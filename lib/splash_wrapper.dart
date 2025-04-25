@@ -21,23 +21,32 @@ class _SplashWrapperState extends State<SplashWrapper> {
   Future<void> _checkAuth() async {
     await apiService.loadToken();
     try {
-      final response = await apiService.get('/users/me');
-      if (response.statusCode == 200) {
-        final data = response.body;
-        final username = RegExp(r'"username"\s*:\s*"([^"]+)"').firstMatch(data)?.group(1);
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => MyApp(username: username)),
-          );
-        }
+      final username = await _fetchUsername();
+      if (username != null && mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => MyApp(username: username)),
+        );
         return;
       }
-    } catch (_) {}
+    } catch (e, st) {
+      // Puedes loggear el error aquí si lo deseas
+      debugPrint('Auth check error: $e\n$st');
+    }
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const LoginPage()),
       );
     }
+  }
+
+  /// Devuelve el username si está autenticado, null si no
+  Future<String?> _fetchUsername() async {
+    final response = await apiService.get('/users/me');
+    if (response.statusCode == 200) {
+      final data = response.body;
+      return RegExp(r'"username"\s*:\s*"([^"]+)"').firstMatch(data)?.group(1);
+    }
+    return null;
   }
 
   @override

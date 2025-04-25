@@ -56,144 +56,25 @@ class ShowCarousel extends StatelessWidget {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return Text('Error: \\${snapshot.error}', style: const TextStyle(color: Colors.red));
+                    return Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red));
                   }
                   final shows = snapshot.data;
                   if (shows == null || shows.isEmpty) {
                     return Text(emptyText);
                   }
+                  // --- Carrusel de shows ---
                   return ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: shows.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) {
-                      final show = extractShow(shows[index]);
-                      final title = show['title'] ?? '';
-                      final posterArr = show['images']?['poster'] as List?;
-                      final posterUrl = (posterArr != null && posterArr.isNotEmpty)
-                          ? 'https://${posterArr.first}'
-                          : null;
-                      return SizedBox(
-                        width: itemWidth,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            posterUrl != null
-                                ? GestureDetector(
-                                    onTap: () {
-                                      final showId = show['ids']?['slug'] ?? show['ids']?['trakt']?.toString() ?? show['ids']?['imdb'] ?? '';
-                                      if (showId.isNotEmpty) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => ShowDetailPage(showId: showId, apiService: ApiService()),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    child: Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(8),
-                                          child: CachedNetworkImage(
-                                            imageUrl: posterUrl,
-                                            width: itemWidth,
-                                            height: imageHeight,
-                                            fit: BoxFit.cover,
-                                            placeholder: (context, url) => SizedBox(
-                                              width: itemWidth, height: imageHeight,
-                                              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                                            ),
-                                            errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 48),
-                                          ),
-                                        ),
-                                      if (shows[index]['user_count'] != null || shows[index]['play_count'] != null || shows[index]['watcher_count'] != null || shows[index]['collected_count'] != null || shows[index]['list_count'] != null)
-                                        Positioned(
-                                          right: 6,
-                                          top: 6,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black54,
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                if (shows[index]['user_count'] != null) ...[
-                                                  const Icon(Icons.favorite, color: Colors.pinkAccent, size: 14),
-                                                  const SizedBox(width: 3),
-                                                  Text(
-                                                    _formatCount(shows[index]['user_count']),
-                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                ],
-                                                if (shows[index]['play_count'] != null) ...[
-                                                  const Icon(Icons.play_circle_fill, color: Colors.lightBlueAccent, size: 14),
-                                                  const SizedBox(width: 3),
-                                                  Text(
-                                                    _formatCount(shows[index]['play_count']),
-                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                ],
-                                                if (shows[index]['watcher_count'] != null) ...[
-                                                  const Icon(Icons.visibility, color: Colors.amber, size: 14),
-                                                  const SizedBox(width: 3),
-                                                  Text(
-                                                    _formatCount(shows[index]['watcher_count']),
-                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                ],
-                                                if (shows[index]['collected_count'] != null) ...[
-                                                  const Icon(Icons.collections_bookmark, color: Colors.deepPurpleAccent, size: 14),
-                                                  const SizedBox(width: 3),
-                                                  Text(
-                                                    _formatCount(shows[index]['collected_count']),
-                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                ],
-                                                if (shows[index]['list_count'] != null) ...[
-                                                  const Icon(Icons.star_outline, color: Colors.orange, size: 14),
-                                                  const SizedBox(width: 3),
-                                                  Text(
-                                                    _formatCount(shows[index]['list_count']),
-                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
-                                                  ),
-                                                ],
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-
-                                    ],
-                                  )
-                                ) // <- Cierre de GestureDetector
-                                : Column(
-                                    children: [
-                                      Icon(Icons.tv, size: itemWidth/2, color: Colors.grey),
-                                      const SizedBox(height: 4),
-                                      const Text('Sin imagen', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                    ],
-                                  ),
-                            const SizedBox(height: 6),
-                            Text(
-                              title,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                              softWrap: true,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                    itemBuilder: (context, index) => _buildShowItem(
+                      context: context,
+                      show: extractShow(shows[index]),
+                      itemWidth: itemWidth,
+                      imageHeight: imageHeight,
+                      shows: shows,
+                      index: index,
+                    ),
                   );
                 },
               ),
@@ -203,4 +84,258 @@ class ShowCarousel extends StatelessWidget {
       ],
     );
   }
+
+  // --- Widget privado para un show ---
+  Widget _buildShowItem({
+    required BuildContext context,
+    required Map<String, dynamic> show,
+    required double itemWidth,
+    required double imageHeight,
+    required List<dynamic> shows,
+    required int index,
+  }) {
+    final title = show['title'] ?? '';
+    final posterArr = show['images']?['poster'] as List?;
+    final posterUrl = (posterArr != null && posterArr.isNotEmpty)
+        ? 'https://${posterArr.first}'
+        : null;
+    // ... El resto de la lógica del show (Stack, GestureDetector, badges, etc.) ...
+    // Copia aquí el contenido actual del return SizedBox(...)
+    return SizedBox(
+      width: itemWidth,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Imagen del show o placeholder
+          posterUrl != null
+              ? GestureDetector(
+                  onTap: () {
+                    final showId = _getShowId(show);
+                    if (showId.isNotEmpty) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ShowDetailPage(showId: showId, apiService: ApiService()),
+                        ),
+                      );
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CachedNetworkImage(
+                          imageUrl: posterUrl,
+                          width: itemWidth,
+                          height: imageHeight,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => SizedBox(
+                            width: itemWidth,
+                            height: imageHeight,
+                            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 48),
+                        ),
+                      ),
+                      _buildBadges(shows[index]),
+                    ],
+                  ),
+                )
+              : Column(
+                  children: [
+                    Icon(Icons.tv, size: itemWidth / 2, color: Colors.grey),
+                    const SizedBox(height: 4),
+                    const Text('Sin imagen', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  ],
+                ),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            softWrap: true,
+          ),
+        ],
+      ),
+    );
+                    if (showId.isNotEmpty) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ShowDetailPage(showId: showId, apiService: ApiService()),
+                        ),
+                      );
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CachedNetworkImage(
+                          imageUrl: posterUrl,
+                          width: itemWidth,
+                          height: imageHeight,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => SizedBox(
+                            width: itemWidth,
+                            height: imageHeight,
+                            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 48),
+                        ),
+                      ),
+                      if (shows[index]['user_count'] != null || shows[index]['play_count'] != null || shows[index]['watcher_count'] != null || shows[index]['collected_count'] != null || shows[index]['list_count'] != null)
+                        Positioned(
+                          right: 6,
+                          top: 6,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (shows[index]['user_count'] != null) ...[
+                                  const Icon(Icons.favorite, color: Colors.pinkAccent, size: 14),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    _formatCount(shows[index]['user_count']),
+                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                                if (shows[index]['play_count'] != null) ...[
+                                  const Icon(Icons.play_circle_fill, color: Colors.lightBlueAccent, size: 14),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    _formatCount(shows[index]['play_count']),
+                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                                if (shows[index]['watcher_count'] != null) ...[
+                                  const Icon(Icons.visibility, color: Colors.amber, size: 14),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    _formatCount(shows[index]['watcher_count']),
+                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                                if (shows[index]['collected_count'] != null) ...[
+                                  const Icon(Icons.collections_bookmark, color: Colors.deepPurpleAccent, size: 14),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    _formatCount(shows[index]['collected_count']),
+                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(width: 10),
+                                ],
+                                if (shows[index]['list_count'] != null) ...[
+                                  const Icon(Icons.star_outline, color: Colors.orange, size: 14),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    _formatCount(shows[index]['list_count']),
+                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                )
+              : Column(
+                  children: [
+                    Icon(Icons.tv, size: itemWidth / 2, color: Colors.grey),
+                    const SizedBox(height: 4),
+                    const Text('Sin imagen', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  ],
+                ),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            softWrap: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Extrae el showId de forma robusta
+  String _getShowId(Map<String, dynamic> show) {
+    final ids = show['ids'] as Map?;
+    if (ids == null) return '';
+    return ids['slug'] ?? ids['trakt']?.toString() ?? ids['imdb'] ?? '';
+  }
+
+  // Widget de badges de contadores
+  Widget _buildBadges(Map<String, dynamic> show) {
+    final badgeItems = <Widget>[];
+    void addBadge(Icon icon, dynamic count) {
+      badgeItems.addAll([
+        icon,
+        const SizedBox(width: 3),
+        Text(
+          _formatCount(count),
+          style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(width: 10),
+      ]);
+    }
+    if (show['user_count'] != null) {
+      addBadge(const Icon(Icons.favorite, color: Colors.pinkAccent, size: 14), show['user_count']);
+    }
+    if (show['play_count'] != null) {
+      addBadge(const Icon(Icons.play_circle_fill, color: Colors.lightBlueAccent, size: 14), show['play_count']);
+    }
+    if (show['watcher_count'] != null) {
+      addBadge(const Icon(Icons.visibility, color: Colors.amber, size: 14), show['watcher_count']);
+    }
+    if (show['collected_count'] != null) {
+      addBadge(const Icon(Icons.collections_bookmark, color: Colors.deepPurpleAccent, size: 14), show['collected_count']);
+    }
+    if (show['list_count'] != null) {
+      badgeItems.addAll([
+        const Icon(Icons.star_outline, color: Colors.orange, size: 14),
+        const SizedBox(width: 3),
+        Text(
+          _formatCount(show['list_count']),
+          style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ]);
+    }
+    if (badgeItems.isEmpty) return const SizedBox.shrink();
+    // Elimina el último SizedBox(width: 10)
+    if (badgeItems.length > 3 && badgeItems.last is SizedBox) {
+      badgeItems.removeLast();
+    }
+    return Positioned(
+      right: 6,
+      top: 6,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.black54,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: badgeItems,
+        ),
+      ),
+    );
+  }
 }
+

@@ -17,6 +17,58 @@ class _LoginPageState extends State<LoginPage> {
   String? _error;
   bool _loading = false;
 
+  Widget _buildUserDisplay() {
+    return widget.username != null
+        ? Column(
+            children: [
+              const Icon(Icons.person, size: 32, color: Colors.green),
+              const SizedBox(height: 8),
+              Text('Hola, ${widget.username}', style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          )
+        : const SizedBox();
+  }
+
+  Widget _buildAuthButton(String text, VoidCallback onPressed) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: ElevatedButton(
+        onPressed: _loading ? null : onPressed,
+        child: _loading ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) : Text(text),
+      ),
+    );
+  }
+
+  void _handleAuth({bool signup = false, bool promptLogin = false}) {
+    setState(() {
+      _showCodeInput = true;
+    });
+    _authorizeWithTrakt(signup: signup, promptLogin: promptLogin);
+  }
+
+  List<Widget> _buildCodeInput() {
+    return [
+      TextField(
+        controller: _codeController,
+        decoration: InputDecoration(
+          labelText: 'Código de autorización',
+          errorText: _error,
+        ),
+        enabled: !_loading,
+      ),
+      const SizedBox(height: 16),
+      SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: ElevatedButton(
+          onPressed: _loading ? null : _submitCode,
+          child: _loading ? const CircularProgressIndicator(strokeWidth: 2) : const Text('Enviar código'),
+        ),
+      ),
+    ];
+  }
+
   Future<void> _authorizeWithTrakt({bool signup = false, bool promptLogin = false}) async {
     final params = <String, String>{'state': 'login'};
     if (signup) params['signup'] = 'true';
@@ -73,59 +125,13 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (widget.username != null)
-                Text('Usuario: ${widget.username}', style: const TextStyle(fontWeight: FontWeight.bold))
-              else
-                FutureBuilder(
-                  future: apiService.get('/users/me'),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-                    final response = snapshot.data;
-                    if (snapshot.hasError || response == null || response.statusCode != 200) {
-                      return const Text('Usuario: No conectado', style: TextStyle(fontWeight: FontWeight.bold));
-                    }
-                    final data = response.body;
-                    final username = RegExp(r'"username"\s*:\s*"([^"]+)"').firstMatch(data)?.group(1);
-                    return Text('Usuario: ${username ?? 'No conectado'}', style: const TextStyle(fontWeight: FontWeight.bold));
-                  },
-                ),
+              _buildUserDisplay(),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() => _showCodeInput = true);
-                  _authorizeWithTrakt(promptLogin: true);
-                },
-                child: const Text('Iniciar sesión con Trakt.tv'),
-              ),
+              _buildAuthButton('Iniciar sesión con Trakt.tv', () => _handleAuth(promptLogin: true)),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() => _showCodeInput = true);
-                  _authorizeWithTrakt(signup: true);
-                },
-                child: const Text('Registrarse con Trakt.tv'),
-              ),
+              _buildAuthButton('Registrarse con Trakt.tv', () => _handleAuth(signup: true)),
               const SizedBox(height: 32),
-              if (_showCodeInput) ...[
-                TextField(
-                  controller: _codeController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Código de autorización',
-                  ),
-                ),
-                if (_error != null) ...[
-                  const SizedBox(height: 12),
-                  Text(_error!, style: const TextStyle(color: Colors.red)),
-                ],
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _submitCode,
-                  child: const Text('Enviar código'),
-                ),
-              ],
+              if (_showCodeInput) ..._buildCodeInput(),
             ],
           ),
         ),

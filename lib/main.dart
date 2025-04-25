@@ -151,7 +151,7 @@ class _MyAppState extends State<MyApp> {
             ShowCarousel(
               title: 'Popular Shows',
               future: apiService.getPopularShows(),
-              extractShow: (item) => item, // popular ya es el show
+              extractShow: (item) => Map<String, dynamic>.from(item), // popular ya es el show
               emptyText: 'No hay shows populares.'
             ),
             const SizedBox(height: 16),
@@ -193,7 +193,7 @@ class _MyAppState extends State<MyApp> {
             ShowCarousel(
               title: 'Most Anticipated',
               future: apiService.getMostAnticipatedShows(),
-              extractShow: (item) => {...?item['show'], 'list_count': item['list_count']},
+              extractShow: (item) => {...Map<String, dynamic>.from(item['show']), 'list_count': item['list_count']},
               emptyText: 'No hay shows anticipados.'
             ),
             const SizedBox(height: 16),

@@ -27,148 +27,77 @@ class ApiService {
     _accessToken = token;
   }
 
-  /// Obtener los shows en tendencia de Trakt.tv
-  Future<List<dynamic>> getTrendingShows({int page = 1, int limit = 10}) async {
-    final url = Uri.parse('$baseUrl/shows/trending?extended=images&page=$page&limit=$limit');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': clientId ?? '',
-      },
-    );
+  /// --- MÉTODOS PRIVADOS DE UTILIDAD ---
+
+  /// Realiza una petición GET y retorna una lista JSON
+  Future<List<dynamic>> _getJsonList(String endpoint) async {
+    final url = Uri.parse('$baseUrl$endpoint');
+    final response = await http.get(url, headers: _headersBase);
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as List<dynamic>;
     } else {
-      throw Exception('Error al obtener trending shows: ${response.statusCode}\n${response.body}');
+      throw Exception('Error GET $endpoint: ${response.statusCode}\n${response.body}');
     }
   }
 
-  /// Obtener los shows populares de Trakt.tv
-  Future<List<dynamic>> getPopularShows({int page = 1, int limit = 10}) async {
-    final url = Uri.parse('$baseUrl/shows/popular?extended=images&page=$page&limit=$limit');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': clientId ?? '',
-      },
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
-    } else {
-      throw Exception('Error al obtener popular shows: ${response.statusCode}\n${response.body}');
-    }
-  }
-
-  /// Obtener los shows más favoritos según periodo (daily, weekly, monthly, all)
-  Future<List<dynamic>> getMostFavoritedShows({String period = 'weekly', int page = 1, int limit = 10}) async {
-    final url = Uri.parse('$baseUrl/shows/favorited/$period?extended=images&page=$page&limit=$limit');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': clientId ?? '',
-      },
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
-    } else {
-      throw Exception('Error al obtener shows más favoritos ($period): ${response.statusCode}\n${response.body}');
-    }
-  }
-
-  /// Obtener los shows más reproducidos según periodo (daily, weekly, monthly, all)
-  Future<List<dynamic>> getMostPlayedShows({String period = 'weekly', int page = 1, int limit = 10}) async {
-    final url = Uri.parse('$baseUrl/shows/played/$period?extended=images&page=$page&limit=$limit');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': clientId ?? '',
-      },
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
-    } else {
-      throw Exception('Error al obtener shows más reproducidos ($period): ${response.statusCode}\n${response.body}');
-    }
-  }
-
-  /// Obtener los shows más vistos según periodo (daily, weekly, monthly, all)
-  Future<List<dynamic>> getMostWatchedShows({String period = 'weekly', int page = 1, int limit = 10}) async {
-    final url = Uri.parse('$baseUrl/shows/watched/$period?extended=images&page=$page&limit=$limit');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': clientId ?? '',
-      },
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
-    } else {
-      throw Exception('Error al obtener shows más vistos ($period): ${response.statusCode}\n${response.body}');
-    }
-  }
-
-  /// Obtener los shows más coleccionados según periodo (daily, weekly, monthly, all)
-  Future<List<dynamic>> getMostCollectedShows({String period = 'weekly', int page = 1, int limit = 10}) async {
-    final url = Uri.parse('$baseUrl/shows/collected/$period?extended=images&page=$page&limit=$limit');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': clientId ?? '',
-      },
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
-    } else {
-      throw Exception('Error al obtener shows más coleccionados ($period): ${response.statusCode}\n${response.body}');
-    }
-  }
-
-  /// Obtener los shows más anticipados
-  Future<List<dynamic>> getMostAnticipatedShows({int page = 1, int limit = 10}) async {
-    final url = Uri.parse('$baseUrl/shows/anticipated?extended=images&page=$page&limit=$limit');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': clientId ?? '',
-      },
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
-    } else {
-      throw Exception('Error al obtener shows más anticipados: ${response.statusCode}\n${response.body}');
-    }
-  }
-
-  /// Obtener la información completa de un show por id, slug o imdb
-  Future<Map<String, dynamic>> getShowById(String id) async {
-    final url = Uri.parse('$baseUrl/shows/$id?extended=full');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': clientId ?? '',
-      },
-    );
+  /// Realiza una petición GET y retorna un mapa JSON
+  Future<Map<String, dynamic>> _getJsonMap(String endpoint) async {
+    final url = Uri.parse('$baseUrl$endpoint');
+    final response = await http.get(url, headers: _headersBase);
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      throw Exception('Error al obtener show $id: ${response.statusCode}\n${response.body}');
+      throw Exception('Error GET $endpoint: ${response.statusCode}\n${response.body}');
     }
+  }
+
+  /// Headers base para peticiones públicas (sin token)
+  Map<String, String> get _headersBase => {
+    'Content-Type': 'application/json',
+    'trakt-api-version': '2',
+    'trakt-api-key': clientId ?? '',
+  };
+
+  /// --- MÉTODOS DE SHOWS ---
+
+  /// Obtener los shows en tendencia de Trakt.tv
+  Future<List<dynamic>> getTrendingShows({int page = 1, int limit = 10}) {
+    return _getJsonList('/shows/trending?extended=images&page=$page&limit=$limit');
+  }
+
+  /// Obtener los shows populares de Trakt.tv
+  Future<List<dynamic>> getPopularShows({int page = 1, int limit = 10}) {
+    return _getJsonList('/shows/popular?extended=images&page=$page&limit=$limit');
+  }
+
+  /// Obtener los shows más favoritos según periodo (daily, weekly, monthly, all)
+  Future<List<dynamic>> getMostFavoritedShows({String period = 'weekly', int page = 1, int limit = 10}) {
+    return _getJsonList('/shows/favorited/$period?extended=images&page=$page&limit=$limit');
+  }
+
+  /// Obtener los shows más reproducidos según periodo (daily, weekly, monthly, all)
+  Future<List<dynamic>> getMostPlayedShows({String period = 'weekly', int page = 1, int limit = 10}) {
+    return _getJsonList('/shows/played/$period?extended=images&page=$page&limit=$limit');
+  }
+
+  /// Obtener los shows más vistos según periodo (daily, weekly, monthly, all)
+  Future<List<dynamic>> getMostWatchedShows({String period = 'weekly', int page = 1, int limit = 10}) {
+    return _getJsonList('/shows/watched/$period?extended=images&page=$page&limit=$limit');
+  }
+
+  /// Obtener los shows más coleccionados según periodo (daily, weekly, monthly, all)
+  Future<List<dynamic>> getMostCollectedShows({String period = 'weekly', int page = 1, int limit = 10}) {
+    return _getJsonList('/shows/collected/$period?extended=images&page=$page&limit=$limit');
+  }
+
+  /// Obtener los shows más anticipados
+  Future<List<dynamic>> getMostAnticipatedShows({int page = 1, int limit = 10}) {
+    return _getJsonList('/shows/anticipated?extended=images&page=$page&limit=$limit');
+  }
+
+  /// Obtener la información completa de un show por id, slug o imdb
+  Future<Map<String, dynamic>> getShowById(String id) {
+    return _getJsonMap('/shows/$id?extended=full');
   }
 
 
