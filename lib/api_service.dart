@@ -29,6 +29,11 @@ class ApiService {
 
   /// --- MÉTODOS PRIVADOS DE UTILIDAD ---
 
+  /// Obtener comentarios de un show, ordenados por el criterio indicado (por defecto: likes)
+  Future<List<dynamic>> getShowComments(String id, {String sort = 'likes'}) async {
+    return await _getJsonList('/shows/$id/comments/$sort');
+  }
+
   /// Realiza una petición GET y retorna una lista JSON
   Future<List<dynamic>> _getJsonList(String endpoint) async {
     final url = Uri.parse('$baseUrl$endpoint');
@@ -93,6 +98,16 @@ class ApiService {
   /// Obtener los shows más anticipados
   Future<List<dynamic>> getMostAnticipatedShows({int page = 1, int limit = 10}) {
     return _getJsonList('/shows/anticipated?extended=images&page=$page&limit=$limit');
+  }
+
+  /// Obtener las traducciones de un show para un idioma específico (devuelve lista de traducciones)
+  Future<List<dynamic>> getShowTranslations(String id, String language) async {
+    return await _getJsonList('/shows/$id/translations/$language');
+  }
+
+  /// Obtener los aliases (títulos por país) de un show por id, slug o imdb
+  Future<List<dynamic>> getShowAliases(String id) async {
+    return await _getJsonList('/shows/$id/aliases');
   }
 
   /// Obtener la información completa de un show por id, slug o imdb

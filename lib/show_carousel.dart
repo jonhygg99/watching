@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'show_detail_page.dart';
 import 'api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShowCarousel extends StatelessWidget {
   /// Formatea el conteo para mostrarlo como 1.2k o 3.4M si es necesario
@@ -108,13 +109,22 @@ class ShowCarousel extends StatelessWidget {
         children: [
           posterUrl != null
               ? GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     final showId = _getShowId(show);
                     if (showId.isNotEmpty) {
-                      Navigator.push(
-                        context,
+                      // Obtener el countryCode guardado
+                      String countryCode = 'ES';
+                      try {
+                        final prefs = await SharedPreferences.getInstance();
+                        countryCode = prefs.getString('country_code') ?? 'ES';
+                      } catch (_) {}
+                      Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => ShowDetailPage(showId: showId, apiService: ApiService()),
+                          builder: (_) => ShowDetailPage(
+                            showId: showId,
+                            apiService: ApiService(),
+                            countryCode: countryCode,
+                          ),
                         ),
                       );
                     }

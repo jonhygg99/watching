@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'country_list.dart';
 import 'api_service.dart';
 import 'login_page.dart';
 import 'splash_wrapper.dart';
@@ -42,6 +43,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  String _countryCode = 'ES';
+  // Usamos la lista completa de países desde country_list.dart
+  List<String> get _countryCodes => allCountryCodes;
+  Map<String, String> get _countryNames => allCountryNames;
+
+
+
+  String countryFlag(String code) {
+    // Devuelve el emoji de la bandera
+    return String.fromCharCodes(code.toUpperCase().codeUnits.map((c) => 0x1F1E6 - 65 + c));
+  }
   final TextEditingController _codeController = TextEditingController();
   String? _lastAuthUrl;
   bool _loadingToken = true;
@@ -51,6 +63,22 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _initToken();
+    _loadCountry();
+  }
+
+  Future<void> _loadCountry() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _countryCode = prefs.getString('country_code') ?? 'ES';
+    });
+  }
+
+  Future<void> _saveCountry(String code) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('country_code', code);
+    setState(() {
+      _countryCode = code;
+    });
   }
 
   Future<void> _initToken() async {
@@ -119,6 +147,41 @@ class _MyAppState extends State<MyApp> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
+            // Mostrar país seleccionado de forma visible
+            Row(
+              children: [
+                const Text('Tu país:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(width: 10),
+                Text(countryFlag(_countryCode), style: const TextStyle(fontSize: 22)),
+                const SizedBox(width: 8),
+                Text(_countryNames[_countryCode] ?? _countryCode, style: const TextStyle(fontSize: 16)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            // Selector de país
+            Row(
+              children: [
+                const Text('Cambiar país:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                DropdownButton<String>(
+                  value: _countryCode,
+                  items: _countryCodes.map((code) => DropdownMenuItem(
+                    value: code,
+                    child: Row(
+                      children: [
+                        Text(countryFlag(code), style: const TextStyle(fontSize: 20)),
+                        const SizedBox(width: 6),
+                        Text(_countryNames[code] ?? code),
+                      ],
+                    ),
+                  )).toList(),
+                  onChanged: (code) {
+                    if (code != null) _saveCountry(code);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             ElevatedButton(
               onPressed: () async {
                 final result = await Navigator.of(context).push(
