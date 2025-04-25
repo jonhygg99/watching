@@ -1,7 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'show_detail_page.dart';
+import 'api_service.dart';
 
 class ShowCarousel extends StatelessWidget {
+  /// Formatea el conteo para mostrarlo como 1.2k o 3.4M si es necesario
+  static String _formatCount(dynamic value) {
+    if (value == null) return '';
+    int count = 0;
+    if (value is int) {
+      count = value;
+    } else if (value is String) {
+      count = int.tryParse(value) ?? 0;
+    }
+    if (count >= 1000000) {
+      return (count / 1000000).toStringAsFixed(count % 1000000 == 0 ? 0 : 1) + 'M';
+    } else if (count >= 1000) {
+      return (count / 1000).toStringAsFixed(count % 1000 == 0 ? 0 : 1) + 'k';
+    } else {
+      return count.toString();
+    }
+  }
+
   final String title;
   final Future<List<dynamic>> future;
   final String emptyText;
@@ -61,20 +81,99 @@ class ShowCarousel extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             posterUrl != null
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: CachedNetworkImage(
-                                      imageUrl: posterUrl,
-                                      width: itemWidth,
-                                      height: imageHeight,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) => SizedBox(
-                                        width: itemWidth, height: imageHeight,
-                                        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                                      ),
-                                      errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 48),
-                                    ),
+                                ? GestureDetector(
+                                    onTap: () {
+                                      final showId = show['ids']?['slug'] ?? show['ids']?['trakt']?.toString() ?? show['ids']?['imdb'] ?? '';
+                                      if (showId.isNotEmpty) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => ShowDetailPage(showId: showId, apiService: ApiService()),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: CachedNetworkImage(
+                                            imageUrl: posterUrl,
+                                            width: itemWidth,
+                                            height: imageHeight,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) => SizedBox(
+                                              width: itemWidth, height: imageHeight,
+                                              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                                            ),
+                                            errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 48),
+                                          ),
+                                        ),
+                                      if (shows[index]['user_count'] != null || shows[index]['play_count'] != null || shows[index]['watcher_count'] != null || shows[index]['collected_count'] != null || shows[index]['list_count'] != null)
+                                        Positioned(
+                                          right: 6,
+                                          top: 6,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black54,
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                if (shows[index]['user_count'] != null) ...[
+                                                  const Icon(Icons.favorite, color: Colors.pinkAccent, size: 14),
+                                                  const SizedBox(width: 3),
+                                                  Text(
+                                                    _formatCount(shows[index]['user_count']),
+                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                ],
+                                                if (shows[index]['play_count'] != null) ...[
+                                                  const Icon(Icons.play_circle_fill, color: Colors.lightBlueAccent, size: 14),
+                                                  const SizedBox(width: 3),
+                                                  Text(
+                                                    _formatCount(shows[index]['play_count']),
+                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                ],
+                                                if (shows[index]['watcher_count'] != null) ...[
+                                                  const Icon(Icons.visibility, color: Colors.amber, size: 14),
+                                                  const SizedBox(width: 3),
+                                                  Text(
+                                                    _formatCount(shows[index]['watcher_count']),
+                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                ],
+                                                if (shows[index]['collected_count'] != null) ...[
+                                                  const Icon(Icons.collections_bookmark, color: Colors.deepPurpleAccent, size: 14),
+                                                  const SizedBox(width: 3),
+                                                  Text(
+                                                    _formatCount(shows[index]['collected_count']),
+                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                ],
+                                                if (shows[index]['list_count'] != null) ...[
+                                                  const Icon(Icons.star_outline, color: Colors.orange, size: 14),
+                                                  const SizedBox(width: 3),
+                                                  Text(
+                                                    _formatCount(shows[index]['list_count']),
+                                                    style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+
+                                    ],
                                   )
+                                ) // <- Cierre de GestureDetector
                                 : Column(
                                     children: [
                                       Icon(Icons.tv, size: itemWidth/2, color: Colors.grey),

@@ -81,6 +81,96 @@ class ApiService {
     }
   }
 
+  /// Obtener los shows más reproducidos según periodo (daily, weekly, monthly, all)
+  Future<List<dynamic>> getMostPlayedShows({String period = 'weekly', int page = 1, int limit = 10}) async {
+    final url = Uri.parse('$baseUrl/shows/played/$period?extended=images&page=$page&limit=$limit');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': clientId ?? '',
+      },
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Error al obtener shows más reproducidos ($period): ${response.statusCode}\n${response.body}');
+    }
+  }
+
+  /// Obtener los shows más vistos según periodo (daily, weekly, monthly, all)
+  Future<List<dynamic>> getMostWatchedShows({String period = 'weekly', int page = 1, int limit = 10}) async {
+    final url = Uri.parse('$baseUrl/shows/watched/$period?extended=images&page=$page&limit=$limit');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': clientId ?? '',
+      },
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Error al obtener shows más vistos ($period): ${response.statusCode}\n${response.body}');
+    }
+  }
+
+  /// Obtener los shows más coleccionados según periodo (daily, weekly, monthly, all)
+  Future<List<dynamic>> getMostCollectedShows({String period = 'weekly', int page = 1, int limit = 10}) async {
+    final url = Uri.parse('$baseUrl/shows/collected/$period?extended=images&page=$page&limit=$limit');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': clientId ?? '',
+      },
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Error al obtener shows más coleccionados ($period): ${response.statusCode}\n${response.body}');
+    }
+  }
+
+  /// Obtener los shows más anticipados
+  Future<List<dynamic>> getMostAnticipatedShows({int page = 1, int limit = 10}) async {
+    final url = Uri.parse('$baseUrl/shows/anticipated?extended=images&page=$page&limit=$limit');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': clientId ?? '',
+      },
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Error al obtener shows más anticipados: ${response.statusCode}\n${response.body}');
+    }
+  }
+
+  /// Obtener la información completa de un show por id, slug o imdb
+  Future<Map<String, dynamic>> getShowById(String id) async {
+    final url = Uri.parse('$baseUrl/shows/$id?extended=full');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': clientId ?? '',
+      },
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Error al obtener show $id: ${response.statusCode}\n${response.body}');
+    }
+  }
+
 
 
   /// Eliminar el token

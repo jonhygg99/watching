@@ -7,6 +7,7 @@ import 'login_page.dart';
 import 'splash_wrapper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'show_carousel.dart';
+import 'show_detail_page.dart';
 
 final apiService = ApiService(); // Instancia global
 
@@ -166,6 +167,34 @@ class _MyAppState extends State<MyApp> {
               future: apiService.getMostFavoritedShows(period: 'monthly'),
               extractShow: (item) => item['show'],
               emptyText: 'No hay shows más favoritos del mes.'
+            ),
+                        const SizedBox(height: 16),
+            ShowCarousel(
+              title: 'Most Collected (7 días)',
+              future: apiService.getMostCollectedShows(period: 'weekly'),
+              extractShow: (item) => item['show'],
+              emptyText: 'No hay shows más coleccionados de la semana.'
+            ),
+            const SizedBox(height: 16),
+            ShowCarousel(
+              title: 'Most Played (7 días)',
+              future: apiService.getMostPlayedShows(period: 'weekly'),
+              extractShow: (item) => item['show'],
+              emptyText: 'No hay shows más reproducidos de la semana.'
+            ),
+            const SizedBox(height: 16),
+            ShowCarousel(
+              title: 'Most Watched (7 días)',
+              future: apiService.getMostWatchedShows(period: 'weekly'),
+              extractShow: (item) => item['show'],
+              emptyText: 'No hay shows más vistos de la semana.'
+            ),
+            const SizedBox(height: 16),
+            ShowCarousel(
+              title: 'Most Anticipated',
+              future: apiService.getMostAnticipatedShows(),
+              extractShow: (item) => {...?item['show'], 'list_count': item['list_count']},
+              emptyText: 'No hay shows anticipados.'
             ),
             const SizedBox(height: 16),
             ElevatedButton(
