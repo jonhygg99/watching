@@ -99,8 +99,6 @@ class ShowCarousel extends StatelessWidget {
     final posterUrl = (posterArr != null && posterArr.isNotEmpty)
         ? 'https://${posterArr.first}'
         : null;
-    // ... El resto de la lógica del show (Stack, GestureDetector, badges, etc.) ...
-    // Copia aquí el contenido actual del return SizedBox(...)
     return SizedBox(
       width: itemWidth,
       child: Column(
@@ -108,60 +106,10 @@ class ShowCarousel extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Imagen del show o placeholder
           posterUrl != null
               ? GestureDetector(
                   onTap: () {
                     final showId = _getShowId(show);
-                    if (showId.isNotEmpty) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ShowDetailPage(showId: showId, apiService: ApiService()),
-                        ),
-                      );
-                    }
-                  },
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: CachedNetworkImage(
-                          imageUrl: posterUrl,
-                          width: itemWidth,
-                          height: imageHeight,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => SizedBox(
-                            width: itemWidth,
-                            height: imageHeight,
-                            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 48),
-                        ),
-                      ),
-                      _buildBadges(shows[index]),
-                    ],
-                  ),
-                )
-              : Column(
-                  children: [
-                    Icon(Icons.tv, size: itemWidth / 2, color: Colors.grey),
-                    const SizedBox(height: 4),
-                    const Text('Sin imagen', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                  ],
-                ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            softWrap: true,
-          ),
-        ],
-      ),
-    );
                     if (showId.isNotEmpty) {
                       Navigator.push(
                         context,
