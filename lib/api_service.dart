@@ -20,11 +20,21 @@ class ApiService {
     _accessToken = prefs.getString(_tokenKey);
   }
 
-  /// Guardar el token en SharedPreferences
-  Future<void> saveToken(String token) async {
+  /// Guardar el token, refresh_token y expiración en SharedPreferences
+  Future<void> saveTokenData(Map<String, dynamic> data) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, token);
-    _accessToken = token;
+    if (data['access_token'] != null) {
+      await prefs.setString(_tokenKey, data['access_token']);
+      _accessToken = data['access_token'];
+    }
+    if (data['refresh_token'] != null) {
+      await prefs.setString('refresh_token', data['refresh_token']);
+    }
+    if (data['expires_in'] != null) {
+      // Guarda la expiración absoluta (segundos desde epoch)
+      final expiresAt = DateTime.now().millisecondsSinceEpoch ~/ 1000 + (data['expires_in'] as int);
+      await prefs.setInt('expires_at', expiresAt);
+    }
   }
 
   /// --- MÉTODOS PRIVADOS DE UTILIDAD ---
@@ -34,8 +44,22 @@ class ApiService {
     return await _getJsonList('/shows/$id/comments/$sort');
   }
 
+  /// --- Manejo de expiración y refresco de token ---
+  Future<void> _ensureValidToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final expiresAt = prefs.getInt('expires_at');
+    final refreshTk = prefs.getString('refresh_token');
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    if (expiresAt != null && expiresAt <= now && refreshTk != null) {
+      await refreshToken(refreshTk);
+    } else if (_accessToken == null) {
+      await loadToken();
+    }
+  }
+
   /// Realiza una petición GET y retorna una lista JSON
   Future<List<dynamic>> _getJsonList(String endpoint) async {
+    await _ensureValidToken();
     final url = Uri.parse('$baseUrl$endpoint');
     final response = await http.get(url, headers: _headersBase);
     if (response.statusCode == 200) {
@@ -47,6 +71,7 @@ class ApiService {
 
   /// Realiza una petición GET y retorna un mapa JSON
   Future<Map<String, dynamic>> _getJsonMap(String endpoint) async {
+    await _ensureValidToken();
     final url = Uri.parse('$baseUrl$endpoint');
     final response = await http.get(url, headers: _headersBase);
     if (response.statusCode == 200) {
@@ -180,9 +205,7 @@ class ApiService {
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      if (data['access_token'] != null) {
-        await saveToken(data['access_token']);
-      }
+      await saveTokenData(data);
       return data;
     } else {
       throw Exception('Error al obtener el token: \nStatus: \\${response.statusCode}\nBody: \\${response.body}');
@@ -205,9 +228,7 @@ class ApiService {
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      if (data['access_token'] != null) {
-        await saveToken(data['access_token']);
-      }
+      await saveTokenData(data);
       return data;
     } else {
       throw Exception('Error al refrescar el token: \nStatus: \\${response.statusCode}\nBody: \\${response.body}');
