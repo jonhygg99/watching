@@ -44,6 +44,16 @@ class ApiService {
     return await _getJsonList('/shows/$id/comments/$sort');
   }
 
+  /// Obtener certificaciones de un show
+  Future<List<dynamic>> getShowCertifications(String id) async {
+    try {
+      return await _getJsonList('/shows/$id/certifications');
+    } catch (e) {
+      // Si la API falla (por ejemplo, error 500), devuelve lista vacía
+      return [];
+    }
+  }
+
   /// --- Manejo de expiración y refresco de token ---
   Future<void> _ensureValidToken() async {
     final prefs = await SharedPreferences.getInstance();

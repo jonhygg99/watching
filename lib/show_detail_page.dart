@@ -50,6 +50,7 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
         future: Future.wait([
           widget.apiService.getShowById(widget.showId),
           widget.apiService.getShowTranslations(widget.showId, widget.countryCode.substring(0, 2).toLowerCase()),
+          widget.apiService.getShowCertifications(widget.showId),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -59,11 +60,12 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
             return Center(child: Text('Error: \\${snapshot.error}', style: const TextStyle(color: Colors.red)));
           }
           final results = snapshot.data;
-          if (results == null || results.length != 2) {
+          if (results == null || results.length < 3) {
             return const Center(child: Text('No se encontraron datos.'));
           }
           final show = results[0] as Map<String, dynamic>?;
           final translations = results[1] as List<dynamic>?;
+          final certifications = results[2] as List<dynamic>?;
           if (show == null) {
             return const Center(child: Text('No se encontraron datos.'));
           }
@@ -144,6 +146,9 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
                     if (show['rating'] != null) Chip(label: Text('Rating: \\${show['rating']}')),
                     if (show['genres'] != null && show['genres'] is List && show['genres'].isNotEmpty)
                       Chip(label: Text('Géneros: \\${(show['genres'] as List).join(', ')}')),
+                    if (certifications != null && certifications.isNotEmpty)
+                      ...certifications.where((c) => (c['country']?.toString()?.toLowerCase() ?? '') == widget.countryCode.substring(0, 2).toLowerCase())
+                        .map((c) => Chip(label: Text('Certificado: \\${c['certification']}'))),
                   ],
                 ),
                 const SizedBox(height: 20),
