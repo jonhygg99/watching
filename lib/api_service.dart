@@ -275,5 +275,11 @@ class ApiService {
       throw Exception('Error al revocar el token: \nStatus: \\${response.statusCode}\nBody: \\${response.body}');
     }
   }
+
+  /// Obtener shows relacionados por id, slug o imdb, incluyendo imágenes
+  Future<List<dynamic>> getRelatedShows(String id) async {
+    // "extended=images" para obtener imágenes
+    return await _getJsonList('/shows/ {id}/related?extended=images'.replaceFirst(' {id}', id));
+  }
 }
 
