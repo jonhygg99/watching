@@ -8,7 +8,7 @@ import 'login_page.dart';
 import 'splash_wrapper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'show_carousel.dart';
-import 'show_detail_page.dart';
+import 'show_details/details_page.dart';
 
 final apiService = ApiService(); // Instancia global
 
@@ -16,7 +16,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     print('Cargando dotenv...');
-    await dotenv.load(fileName: "/Users/jonathangomez/code_projects/watching/.env");
+    await dotenv.load(fileName: ".env");
     print('dotenv cargado');
     runApp(const MaterialApp(
       title: 'API Variables Viewer',
@@ -28,7 +28,7 @@ Future<void> main() async {
     print(st);
     runApp(const MaterialApp(
       home: Scaffold(
-        body: Center(child: Text('Error en main')),
+        body: Center(child: Text('Unexpected error occurred.\nRestart the app.')),
       ),
     ));
   }

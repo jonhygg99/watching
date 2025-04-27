@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'show_detail_page.dart';
 import 'api_service.dart';
+import 'show_details/details_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ShowCarousel extends StatelessWidget {
