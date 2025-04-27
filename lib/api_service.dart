@@ -54,6 +54,13 @@ class ApiService {
     }
   }
 
+  /// Obtener reparto y equipo de un show (puede incluir guest_stars)
+  Future<Map<String, dynamic>> getShowPeople(String id, {String extended = ''}) async {
+    String endpoint = '/shows/$id/people?extended=images';
+    if (extended.isNotEmpty) endpoint += ',$extended';
+    return await _getJsonMap(endpoint);
+  }
+
   /// --- Manejo de expiración y refresco de token ---
   Future<void> _ensureValidToken() async {
     final prefs = await SharedPreferences.getInstance();
