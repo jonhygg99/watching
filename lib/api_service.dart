@@ -61,6 +61,11 @@ class ApiService {
     return await _getJsonMap(endpoint);
   }
 
+  /// Obtener ratings de un show
+  Future<Map<String, dynamic>> getShowRatings(String id) async {
+    return await _getJsonMap('/shows/$id/ratings');
+  }
+
   /// --- Manejo de expiración y refresco de token ---
   Future<void> _ensureValidToken() async {
     final prefs = await SharedPreferences.getInstance();
