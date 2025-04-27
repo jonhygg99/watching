@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'guest_stars_section.dart';
+import 'youtube_player_dialog.dart';
 
 class ShowDetailPage extends StatefulWidget {
   final String showId;
@@ -55,6 +56,7 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
           widget.apiService.getShowCertifications(widget.showId),
           widget.apiService.getShowPeople(widget.showId), // cast y crew
           widget.apiService.getRelatedShows(widget.showId), // shows relacionados
+          widget.apiService.getShowVideos(widget.showId), // videos
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -64,7 +66,7 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
             return Center(child: Text('Error: \\${snapshot.error}', style: const TextStyle(color: Colors.red)));
           }
           final results = snapshot.data;
-          if (results == null || results.length < 5) {
+          if (results == null || results.length < 6) {
             return const Center(child: Text('No se encontraron datos.'));
           }
           final show = results[0] as Map<String, dynamic>?;
@@ -72,6 +74,7 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
           final certifications = results[2] as List<dynamic>?;
           final people = results[3] as Map<String, dynamic>?;
           final relatedShows = results[4] as List<dynamic>?;
+          final videos = results[5] as List<dynamic>?;
           if (show == null) {
             return const Center(child: Text('No se encontraron datos.'));
           }
@@ -94,6 +97,7 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
 
                 if (show['images'] != null && show['images']['poster'] != null && (show['images']['poster'] as List).isNotEmpty)
                   Center(
@@ -241,6 +245,82 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
                   ],
                 ),
                 const SizedBox(height: 20),
+                // --- Sección de vídeos ---
+                if (videos != null && videos.isNotEmpty)
+                   Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Vídeos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 140,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: videos.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 12),
+                            itemBuilder: (context, i) {
+  final v = videos[i];
+  final isYoutube = v['site'] == 'youtube' || (v['url'] ?? '').contains('youtube.com') || (v['url'] ?? '').contains('youtu.be');
+  if (!isYoutube) return const SizedBox.shrink();
+  String? thumbnailUrl;
+  // Extrae el ID de YouTube
+  final url = v['url'] ?? '';
+  final regExp = RegExp(r'(?:v=|youtu.be/|embed/)([\w-]{11})');
+  final match = regExp.firstMatch(url);
+  final videoId = match != null ? match.group(1) : null;
+  if (videoId != null) {
+    thumbnailUrl = 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
+  }
+  return GestureDetector(
+    onTap: () {
+      showDialog(
+        context: context,
+        builder: (_) => YoutubePlayerDialog(url: url, title: v['title'] ?? ''),
+      );
+    },
+    child: SizedBox(
+      width: 180,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: thumbnailUrl != null
+                                          ? Image.network(thumbnailUrl, height: 90, width: 180, fit: BoxFit.cover)
+                                          : Container(
+                                              height: 90,
+                                              width: 180,
+                                              color: Colors.grey[300],
+                                              child: const Icon(Icons.videocam, size: 40, color: Colors.grey),
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Flexible(
+                                        child: Text(
+                                          v['title'] ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                        ),
+                                      ),
+                                      Text(
+  v['type'] ?? '',
+  style: const TextStyle(fontSize: 11, color: Colors.grey),
+  maxLines: 1,
+  overflow: TextOverflow.ellipsis,
+),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 // --- Lista horizontal de actores principales ---
                 if (people != null && people['cast'] != null && (people['cast'] as List).isNotEmpty)
                   Column(

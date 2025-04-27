@@ -279,7 +279,12 @@ class ApiService {
   /// Obtener shows relacionados por id, slug o imdb, incluyendo imágenes
   Future<List<dynamic>> getRelatedShows(String id) async {
     // "extended=images" para obtener imágenes
-    return await _getJsonList('/shows/ {id}/related?extended=images'.replaceFirst(' {id}', id));
+    return await _getJsonList('/shows/\u0000{id}/related?extended=images'.replaceFirst('\u0000{id}', id));
+  }
+
+  /// Obtener videos de un show (trailers, clips, etc)
+  Future<List<dynamic>> getShowVideos(String id) async {
+    // /shows/{id}/videos
+    return await _getJsonList('/shows/\u0000{id}/videos'.replaceFirst('\u0000{id}', id));
   }
 }
-
