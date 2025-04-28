@@ -51,9 +51,9 @@ class _MyAppState extends State<MyApp> {
   int _selectedIndex = 0;
 
   static const List<Widget> _pages = <Widget>[
+    DiscoverPage(),
     WatchlistPage(),
     MyShowsPage(),
-    DiscoverPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -234,16 +234,16 @@ class _MyAppState extends State<MyApp> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
+            icon: Icon(Icons.explore),
+            label: 'Discover',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.bookmark_border),
             label: 'Watchlist',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.tv),
             label: 'My Shows',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Discover',
           ),
         ],
         currentIndex: _selectedIndex,

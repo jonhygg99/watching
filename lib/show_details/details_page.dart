@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api_service.dart';
-import '../guest_stars_section.dart';
+import 'cast_guest.dart';
 import '../youtube_player_dialog.dart';
 import 'header.dart';
 import 'videos.dart';

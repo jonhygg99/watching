@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api_service.dart';
-import '../guest_stars_section.dart';
+import 'cast_guest.dart';
 
 class ShowDetailCast extends StatelessWidget {
   final Map<String, dynamic>? people;
