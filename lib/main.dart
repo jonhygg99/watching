@@ -9,6 +9,7 @@ import 'splash_wrapper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'show_carousel.dart';
 import 'show_details/details_page.dart';
+import 'settings_page.dart';
 
 final apiService = ApiService(); // Instancia global
 
@@ -149,64 +150,77 @@ class _MyAppState extends State<MyApp> {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Trakt.tv')),
+      appBar: AppBar(
+        title: const Text('Trakt.tv'),
+        leading: IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => SettingsPage(
+                  countryCode: _countryCode,
+                  countryCodes: _countryCodes,
+                  countryNames: _countryNames,
+                  username: _username,
+                  onCountryChanged: (code) async {
+                    await _saveCountry(code);
+                    setState(() {});
+                  },
+                  onLoginRegister: () async {
+                    final result = await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => LoginPage(username: _username)),
+                    );
+                    if (result == true) {
+                      await _initToken();
+                      setState(() {});
+                    }
+                  },
+                  onRevokeToken: () async {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => const Center(child: CircularProgressIndicator()),
+                    );
+                    try {
+                      final prefs = await SharedPreferences.getInstance();
+                      final token = prefs.getString('access_token');
+                      if (token == null || token.isEmpty) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('No hay token para revocar.')),
+                        );
+                        return;
+                      }
+                      await apiService.revokeToken(token);
+                      await apiService.clearToken();
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Token revocado correctamente.')),
+                      );
+                      if (mounted) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const LoginPage()),
+                          (route) => false,
+                        );
+                      }
+                    } catch (e) {
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error al revocar el token: \\${e.toString()}')),
+                      );
+                    }
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
       body: _selectedIndex == 2
           ? Padding(
               padding: const EdgeInsets.all(16.0),
               child: ListView(
                 children: [
-                  Row(
-                    children: [
-                      const Text('Tu país:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      const SizedBox(width: 10),
-                      Text(countryFlag(_countryCode), style: const TextStyle(fontSize: 22)),
-                      const SizedBox(width: 8),
-                      Text(_countryNames[_countryCode] ?? _countryCode, style: const TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      const Text('Cambiar país:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(width: 8),
-                      DropdownButton<String>(
-                        value: _countryCode,
-                        items: _countryCodes.map((code) => DropdownMenuItem(
-                          value: code,
-                          child: Row(
-                            children: [
-                              Text(countryFlag(code), style: const TextStyle(fontSize: 20)),
-                              const SizedBox(width: 6),
-                              Text(_countryNames[code] ?? code),
-                            ],
-                          ),
-                        )).toList(),
-                        onChanged: (code) {
-                          if (code != null) _saveCountry(code);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final result = await Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => LoginPage(username: _username)),
-                      );
-                      if (result == true) {
-                        await _initToken();
-                      }
-                    },
-                    child: const Text('Login / Registro'),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Text('Usuario: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(_username ?? 'No conectado'),
-                    ],
-                  ),
-                  const Divider(height: 32),
                   const SizedBox(height: 16),
                   ShowCarousel(
                     title: 'Trending Shows',
@@ -264,44 +278,6 @@ class _MyAppState extends State<MyApp> {
                     emptyText: 'No hay shows anticipados.'
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () async {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => const Center(child: CircularProgressIndicator()),
-                      );
-                      try {
-                        final prefs = await SharedPreferences.getInstance();
-                        final token = prefs.getString('access_token');
-                        if (token == null || token.isEmpty) {
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('No hay token para revocar.')),
-                          );
-                          return;
-                        }
-                        await apiService.revokeToken(token);
-                        await apiService.clearToken();
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Token revocado correctamente.')),
-                        );
-                        if (mounted) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (_) => const LoginPage()),
-                            (route) => false,
-                          );
-                        }
-                      } catch (e) {
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error al revocar el token: ${e.toString()}')),
-                        );
-                      }
-                    },
-                    child: const Text('Revocar token Trakt.tv'),
-                  ),
                 ],
               ),
             )
