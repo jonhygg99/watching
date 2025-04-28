@@ -43,6 +43,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  int _selectedIndex = 0;
+
+  static const List<Widget> _pages = <Widget>[
+    Center(child: Text('Watchlist', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold))),
+    Center(child: Text('My Shows', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold))),
+    Center(child: Text('Discover', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold))),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
   String _countryCode = 'ES';
   // Usamos la lista completa de países desde country_list.dart
   List<String> get _countryCodes => allCountryCodes;
@@ -137,170 +150,180 @@ class _MyAppState extends State<MyApp> {
     }
     return Scaffold(
       appBar: AppBar(title: const Text('Trakt.tv')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print('Botón flotante pulsado');
-        },
-        child: const Icon(Icons.bug_report),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            // Mostrar país seleccionado de forma visible
-            Row(
-              children: [
-                const Text('Tu país:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                const SizedBox(width: 10),
-                Text(countryFlag(_countryCode), style: const TextStyle(fontSize: 22)),
-                const SizedBox(width: 8),
-                Text(_countryNames[_countryCode] ?? _countryCode, style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // Selector de país
-            Row(
-              children: [
-                const Text('Cambiar país:', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(width: 8),
-                DropdownButton<String>(
-                  value: _countryCode,
-                  items: _countryCodes.map((code) => DropdownMenuItem(
-                    value: code,
-                    child: Row(
-                      children: [
-                        Text(countryFlag(code), style: const TextStyle(fontSize: 20)),
-                        const SizedBox(width: 6),
-                        Text(_countryNames[code] ?? code),
-                      ],
-                    ),
-                  )).toList(),
-                  onChanged: (code) {
-                    if (code != null) _saveCountry(code);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () async {
-                final result = await Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => LoginPage(username: _username)),
-                );
-                // Puedes manejar el resultado del login aquí si lo deseas
-                if (result == true) {
-                  // Por ejemplo, refrescar el usuario
-                  await _initToken();
-                }
-              },
-              child: const Text('Login / Registro'),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Text('Usuario: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(_username ?? 'No conectado'),
-              ],
-            ),
-            const Divider(height: 32),
-            const SizedBox(height: 16),
-            ShowCarousel(
-              title: 'Trending Shows',
-              future: apiService.getTrendingShows(),
-              extractShow: (item) => item['show'],
-              emptyText: 'No hay shows en tendencia.'
-            ),
-            const SizedBox(height: 16),
-            ShowCarousel(
-              title: 'Popular Shows',
-              future: apiService.getPopularShows(),
-              extractShow: (item) => Map<String, dynamic>.from(item), // popular ya es el show
-              emptyText: 'No hay shows populares.'
-            ),
-            const SizedBox(height: 16),
-            ShowCarousel(
-              title: 'Most Favorited (7 días)',
-              future: apiService.getMostFavoritedShows(period: 'weekly'),
-              extractShow: (item) => item['show'],
-              emptyText: 'No hay shows más favoritos de la semana.'
-            ),
-            const SizedBox(height: 16),
-            ShowCarousel(
-              title: 'Most Favorited (30 días)',
-              future: apiService.getMostFavoritedShows(period: 'monthly'),
-              extractShow: (item) => item['show'],
-              emptyText: 'No hay shows más favoritos del mes.'
-            ),
-                        const SizedBox(height: 16),
-            ShowCarousel(
-              title: 'Most Collected (7 días)',
-              future: apiService.getMostCollectedShows(period: 'weekly'),
-              extractShow: (item) => item['show'],
-              emptyText: 'No hay shows más coleccionados de la semana.'
-            ),
-            const SizedBox(height: 16),
-            ShowCarousel(
-              title: 'Most Played (7 días)',
-              future: apiService.getMostPlayedShows(period: 'weekly'),
-              extractShow: (item) => item['show'],
-              emptyText: 'No hay shows más reproducidos de la semana.'
-            ),
-            const SizedBox(height: 16),
-            ShowCarousel(
-              title: 'Most Watched (7 días)',
-              future: apiService.getMostWatchedShows(period: 'weekly'),
-              extractShow: (item) => item['show'],
-              emptyText: 'No hay shows más vistos de la semana.'
-            ),
-            const SizedBox(height: 16),
-            ShowCarousel(
-              title: 'Most Anticipated',
-              future: apiService.getMostAnticipatedShows(),
-              extractShow: (item) => {...Map<String, dynamic>.from(item['show']), 'list_count': item['list_count']},
-              emptyText: 'No hay shows anticipados.'
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () async {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const Center(child: CircularProgressIndicator()),
-                );
-                try {
-                  final prefs = await SharedPreferences.getInstance();
-                  final token = prefs.getString('access_token');
-                  if (token == null || token.isEmpty) {
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No hay token para revocar.')),
-                    );
-                    return;
-                  }
-                  await apiService.revokeToken(token);
-                  await apiService.clearToken();
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Token revocado correctamente.')),
-                  );
-                  if (mounted) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const LoginPage()),
-                      (route) => false,
-                    );
-                  }
-                } catch (e) {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error al revocar el token: ${e.toString()}')),
-                  );
-                }
-              },
-              child: const Text('Revocar token Trakt.tv'),
-            ),
-
-          ],
-        ),
+      body: _selectedIndex == 2
+          ? Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView(
+                children: [
+                  Row(
+                    children: [
+                      const Text('Tu país:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(width: 10),
+                      Text(countryFlag(_countryCode), style: const TextStyle(fontSize: 22)),
+                      const SizedBox(width: 8),
+                      Text(_countryNames[_countryCode] ?? _countryCode, style: const TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Text('Cambiar país:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 8),
+                      DropdownButton<String>(
+                        value: _countryCode,
+                        items: _countryCodes.map((code) => DropdownMenuItem(
+                          value: code,
+                          child: Row(
+                            children: [
+                              Text(countryFlag(code), style: const TextStyle(fontSize: 20)),
+                              const SizedBox(width: 6),
+                              Text(_countryNames[code] ?? code),
+                            ],
+                          ),
+                        )).toList(),
+                        onChanged: (code) {
+                          if (code != null) _saveCountry(code);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final result = await Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => LoginPage(username: _username)),
+                      );
+                      if (result == true) {
+                        await _initToken();
+                      }
+                    },
+                    child: const Text('Login / Registro'),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Text('Usuario: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(_username ?? 'No conectado'),
+                    ],
+                  ),
+                  const Divider(height: 32),
+                  const SizedBox(height: 16),
+                  ShowCarousel(
+                    title: 'Trending Shows',
+                    future: apiService.getTrendingShows(),
+                    extractShow: (item) => item['show'],
+                    emptyText: 'No hay shows en tendencia.'
+                  ),
+                  const SizedBox(height: 16),
+                  ShowCarousel(
+                    title: 'Popular Shows',
+                    future: apiService.getPopularShows(),
+                    extractShow: (item) => Map<String, dynamic>.from(item),
+                    emptyText: 'No hay shows populares.'
+                  ),
+                  const SizedBox(height: 16),
+                  ShowCarousel(
+                    title: 'Most Favorited (7 días)',
+                    future: apiService.getMostFavoritedShows(period: 'weekly'),
+                    extractShow: (item) => item['show'],
+                    emptyText: 'No hay shows más favoritos de la semana.'
+                  ),
+                  const SizedBox(height: 16),
+                  ShowCarousel(
+                    title: 'Most Favorited (30 días)',
+                    future: apiService.getMostFavoritedShows(period: 'monthly'),
+                    extractShow: (item) => item['show'],
+                    emptyText: 'No hay shows más favoritos del mes.'
+                  ),
+                  const SizedBox(height: 16),
+                  ShowCarousel(
+                    title: 'Most Collected (7 días)',
+                    future: apiService.getMostCollectedShows(period: 'weekly'),
+                    extractShow: (item) => item['show'],
+                    emptyText: 'No hay shows más coleccionados de la semana.'
+                  ),
+                  const SizedBox(height: 16),
+                  ShowCarousel(
+                    title: 'Most Played (7 días)',
+                    future: apiService.getMostPlayedShows(period: 'weekly'),
+                    extractShow: (item) => item['show'],
+                    emptyText: 'No hay shows más reproducidos de la semana.'
+                  ),
+                  const SizedBox(height: 16),
+                  ShowCarousel(
+                    title: 'Most Watched (7 días)',
+                    future: apiService.getMostWatchedShows(period: 'weekly'),
+                    extractShow: (item) => item['show'],
+                    emptyText: 'No hay shows más vistos de la semana.'
+                  ),
+                  const SizedBox(height: 16),
+                  ShowCarousel(
+                    title: 'Most Anticipated',
+                    future: apiService.getMostAnticipatedShows(),
+                    extractShow: (item) => {...Map<String, dynamic>.from(item['show']), 'list_count': item['list_count']},
+                    emptyText: 'No hay shows anticipados.'
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () async {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(child: CircularProgressIndicator()),
+                      );
+                      try {
+                        final prefs = await SharedPreferences.getInstance();
+                        final token = prefs.getString('access_token');
+                        if (token == null || token.isEmpty) {
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('No hay token para revocar.')),
+                          );
+                          return;
+                        }
+                        await apiService.revokeToken(token);
+                        await apiService.clearToken();
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Token revocado correctamente.')),
+                        );
+                        if (mounted) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (_) => const LoginPage()),
+                            (route) => false,
+                          );
+                        }
+                      } catch (e) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error al revocar el token: ${e.toString()}')),
+                        );
+                      }
+                    },
+                    child: const Text('Revocar token Trakt.tv'),
+                  ),
+                ],
+              ),
+            )
+          : _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmark_border),
+            label: 'Watchlist',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.tv),
+            label: 'My Shows',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.explore),
+            label: 'Discover',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.redAccent,
+        onTap: _onItemTapped,
       ),
     );
   }
