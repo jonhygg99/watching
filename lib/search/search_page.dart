@@ -13,74 +13,195 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   String _query = '';
+  List<String> _types = ['movie', 'show']; // opciones seleccionadas
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Buscar...',
-            border: InputBorder.none,
-          ),
-          onChanged: (value) {
-            setState(() {
-              _query = value;
-            });
-          },
-        ),
+      appBar: AppBar(),
+      body: _SearchScroll(
+        query: _query,
+        types: _types,
+        onQueryChanged: (value) => setState(() => _query = value),
+        onTypesChanged: (types) => setState(() => _types = types),
       ),
-      body: _query.isEmpty
-          ? FutureBuilder<List<dynamic>>(
-              future: apiService.getTrendingShows(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No hay shows en tendencia.'));
-                }
-                final all = snapshot.data!;
-                for (final item in all) {
-                  print('ITEM TYPE: \\${item.runtimeType}, VALUE: \\${item.toString()}');
-                }
-                final shows = all.where((item) => item is Map && item['show'] is Map).toList();
-                if (shows.isEmpty) {
-                  return const Center(child: Text('No hay shows válidos para mostrar.'));
-                }
-                return GridView.count(
-                  padding: const EdgeInsets.all(12),
-                  crossAxisCount: 3,
-                  childAspectRatio: 0.55,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 0,
+    );
+  }
+}
+
+class _SearchScroll extends StatelessWidget {
+  final String query;
+  final List<String> types;
+  final ValueChanged<String> onQueryChanged;
+  final ValueChanged<List<String>> onTypesChanged;
+  const _SearchScroll({required this.query, required this.types, required this.onQueryChanged, required this.onTypesChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Buscar...',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  onChanged: onQueryChanged,
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
                   children: [
-                    for (final item in shows)
-                      _ShowGridTile(
-                        show: Map<String, dynamic>.from(item['show'] as Map),
-                        onTap: () {
-                          final show = Map<String, dynamic>.from(item['show'] as Map);
-                          final showId = show['ids']?['trakt']?.toString() ?? show['ids']?['slug'] ?? '';
-                          if (showId.isEmpty) return;
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ShowDetailPage(
-                                showId: showId,
-                                apiService: apiService,
-                                countryCode: Localizations.localeOf(context).countryCode ?? 'US',
-                              ),
-                            ),
-                          );
-                        },
-                      )
+                    FilterChip(
+                      label: const Text('Películas'),
+                      selected: types.contains('movie'),
+                      onSelected: (selected) {
+                        final newTypes = List<String>.from(types);
+                        if (selected) {
+                          newTypes.add('movie');
+                        } else {
+                          newTypes.remove('movie');
+                        }
+                        if (newTypes.isEmpty) newTypes.add('movie');
+                        onTypesChanged(newTypes);
+                      },
+                    ),
+                    FilterChip(
+                      label: const Text('Series'),
+                      selected: types.contains('show'),
+                      onSelected: (selected) {
+                        final newTypes = List<String>.from(types);
+                        if (selected) {
+                          newTypes.add('show');
+                        } else {
+                          newTypes.remove('show');
+                        }
+                        if (newTypes.isEmpty) newTypes.add('show');
+                        onTypesChanged(newTypes);
+                      },
+                    ),
                   ],
-                );
-              },
-            )
-          : Center(
-              child: Text('Resultados para "$_query"'),
+                ),
+              ],
             ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 10)),
+        SliverToBoxAdapter(
+          child: query.isEmpty
+              ? _TrendingGrid()
+              : _SearchResultsGrid(query: query, types: types),
+        ),
+      ],
+    );
+  }
+}
+
+class _TrendingGrid extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<dynamic>>(
+      future: apiService.getTrendingShows(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final shows = snapshot.data ?? [];
+        if (shows.isEmpty) {
+          return const Center(child: Text('No hay shows en tendencia.'));
+        }
+        return GridView.count(
+          padding: const EdgeInsets.all(12),
+          crossAxisCount: 3,
+          childAspectRatio: 0.55,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 0,
+          children: [
+            for (final item in shows)
+              _ShowGridTile(
+                show: Map<String, dynamic>.from(item['show'] as Map),
+                onTap: () {
+                  final show = Map<String, dynamic>.from(item['show'] as Map);
+                  final showId = show['ids']?['trakt']?.toString() ?? show['ids']?['slug'] ?? '';
+                  if (showId.isEmpty) return;
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ShowDetailPage(
+                        showId: showId,
+                        apiService: apiService,
+                        countryCode: Localizations.localeOf(context).countryCode ?? 'US',
+                      ),
+                    ),
+                  );
+                },
+              )
+          ],
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+        );
+      },
+    );
+  }
+}
+
+class _SearchResultsGrid extends StatelessWidget {
+  final String query;
+  final List<String> types;
+  const _SearchResultsGrid({required this.query, required this.types});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<dynamic>>(
+      future: apiService.searchMoviesAndShows(query, types: types),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error al buscar.'));
+        }
+        final results = snapshot.data ?? [];
+        final filtered = results.where((item) => item['type'] == 'show' || item['type'] == 'movie').toList();
+        if (filtered.isEmpty) {
+          return Center(child: Text('No se encontraron resultados para "$query".'));
+        }
+         return GridView.count(
+          padding: const EdgeInsets.all(12),
+          crossAxisCount: 3,
+          childAspectRatio: 0.55,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 0,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            for (final item in filtered)
+              _ShowGridTile(
+                show: Map<String, dynamic>.from(item[item['type']] as Map),
+                onTap: () {
+                  final show = Map<String, dynamic>.from(item[item['type']] as Map);
+                  final showId = show['ids']?['trakt']?.toString() ?? show['ids']?['slug'] ?? '';
+                  if (showId.isEmpty) return;
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ShowDetailPage(
+                        showId: showId,
+                        apiService: apiService,
+                        countryCode: Localizations.localeOf(context).countryCode ?? 'US',
+                      ),
+                    ),
+                  );
+                },
+              )
+          ],
+        );
+      },
     );
   }
 }

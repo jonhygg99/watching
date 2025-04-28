@@ -6,6 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 final apiService = ApiService();
 
 class ApiService {
+  /// Busca películas y series usando el endpoint de búsqueda de Trakt.tv.
+  /// Devuelve una lista de resultados (tipo 'movie' o 'show').
+  Future<List<dynamic>> searchMoviesAndShows(String query, {List<String> types = const ['movie', 'show']}) async {
+    if (query.trim().isEmpty) return [];
+    final safeQuery = Uri.encodeQueryComponent(query);
+    final typeParam = types.join(',');
+    return await _getJsonList('/search/$typeParam?query=$safeQuery&extended=images');
+  }
   final String baseUrl = 'https://api.trakt.tv';
   final String? clientId = dotenv.env['CLIENT_ID'];
   final String? clientSecret = dotenv.env['CLIENT_SECRET'];
