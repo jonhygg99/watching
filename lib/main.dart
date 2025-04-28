@@ -13,6 +13,7 @@ import 'settings/settings.dart';
 import 'watchlist/watchlist_page.dart';
 import 'myshows/my_shows_page.dart';
 import 'discover/discover_page.dart';
+import 'search/search_page.dart';
 
 final apiService = ApiService(); // Instancia global
 
@@ -218,6 +219,16 @@ class _MyAppState extends State<MyApp> {
             );
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SearchPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
