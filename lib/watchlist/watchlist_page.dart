@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:watching/api_service.dart';
+import 'package:watching/watchlist/progress_bar.dart';
+import 'package:watching/watchlist/episode_info_button.dart';
+import 'package:watching/watchlist/show_card.dart';
+import 'package:watching/watchlist/episode_info_modal.dart';
 import 'package:watching/show_details/details_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 // import 'dart:io';
@@ -60,37 +64,7 @@ class _WatchProgressInfoState extends State<_WatchProgressInfo> {
     final TextStyle titleStyle = Theme.of(context).textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold);
     final TextStyle episodeStyle = Theme.of(context).textTheme.bodyMedium!;
 
-    Widget progressBar({required double percent, required int watched, required int total}) {
-      return Row(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                Container(
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                FractionallySizedBox(
-                  widthFactor: percent,
-                  child: Container(
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text('$watched / $total', style: episodeStyle),
-        ],
-      );
-    }
+    // Usa ProgressBar importado
 
     if (widget.traktId == null) {
       return Column(
@@ -134,97 +108,14 @@ class _WatchProgressInfoState extends State<_WatchProgressInfo> {
             'T${nextEpisode['season']}E${nextEpisode['number']} - ${nextEpisode['title']}',
             style: episodeStyle.copyWith(color: Colors.grey[700]),
           ),
-        progressBar(percent: percent, watched: episodesWatched, total: totalEpisodes),
-
-          TextButton.icon(
-            icon: const Icon(Icons.info_outline),
-            label: const Text('Episode Info'),
-            onPressed: () async {
-              final traktId = widget.traktId;
-              if (traktId == null) return;
-              final season = nextEpisode['season'];
-              final episode = nextEpisode['number'];
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                ),
-                builder: (ctx) {
-                  return FutureBuilder<Map<String, dynamic>>(
-                    future: apiService.getEpisodeInfo(
-                      id: traktId,
-                      season: season,
-                      episode: episode,
-                    ),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      }
-                      final ep = snapshot.data;
-                      if (ep == null) return const SizedBox.shrink();
-                      final img = (ep['images']?['screenshot'] is List && ep['images']['screenshot'].isNotEmpty)
-                          ? ep['images']['screenshot'][0]
-                          : null;
-                      return Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      ep['title'] ?? '',
-                                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  Text('T${ep['season']}E${ep['number']}', style: Theme.of(context).textTheme.bodyMedium),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              if (img != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(
-                                    (img is String && !img.startsWith('http')) ? 'https://$img' : img,
-                                    height: 120,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              const SizedBox(height: 12),
-                              if (ep['overview'] != null && ep['overview'].toString().isNotEmpty)
-                                Text(ep['overview'], style: Theme.of(context).textTheme.bodyMedium),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  if (ep['rating'] != null) ...[
-                                    const Icon(Icons.star, size: 18, color: Colors.amber),
-                                    SizedBox(width: 4),
-                                    Text('${ep['rating']?.toStringAsFixed(1) ?? ''}'),
-                                    SizedBox(width: 16),
-                                  ],
-                                  if (ep['runtime'] != null) ...[
-                                    const Icon(Icons.timer, size: 18),
-                                    SizedBox(width: 4),
-                                    Text('${ep['runtime']} min'),
-                                  ],
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
+          const SizedBox(height: 6),
+          ProgressBar(percent: percent, watched: episodesWatched, total: totalEpisodes),
+          const SizedBox(height: 6),
+          EpisodeInfoButton(
+            traktId: widget.traktId,
+            season: nextEpisode['season'],
+            episode: nextEpisode['number'],
+            apiService: apiService,
           ),
         ],
       ],
@@ -344,52 +235,16 @@ class _WatchlistPageState extends State<WatchlistPage> {
                   } else {
                     posterUrl = null;
                   }
-                  return InkWell(
-                    onTap: traktId != null
-                        ? () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ShowDetailPage(
-                                  showId: traktId,
-                                  apiService: apiService,
-                                  countryCode: Localizations.localeOf(context).countryCode ?? 'US',
-                                ),
-                              ),
-                            );
-                          }
-                        : null,
-                    child: Card(
-                      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-                      elevation: 0,
-                      color: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          // Poster grande y redondeado
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: posterUrl != null
-                                ? CachedNetworkImage(
-                                    imageUrl: posterUrl,
-                                    width: 90,
-                                    height: 135,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Container(width: 90, height: 135, color: Colors.grey),
-                          ),
-                          const SizedBox(width: 16),
-                          // Info principal
-                          Expanded(
-                            child: _WatchProgressInfo(
-                              traktId: traktId,
-                              title: title,
-                            ),
-                          ),
-                        ],
-                      ),
+                  return ShowCard(
+                    traktId: traktId,
+                    posterUrl: posterUrl,
+                    infoWidget: _WatchProgressInfo(
+                      traktId: traktId,
+                      title: title,
                     ),
+                    apiService: apiService,
+                    parentContext: context,
+                    countryCode: Localizations.localeOf(context).countryCode,
                   );
                 },
               );
