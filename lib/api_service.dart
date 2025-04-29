@@ -6,6 +6,36 @@ import 'package:shared_preferences/shared_preferences.dart';
 final apiService = ApiService();
 
 class ApiService {
+  /// Obtener el historial visto del usuario (shows o movies) con imágenes extendidas
+  /// [type]: 'shows' o 'movies' (por defecto: 'shows')
+  Future<List<dynamic>> getWatched({String type = 'shows'}) async {
+    await _ensureValidToken();
+    final allowedTypes = ['shows', 'movies'];
+    final safeType = allowedTypes.contains(type) ? type : 'shows';
+    final url = Uri.parse('$baseUrl/sync/watched/$safeType?extended=images,noseasons');
+    final response = await http.get(url, headers: _headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Error GET /sync/watched/$safeType: \n${response.statusCode}\n${response.body}');
+    }
+  }
+
+  /// Obtener la watchlist del usuario (shows o movies) con imágenes extendidas
+  /// [type]: 'shows' o 'movies' (por defecto: 'shows')
+  Future<List<dynamic>> getWatchlist({String type = 'shows'}) async {
+    await _ensureValidToken();
+    final allowedTypes = ['shows', 'movies'];
+    final safeType = allowedTypes.contains(type) ? type : 'shows';
+    final url = Uri.parse('$baseUrl/sync/watchlist/$safeType?extended=images&sort_by=rank&sort_how=asc');
+    final response = await http.get(url, headers: _headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Error GET /sync/watchlist/$safeType: \n${response.statusCode}\n${response.body}');
+    }
+  }
+
   /// Busca películas y series usando el endpoint de búsqueda de Trakt.tv.
   /// Devuelve una lista de resultados (tipo 'movie' o 'show').
   Future<List<dynamic>> searchMoviesAndShows(String query, {List<String> types = const ['movie', 'show']}) async {
@@ -72,6 +102,26 @@ class ApiService {
   /// Obtener ratings de un show
   Future<Map<String, dynamic>> getShowRatings(String id) async {
     return await _getJsonMap('/shows/$id/ratings');
+  }
+
+  /// Obtener progreso visto de un show
+  Future<Map<String, dynamic>> getShowWatchedProgress({
+    required String id,
+    String hidden = 'false',
+    String specials = 'false',
+    String countSpecials = 'true',
+  }) async {
+    await _ensureValidToken();
+    final url = Uri.parse(
+      '$baseUrl/shows/$id/progress/watched'
+      '?hidden=$hidden&specials=$specials&count_specials=$countSpecials',
+    );
+    final response = await http.get(url, headers: _headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to load watched progress: ${response.statusCode}');
+    }
   }
 
   /// --- Manejo de expiración y refresco de token ---
