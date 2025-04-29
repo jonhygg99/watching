@@ -6,6 +6,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 final apiService = ApiService();
 
 class ApiService {
+  /// Obtener la información de un episodio específico (extended=full, imágenes)
+  Future<Map<String, dynamic>> getEpisodeInfo({
+    required String id,
+    required int season,
+    required int episode,
+  }) async {
+    await _ensureValidToken();
+    final url = Uri.parse('$baseUrl/shows/$id/seasons/$season/episodes/$episode?extended=full,images');
+    final response = await http.get(url, headers: _headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Error GET /shows/$id/seasons/$season/episodes/$episode: ${response.statusCode}\n${response.body}');
+    }
+  }
+
   /// Obtener el historial visto del usuario (shows o movies) con imágenes extendidas
   /// [type]: 'shows' o 'movies' (por defecto: 'shows')
   Future<List<dynamic>> getWatched({String type = 'shows'}) async {
