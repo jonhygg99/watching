@@ -66,7 +66,7 @@ class ApiService {
   Future<Map<String, dynamic>> getShowPeople(String id, {String extended = ''}) async {
     String endpoint = '/shows/$id/people?extended=images';
     if (extended.isNotEmpty) endpoint += ',$extended';
-    return await _getJsonMap(endpoint);
+    return await _getJsonMap('/shows/$id/people?extended=images');
   }
 
   /// Obtener ratings de un show
@@ -167,10 +167,8 @@ class ApiService {
 
   /// Obtener la información completa de un show por id, slug o imdb
   Future<Map<String, dynamic>> getShowById(String id) {
-    return _getJsonMap('/shows/$id?extended=full');
+    return _getJsonMap('/shows/$id?extended=full,images,');
   }
-
-
 
   /// Eliminar el token
   Future<void> clearToken() async {
