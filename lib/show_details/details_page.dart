@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../api_service.dart';
 import 'cast_guest.dart';
+import 'seasons_progress_widget.dart';
 import '../youtube_player_dialog.dart';
 import 'header.dart';
 import 'videos.dart';
@@ -13,7 +14,12 @@ class ShowDetailPage extends StatefulWidget {
   final ApiService apiService;
   final String countryCode;
 
-  const ShowDetailPage({super.key, required this.showId, required this.apiService, required this.countryCode});
+  const ShowDetailPage({
+    super.key,
+    required this.showId,
+    required this.apiService,
+    required this.countryCode,
+  });
 
   @override
   State<ShowDetailPage> createState() => _ShowDetailPageState();
@@ -38,14 +44,20 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
   @override
   void initState() {
     super.initState();
-    _commentsFuture = widget.apiService.getShowComments(widget.showId, sort: _sort);
+    _commentsFuture = widget.apiService.getShowComments(
+      widget.showId,
+      sort: _sort,
+    );
   }
 
   void _changeSort(String? value) {
     if (value == null || value == _sort) return;
     setState(() {
       _sort = value;
-      _commentsFuture = widget.apiService.getShowComments(widget.showId, sort: _sort);
+      _commentsFuture = widget.apiService.getShowComments(
+        widget.showId,
+        sort: _sort,
+      );
     });
   }
 
@@ -56,7 +68,10 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
       body: FutureBuilder<List<dynamic>>(
         future: Future.wait([
           widget.apiService.getShowById(widget.showId),
-          widget.apiService.getShowTranslations(widget.showId, widget.countryCode.substring(0, 2).toLowerCase()),
+          widget.apiService.getShowTranslations(
+            widget.showId,
+            widget.countryCode.substring(0, 2).toLowerCase(),
+          ),
           widget.apiService.getShowCertifications(widget.showId),
           widget.apiService.getShowPeople(widget.showId),
           widget.apiService.getRelatedShows(widget.showId),
@@ -67,7 +82,12 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: \\${snapshot.error}', style: const TextStyle(color: Colors.red)));
+            return Center(
+              child: Text(
+                'Error: \\${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
           }
           final results = snapshot.data;
           if (results == null || results.length < 6) {
@@ -87,7 +107,9 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
           Map<String, dynamic>? translation;
           if (translations != null && translations.isNotEmpty) {
             translation = translations.firstWhere(
-              (t) => t['language']?.toString()?.toLowerCase() == widget.countryCode.substring(0, 2).toLowerCase(),
+              (t) =>
+                  t['language']?.toString().toLowerCase() ==
+                  widget.countryCode.substring(0, 2).toLowerCase(),
               orElse: () => null,
             );
           }
@@ -105,7 +127,8 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
                   show: show,
                   translation: translation,
                   showOriginal: _showOriginal,
-                  onToggleOriginal: (val) => setState(() => _showOriginal = val),
+                  onToggleOriginal:
+                      (val) => setState(() => _showOriginal = val),
                   originalTitle: originalTitle,
                   originalOverview: originalOverview,
                   originalTagline: originalTagline,
@@ -114,9 +137,18 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
                   apiService: widget.apiService,
                   showId: widget.showId,
                 ),
+                SeasonsProgressWidget(showId: widget.showId),
                 ShowDetailVideos(videos: videos),
-                ShowDetailCast(people: people, showId: widget.showId, apiService: widget.apiService),
-                ShowDetailRelated(relatedShows: relatedShows, apiService: widget.apiService, countryCode: widget.countryCode),
+                ShowDetailCast(
+                  people: people,
+                  showId: widget.showId,
+                  apiService: widget.apiService,
+                ),
+                ShowDetailRelated(
+                  relatedShows: relatedShows,
+                  apiService: widget.apiService,
+                  countryCode: widget.countryCode,
+                ),
                 ShowDetailComments(
                   commentsFuture: _commentsFuture,
                   sort: _sort,

@@ -5,6 +5,49 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final apiService = ApiService();
 
+extension SeasonsAndProgressApi on ApiService {
+  /// Obtiene todas las temporadas de una serie (array de temporadas con número y count)
+  Future<List<dynamic>> getSeasons(String showId) async {
+    await _ensureValidToken();
+    final url = Uri.parse('$baseUrl/shows/$showId/seasons');
+    final response = await http.get(url, headers: _headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Error GET /shows/$showId/seasons: \\n${response.statusCode}\\n${response.body}');
+    }
+  }
+
+  /// Obtiene el progreso de vistas de una serie (por temporadas)
+  Future<Map<String, dynamic>> getWatchedProgress(String showId) async {
+    return await getShowWatchedProgress(id: showId);
+  }
+
+  /// Marca una temporada completa como vista
+  Future<void> markSeasonAsWatched(String showId, int seasonNumber, List<Map<String, dynamic>> episodes) async {
+    await _ensureValidToken();
+    final payload = {
+      "shows": [
+        {
+          "ids": {"trakt": int.tryParse(showId) ?? showId},
+          "seasons": [
+            {
+              "number": seasonNumber,
+              "episodes": episodes,
+            }
+          ]
+        }
+      ]
+    };
+    final url = Uri.parse('$baseUrl/sync/history');
+    final response = await http.post(url, headers: _headers, body: jsonEncode(payload));
+    if (response.statusCode != 201) {
+      throw Exception('Error POST /sync/history: \\n${response.statusCode}\\n${response.body}');
+    }
+  }
+}
+
+
 class ApiService {
   /// Obtener la información de un episodio específico (extended=full, imágenes)
   Future<Map<String, dynamic>> getEpisodeInfo({
@@ -13,12 +56,16 @@ class ApiService {
     required int episode,
   }) async {
     await _ensureValidToken();
-    final url = Uri.parse('$baseUrl/shows/$id/seasons/$season/episodes/$episode?extended=full,images');
+    final url = Uri.parse(
+      '$baseUrl/shows/$id/seasons/$season/episodes/$episode?extended=full,images',
+    );
     final response = await http.get(url, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      throw Exception('Error GET /shows/$id/seasons/$season/episodes/$episode: ${response.statusCode}\n${response.body}');
+      throw Exception(
+        'Error GET /shows/$id/seasons/$season/episodes/$episode: ${response.statusCode}\n${response.body}',
+      );
     }
   }
 
@@ -28,12 +75,16 @@ class ApiService {
     await _ensureValidToken();
     final allowedTypes = ['shows', 'movies'];
     final safeType = allowedTypes.contains(type) ? type : 'shows';
-    final url = Uri.parse('$baseUrl/sync/watched/$safeType?extended=images,noseasons');
+    final url = Uri.parse(
+      '$baseUrl/sync/watched/$safeType?extended=images,noseasons',
+    );
     final response = await http.get(url, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as List<dynamic>;
     } else {
-      throw Exception('Error GET /sync/watched/$safeType: \n${response.statusCode}\n${response.body}');
+      throw Exception(
+        'Error GET /sync/watched/$safeType: \n${response.statusCode}\n${response.body}',
+      );
     }
   }
 
@@ -43,23 +94,33 @@ class ApiService {
     await _ensureValidToken();
     final allowedTypes = ['shows', 'movies'];
     final safeType = allowedTypes.contains(type) ? type : 'shows';
-    final url = Uri.parse('$baseUrl/sync/watchlist/$safeType?extended=images&sort_by=rank&sort_how=asc');
+    final url = Uri.parse(
+      '$baseUrl/sync/watchlist/$safeType?extended=images&sort_by=rank&sort_how=asc',
+    );
     final response = await http.get(url, headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as List<dynamic>;
     } else {
-      throw Exception('Error GET /sync/watchlist/$safeType: \n${response.statusCode}\n${response.body}');
+      throw Exception(
+        'Error GET /sync/watchlist/$safeType: \n${response.statusCode}\n${response.body}',
+      );
     }
   }
 
   /// Busca películas y series usando el endpoint de búsqueda de Trakt.tv.
   /// Devuelve una lista de resultados (tipo 'movie' o 'show').
-  Future<List<dynamic>> searchMoviesAndShows(String query, {List<String> types = const ['movie', 'show']}) async {
+  Future<List<dynamic>> searchMoviesAndShows(
+    String query, {
+    List<String> types = const ['movie', 'show'],
+  }) async {
     if (query.trim().isEmpty) return [];
     final safeQuery = Uri.encodeQueryComponent(query);
     final typeParam = types.join(',');
-    return await _getJsonList('/search/$typeParam?query=$safeQuery&extended=images');
+    return await _getJsonList(
+      '/search/$typeParam?query=$safeQuery&extended=images',
+    );
   }
+
   final String baseUrl = 'https://api.trakt.tv';
   final String? clientId = dotenv.env['CLIENT_ID'];
   final String? clientSecret = dotenv.env['CLIENT_SECRET'];
@@ -86,7 +147,9 @@ class ApiService {
     }
     if (data['expires_in'] != null) {
       // Guarda la expiración absoluta (segundos desde epoch)
-      final expiresAt = DateTime.now().millisecondsSinceEpoch ~/ 1000 + (data['expires_in'] as int);
+      final expiresAt =
+          DateTime.now().millisecondsSinceEpoch ~/ 1000 +
+          (data['expires_in'] as int);
       await prefs.setInt('expires_at', expiresAt);
     }
   }
@@ -94,7 +157,10 @@ class ApiService {
   /// --- MÉTODOS PRIVADOS DE UTILIDAD ---
 
   /// Obtener comentarios de un show, ordenados por el criterio indicado (por defecto: likes)
-  Future<List<dynamic>> getShowComments(String id, {String sort = 'likes'}) async {
+  Future<List<dynamic>> getShowComments(
+    String id, {
+    String sort = 'likes',
+  }) async {
     return await _getJsonList('/shows/$id/comments/$sort');
   }
 
@@ -109,7 +175,10 @@ class ApiService {
   }
 
   /// Obtener reparto y equipo de un show (puede incluir guest_stars)
-  Future<Map<String, dynamic>> getShowPeople(String id, {String extended = ''}) async {
+  Future<Map<String, dynamic>> getShowPeople(
+    String id, {
+    String extended = '',
+  }) async {
     String endpoint = '/shows/$id/people?extended=images';
     if (extended.isNotEmpty) endpoint += ',$extended';
     return await _getJsonMap('/shows/$id/people?extended=images');
@@ -136,7 +205,9 @@ class ApiService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      throw Exception('Failed to load watched progress: ${response.statusCode}');
+      throw Exception(
+        'Failed to load watched progress: ${response.statusCode}',
+      );
     }
   }
 
@@ -161,7 +232,9 @@ class ApiService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as List<dynamic>;
     } else {
-      throw Exception('Error GET $endpoint: ${response.statusCode}\n${response.body}');
+      throw Exception(
+        'Error GET $endpoint: ${response.statusCode}\n${response.body}',
+      );
     }
   }
 
@@ -173,7 +246,9 @@ class ApiService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      throw Exception('Error GET $endpoint: ${response.statusCode}\n${response.body}');
+      throw Exception(
+        'Error GET $endpoint: ${response.statusCode}\n${response.body}',
+      );
     }
   }
 
@@ -188,37 +263,70 @@ class ApiService {
 
   /// Obtener los shows en tendencia de Trakt.tv
   Future<List<dynamic>> getTrendingShows({int page = 1, int limit = 10}) {
-    return _getJsonList('/shows/trending?extended=images&page=$page&limit=$limit');
+    return _getJsonList(
+      '/shows/trending?extended=images&page=$page&limit=$limit',
+    );
   }
 
   /// Obtener los shows populares de Trakt.tv
   Future<List<dynamic>> getPopularShows({int page = 1, int limit = 10}) {
-    return _getJsonList('/shows/popular?extended=images&page=$page&limit=$limit');
+    return _getJsonList(
+      '/shows/popular?extended=images&page=$page&limit=$limit',
+    );
   }
 
   /// Obtener los shows más favoritos según periodo (daily, weekly, monthly, all)
-  Future<List<dynamic>> getMostFavoritedShows({String period = 'weekly', int page = 1, int limit = 10}) {
-    return _getJsonList('/shows/favorited/$period?extended=images&page=$page&limit=$limit');
+  Future<List<dynamic>> getMostFavoritedShows({
+    String period = 'weekly',
+    int page = 1,
+    int limit = 10,
+  }) {
+    return _getJsonList(
+      '/shows/favorited/$period?extended=images&page=$page&limit=$limit',
+    );
   }
 
   /// Obtener los shows más reproducidos según periodo (daily, weekly, monthly, all)
-  Future<List<dynamic>> getMostPlayedShows({String period = 'weekly', int page = 1, int limit = 10}) {
-    return _getJsonList('/shows/played/$period?extended=images&page=$page&limit=$limit');
+  Future<List<dynamic>> getMostPlayedShows({
+    String period = 'weekly',
+    int page = 1,
+    int limit = 10,
+  }) {
+    return _getJsonList(
+      '/shows/played/$period?extended=images&page=$page&limit=$limit',
+    );
   }
 
   /// Obtener los shows más vistos según periodo (daily, weekly, monthly, all)
-  Future<List<dynamic>> getMostWatchedShows({String period = 'weekly', int page = 1, int limit = 10}) {
-    return _getJsonList('/shows/watched/$period?extended=images&page=$page&limit=$limit');
+  Future<List<dynamic>> getMostWatchedShows({
+    String period = 'weekly',
+    int page = 1,
+    int limit = 10,
+  }) {
+    return _getJsonList(
+      '/shows/watched/$period?extended=images&page=$page&limit=$limit',
+    );
   }
 
   /// Obtener los shows más coleccionados según periodo (daily, weekly, monthly, all)
-  Future<List<dynamic>> getMostCollectedShows({String period = 'weekly', int page = 1, int limit = 10}) {
-    return _getJsonList('/shows/collected/$period?extended=images&page=$page&limit=$limit');
+  Future<List<dynamic>> getMostCollectedShows({
+    String period = 'weekly',
+    int page = 1,
+    int limit = 10,
+  }) {
+    return _getJsonList(
+      '/shows/collected/$period?extended=images&page=$page&limit=$limit',
+    );
   }
 
   /// Obtener los shows más anticipados
-  Future<List<dynamic>> getMostAnticipatedShows({int page = 1, int limit = 10}) {
-    return _getJsonList('/shows/anticipated?extended=images&page=$page&limit=$limit');
+  Future<List<dynamic>> getMostAnticipatedShows({
+    int page = 1,
+    int limit = 10,
+  }) {
+    return _getJsonList(
+      '/shows/anticipated?extended=images&page=$page&limit=$limit',
+    );
   }
 
   /// Obtener las traducciones de un show para un idioma específico (devuelve lista de traducciones)
@@ -244,7 +352,10 @@ class ApiService {
   }
 
   /// Construye la URL de autorización OAuth para Trakt.tv
-  String getAuthorizationUrl({String state = 'login', Map<String, String>? extraParams}) {
+  String getAuthorizationUrl({
+    String state = 'login',
+    Map<String, String>? extraParams,
+  }) {
     final params = {
       'response_type': 'code',
       'client_id': clientId ?? '',
@@ -302,7 +413,9 @@ class ApiService {
       await saveTokenData(data);
       return data;
     } else {
-      throw Exception('Error al obtener el token: \nStatus: \\${response.statusCode}\nBody: \\${response.body}');
+      throw Exception(
+        'Error al obtener el token: \nStatus: \\${response.statusCode}\nBody: \\${response.body}',
+      );
     }
   }
 
@@ -325,7 +438,9 @@ class ApiService {
       await saveTokenData(data);
       return data;
     } else {
-      throw Exception('Error al refrescar el token: \nStatus: \\${response.statusCode}\nBody: \\${response.body}');
+      throw Exception(
+        'Error al refrescar el token: \nStatus: \\${response.statusCode}\nBody: \\${response.body}',
+      );
     }
   }
 
@@ -344,19 +459,28 @@ class ApiService {
     if (response.statusCode == 200) {
       await clearToken();
     } else {
-      throw Exception('Error al revocar el token: \nStatus: \\${response.statusCode}\nBody: \\${response.body}');
+      throw Exception(
+        'Error al revocar el token: \nStatus: \\${response.statusCode}\nBody: \\${response.body}',
+      );
     }
   }
 
   /// Obtener shows relacionados por id, slug o imdb, incluyendo imágenes
   Future<List<dynamic>> getRelatedShows(String id) async {
     // "extended=images" para obtener imágenes
-    return await _getJsonList('/shows/\u0000{id}/related?extended=images'.replaceFirst('\u0000{id}', id));
+    return await _getJsonList(
+      '/shows/\u0000{id}/related?extended=images'.replaceFirst(
+        '\u0000{id}',
+        id,
+      ),
+    );
   }
 
   /// Obtener videos de un show (trailers, clips, etc)
   Future<List<dynamic>> getShowVideos(String id) async {
     // /shows/{id}/videos
-    return await _getJsonList('/shows/\u0000{id}/videos'.replaceFirst('\u0000{id}', id));
+    return await _getJsonList(
+      '/shows/\u0000{id}/videos'.replaceFirst('\u0000{id}', id),
+    );
   }
 }
