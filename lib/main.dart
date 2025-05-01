@@ -101,13 +101,16 @@ class MyApp extends ConsumerWidget {
                             await ref.read(authProvider.notifier).reload();
                           },
                           onRevokeToken: () async {
-                            await ref.read(authProvider.notifier).logout();
-                            // Si quieres mostrar un mensaje, verifica que el widget siga montado
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Token revocado')),
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (_) => const SplashWrapper(),
+                                ),
+                                (route) => false,
                               );
                             }
+                            // Realiza el logout después de navegar para evitar el uso de ref en un widget destruido
+                            await ref.read(authProvider.notifier).logout();
                           },
                         ),
                   ),
