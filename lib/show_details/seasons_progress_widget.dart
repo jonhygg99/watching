@@ -5,7 +5,8 @@ import '../watchlist/progress_bar.dart';
 
 class SeasonsProgressWidget extends StatefulWidget {
   final String showId;
-  const SeasonsProgressWidget({Key? key, required this.showId}) : super(key: key);
+  final VoidCallback? onProgressChanged;
+  const SeasonsProgressWidget({Key? key, required this.showId, this.onProgressChanged}) : super(key: key);
 
   @override
   State<SeasonsProgressWidget> createState() => _SeasonsProgressWidgetState();
@@ -40,42 +41,25 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
     }
   }
 
-Future<void> _markSeasonAsWatched(int seasonNumber, int episodeCount) async {
-  setState(() => marking = true);
-  try {
-    await apiService.addToWatchHistory(
-      shows: [
-        {
-          "ids": int.tryParse(widget.showId) != null
-              ? {"trakt": int.parse(widget.showId)}
-              : {"slug": widget.showId},
-          "seasons": [
-            {
-              "number": seasonNumber,
-            }
-          ]
-        }
-      ]
-    );
-    await _fetchData();
-  } catch (e) {
-    // Manejo de error: opcional mostrar snackbar
-  } finally {
-    setState(() => marking = false);
-  }
-}
-
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
     if (seasons == null || progress == null) {
       return const SizedBox();
     }
     final progressSeasons = Map.fromEntries(
       (progress!["seasons"] as List).map((s) => MapEntry(s["number"], s)),
     );
+
+    // Filtrar temporadas: ocultar la 0 y la última si tienen 0 episodios
+    final filteredSeasons = List<Map<String, dynamic>>.from(seasons!)
+      ..removeWhere((season) {
+        final number = season["number"];
+        final episodeCount = season["episode_count"] ?? 0;
+        final isFirst = number == 0;
+        final isLast = number == (seasons!.isNotEmpty ? seasons!.map((s) => s["number"] as int).reduce((a, b) => a > b ? a : b) : -1);
+        return (isFirst || isLast) && episodeCount == 0;
+      });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -83,7 +67,7 @@ Future<void> _markSeasonAsWatched(int seasonNumber, int episodeCount) async {
           padding: EdgeInsets.symmetric(vertical: 8.0),
           child: Text('Temporadas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ),
-        ...seasons!.map<Widget>((season) {
+        ...filteredSeasons.map<Widget>((season) {
           final number = season["number"];
           final episodeCount = season["episode_count"] ?? 0;
           final seasonProgress = progressSeasons[number] ?? {};
@@ -95,9 +79,13 @@ Future<void> _markSeasonAsWatched(int seasonNumber, int episodeCount) async {
             child: Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.check_circle,
-                      color: isComplete ? Colors.green : Colors.grey),
-                  onPressed: marking || isComplete
+                  icon: Icon(
+                    Icons.check_circle,
+                    color: isComplete
+                        ? Colors.green
+                        : (markingColors[number] ?? Colors.grey),
+                  ),
+                  onPressed: isComplete
                       ? null
                       : () => _markSeasonAsWatched(number, episodeCount),
                   tooltip: isComplete ? 'Completada' : 'Marcar temporada como vista',
@@ -119,5 +107,43 @@ Future<void> _markSeasonAsWatched(int seasonNumber, int episodeCount) async {
         }).toList(),
       ],
     );
+  }
+
+  int? seasonMarkingNumber;
+  Map<int, Color> markingColors = {};
+
+  Future<void> _markSeasonAsWatched(int seasonNumber, int episodeCount) async {
+    setState(() {
+      markingColors[seasonNumber] = Colors.blue;
+    });
+    try {
+      await apiService.addToWatchHistory(
+        shows: [
+          {
+            "ids": int.tryParse(widget.showId) != null
+                ? {"trakt": int.parse(widget.showId)}
+                : {"slug": widget.showId},
+            "seasons": [
+              {
+                "number": seasonNumber,
+              }
+            ]
+          }
+        ]
+      );
+      await _fetchData();
+      if (widget.onProgressChanged != null) widget.onProgressChanged!();
+      setState(() {
+        markingColors[seasonNumber] = Colors.grey;
+      });
+    } catch (e) {
+      setState(() {
+        markingColors[seasonNumber] = Colors.red;
+      });
+      await Future.delayed(const Duration(milliseconds: 500));
+      setState(() {
+        markingColors[seasonNumber] = Colors.grey;
+      });
+    }
   }
 }

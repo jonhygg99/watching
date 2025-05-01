@@ -18,28 +18,6 @@ extension SeasonsAndProgressApi on ApiService {
     }
   }
 
-  /// Marca una temporada completa como vista
-  // Future<void> markSeasonAsWatched(String showId, int seasonNumber, List<Map<String, dynamic>> episodes) async {
-  //   await _ensureValidToken();
-  //   final payload = {
-  //     "shows": [
-  //       {
-  //         "ids": {"trakt": int.tryParse(showId) ?? showId},
-  //         "seasons": [
-  //           {
-  //             "number": seasonNumber,
-  //             "episodes": episodes,
-  //           }
-  //         ]
-  //       }
-  //     ]
-  //   };
-  //   final url = Uri.parse('$baseUrl/sync/history');
-  //   final response = await http.post(url, headers: _headers, body: jsonEncode(payload));
-  //   if (response.statusCode != 201) {
-  //     throw Exception('Error POST /sync/history: \\n${response.statusCode}\\n${response.body}');
-  //   }
-  // }
   /// Añade películas, series, temporadas o episodios al historial del usuario
   Future<void> addToWatchHistory({
     List<Map<String, dynamic>>? movies,
