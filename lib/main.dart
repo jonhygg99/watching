@@ -2,24 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/auth_provider.dart';
-import 'country_list.dart';
-import 'helpers/country_flag.dart';
-import 'app_providers.dart';
+import 'package:watching/discover/discover_page.dart';
 
+import 'app_providers.dart';
+import 'country_list.dart';
 import 'splash_wrapper.dart';
 import 'settings/settings.dart';
 import 'watchlist/watchlist_page.dart';
 import 'myshows/my_shows_page.dart';
-import 'discover/discover_page.dart';
 import 'search/search_page.dart';
-// Remove unused imports and global ApiService instance.
+
+/// Main entry point for the Watching app.
+/// Loads environment and initializes Riverpod.
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await dotenv.load(fileName: ".env");
     runApp(const ProviderScope(child: AppRoot()));
-  } catch (e, st) {
+  } catch (e) {
     runApp(
       const MaterialApp(
         home: Scaffold(
@@ -47,18 +48,17 @@ class AppRoot extends StatelessWidget {
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
-  static const List<Widget> _pages = [
-    DiscoverPage(),
-    WatchlistPage(),
-    MyShowsPage(),
+  static final List<Widget> _pages = [
+    const DiscoverPage(),
+    const WatchlistPage(),
+    const MyShowsPage(),
   ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final navIndex = ref.watch(navIndexProvider);
     final countryCode = ref.watch(countryCodeProvider);
-    final countryCodes = allCountryCodes;
-    final countryNames = allCountryNames;
+
     final authAsync = ref.watch(authProvider);
 
     return authAsync.when(
@@ -68,7 +68,21 @@ class MyApp extends ConsumerWidget {
       error:
           (err, stack) => Scaffold(
             body: Center(
-              child: Text('Error: $err', style: TextStyle(color: Colors.red)),
+              child: SelectableText.rich(
+                TextSpan(
+                  text: 'Error: ',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+                  children: [
+                    TextSpan(
+                      text: '$err',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
       data: (authState) {
@@ -88,8 +102,8 @@ class MyApp extends ConsumerWidget {
                     builder:
                         (_) => SettingsPage(
                           countryCode: countryCode,
-                          countryCodes: countryCodes,
-                          countryNames: countryNames,
+                          countryCodes: allCountryCodes,
+                          countryNames: allCountryNames,
                           username: username,
                           onCountryChanged: (code) async {
                             await ref
@@ -143,7 +157,7 @@ class MyApp extends ConsumerWidget {
             ],
             currentIndex: navIndex,
             selectedItemColor: Colors.redAccent,
-            onTap: (index) => ref.read(navIndexProvider.notifier).state = index,
+            onTap: (index) => ref.read(navIndexProvider.notifier).set(index),
           ),
         );
       },

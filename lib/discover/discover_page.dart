@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../show_carousel.dart';
-import '../api_service.dart';
+import '../app_providers.dart';
 
-/// DiscoverPage displays various carousels of TV shows using data from the ApiService.
-/// Uses Riverpod for dependency injection and best practices.
+/// DiscoverPage displays curated carousels of TV shows using data from ApiService.
+/// - Follows Windsurf Development Guidelines for Riverpod usage and code structure.
+/// - Uses generated provider for ApiService for optimal DI and testability.
 class DiscoverPage extends ConsumerWidget {
   const DiscoverPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Use Riverpod to get the ApiService instance
+    // Use Riverpod's generated provider for ApiService (see app_providers.dart)
     final api = ref.watch(apiServiceProvider);
 
-    // Helper for each carousel to ensure consistent error/loading handling
+    /// Helper function for each carousel to ensure consistent error/loading handling
     Widget buildCarousel({
       required String title,
       required Future<List<dynamic>> future,
@@ -27,11 +28,12 @@ class DiscoverPage extends ConsumerWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
+            // Use user-friendly, i18n-ready error message
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Center(
                 child: Text(
-                  'Error al cargar: [${snapshot.error}',
+                  'Error loading data: ${snapshot.error}',
                   style: const TextStyle(color: Colors.red),
                 ),
               ),
@@ -48,81 +50,82 @@ class DiscoverPage extends ConsumerWidget {
       );
     }
 
-    // Ensure this ListView is NOT wrapped in a SingleChildScrollView or constrained parent.
+    // Section: Main ListView with all carousels
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
-        key: const PageStorageKey(
-          'discover-list',
-        ), // helps preserve scroll position
-        // Do NOT set shrinkWrap or physics here!
+        key: const PageStorageKey('discover-list'), // preserves scroll position
         children: [
-          const SizedBox(height: 16),
+          // Trending Shows
+          SizedBox(height: 16),
           buildCarousel(
             title: 'Trending Shows',
             future: api.getTrendingShows(),
             extractShow: (item) => item['show'],
-            emptyText: 'No hay shows en tendencia.',
+            emptyText: 'No trending shows.',
           ),
-          const SizedBox(height: 16),
+          // Popular Shows
+          SizedBox(height: 16),
           buildCarousel(
             title: 'Popular Shows',
             future: api.getPopularShows(),
             extractShow: (item) => Map<String, dynamic>.from(item),
-            emptyText: 'No hay shows populares.',
+            emptyText: 'No popular shows.',
           ),
-          const SizedBox(height: 16),
+          // Most Favorited (7d)
+          SizedBox(height: 16),
           buildCarousel(
-            title: 'Most Favorited (7 días)',
+            title: 'Most Favorited (7 days)',
             future: api.getMostFavoritedShows(period: 'weekly'),
             extractShow: (item) => item['show'],
-            emptyText: 'No hay shows más favoritos de la semana.',
+            emptyText: 'No most favorited shows this week.',
           ),
-          const SizedBox(height: 16),
+          // Most Favorited (30d)
+          SizedBox(height: 16),
           buildCarousel(
-            title: 'Most Favorited (30 días)',
+            title: 'Most Favorited (30 days)',
             future: api.getMostFavoritedShows(period: 'monthly'),
             extractShow: (item) => item['show'],
-            emptyText: 'No hay shows más favoritos del mes.',
+            emptyText: 'No most favorited shows this month.',
           ),
-          const SizedBox(height: 16),
+          // Most Collected (7d)
+          SizedBox(height: 16),
           buildCarousel(
-            title: 'Most Collected (7 días)',
+            title: 'Most Collected (7 days)',
             future: api.getMostCollectedShows(period: 'weekly'),
             extractShow: (item) => item['show'],
-            emptyText: 'No hay shows más coleccionados de la semana.',
+            emptyText: 'No most collected shows this week.',
           ),
-          const SizedBox(height: 16),
+          // Most Played (7d)
+          SizedBox(height: 16),
           buildCarousel(
-            title: 'Most Played (7 días)',
+            title: 'Most Played (7 days)',
             future: api.getMostPlayedShows(period: 'weekly'),
             extractShow: (item) => item['show'],
-            emptyText: 'No hay shows más reproducidos de la semana.',
+            emptyText: 'No most played shows this week.',
           ),
-          const SizedBox(height: 16),
+          // Most Watched (7d)
+          SizedBox(height: 16),
           buildCarousel(
-            title: 'Most Watched (7 días)',
+            title: 'Most Watched (7 days)',
             future: api.getMostWatchedShows(period: 'weekly'),
             extractShow: (item) => item['show'],
-            emptyText: 'No hay shows más vistos de la semana.',
+            emptyText: 'No most watched shows this week.',
           ),
-          const SizedBox(height: 16),
+          // Most Anticipated
+          SizedBox(height: 16),
           buildCarousel(
             title: 'Most Anticipated',
             future: api.getMostAnticipatedShows(),
-            extractShow:
-                (item) => {
-                  ...Map<String, dynamic>.from(item['show']),
-                  'list_count': item['list_count'],
-                },
-            emptyText: 'No hay shows anticipados.',
+            extractShow: (item) => {
+              ...Map<String, dynamic>.from(item['show']),
+              'list_count': item['list_count'],
+            },
+            emptyText: 'No anticipated shows.',
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
         ],
       ),
     );
   }
 }
-
-/// Riverpod provider for ApiService singleton.
-final apiServiceProvider = Provider<ApiService>((ref) => apiService);

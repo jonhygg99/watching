@@ -30,8 +30,6 @@ class ShowCard extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => ShowDetailPage(
                     showId: traktId!,
-                    apiService: apiService,
-                    countryCode: countryCode ?? 'US',
                   ),
                 ),
               );

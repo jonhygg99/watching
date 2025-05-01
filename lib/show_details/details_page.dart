@@ -1,31 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../api_service.dart';
-import 'cast_guest.dart';
+import '../app_providers.dart';
 import 'seasons_progress_widget.dart';
-import '../youtube_player_dialog.dart';
 import 'header.dart';
 import 'videos.dart';
 import 'cast.dart';
 import 'related.dart';
 import 'comments.dart';
 
-class ShowDetailPage extends StatefulWidget {
+/// Displays detailed information about a TV show, including header, seasons, videos, cast, related shows, and comments.
+/// Uses Riverpod for dependency injection and state management.
+class ShowDetailPage extends ConsumerStatefulWidget {
   final String showId;
-  final ApiService apiService;
-  final String countryCode;
-
-  const ShowDetailPage({
-    super.key,
-    required this.showId,
-    required this.apiService,
-    required this.countryCode,
-  });
+  const ShowDetailPage({super.key, required this.showId});
 
   @override
-  State<ShowDetailPage> createState() => _ShowDetailPageState();
+  ConsumerState<ShowDetailPage> createState() => _ShowDetailPageState();
 }
 
-class _ShowDetailPageState extends State<ShowDetailPage> {
+class _ShowDetailPageState extends ConsumerState<ShowDetailPage> {
   bool _showOriginal = false;
   String _sort = 'likes';
   late Future<List<dynamic>> _commentsFuture;
@@ -41,41 +35,44 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
     'watched': 'Más vistos',
   };
 
+  late ApiService _apiService;
+  late String _countryCode;
+
   @override
   void initState() {
     super.initState();
-    _commentsFuture = widget.apiService.getShowComments(
-      widget.showId,
-      sort: _sort,
-    );
+    // _apiService and _countryCode are set in build via ref.watch
+    // _commentsFuture is set in build as well for correct provider usage
   }
 
   void _changeSort(String? value) {
     if (value == null || value == _sort) return;
     setState(() {
       _sort = value;
-      _commentsFuture = widget.apiService.getShowComments(
-        widget.showId,
-        sort: _sort,
-      );
+      _commentsFuture = _apiService.getShowComments(widget.showId, sort: _sort);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Use Riverpod providers for dependencies
+    _apiService = ref.watch(apiServiceProvider);
+    _countryCode = ref.watch(countryCodeProvider);
+    _commentsFuture = _apiService.getShowComments(widget.showId, sort: _sort);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle del Show')),
       body: FutureBuilder<List<dynamic>>(
         future: Future.wait([
-          widget.apiService.getShowById(widget.showId),
-          widget.apiService.getShowTranslations(
+          _apiService.getShowById(widget.showId),
+          _apiService.getShowTranslations(
             widget.showId,
-            widget.countryCode.substring(0, 2).toLowerCase(),
+            _countryCode.substring(0, 2).toLowerCase(),
           ),
-          widget.apiService.getShowCertifications(widget.showId),
-          widget.apiService.getShowPeople(widget.showId),
-          widget.apiService.getRelatedShows(widget.showId),
-          widget.apiService.getShowVideos(widget.showId),
+          _apiService.getShowCertifications(widget.showId),
+          _apiService.getShowPeople(widget.showId),
+          _apiService.getRelatedShows(widget.showId),
+          _apiService.getShowVideos(widget.showId),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -109,7 +106,7 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
             translation = translations.firstWhere(
               (t) =>
                   t['language']?.toString().toLowerCase() ==
-                  widget.countryCode.substring(0, 2).toLowerCase(),
+                  _countryCode.substring(0, 2).toLowerCase(),
               orElse: () => null,
             );
           }
@@ -133,8 +130,8 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
                   originalOverview: originalOverview,
                   originalTagline: originalTagline,
                   certifications: certifications,
-                  countryCode: widget.countryCode,
-                  apiService: widget.apiService,
+                  countryCode: _countryCode,
+                  apiService: _apiService,
                   showId: widget.showId,
                 ),
                 SeasonsProgressWidget(showId: widget.showId),
@@ -142,12 +139,12 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
                 ShowDetailCast(
                   people: people,
                   showId: widget.showId,
-                  apiService: widget.apiService,
+                  apiService: _apiService,
                 ),
                 ShowDetailRelated(
                   relatedShows: relatedShows,
-                  apiService: widget.apiService,
-                  countryCode: widget.countryCode,
+                  apiService: _apiService,
+                  countryCode: _countryCode,
                 ),
                 ShowDetailComments(
                   commentsFuture: _commentsFuture,

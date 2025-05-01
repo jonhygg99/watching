@@ -35,8 +35,6 @@ class ShowDetailRelated extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => ShowDetailPage(
                           showId: relatedId,
-                          apiService: apiService,
-                          countryCode: countryCode,
                         ),
                       ),
                     );

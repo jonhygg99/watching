@@ -1,19 +1,20 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+part 'app_providers.g.dart';
 
 /// Provides a singleton instance of ApiService.
-final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
+@riverpod
+ApiService apiService(ApiServiceRef ref) => ApiService(); // TODO: Replace ApiServiceRef with Ref when Riverpod v3 is adopted.
 
 /// Provides the user's selected country code, persisted in SharedPreferences.
-final countryCodeProvider = StateNotifierProvider<CountryCodeNotifier, String>(
-  (ref) => CountryCodeNotifier(),
-);
-
-class CountryCodeNotifier extends StateNotifier<String> {
+@riverpod
+class CountryCode extends _$CountryCode {
   static const _prefsKey = 'country_code';
-  CountryCodeNotifier() : super('ES') {
+  @override
+  String build() {
     _load();
+    return 'ES';
   }
 
   Future<void> _load() async {
@@ -29,7 +30,17 @@ class CountryCodeNotifier extends StateNotifier<String> {
 }
 
 /// Provides the current username (null if not authenticated).
-final usernameProvider = StateProvider<String?>((ref) => null);
+@riverpod
+class Username extends _$Username {
+  @override
+  String? build() => null;
+  void set(String? username) => state = username;
+}
 
 /// Provides the selected bottom navigation index.
-final navIndexProvider = StateProvider<int>((ref) => 0);
+@riverpod
+class NavIndex extends _$NavIndex {
+  @override
+  int build() => 0;
+  void set(int index) => state = index;
+}

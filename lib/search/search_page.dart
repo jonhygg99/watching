@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../show_carousel.dart';
 import '../api_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../show_details/details_page.dart';
@@ -34,7 +33,12 @@ class _SearchScroll extends StatelessWidget {
   final List<String> types;
   final ValueChanged<String> onQueryChanged;
   final ValueChanged<List<String>> onTypesChanged;
-  const _SearchScroll({required this.query, required this.types, required this.onQueryChanged, required this.onTypesChanged});
+  const _SearchScroll({
+    required this.query,
+    required this.types,
+    required this.onQueryChanged,
+    required this.onTypesChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +99,10 @@ class _SearchScroll extends StatelessWidget {
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 10)),
         SliverToBoxAdapter(
-          child: query.isEmpty
-              ? _TrendingGrid()
-              : _SearchResultsGrid(query: query, types: types),
+          child:
+              query.isEmpty
+                  ? _TrendingGrid()
+                  : _SearchResultsGrid(query: query, types: types),
         ),
       ],
     );
@@ -129,19 +134,18 @@ class _TrendingGrid extends StatelessWidget {
                 show: Map<String, dynamic>.from(item['show'] as Map),
                 onTap: () {
                   final show = Map<String, dynamic>.from(item['show'] as Map);
-                  final showId = show['ids']?['trakt']?.toString() ?? show['ids']?['slug'] ?? '';
+                  final showId =
+                      show['ids']?['trakt']?.toString() ??
+                      show['ids']?['slug'] ??
+                      '';
                   if (showId.isEmpty) return;
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => ShowDetailPage(
-                        showId: showId,
-                        apiService: apiService,
-                        countryCode: Localizations.localeOf(context).countryCode ?? 'US',
-                      ),
+                      builder: (_) => ShowDetailPage(showId: showId),
                     ),
                   );
                 },
-              )
+              ),
           ],
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -168,11 +172,18 @@ class _SearchResultsGrid extends StatelessWidget {
           return const Center(child: Text('Error al buscar.'));
         }
         final results = snapshot.data ?? [];
-        final filtered = results.where((item) => item['type'] == 'show' || item['type'] == 'movie').toList();
+        final filtered =
+            results
+                .where(
+                  (item) => item['type'] == 'show' || item['type'] == 'movie',
+                )
+                .toList();
         if (filtered.isEmpty) {
-          return Center(child: Text('No se encontraron resultados para "$query".'));
+          return Center(
+            child: Text('No se encontraron resultados para "$query".'),
+          );
         }
-         return GridView.count(
+        return GridView.count(
           padding: const EdgeInsets.all(12),
           crossAxisCount: 3,
           childAspectRatio: 0.55,
@@ -185,20 +196,21 @@ class _SearchResultsGrid extends StatelessWidget {
               _ShowGridTile(
                 show: Map<String, dynamic>.from(item[item['type']] as Map),
                 onTap: () {
-                  final show = Map<String, dynamic>.from(item[item['type']] as Map);
-                  final showId = show['ids']?['trakt']?.toString() ?? show['ids']?['slug'] ?? '';
+                  final show = Map<String, dynamic>.from(
+                    item[item['type']] as Map,
+                  );
+                  final showId =
+                      show['ids']?['trakt']?.toString() ??
+                      show['ids']?['slug'] ??
+                      '';
                   if (showId.isEmpty) return;
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => ShowDetailPage(
-                        showId: showId,
-                        apiService: apiService,
-                        countryCode: Localizations.localeOf(context).countryCode ?? 'US',
-                      ),
+                      builder: (_) => ShowDetailPage(showId: showId),
                     ),
                   );
                 },
-              )
+              ),
           ],
         );
       },
@@ -212,7 +224,9 @@ class _ShowGridTile extends StatelessWidget {
   const _ShowGridTile({required this.show, this.onTap});
 
   String? getPosterUrl(dynamic posterList) {
-    if (posterList is List && posterList.isNotEmpty && posterList.first is String) {
+    if (posterList is List &&
+        posterList.isNotEmpty &&
+        posterList.first is String) {
       final url = posterList.first as String;
       if (url.startsWith('http')) return url;
       return 'https://$url';
@@ -237,20 +251,28 @@ class _ShowGridTile extends StatelessWidget {
               Flexible(
                 child: AspectRatio(
                   aspectRatio: 0.7,
-                  child: poster != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: poster,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                            errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 48),
+                  child:
+                      poster != null
+                          ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: CachedNetworkImage(
+                              imageUrl: poster,
+                              fit: BoxFit.cover,
+                              placeholder:
+                                  (context, url) => const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                              errorWidget:
+                                  (context, url, error) =>
+                                      const Icon(Icons.broken_image, size: 48),
+                            ),
+                          )
+                          : Container(
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.broken_image, size: 48),
                           ),
-                        )
-                      : Container(
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.broken_image, size: 48),
-                        ),
                 ),
               ),
               const SizedBox(height: 6),
@@ -259,7 +281,10 @@ class _ShowGridTile extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
