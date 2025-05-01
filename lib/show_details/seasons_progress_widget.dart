@@ -27,7 +27,8 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
     setState(() => loading = true);
     try {
       final s = await apiService.getSeasons(widget.showId);
-      final p = await apiService.getWatchedProgress(widget.showId);
+      final p = await apiService.getShowWatchedProgress(id: widget.showId);
+
       setState(() {
         seasons = s;
         progress = p;
@@ -39,18 +40,30 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
     }
   }
 
-  Future<void> _markSeasonAsWatched(int seasonNumber, int episodeCount) async {
-    setState(() => marking = true);
-    try {
-      final episodes = List.generate(episodeCount, (i) => {"number": i + 1});
-      await apiService.markSeasonAsWatched(widget.showId, seasonNumber, episodes);
-      await _fetchData();
-    } catch (e) {
-      // Manejo de error: opcional mostrar snackbar
-    } finally {
-      setState(() => marking = false);
-    }
+Future<void> _markSeasonAsWatched(int seasonNumber, int episodeCount) async {
+  setState(() => marking = true);
+  try {
+    await apiService.addToWatchHistory(
+      shows: [
+        {
+          "ids": int.tryParse(widget.showId) != null
+              ? {"trakt": int.parse(widget.showId)}
+              : {"slug": widget.showId},
+          "seasons": [
+            {
+              "number": seasonNumber,
+            }
+          ]
+        }
+      ]
+    );
+    await _fetchData();
+  } catch (e) {
+    // Manejo de error: opcional mostrar snackbar
+  } finally {
+    setState(() => marking = false);
   }
+}
 
   @override
   Widget build(BuildContext context) {

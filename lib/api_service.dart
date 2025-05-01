@@ -18,31 +18,49 @@ extension SeasonsAndProgressApi on ApiService {
     }
   }
 
-  /// Obtiene el progreso de vistas de una serie (por temporadas)
-  Future<Map<String, dynamic>> getWatchedProgress(String showId) async {
-    return await getShowWatchedProgress(id: showId);
-  }
-
   /// Marca una temporada completa como vista
-  Future<void> markSeasonAsWatched(String showId, int seasonNumber, List<Map<String, dynamic>> episodes) async {
+  // Future<void> markSeasonAsWatched(String showId, int seasonNumber, List<Map<String, dynamic>> episodes) async {
+  //   await _ensureValidToken();
+  //   final payload = {
+  //     "shows": [
+  //       {
+  //         "ids": {"trakt": int.tryParse(showId) ?? showId},
+  //         "seasons": [
+  //           {
+  //             "number": seasonNumber,
+  //             "episodes": episodes,
+  //           }
+  //         ]
+  //       }
+  //     ]
+  //   };
+  //   final url = Uri.parse('$baseUrl/sync/history');
+  //   final response = await http.post(url, headers: _headers, body: jsonEncode(payload));
+  //   if (response.statusCode != 201) {
+  //     throw Exception('Error POST /sync/history: \\n${response.statusCode}\\n${response.body}');
+  //   }
+  // }
+  /// Añade películas, series, temporadas o episodios al historial del usuario
+  Future<void> addToWatchHistory({
+    List<Map<String, dynamic>>? movies,
+    List<Map<String, dynamic>>? shows,
+    List<Map<String, dynamic>>? seasons,
+    List<Map<String, dynamic>>? episodes,
+  }) async {
     await _ensureValidToken();
-    final payload = {
-      "shows": [
-        {
-          "ids": {"trakt": int.tryParse(showId) ?? showId},
-          "seasons": [
-            {
-              "number": seasonNumber,
-              "episodes": episodes,
-            }
-          ]
-        }
-      ]
-    };
+
+    final Map<String, dynamic> payload = {};
+    if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
+    if (shows != null && shows.isNotEmpty) payload['shows'] = shows;
+    if (seasons != null && seasons.isNotEmpty) payload['seasons'] = seasons;
+    if (episodes != null && episodes.isNotEmpty) payload['episodes'] = episodes;
+
     final url = Uri.parse('$baseUrl/sync/history');
     final response = await http.post(url, headers: _headers, body: jsonEncode(payload));
+
+print(response.body);
     if (response.statusCode != 201) {
-      throw Exception('Error POST /sync/history: \\n${response.statusCode}\\n${response.body}');
+      throw Exception('Error POST /sync/history: ${response.statusCode}\n${response.body}');
     }
   }
 }
