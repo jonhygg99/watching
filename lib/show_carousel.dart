@@ -24,14 +24,14 @@ class ShowCarousel extends StatelessWidget {
   }
 
   final String title;
-  final Future<List<dynamic>> future;
+  final List<dynamic> shows;
   final String emptyText;
   final dynamic Function(dynamic) extractShow;
 
   const ShowCarousel({
     super.key,
     required this.title,
-    required this.future,
+    required this.shows,
     required this.extractShow,
     required this.emptyText,
   });
@@ -48,36 +48,26 @@ class ShowCarousel extends StatelessWidget {
             final itemWidth = ((screenWidth / 2.2).clamp(140, 260)).toDouble();
             final imageHeight = (itemWidth * 1.3).toDouble();
             final carouselHeight = imageHeight + 30;
+            if (shows.isEmpty) {
+              return SizedBox(
+                height: carouselHeight,
+                child: Center(child: Text(emptyText)),
+              );
+            }
             return SizedBox(
               height: carouselHeight,
-              child: FutureBuilder<List<dynamic>>(
-                future: future,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red));
-                  }
-                  final shows = snapshot.data;
-                  if (shows == null || shows.isEmpty) {
-                    return Text(emptyText);
-                  }
-                  // --- Carrusel de shows ---
-                  return ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: shows.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) => _buildShowItem(
-                      context: context,
-                      show: extractShow(shows[index]),
-                      itemWidth: itemWidth,
-                      imageHeight: imageHeight,
-                      shows: shows,
-                      index: index,
-                    ),
-                  );
-                },
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: shows.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) => _buildShowItem(
+                  context: context,
+                  show: extractShow(shows[index]),
+                  itemWidth: itemWidth,
+                  imageHeight: imageHeight,
+                  shows: shows,
+                  index: index,
+                ),
               ),
             );
           },
