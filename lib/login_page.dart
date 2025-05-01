@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'api_service.dart';
-import 'splash_wrapper.dart';
 
-class LoginPage extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'auth_provider.dart';
+
+class LoginPage extends ConsumerStatefulWidget {
   final String? username;
   const LoginPage({super.key, this.username});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   bool _showCodeInput = false;
   final TextEditingController _codeController = TextEditingController();
   String? _error;
@@ -20,12 +22,15 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildUserDisplay() {
     return widget.username != null
         ? Column(
-            children: [
-              const Icon(Icons.person, size: 32, color: Colors.green),
-              const SizedBox(height: 8),
-              Text('Hola, ${widget.username}', style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          )
+          children: [
+            const Icon(Icons.person, size: 32, color: Colors.green),
+            const SizedBox(height: 8),
+            Text(
+              'Hola, ${widget.username}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        )
         : const SizedBox();
   }
 
@@ -35,7 +40,14 @@ class _LoginPageState extends State<LoginPage> {
       height: 48,
       child: ElevatedButton(
         onPressed: _loading ? null : onPressed,
-        child: _loading ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) : Text(text),
+        child:
+            _loading
+                ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                : Text(text),
       ),
     );
   }
@@ -63,13 +75,19 @@ class _LoginPageState extends State<LoginPage> {
         height: 48,
         child: ElevatedButton(
           onPressed: _loading ? null : _submitCode,
-          child: _loading ? const CircularProgressIndicator(strokeWidth: 2) : const Text('Enviar código'),
+          child:
+              _loading
+                  ? const CircularProgressIndicator(strokeWidth: 2)
+                  : const Text('Enviar código'),
         ),
       ),
     ];
   }
 
-  Future<void> _authorizeWithTrakt({bool signup = false, bool promptLogin = false}) async {
+  Future<void> _authorizeWithTrakt({
+    bool signup = false,
+    bool promptLogin = false,
+  }) async {
     final params = <String, String>{'state': 'login'};
     if (signup) params['signup'] = 'true';
     if (promptLogin) params['prompt'] = 'login';
@@ -83,6 +101,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// Handles submission of the OAuth code and triggers login via Riverpod provider.
   Future<void> _submitCode() async {
     setState(() {
       _loading = true;
@@ -97,17 +116,18 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
     try {
-      await apiService.getToken(code);
+      await ref.read(authProvider.notifier).loginWithCode(code);
+      if (!mounted) return;
       setState(() {
         _loading = false;
       });
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => SplashWrapper()),
-          (route) => false,
-        );
+      // Si el usuario está autenticado, cierra la pantalla de login
+      final authState = ref.read(authProvider);
+      if (authState.hasValue && authState.value?.username != null) {
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = 'Código incorrecto o expirado';
         _loading = false;
@@ -127,9 +147,15 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               _buildUserDisplay(),
               const SizedBox(height: 24),
-              _buildAuthButton('Iniciar sesión con Trakt.tv', () => _handleAuth(promptLogin: true)),
+              _buildAuthButton(
+                'Iniciar sesión con Trakt.tv',
+                () => _handleAuth(promptLogin: true),
+              ),
               const SizedBox(height: 24),
-              _buildAuthButton('Registrarse con Trakt.tv', () => _handleAuth(signup: true)),
+              _buildAuthButton(
+                'Registrarse con Trakt.tv',
+                () => _handleAuth(signup: true),
+              ),
               const SizedBox(height: 32),
               if (_showCodeInput) ..._buildCodeInput(),
             ],
