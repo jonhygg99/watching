@@ -6,11 +6,11 @@ class ProgressBar extends StatelessWidget {
   final int total;
 
   const ProgressBar({
-    Key? key,
+    super.key,
     required this.percent,
     required this.watched,
     required this.total,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

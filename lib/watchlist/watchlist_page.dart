@@ -1,144 +1,111 @@
 import 'package:flutter/material.dart';
-import 'package:watching/api_service.dart';
-import 'package:watching/watchlist/progress_bar.dart';
-import 'package:watching/watchlist/episode_info_button.dart';
-import 'package:watching/watchlist/show_card.dart';
-import 'package:watching/watchlist/episode_info_modal.dart';
-import 'package:watching/show_details/details_page.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-// import 'dart:io';
-import 'package:watching/watchlist/watch_progress_info.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/providers/watchlist_providers.dart';
+import 'package:watching/watchlist/watchlist_show_item.dart';
 
-class WatchlistPage extends StatefulWidget {
-  const WatchlistPage({Key? key}) : super(key: key);
+/// Main Watchlist Page - Riverpod + Hooks
+class WatchlistPage extends HookConsumerWidget {
+  const WatchlistPage({super.key});
 
   @override
-  State<WatchlistPage> createState() => _WatchlistPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final watchlistAsync = ref.watch(watchlistProvider);
+    final animatingOut = useState<Set<String>>({});
 
-class _WatchlistPageState extends State<WatchlistPage> {
-  String _type = 'shows';
-  late Future<List<dynamic>> _futureWatchlist;
+    Future<void> refreshWatchlist() async {
+      ref.invalidate(watchlistProvider);
+    }
 
-  @override
-  void initState() {
-    super.initState();
-    _futureWatchlist = _getFilteredWatchlist();
-  }
-
-  Future<List<dynamic>> _getFilteredWatchlist() async {
-    final items = await apiService.getWatched(type: _type);
-    // Prepara todas las peticiones de progreso en paralelo
-    final futures = items.map((item) async {
-      final show = item['show'];
-      final ids = show != null ? show['ids'] : null;
-      final traktId = ids != null ? ids['slug'] ?? ids['trakt']?.toString() : null;
-      if (traktId != null) {
-        try {
-          final progress = await apiService.getShowWatchedProgress(id: traktId);
-          if (progress['next_episode'] != null) {
-            return item;
-          }
-        } catch (e) {
-          // Si hay error, puedes decidir mostrarlo o no
-        }
-        return null;
-      } else {
-        // Si no hay traktId, igual lo mostramos
-        return item;
-      }
-    }).toList();
-    final results = await Future.wait(futures);
-    // Filtra los nulos (series completas)
-    return results.where((item) => item != null).toList();
-  }
-
-  void _onTypeChanged(String? newType) {
-    if (newType == null) return;
-    setState(() {
-      _type = newType;
-      _futureWatchlist = _getFilteredWatchlist();
-    });
-  }
-
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-          child: Row(
-            children: [
-              const Text('Tipo:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(width: 12),
-              DropdownButton<String>(
-                value: _type,
-                items: const [
-                  DropdownMenuItem(value: 'shows', child: Text('Shows')),
-                  DropdownMenuItem(value: 'movies', child: Text('Movies')),
-                ],
-                onChanged: _onTypeChanged,
-              ),
-            ],
+    return RefreshIndicator(
+      onRefresh: refreshWatchlist,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12.0,
+              horizontal: 16.0,
+            ),
+            child: Row(
+              children: [
+                const Text(
+                  'Tipo:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 12),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final type = ref.watch(watchlistTypeProvider);
+                    return DropdownButton<WatchlistType>(
+                      value: type,
+                      items: const [
+                        DropdownMenuItem(
+                          value: WatchlistType.shows,
+                          child: Text('Series'),
+                        ),
+                        DropdownMenuItem(
+                          value: WatchlistType.movies,
+                          child: Text('Películas'),
+                        ),
+                      ],
+                      onChanged: (newType) {
+                        if (newType != null) {
+                          ref.read(watchlistTypeProvider.notifier).state =
+                              newType;
+                          ref.invalidate(watchlistProvider);
+                        }
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: FutureBuilder<List<dynamic>>(
-            future: _futureWatchlist,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: [31m${snapshot.error}[0m'));
-              }
-              final items = snapshot.data ?? [];
-              if (items.isEmpty) {
-                return const Center(
-                  child: Text(
-                    '¡Felicidades! Has visto todas tus series pendientes 🎉',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              }
-              return ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  final show = item['show'];
-                  final title = show != null ? show['title'] ?? 'Sin título' : 'Sin título';
-                  final ids = show != null ? show['ids'] : null;
-                  final traktId = ids != null ? ids['slug'] ?? ids['trakt']?.toString() : null;
-                  String? posterUrl;
-                  if (show != null && show['images'] != null && show['images']['poster'] != null && show['images']['poster'].isNotEmpty) {
-                    posterUrl = show['images']['poster'][0];
-                    if (posterUrl is String && !posterUrl.startsWith('http')) {
-                      posterUrl = 'https://$posterUrl';
-                    }
-                  } else {
-                    posterUrl = null;
-                  }
-                  return ShowCard(
-                    traktId: traktId,
-                    posterUrl: posterUrl,
-                    infoWidget: WatchProgressInfo(
-                      traktId: traktId,
-                      title: title,
-                      apiService: apiService,
+          Expanded(
+            child: watchlistAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error:
+                  (error, stack) => Center(
+                    child: SelectableText.rich(
+                      TextSpan(
+                        text: 'Error: ',
+                        style: const TextStyle(color: Colors.red),
+                        children: [TextSpan(text: error.toString())],
+                      ),
                     ),
-                    apiService: apiService,
-                    parentContext: context,
-                    countryCode: Localizations.localeOf(context).countryCode,
+                  ),
+              data: (items) {
+                if (items.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      '¡Felicidades! Has visto todas tus series pendientes 🎉',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   );
-                },
-              );
-            },
+                }
+                return ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return WatchlistShowItem(
+                      item: item,
+                      animatingOut: animatingOut.value,
+                      onFullyWatched: (traktId) {
+                        // Aquí puedes refrescar la lista o animar la salida
+                        // refreshWatchlist();
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -1,31 +1,26 @@
 import 'package:flutter/material.dart';
-import '../api_service.dart';
-import 'cast_guest.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../services/trakt/trakt_api.dart';
+import '../providers/app_providers.dart';
 import 'seasons_progress_widget.dart';
-import '../youtube_player_dialog.dart';
 import 'header.dart';
 import 'videos.dart';
 import 'cast.dart';
 import 'related.dart';
 import 'comments.dart';
 
-class ShowDetailPage extends StatefulWidget {
+/// Displays detailed information about a TV show, including header, seasons, videos, cast, related shows, and comments.
+/// Uses Riverpod for dependency injection and state management.
+class ShowDetailPage extends ConsumerStatefulWidget {
   final String showId;
-  final ApiService apiService;
-  final String countryCode;
-
-  const ShowDetailPage({
-    super.key,
-    required this.showId,
-    required this.apiService,
-    required this.countryCode,
-  });
+  const ShowDetailPage({super.key, required this.showId});
 
   @override
-  State<ShowDetailPage> createState() => _ShowDetailPageState();
+  ConsumerState<ShowDetailPage> createState() => _ShowDetailPageState();
 }
 
-class _ShowDetailPageState extends State<ShowDetailPage> {
+class _ShowDetailPageState extends ConsumerState<ShowDetailPage> {
+  bool _fullyWatched = false;
   bool _showOriginal = false;
   String _sort = 'likes';
   late Future<List<dynamic>> _commentsFuture;
@@ -41,21 +36,22 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
     'watched': 'Más vistos',
   };
 
+  late TraktApi _apiService;
+  late String _countryCode;
+
   @override
   void initState() {
     super.initState();
-    _commentsFuture = widget.apiService.getShowComments(
-      widget.showId,
-      sort: _sort,
-    );
+    // _apiService and _countryCode are set in build via ref.watch
+    // _commentsFuture is set in build as well for correct provider usage
   }
 
   void _changeSort(String? value) {
     if (value == null || value == _sort) return;
     setState(() {
       _sort = value;
-      _commentsFuture = widget.apiService.getShowComments(
-        widget.showId,
+      _commentsFuture = _apiService.getShowComments(
+        id: widget.showId,
         sort: _sort,
       );
     });
@@ -63,19 +59,43 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Intercept back navigation to pass result if fully watched
+    return WillPopScope(
+      onWillPop: () async {
+        if (_fullyWatched) {
+          Navigator.pop(context, {
+            'traktId': widget.showId,
+            'fullyWatched': true,
+          });
+          return false;
+        }
+        return true;
+      },
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    // Use Riverpod providers for dependencies
+    _apiService = ref.watch(apiServiceProvider);
+    _countryCode = ref.watch(countryCodeProvider);
+    _commentsFuture = _apiService.getShowComments(
+      id: widget.showId,
+      sort: _sort,
+    );
+
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle del Show')),
       body: FutureBuilder<List<dynamic>>(
         future: Future.wait([
-          widget.apiService.getShowById(widget.showId),
-          widget.apiService.getShowTranslations(
-            widget.showId,
-            widget.countryCode.substring(0, 2).toLowerCase(),
+          _apiService.getShowById(id: widget.showId),
+          _apiService.getShowTranslations(
+            id: widget.showId,
+            language: _countryCode.substring(0, 2).toLowerCase(),
           ),
-          widget.apiService.getShowCertifications(widget.showId),
-          widget.apiService.getShowPeople(widget.showId),
-          widget.apiService.getRelatedShows(widget.showId),
-          widget.apiService.getShowVideos(widget.showId),
+          _apiService.getShowVideos(id: widget.showId),
+          _apiService.getShowPeople(id: widget.showId),
+          _apiService.getRelatedShows(id: widget.showId),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -90,33 +110,36 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
             );
           }
           final results = snapshot.data;
-          if (results == null || results.length < 6) {
+          if (results == null || results.length < 5) {
             return const Center(child: Text('No se encontraron datos.'));
           }
           final show = results[0] as Map<String, dynamic>?;
           final translations = results[1] as List<dynamic>?;
-          final certifications = results[2] as List<dynamic>?;
+          final videos = results[2] as List<dynamic>?;
           final people = results[3] as Map<String, dynamic>?;
           final relatedShows = results[4] as List<dynamic>?;
-          final videos = results[5] as List<dynamic>?;
+          final certifications =
+              show?['certifications'] as List<dynamic>? ?? [];
           if (show == null) {
             return const Center(child: Text('No se encontraron datos.'));
           }
 
-          // Buscar traducción para el idioma del usuario
           Map<String, dynamic>? translation;
           if (translations != null && translations.isNotEmpty) {
             translation = translations.firstWhere(
               (t) =>
                   t['language']?.toString().toLowerCase() ==
-                  widget.countryCode.substring(0, 2).toLowerCase(),
-              orElse: () => null,
+                  _countryCode.substring(0, 2).toLowerCase(),
+              orElse: () => translations[0],
             );
           }
 
-          final originalTitle = show['title'] ?? '';
-          final originalOverview = show['overview'] ?? '';
-          final originalTagline = show['tagline'] ?? '';
+          final originalTitle =
+              translation != null ? translation['title'] ?? '' : '';
+          final originalOverview =
+              translation != null ? translation['overview'] ?? '' : '';
+          final originalTagline =
+              translation != null ? translation['tagline'] ?? '' : '';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -127,27 +150,44 @@ class _ShowDetailPageState extends State<ShowDetailPage> {
                   show: show,
                   translation: translation,
                   showOriginal: _showOriginal,
-                  onToggleOriginal:
-                      (val) => setState(() => _showOriginal = val),
+                  onToggleOriginal: (val) {
+                    setState(() => _showOriginal = val);
+                  },
                   originalTitle: originalTitle,
                   originalOverview: originalOverview,
                   originalTagline: originalTagline,
                   certifications: certifications,
-                  countryCode: widget.countryCode,
-                  apiService: widget.apiService,
+                  countryCode: _countryCode,
+                  apiService: _apiService,
                   showId: widget.showId,
                 ),
-                SeasonsProgressWidget(showId: widget.showId),
+                SeasonsProgressWidget(
+                  showId: widget.showId,
+                  onProgressChanged: () async {
+                    // Check if all seasons are now watched
+                    final api = ref.read(apiServiceProvider);
+                    final progress = await api.getShowWatchedProgress(
+                      id: widget.showId,
+                    );
+                    final total = progress['aired'] ?? 0;
+                    final completed = progress['completed'] ?? 0;
+                    if (total > 0 && completed == total) {
+                      setState(() {
+                        _fullyWatched = true;
+                      });
+                    }
+                  },
+                ),
                 ShowDetailVideos(videos: videos),
                 ShowDetailCast(
                   people: people,
                   showId: widget.showId,
-                  apiService: widget.apiService,
+                  apiService: _apiService,
                 ),
                 ShowDetailRelated(
                   relatedShows: relatedShows,
-                  apiService: widget.apiService,
-                  countryCode: widget.countryCode,
+                  apiService: _apiService,
+                  countryCode: _countryCode,
                 ),
                 ShowDetailComments(
                   commentsFuture: _commentsFuture,

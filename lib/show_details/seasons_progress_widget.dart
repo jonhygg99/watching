@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import '../api_service.dart';
-import '../watchlist/watch_progress_info.dart';
+import '../services/trakt/trakt_api.dart';
 import '../watchlist/progress_bar.dart';
 
 class SeasonsProgressWidget extends StatefulWidget {
   final String showId;
   final VoidCallback? onProgressChanged;
-  const SeasonsProgressWidget({Key? key, required this.showId, this.onProgressChanged}) : super(key: key);
+  const SeasonsProgressWidget({
+    super.key,
+    required this.showId,
+    this.onProgressChanged,
+  });
 
   @override
   State<SeasonsProgressWidget> createState() => _SeasonsProgressWidgetState();
@@ -18,17 +21,20 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
   bool loading = true;
   bool marking = false;
 
+  // TODO: implementar
   @override
   void initState() {
     super.initState();
     _fetchData();
   }
 
+  final traktApi = TraktApi();
+
   Future<void> _fetchData() async {
     setState(() => loading = true);
     try {
-      final s = await apiService.getSeasons(widget.showId);
-      final p = await apiService.getShowWatchedProgress(id: widget.showId);
+      final s = await traktApi.getSeasons(widget.showId);
+      final p = await traktApi.getShowWatchedProgress(id: widget.showId);
 
       setState(() {
         seasons = s;
@@ -56,7 +62,13 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
         final number = season["number"];
         final episodeCount = season["episode_count"] ?? 0;
         final isFirst = number == 0;
-        final isLast = number == (seasons!.isNotEmpty ? seasons!.map((s) => s["number"] as int).reduce((a, b) => a > b ? a : b) : -1);
+        final isLast =
+            number ==
+            (seasons!.isNotEmpty
+                ? seasons!
+                    .map((s) => s["number"] as int)
+                    .reduce((a, b) => a > b ? a : b)
+                : -1);
         return (isFirst || isLast) && episodeCount == 0;
       });
 
@@ -65,7 +77,10 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
       children: [
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: Text('Temporadas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          child: Text(
+            'Temporadas',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
         ),
         ...filteredSeasons.map<Widget>((season) {
           final number = season["number"];
@@ -81,22 +96,26 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
                 IconButton(
                   icon: Icon(
                     Icons.check_circle,
-                    color: isComplete
-                        ? Colors.green
-                        : (markingColors[number] ?? Colors.grey),
+                    color:
+                        isComplete
+                            ? Colors.green
+                            : (markingColors[number] ?? Colors.grey),
                   ),
-                  onPressed: isComplete
-                      ? null
-                      : () => _markSeasonAsWatched(number, episodeCount),
-                  tooltip: isComplete ? 'Completada' : 'Marcar temporada como vista',
+                  onPressed:
+                      isComplete
+                          ? null
+                          : () => _markSeasonAsWatched(number, episodeCount),
+                  tooltip:
+                      isComplete ? 'Completada' : 'Marcar temporada como vista',
                 ),
                 Text('Temporada $number', style: const TextStyle(fontSize: 16)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: ProgressBar(
-                    percent: (aired == 0 || completed < 0 || aired < 0)
-                        ? 0.0
-                        : (completed / aired).clamp(0.0, 1.0),
+                    percent:
+                        (aired == 0 || completed < 0 || aired < 0)
+                            ? 0.0
+                            : (completed / aired).clamp(0.0, 1.0),
                     watched: completed,
                     total: aired,
                   ),
@@ -117,19 +136,18 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
       markingColors[seasonNumber] = Colors.blue;
     });
     try {
-      await apiService.addToWatchHistory(
+      await traktApi.addToWatchHistory(
         shows: [
           {
-            "ids": int.tryParse(widget.showId) != null
-                ? {"trakt": int.parse(widget.showId)}
-                : {"slug": widget.showId},
+            "ids":
+                int.tryParse(widget.showId) != null
+                    ? {"trakt": int.parse(widget.showId)}
+                    : {"slug": widget.showId},
             "seasons": [
-              {
-                "number": seasonNumber,
-              }
-            ]
-          }
-        ]
+              {"number": seasonNumber},
+            ],
+          },
+        ],
       );
       await _fetchData();
       if (widget.onProgressChanged != null) widget.onProgressChanged!();
