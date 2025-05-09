@@ -10,10 +10,10 @@ String _$apiServiceHash() => r'73ad3c2e8c0d458c43bdd728c0f0fb75c5c2af98';
 
 /// Provides a singleton instance of ApiService.
 ///
-/// Copied from [apiService].
-@ProviderFor(apiService)
-final apiServiceProvider = AutoDisposeProvider<ApiService>.internal(
-  apiService,
+/// Copied from [traktApi].
+@ProviderFor(traktApi)
+final apiServiceProvider = AutoDisposeProvider<TraktApi>.internal(
+  traktApi,
   name: r'apiServiceProvider',
   debugGetCreateSourceHash:
       const bool.fromEnvironment('dart.vm.product') ? null : _$apiServiceHash,
@@ -23,7 +23,7 @@ final apiServiceProvider = AutoDisposeProvider<ApiService>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef ApiServiceRef = AutoDisposeProviderRef<ApiService>;
+typedef ApiServiceRef = AutoDisposeProviderRef<TraktApi>;
 String _$countryCodeHash() => r'5e037e6406dd2c5e562d42464aaad7a6c2ce9577';
 
 /// Provides the user's selected country code, persisted in SharedPreferences.

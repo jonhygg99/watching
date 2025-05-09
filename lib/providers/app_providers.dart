@@ -1,11 +1,12 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'api_service.dart';
+import 'package:watching/services/trakt/trakt_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 part 'app_providers.g.dart';
 
 /// Provides a singleton instance of ApiService.
 @riverpod
-ApiService apiService(ApiServiceRef ref) => ApiService(); // TODO: Replace ApiServiceRef with Ref when Riverpod v3 is adopted.
+TraktApi traktApi(Ref ref) => TraktApi();
 
 /// Provides the user's selected country code, persisted in SharedPreferences.
 @riverpod

@@ -18,10 +18,12 @@ class SearchResultGridTile extends StatelessWidget {
   final SearchResultItem item;
   final VoidCallback? onTap;
 
-  const SearchResultGridTile({Key? key, required this.item, this.onTap}) : super(key: key);
+  const SearchResultGridTile({super.key, required this.item, this.onTap});
 
   String? getPosterUrl(dynamic posterList) {
-    if (posterList is List && posterList.isNotEmpty && posterList.first is String) {
+    if (posterList is List &&
+        posterList.isNotEmpty &&
+        posterList.first is String) {
       final url = posterList.first as String;
       if (url.startsWith('http')) return url;
       return 'https://$url';
@@ -40,20 +42,28 @@ class SearchResultGridTile extends StatelessWidget {
           Flexible(
             child: AspectRatio(
               aspectRatio: 0.7,
-              child: poster != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: CachedNetworkImage(
-                        imageUrl: poster,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                        errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 48),
+              child:
+                  poster != null
+                      ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CachedNetworkImage(
+                          imageUrl: poster,
+                          fit: BoxFit.cover,
+                          placeholder:
+                              (context, url) => const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                          errorWidget:
+                              (context, url, error) =>
+                                  const Icon(Icons.broken_image, size: 48),
+                        ),
+                      )
+                      : Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.broken_image, size: 48),
                       ),
-                    )
-                  : Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.broken_image, size: 48),
-                    ),
             ),
           ),
           const SizedBox(height: 6),

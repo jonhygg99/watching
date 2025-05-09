@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../api_service.dart';
-import '../app_providers.dart';
+import '../services/trakt/trakt_api.dart';
+import '../providers/app_providers.dart';
 import 'seasons_progress_widget.dart';
 import 'header.dart';
 import 'videos.dart';
@@ -20,6 +20,7 @@ class ShowDetailPage extends ConsumerStatefulWidget {
 }
 
 class _ShowDetailPageState extends ConsumerState<ShowDetailPage> {
+  bool _fullyWatched = false;
   bool _showOriginal = false;
   String _sort = 'likes';
   late Future<List<dynamic>> _commentsFuture;
@@ -35,7 +36,7 @@ class _ShowDetailPageState extends ConsumerState<ShowDetailPage> {
     'watched': 'Más vistos',
   };
 
-  late ApiService _apiService;
+  late TraktApi _apiService;
   late String _countryCode;
 
   @override
@@ -49,30 +50,52 @@ class _ShowDetailPageState extends ConsumerState<ShowDetailPage> {
     if (value == null || value == _sort) return;
     setState(() {
       _sort = value;
-      _commentsFuture = _apiService.getShowComments(widget.showId, sort: _sort);
+      _commentsFuture = _apiService.getShowComments(
+        id: widget.showId,
+        sort: _sort,
+      );
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Intercept back navigation to pass result if fully watched
+    return WillPopScope(
+      onWillPop: () async {
+        if (_fullyWatched) {
+          Navigator.pop(context, {
+            'traktId': widget.showId,
+            'fullyWatched': true,
+          });
+          return false;
+        }
+        return true;
+      },
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     // Use Riverpod providers for dependencies
     _apiService = ref.watch(apiServiceProvider);
     _countryCode = ref.watch(countryCodeProvider);
-    _commentsFuture = _apiService.getShowComments(widget.showId, sort: _sort);
+    _commentsFuture = _apiService.getShowComments(
+      id: widget.showId,
+      sort: _sort,
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle del Show')),
       body: FutureBuilder<List<dynamic>>(
         future: Future.wait([
-          _apiService.getShowById(widget.showId),
+          _apiService.getShowById(id: widget.showId),
           _apiService.getShowTranslations(
-            widget.showId,
-            _countryCode.substring(0, 2).toLowerCase(),
+            id: widget.showId,
+            language: _countryCode.substring(0, 2).toLowerCase(),
           ),
-          _apiService.getShowCertifications(widget.showId),
-          _apiService.getShowPeople(widget.showId),
-          _apiService.getRelatedShows(widget.showId),
-          _apiService.getShowVideos(widget.showId),
+          _apiService.getShowVideos(id: widget.showId),
+          _apiService.getShowPeople(id: widget.showId),
+          _apiService.getRelatedShows(id: widget.showId),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -87,33 +110,36 @@ class _ShowDetailPageState extends ConsumerState<ShowDetailPage> {
             );
           }
           final results = snapshot.data;
-          if (results == null || results.length < 6) {
+          if (results == null || results.length < 5) {
             return const Center(child: Text('No se encontraron datos.'));
           }
           final show = results[0] as Map<String, dynamic>?;
           final translations = results[1] as List<dynamic>?;
-          final certifications = results[2] as List<dynamic>?;
+          final videos = results[2] as List<dynamic>?;
           final people = results[3] as Map<String, dynamic>?;
           final relatedShows = results[4] as List<dynamic>?;
-          final videos = results[5] as List<dynamic>?;
+          final certifications =
+              show?['certifications'] as List<dynamic>? ?? [];
           if (show == null) {
             return const Center(child: Text('No se encontraron datos.'));
           }
 
-          // Buscar traducción para el idioma del usuario
           Map<String, dynamic>? translation;
           if (translations != null && translations.isNotEmpty) {
             translation = translations.firstWhere(
               (t) =>
                   t['language']?.toString().toLowerCase() ==
                   _countryCode.substring(0, 2).toLowerCase(),
-              orElse: () => null,
+              orElse: () => translations[0],
             );
           }
 
-          final originalTitle = show['title'] ?? '';
-          final originalOverview = show['overview'] ?? '';
-          final originalTagline = show['tagline'] ?? '';
+          final originalTitle =
+              translation != null ? translation['title'] ?? '' : '';
+          final originalOverview =
+              translation != null ? translation['overview'] ?? '' : '';
+          final originalTagline =
+              translation != null ? translation['tagline'] ?? '' : '';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -124,8 +150,9 @@ class _ShowDetailPageState extends ConsumerState<ShowDetailPage> {
                   show: show,
                   translation: translation,
                   showOriginal: _showOriginal,
-                  onToggleOriginal:
-                      (val) => setState(() => _showOriginal = val),
+                  onToggleOriginal: (val) {
+                    setState(() => _showOriginal = val);
+                  },
                   originalTitle: originalTitle,
                   originalOverview: originalOverview,
                   originalTagline: originalTagline,
@@ -134,7 +161,23 @@ class _ShowDetailPageState extends ConsumerState<ShowDetailPage> {
                   apiService: _apiService,
                   showId: widget.showId,
                 ),
-                SeasonsProgressWidget(showId: widget.showId),
+                SeasonsProgressWidget(
+                  showId: widget.showId,
+                  onProgressChanged: () async {
+                    // Check if all seasons are now watched
+                    final api = ref.read(apiServiceProvider);
+                    final progress = await api.getShowWatchedProgress(
+                      id: widget.showId,
+                    );
+                    final total = progress['aired'] ?? 0;
+                    final completed = progress['completed'] ?? 0;
+                    if (total > 0 && completed == total) {
+                      setState(() {
+                        _fullyWatched = true;
+                      });
+                    }
+                  },
+                ),
                 ShowDetailVideos(videos: videos),
                 ShowDetailCast(
                   people: people,

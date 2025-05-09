@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../app_providers.dart';
+import '../providers/app_providers.dart';
 import '../show_details/details_page.dart';
 import 'search_result_item.dart';
 
@@ -180,7 +180,7 @@ class _SearchResultsGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final api = ref.watch(apiServiceProvider);
     return FutureBuilder<List<dynamic>>(
-      future: api.searchMoviesAndShows(query, types: types),
+      future: api.searchMoviesAndShows(query: query, type: 'show'),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

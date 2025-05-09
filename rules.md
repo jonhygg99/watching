@@ -12,6 +12,8 @@
   - `helpers/`
   - `static content/`
   - `types/`
+  - `providers/`
+  - `services/`
 
 ---
 

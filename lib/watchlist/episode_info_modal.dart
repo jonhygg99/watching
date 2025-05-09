@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 class EpisodeInfoModal extends StatelessWidget {
   final Future<Map<String, dynamic>> episodeFuture;
-  const EpisodeInfoModal({Key? key, required this.episodeFuture})
-    : super(key: key);
+  const EpisodeInfoModal({super.key, required this.episodeFuture});
 
   @override
   Widget build(BuildContext context) {

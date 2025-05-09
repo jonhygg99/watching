@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watching/auth_provider.dart';
+import 'package:watching/providers/auth_provider.dart';
 import 'package:watching/discover/discover_page.dart';
 
-import 'app_providers.dart';
+import 'providers/app_providers.dart';
 import 'country_list.dart';
 import 'splash_wrapper.dart';
 import 'settings/settings.dart';
@@ -164,130 +164,3 @@ class MyApp extends ConsumerWidget {
     );
   }
 }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     print('Build ejecutado. _loadingToken=$_loadingToken');
-//     if (_loadingToken) {
-//       return const MaterialApp(
-//         home: Scaffold(
-//           body: Center(child: CircularProgressIndicator()),
-//         ),
-//       );
-//     }
-
-//     print('Entrando en build principal de MyApp');
-//     if (_username == null) {
-//       // Si no está conectado, navegar a la pantalla de login/signue ep
-//       Future.microtask(() async {
-//         final result = await Navigator.of(context).pushReplacement(
-//           MaterialPageRoute(builder: (_) => LoginPage(username: _username)),
-//         );
-//         if (result == true) {
-//           await _initToken();
-//         }
-//       });
-//       return const Scaffold(
-//         body: Center(child: CircularProgressIndicator()),
-//       );
-//     }
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Trakt.tv'),
-//         leading: IconButton(
-//           icon: const Icon(Icons.settings),
-//           onPressed: () {
-//             Navigator.of(context).push(
-//               MaterialPageRoute(
-//                 builder: (_) => SettingsPage(
-//                   countryCode: _countryCode,
-//                   countryCodes: _countryCodes,
-//                   countryNames: _countryNames,
-//                   username: _username,
-//                   onCountryChanged: (code) async {
-//                     await _saveCountry(code);
-//                     setState(() {});
-//                   },
-//                   onLoginRegister: () async {
-//                     final result = await Navigator.of(context).push(
-//                       MaterialPageRoute(builder: (_) => LoginPage(username: _username)),
-//                     );
-//                     if (result == true) {
-//                       await _initToken();
-//                       setState(() {});
-//                     }
-//                   },
-//                   onRevokeToken: () async {
-//                     showDialog(
-//                       context: context,
-//                       barrierDismissible: false,
-//                       builder: (context) => const Center(child: CircularProgressIndicator()),
-//                     );
-//                     try {
-//                       final prefs = await SharedPreferences.getInstance();
-//                       final token = prefs.getString('access_token');
-//                       if (token == null || token.isEmpty) {
-//                         Navigator.of(context).pop();
-//                         ScaffoldMessenger.of(context).showSnackBar(
-//                           const SnackBar(content: Text('No hay token para revocar.')),
-//                         );
-//                         return;
-//                       }
-//                       await apiService.revokeToken(token);
-//                       await apiService.clearToken();
-//                       Navigator.of(context).pop();
-//                       ScaffoldMessenger.of(context).showSnackBar(
-//                         const SnackBar(content: Text('Token revocado correctamente.')),
-//                       );
-//                       if (mounted) {
-//                         Navigator.of(context).pushAndRemoveUntil(
-//                           MaterialPageRoute(builder: (_) => const LoginPage()),
-//                           (route) => false,
-//                         );
-//                       }
-//                     } catch (e) {
-//                       Navigator.of(context).pop();
-//                       ScaffoldMessenger.of(context).showSnackBar(
-//                         SnackBar(content: Text('Error al revocar el token: ${e.toString()}')),
-//                       );
-//                     }
-//                   },
-//                 ),
-//               ),
-//             );
-//           },
-//         ),
-//         actions: [
-//           IconButton(
-//             icon: const Icon(Icons.search),
-//             onPressed: () {
-//               Navigator.of(context).push(
-//                 MaterialPageRoute(builder: (_) => const SearchPage()),
-//               );
-//             },
-//           ),
-//         ],
-//       ),
-//       body: _pages[_selectedIndex],
-//       bottomNavigationBar: BottomNavigationBar(
-//         items: const <BottomNavigationBarItem>[
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.explore),
-//             label: 'Discover',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.bookmark_border),
-//             label: 'Watchlist',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.tv),
-//             label: 'My Shows',
-//           ),
-//         ],
-//         currentIndex: _selectedIndex,
-//         selectedItemColor: Colors.redAccent,
-//         onTap: _onItemTapped,
-//       ),
-//     );
-//   }
-// }

@@ -1,40 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:watching/show_details/details_page.dart';
-import 'package:watching/api_service.dart';
+import 'package:watching/services/trakt/trakt_api.dart';
 
 class ShowCard extends StatelessWidget {
   final String? traktId;
   final String? posterUrl;
   final Widget infoWidget;
-  final ApiService apiService;
+  final TraktApi apiService;
   final BuildContext parentContext;
   final String? countryCode;
 
   const ShowCard({
-    Key? key,
+    super.key,
     required this.traktId,
     required this.posterUrl,
     required this.infoWidget,
     required this.apiService,
     required this.parentContext,
     this.countryCode,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: traktId != null
-          ? () {
-              Navigator.of(parentContext).push(
-                MaterialPageRoute(
-                  builder: (_) => ShowDetailPage(
-                    showId: traktId!,
+      onTap:
+          traktId != null
+              ? () {
+                Navigator.of(parentContext).push(
+                  MaterialPageRoute(
+                    builder: (_) => ShowDetailPage(showId: traktId!),
                   ),
-                ),
-              );
-            }
-          : null,
+                );
+              }
+              : null,
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
         elevation: 0,
@@ -47,14 +46,15 @@ class ShowCard extends StatelessWidget {
             // Poster grande y redondeado
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: posterUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: posterUrl!,
-                      width: 90,
-                      height: 135,
-                      fit: BoxFit.cover,
-                    )
-                  : Container(width: 90, height: 135, color: Colors.grey),
+              child:
+                  posterUrl != null
+                      ? CachedNetworkImage(
+                        imageUrl: posterUrl!,
+                        width: 90,
+                        height: 135,
+                        fit: BoxFit.cover,
+                      )
+                      : Container(width: 90, height: 135, color: Colors.grey),
             ),
             const SizedBox(width: 16),
             // Info principal

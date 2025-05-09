@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../api_service.dart';
+import '../services/trakt/trakt_api.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ShowDetailHeader extends StatelessWidget {
@@ -12,7 +12,7 @@ class ShowDetailHeader extends StatelessWidget {
   final String originalTagline;
   final List<dynamic>? certifications;
   final String countryCode;
-  final ApiService apiService;
+  final TraktApi apiService;
   final String showId;
 
   const ShowDetailHeader({
@@ -57,26 +57,21 @@ class ShowDetailHeader extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       height: 170,
-                      child:
-                          fanartUrl != null
-                              ? CachedNetworkImage(
-                                imageUrl: fanartUrl,
-                                fit: BoxFit.cover,
-                                placeholder:
-                                    (ctx, url) => const SizedBox(
-                                      height: 170,
-                                      child: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    ),
-                                errorWidget:
-                                    (ctx, url, error) => const Icon(
-                                      Icons.broken_image,
-                                      size: 80,
-                                      color: Colors.grey,
-                                    ),
-                              )
-                              : const SizedBox(height: 170),
+                      child: CachedNetworkImage(
+                        imageUrl: fanartUrl,
+                        fit: BoxFit.cover,
+                        placeholder:
+                            (ctx, url) => const SizedBox(
+                              height: 170,
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                        errorWidget:
+                            (ctx, url, error) => const Icon(
+                              Icons.broken_image,
+                              size: 80,
+                              color: Colors.grey,
+                            ),
+                      ),
                     ),
                     Container(
                       width: double.infinity,
@@ -84,9 +79,9 @@ class ShowDetailHeader extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.black.withOpacity(0.7),
+                            Colors.black.withValues(alpha: 0.7),
                             Colors.transparent,
-                            Colors.black.withOpacity(0.9),
+                            Colors.black.withValues(alpha: 0.9),
                           ],
                           begin: Alignment.bottomLeft,
                           end: Alignment.topRight,
@@ -246,7 +241,7 @@ class ShowDetailHeader extends StatelessWidget {
                     builder: (context) {
                       return Dialog(
                         child: FutureBuilder<Map<String, dynamic>>(
-                          future: apiService.getShowRatings(showId),
+                          future: apiService.getShowRatings(id: showId),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -325,8 +320,8 @@ class ShowDetailHeader extends StatelessWidget {
                                                 Container(
                                                   height: 16,
                                                   decoration: BoxDecoration(
-                                                    color: color.withOpacity(
-                                                      0.25,
+                                                    color: color.withValues(
+                                                      alpha: 0.25,
                                                     ),
                                                     borderRadius:
                                                         BorderRadius.circular(

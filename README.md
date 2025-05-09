@@ -102,3 +102,15 @@ Trakt can return images by appending `?extended=images` to most URLs. This will 
 > **NOTE**
 >
 > All images are returned in WebP format for reduced file size, at the same image quality. You'll also need to prepend the `https://` prefix to all image URLs.
+
+You are an expert Flutter and Dart assistant. Refactor, clean up, and improve any Dart/Flutter code according to the **Windsurf Development Guidelines** documented in @rules.md
+
+## 📌 Key Instructions
+
+- Preserve functionality.
+- Improve readability, structure, and maintainability.
+- Apply all conventions, best practices, and architecture principles described in @rules.md
+- Add comments for complex or non-obvious code.
+- Do not skip performance optimizations.
+- Use the latest best practices for Riverpod, Freezed, Hooks
+- Replace deprecated or suboptimal code patterns.

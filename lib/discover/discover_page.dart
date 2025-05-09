@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../show_carousel.dart';
-import '../app_providers.dart';
+import 'package:watching/show_carousel.dart';
+import 'package:watching/providers/app_providers.dart';
 
 /// DiscoverPage displays curated carousels of TV shows using data from ApiService.
 /// - Follows Windsurf Development Guidelines for Riverpod usage and code structure.
 /// - Uses generated provider for ApiService for optimal DI and testability.
 class DiscoverPage extends ConsumerWidget {
-  const DiscoverPage({Key? key}) : super(key: key);
+  const DiscoverPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -117,10 +117,11 @@ class DiscoverPage extends ConsumerWidget {
           buildCarousel(
             title: 'Most Anticipated',
             future: api.getMostAnticipatedShows(),
-            extractShow: (item) => {
-              ...Map<String, dynamic>.from(item['show']),
-              'list_count': item['list_count'],
-            },
+            extractShow:
+                (item) => {
+                  ...Map<String, dynamic>.from(item['show']),
+                  'list_count': item['list_count'],
+                },
             emptyText: 'No anticipated shows.',
           ),
           SizedBox(height: 16),

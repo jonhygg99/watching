@@ -10,7 +10,7 @@ class SettingsPage extends StatefulWidget {
   final VoidCallback onRevokeToken;
 
   const SettingsPage({
-    Key? key,
+    super.key,
     required this.countryCode,
     required this.countryCodes,
     required this.countryNames,
@@ -18,7 +18,7 @@ class SettingsPage extends StatefulWidget {
     required this.onCountryChanged,
     required this.onLoginRegister,
     required this.onRevokeToken,
-  }) : super(key: key);
+  });
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -34,30 +34,31 @@ class _SettingsPageState extends State<SettingsPage> {
         child: ListView(
           children: [
             Row(
-  children: [
-    const Text(
-      'Tu país:',
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-    ),
-    const SizedBox(width: 10),
-    Text(
-      String.fromCharCodes(
-        widget.countryCode.toUpperCase().codeUnits.map(
-          (c) => 0x1F1E6 - 65 + c,
-        ),
-      ),
-      style: const TextStyle(fontSize: 22),
-    ),
-    const SizedBox(width: 8),
-    Expanded(
-      child: Text(
-        widget.countryNames[widget.countryCode] ?? widget.countryCode,
-        style: const TextStyle(fontSize: 16),
-        overflow: TextOverflow.ellipsis,
-      ),
-    ),
-  ],
-),
+              children: [
+                const Text(
+                  'Tu país:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  String.fromCharCodes(
+                    widget.countryCode.toUpperCase().codeUnits.map(
+                      (c) => 0x1F1E6 - 65 + c,
+                    ),
+                  ),
+                  style: const TextStyle(fontSize: 22),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.countryNames[widget.countryCode] ??
+                        widget.countryCode,
+                    style: const TextStyle(fontSize: 16),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 10),
             Row(
               children: [

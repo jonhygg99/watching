@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'api_service.dart';
+import 'package:watching/services/trakt/trakt_api.dart';
 import 'app_providers.dart';
 
 /// Holds authentication state: loading, username, error.
@@ -21,7 +21,7 @@ class AuthState {
 
 /// Riverpod AsyncNotifier for authentication logic.
 class AuthNotifier extends AsyncNotifier<AuthState> {
-  late final ApiService _apiService;
+  late final TraktApi _apiService;
 
   @override
   Future<AuthState> build() async {
