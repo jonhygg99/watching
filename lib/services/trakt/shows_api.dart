@@ -24,6 +24,30 @@ mixin ShowsApi on TraktApiBase {
     }
   }
 
+  /// Gets all episodes for a single season of a show.
+  ///
+  /// [id]: Trakt ID, slug, or IMDB ID of the show
+  /// [season]: Season number (e.g., 1)
+  /// [translations]: Optional 2-letter language code (e.g., 'es'), or 'all' for all translations
+  /// Returns a List of episode objects for the season.
+  Future<List<dynamic>> getSeasonEpisodes({
+    required String id,
+    required int season,
+    String? translations,
+  }) async {
+    await ensureValidToken();
+    final translationParam = translations != null ? '?translations=$translations' : '';
+    final url = Uri.parse('$baseUrl/shows/$id/seasons/$season$translationParam');
+    final response = await http.get(url, headers: headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception(
+        'Error GET /shows/$id/seasons/$season: ${response.statusCode}\n${response.body}',
+      );
+    }
+  }
+
   /// Gets all seasons for a show.
   Future<List<dynamic>> getSeasons(String showId) async {
     await ensureValidToken();
