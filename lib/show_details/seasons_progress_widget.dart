@@ -56,20 +56,14 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
       (progress!["seasons"] as List).map((s) => MapEntry(s["number"], s)),
     );
 
-    // Filtrar temporadas: ocultar la 0 y la última si tienen 0 episodios
+    // Filtrar temporadas: ocultar SOLO la temporada 0 (especiales) si tiene 0 episodios.
+    // Mostrar SIEMPRE todas las temporadas "reales" aunque tengan 0 episodios.
     final filteredSeasons = List<Map<String, dynamic>>.from(seasons!)
       ..removeWhere((season) {
         final number = season["number"];
         final episodeCount = season["episode_count"] ?? 0;
-        final isFirst = number == 0;
-        final isLast =
-            number ==
-            (seasons!.isNotEmpty
-                ? seasons!
-                    .map((s) => s["number"] as int)
-                    .reduce((a, b) => a > b ? a : b)
-                : -1);
-        return (isFirst || isLast) && episodeCount == 0;
+        // Oculta solo la temporada 0 (especiales) si tiene 0 episodios
+        return number == 0 && episodeCount == 0;
       });
 
     return Column(
@@ -123,7 +117,7 @@ class _SeasonsProgressWidgetState extends State<SeasonsProgressWidget> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
