@@ -44,45 +44,7 @@ class SeasonsProgressWidget extends HookConsumerWidget {
       return null;
     }, [showId]);
 
-    // Función para marcar temporada como vista
-    Future<void> markSeasonAsWatched(int seasonNumber, int episodeCount) async {
-      markingColors.value = {...markingColors.value, seasonNumber: Colors.blue};
-      try {
-        await traktApi.addToWatchHistory(
-          shows: [
-            {
-              "ids":
-                  int.tryParse(showId) != null
-                      ? {"trakt": int.parse(showId)}
-                      : {"slug": showId},
-              "seasons": [
-                {"number": seasonNumber},
-              ],
-            },
-          ],
-        );
-        // Refresca datos tras marcar como vista
-        final s = await traktApi.getSeasons(showId);
-        final p = await traktApi.getShowWatchedProgress(id: showId);
-        seasons.value = s;
-        progress.value = p;
-        if (onProgressChanged != null) onProgressChanged!();
-        markingColors.value = {
-          ...markingColors.value,
-          seasonNumber: Colors.grey,
-        };
-      } catch (e) {
-        markingColors.value = {
-          ...markingColors.value,
-          seasonNumber: Colors.red,
-        };
-        await Future.delayed(const Duration(milliseconds: 500));
-        markingColors.value = {
-          ...markingColors.value,
-          seasonNumber: Colors.grey,
-        };
-      }
-    }
+    // (Eliminada función markSeasonAsWatched: ahora la lógica está integrada en el onPressed del botón)
 
     if (loading.value) {
       return const Center(child: CircularProgressIndicator());
@@ -134,12 +96,100 @@ class SeasonsProgressWidget extends HookConsumerWidget {
                             ? Colors.green
                             : (markingColors.value[number] ?? Colors.grey),
                   ),
-                  onPressed:
-                      isComplete
-                          ? null
-                          : () => markSeasonAsWatched(number, episodeCount),
+                  // If season is complete, pressing removes from history; else, it adds to history
+                  onPressed: () async {
+                    // Helper for color feedback
+                    Future<void> setMarkingColor(
+                      Color color, {
+                      int delayMs = 0,
+                    }) async {
+                      markingColors.value = {
+                        ...markingColors.value,
+                        number: color,
+                      };
+                      if (delayMs > 0) {
+                        await Future.delayed(Duration(milliseconds: delayMs));
+                      }
+                    }
+
+                    if (isComplete) {
+                      // Remove season from history with feedback
+                      final prevColor = markingColors.value[number] ?? Colors.green;
+                      await setMarkingColor(Colors.blue); // Blue: updating
+                      try {
+                        await traktApi.removeFromHistory(
+                          shows: [
+                            {
+                              "ids":
+                                  int.tryParse(showId) != null
+                                      ? {"trakt": int.parse(showId)}
+                                      : {"slug": showId},
+                              "seasons": [
+                                {"number": number},
+                              ],
+                            },
+                          ],
+                        );
+                        // Refresh data after removal
+                        final s = await traktApi.getSeasons(showId);
+                        final p = await traktApi.getShowWatchedProgress(
+                          id: showId,
+                        );
+                        seasons.value = s;
+                        progress.value = p;
+                        if (onProgressChanged != null) onProgressChanged!();
+                        // Grey: success (no green)
+                        await setMarkingColor(Colors.grey);
+                      } catch (e) {
+                        await setMarkingColor(
+                          Colors.red,
+                          delayMs: 500,
+                        ); // Red: error
+                        await setMarkingColor(prevColor); // Restore previous color
+                      }
+                    } else {
+                      // Mark season as watched with feedback
+                      await setMarkingColor(Colors.blue); // Blue: updating
+                      try {
+                        await traktApi.addToWatchHistory(
+                          shows: [
+                            {
+                              "ids":
+                                  int.tryParse(showId) != null
+                                      ? {"trakt": int.parse(showId)}
+                                      : {"slug": showId},
+                              "seasons": [
+                                {"number": number},
+                              ],
+                            },
+                          ],
+                        );
+                        // Refresh data after marking as watched
+                        final s = await traktApi.getSeasons(showId);
+                        final p = await traktApi.getShowWatchedProgress(
+                          id: showId,
+                        );
+                        seasons.value = s;
+                        progress.value = p;
+                        if (onProgressChanged != null) onProgressChanged!();
+                        await setMarkingColor(
+                          Colors.green,
+                          delayMs: 400,
+                        ); // Green: success
+                        await setMarkingColor(Colors.grey);
+                      } catch (e) {
+                        await setMarkingColor(
+                          Colors.red,
+                          delayMs: 500,
+                        ); // Red: error
+                        await setMarkingColor(Colors.grey);
+                      }
+                    }
+                  },
                   tooltip:
-                      isComplete ? 'Completada' : 'Marcar temporada como vista',
+                      isComplete
+                          ? 'Eliminar temporada del historial'
+                          : 'Marcar temporada como vista',
                 ),
                 Text('Temporada $number', style: const TextStyle(fontSize: 16)),
                 const SizedBox(width: 12),
