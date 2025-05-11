@@ -44,8 +44,6 @@ class WatchlistShowItem extends HookConsumerWidget {
     final progress = item['progress'] as Map<String, dynamic>? ?? {};
     final watched = progress['completed'] as int? ?? 0;
     final total = progress['aired'] as int? ?? 1;
-    // print(progress);
-    // print("$title $watched $total");
     if (traktId == null || watched == total) {
       return const SizedBox.shrink();
     }
