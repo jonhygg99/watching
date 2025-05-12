@@ -15,7 +15,9 @@ final watchlistTypeProvider = StateProvider<WatchlistType>(
 /// Provider for the user's watchlist with accurate progress for each show.
 /// For each show, fetches the watched progress using Trakt's /shows/{id}/progress/watched endpoint.
 /// Results are attached as 'progress' and are fully compatible with the UI (WatchProgressInfo).
-final watchlistProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+final watchlistProvider = FutureProvider.autoDispose<
+  List<Map<String, dynamic>>
+>((ref) async {
   final trakt = ref.watch(apiServiceProvider);
   final type = ref.watch(watchlistTypeProvider);
 
@@ -25,24 +27,26 @@ final watchlistProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>
   );
 
   // For each show, fetch its watched progress in parallel and attach as 'progress'
-  final futures = items.whereType<Map<String, dynamic>>().map((item) async {
-    final show = item['show'];
-    final ids = show != null ? show['ids'] : null;
-    final traktId = ids != null ? ids['slug'] ?? ids['trakt']?.toString() : null;
-    if (traktId != null) {
-      try {
-        // Fetch watched progress for this show
-        final progress = await trakt.getShowWatchedProgress(id: traktId);
-        return {...item, 'progress': progress};
-      } catch (e, st) {
-        // On error, still include the item with empty progress for UI consistency
-        return {...item, 'progress': <String, dynamic>{}};
-      }
-    } else {
-      // If no traktId, fallback to empty progress
-      return {...item, 'progress': <String, dynamic>{}};
-    }
-  }).toList();
+  final futures =
+      items.whereType<Map<String, dynamic>>().map((item) async {
+        final show = item['show'];
+        final ids = show != null ? show['ids'] : null;
+        final traktId =
+            ids != null ? ids['slug'] ?? ids['trakt']?.toString() : null;
+        if (traktId != null) {
+          try {
+            // Fetch watched progress for this show
+            final progress = await trakt.getShowWatchedProgress(id: traktId);
+            return {...item, 'progress': progress};
+          } catch (e) {
+            // On error, still include the item with empty progress for UI consistency
+            return {...item, 'progress': <String, dynamic>{}};
+          }
+        } else {
+          // If no traktId, fallback to empty progress
+          return {...item, 'progress': <String, dynamic>{}};
+        }
+      }).toList();
 
   // Wait for all progress fetches to complete
   return await Future.wait(futures);
