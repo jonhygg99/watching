@@ -27,7 +27,8 @@ abstract class TraktApiBase {
   Map<String, String> get headers;
 }
 
-class TraktApi extends TraktApiBase with ShowsApi, ShowsListsApi, HistoryApi, UserApi, SearchApi {
+class TraktApi extends TraktApiBase
+    with ShowsApi, ShowsListsApi, HistoryApi, UserApi, SearchApi {
   TraktApi();
 
   // --- BASE CONFIGURATION ---

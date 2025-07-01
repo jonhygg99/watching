@@ -83,4 +83,18 @@ mixin HistoryApi on TraktApiBase {
       );
     }
   }
+
+  Future<List<dynamic>> getWatchlist({
+    String type = 'shows',
+    String sort = 'rank',
+  }) async {
+    try {
+      final response = await getJsonList('/users/me/watchlist/$type/$sort');
+      return response;
+    } catch (e) {
+      throw Exception('Error GET /users/me/watchlist/$type/$sort: $e');
+    }
+  }
+
+  //get watched history
 }
