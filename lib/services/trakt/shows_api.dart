@@ -36,8 +36,11 @@ mixin ShowsApi on TraktApiBase {
     String? translations,
   }) async {
     await ensureValidToken();
-    final translationParam = translations != null ? '?translations=$translations' : '';
-    final url = Uri.parse('$baseUrl/shows/$id/seasons/$season$translationParam');
+    final translationParam =
+        translations != null ? '?translations=$translations' : '';
+    final url = Uri.parse(
+      '$baseUrl/shows/$id/seasons/$season$translationParam',
+    );
     final response = await http.get(url, headers: headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as List<dynamic>;
@@ -157,12 +160,4 @@ mixin ShowsApi on TraktApiBase {
     return await getJsonList('/shows/anticipated?extended=images');
   }
 
-  /// Searches for movies and shows by query.
-  Future<List<dynamic>> searchMoviesAndShows({
-    required String query,
-    String type = '',
-  }) async {
-    final encodedQuery = Uri.encodeComponent(query);
-    return await getJsonList('/search/multi?query=$encodedQuery&type=$type');
-  }
 }

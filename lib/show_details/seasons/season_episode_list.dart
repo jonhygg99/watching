@@ -100,6 +100,7 @@ class SeasonEpisodeList extends StatelessWidget {
           onTap: () async {
             // Espera a que la info esté lista antes de mostrar el modal
             final epInfo = await _fetchEpisodeInfo(epNumber);
+            // TODO: Manejar el caso de que el contexto ya no esté montado
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,

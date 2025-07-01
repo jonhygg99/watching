@@ -6,7 +6,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'search_result_item.freezed.dart';
 
 @freezed
-class SearchResultItem with _$SearchResultItem {
+abstract class SearchResultItem with _$SearchResultItem {
   const factory SearchResultItem({
     required Map<String, dynamic> data,
     required String type, // 'show' or 'movie'

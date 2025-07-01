@@ -25,7 +25,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   @override
   Future<AuthState> build() async {
-    _apiService = ref.read(apiServiceProvider);
+    _apiService = ref.read(traktApiProvider);
     return await _loadAuth();
   }
 

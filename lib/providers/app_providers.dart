@@ -4,7 +4,7 @@ import 'package:watching/services/trakt/trakt_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 part 'app_providers.g.dart';
 
-/// Provides a singleton instance of ApiService.
+/// Provides a singleton instance of [TraktApi].
 @riverpod
 TraktApi traktApi(Ref ref) => TraktApi();
 

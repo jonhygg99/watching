@@ -32,7 +32,7 @@ class ShowDetailPage extends HookConsumerWidget {
       'watched': 'Más vistos',
     };
 
-    final apiService = ref.watch(apiServiceProvider);
+    final apiService = ref.watch(traktApiProvider);
     final countryCode = ref.watch(countryCodeProvider);
 
     // Comments future (updates when sort or showId changes)
@@ -76,6 +76,7 @@ class ShowDetailPage extends HookConsumerWidget {
               );
             }
             final results = snapshot.data;
+
             if (results == null || results.length < 5) {
               return const Center(child: Text('No se encontraron datos.'));
             }
@@ -132,7 +133,7 @@ class ShowDetailPage extends HookConsumerWidget {
                     showId: showId,
                     onProgressChanged: () async {
                       // Check if all seasons are now watched
-                      final api = ref.read(apiServiceProvider);
+                      final api = ref.read(traktApiProvider);
                       final progress = await api.getShowWatchedProgress(
                         id: showId,
                       );

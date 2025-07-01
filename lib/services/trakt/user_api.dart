@@ -4,6 +4,23 @@ import 'trakt_api.dart';
 
 /// Mixin for user-related endpoints.
 mixin UserApi on TraktApiBase {
+  /// Gets the user's watchlist.
+  ///
+  /// [type]: Type of items to return (e.g., 'shows', 'movies').
+  /// [sort]: How to sort the items.
+  Future<List<dynamic>> getWatchlist({
+    String type = 'shows',
+    String sort = 'rank',
+  }) async {
+    return await getJsonList('/users/me/watchlist/$type/$sort');
+  }
+
+  /// Gets the user's watched items.
+  ///
+  /// [type]: Type of items to return (e.g., 'shows', 'movies').
+  Future<List<dynamic>> getWatched({String type = 'shows'}) async {
+    return await getJsonList('/users/me/watched/$type');
+  }
   /// Gets the current user's profile.
   Future<Map<String, dynamic>> getCurrentUserProfile() async {
     await ensureValidToken();

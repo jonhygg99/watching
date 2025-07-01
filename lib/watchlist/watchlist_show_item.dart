@@ -57,7 +57,7 @@ class WatchlistShowItem extends HookConsumerWidget {
         infoWidget: WatchProgressInfo(
           traktId: traktId,
           title: title,
-          apiService: ref.read(apiServiceProvider),
+          apiService: ref.read(traktApiProvider),
           progress: progress,
         ),
         builder:
@@ -65,7 +65,7 @@ class WatchlistShowItem extends HookConsumerWidget {
               traktId: traktId,
               posterUrl: posterUrl,
               infoWidget: child,
-              apiService: ref.read(apiServiceProvider),
+              apiService: ref.read(traktApiProvider),
               parentContext: context,
               countryCode: Localizations.localeOf(context).countryCode,
             ),
@@ -87,13 +87,13 @@ class WatchlistShowItem extends HookConsumerWidget {
       child: ShowCard(
         traktId: traktId,
         posterUrl: posterUrl,
-        apiService: ref.read(apiServiceProvider),
+        apiService: ref.read(traktApiProvider),
         parentContext: context,
         countryCode: Localizations.localeOf(context).countryCode,
         infoWidget: WatchProgressInfo(
           traktId: traktId,
           title: title,
-          apiService: ref.read(apiServiceProvider),
+          apiService: ref.read(traktApiProvider),
           progress: progress,
         ),
       ),
