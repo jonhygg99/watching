@@ -42,6 +42,10 @@ class ShowDetailHeader extends StatelessWidget {
             ? 'https://${images['poster'][0]}'
             : null;
 
+    print(translation?['title'] ?? originalTitle);
+    print(translation?['title']);
+    print(originalTitle);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,60 +100,129 @@ class ShowDetailHeader extends StatelessWidget {
               Positioned(
                 left: 16,
                 bottom: -85,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: CachedNetworkImage(
-                        imageUrl: posterUrl,
-                        height: 170,
-                        width: 120,
-                        fit: BoxFit.cover,
-                        placeholder:
-                            (ctx, url) => const SizedBox(
-                              height: 170,
-                              width: 120,
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
-                        errorWidget:
-                            (ctx, url, error) => const Icon(
-                              Icons.broken_image,
-                              size: 40,
-                              color: Colors.grey,
-                            ),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          showOriginal
-                              ? (translation?['title'] ?? originalTitle)
-                              : originalTitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (show['status'] != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2.0),
-                            child: Text(
-                              show['status'],
-                              style: const TextStyle(
-                                fontSize: 15,
-                                color: Colors.white70,
+                right: 16, // Add right constraint to prevent overflow
+                child: Container(
+                  color:
+                      Colors.transparent, // Ensure the container takes up space
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Poster image
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: CachedNetworkImage(
+                          imageUrl: posterUrl,
+                          height: 170,
+                          width: 120,
+                          fit: BoxFit.cover,
+                          placeholder:
+                              (ctx, url) => const SizedBox(
+                                height: 170,
+                                width: 120,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
                               ),
+                          errorWidget:
+                              (ctx, url, error) => const Icon(
+                                Icons.broken_image,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      // Title and details
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    showOriginal
+                                        ? (translation?['title'] ??
+                                            originalTitle)
+                                        : originalTitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                // Follow icon button
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[800],
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () {
+                                      // TODO: Implement follow functionality
+                                    },
+                                    padding: const EdgeInsets.all(8),
+                                    constraints: const BoxConstraints(),
+                                    icon: const Icon(
+                                      Icons.add,
+                                      size: 20,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                      ],
-                    ),
-                  ],
+                            Row(
+                              children: [
+                                if (show['year'] != null)
+                                  Text(
+                                    '${show['year']}',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                if (show['year'] != null &&
+                                    show['runtime'] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4.0,
+                                    ),
+                                    child: Text(
+                                      '·',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                if (show['runtime'] != null)
+                                  Text(
+                                    '${show['runtime']} min',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                if ((show['year'] != null ||
+                                        show['runtime'] != null) &&
+                                    show['status'] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4.0,
+                                    ),
+                                    child: Text(
+                                      '·',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                if (show['status'] != null)
+                                  Text(
+                                    show['status'],
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -158,16 +231,9 @@ class ShowDetailHeader extends StatelessWidget {
         ...[
           ...(!showOriginal && translation != null
               ? [
-                Text(
-                  translation?['title'] ?? originalTitle,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
                 if ((translation?['tagline'] ?? '').toString().isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(top: 6, bottom: 8),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
                       translation?['tagline'],
                       style: const TextStyle(

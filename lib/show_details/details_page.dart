@@ -91,23 +91,26 @@ class ShowDetailPage extends HookConsumerWidget {
               return const Center(child: Text('No se encontraron datos.'));
             }
 
+            // Filter out null values and find the best translation
             Map<String, dynamic>? translation;
             if (translations != null && translations.isNotEmpty) {
-              translation = translations.firstWhere(
-                (t) =>
-                    t['language']?.toString().toLowerCase() ==
-                    countryCode.substring(0, 2).toLowerCase(),
-                orElse: () => translations[0],
-              );
+              // Filter out translations with null title
+              final validTranslations = translations.where((t) => t['title'] != null).toList();
+              
+              if (validTranslations.isNotEmpty) {
+                // Try to find exact match for user's country
+                translation = validTranslations.firstWhere(
+                  (t) => t['language']?.toString().toLowerCase() == 
+                      countryCode.substring(0, 2).toLowerCase(),
+                  orElse: () => validTranslations.first,
+                );
+              }
             }
 
-            // Handle translation and fallback to original title/overview if needed
-            final originalTitle =
-                translation != null ? translation['title'] ?? '' : '';
-            final originalOverview =
-                translation != null ? translation['overview'] ?? '' : '';
-            final originalTagline =
-                translation != null ? translation['tagline'] ?? '' : '';
+            // Get title, overview, and tagline from translation if available, otherwise use original
+            final originalTitle = translation?['title'] ?? show['title'] ?? '';
+            final originalOverview = translation?['overview'] ?? show['overview'] ?? '';
+            final originalTagline = translation?['tagline'] ?? show['tagline'] ?? '';
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),

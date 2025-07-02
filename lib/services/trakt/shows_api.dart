@@ -108,7 +108,7 @@ mixin ShowsApi on TraktApiBase {
     required String id,
     String language = 'es',
   }) async {
-    return await getJsonList('/shows/$id/translations?language=$language');
+    return await getJsonList('/shows/$id/translations/$language');
   }
 
   /// Gets videos (trailers, teasers) for a show.
