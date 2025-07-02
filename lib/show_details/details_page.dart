@@ -3,6 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../providers/app_providers.dart';
 import 'seasons_progress_widget.dart';
+import 'show_info_chips.dart';
+import 'show_description.dart';
 import 'header.dart';
 import 'videos.dart';
 import 'cast.dart';
@@ -19,7 +21,6 @@ class ShowDetailPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // State hooks
     final fullyWatched = useState(false);
-    final showOriginal = useState(false);
     final sort = useState('likes');
     final sortLabels = const {
       'likes': 'Más likes',
@@ -95,12 +96,14 @@ class ShowDetailPage extends HookConsumerWidget {
             Map<String, dynamic>? translation;
             if (translations != null && translations.isNotEmpty) {
               // Filter out translations with null title
-              final validTranslations = translations.where((t) => t['title'] != null).toList();
-              
+              final validTranslations =
+                  translations.where((t) => t['title'] != null).toList();
+
               if (validTranslations.isNotEmpty) {
                 // Try to find exact match for user's country
                 translation = validTranslations.firstWhere(
-                  (t) => t['language']?.toString().toLowerCase() == 
+                  (t) =>
+                      t['language']?.toString().toLowerCase() ==
                       countryCode.substring(0, 2).toLowerCase(),
                   orElse: () => validTranslations.first,
                 );
@@ -109,28 +112,25 @@ class ShowDetailPage extends HookConsumerWidget {
 
             // Get title, overview, and tagline from translation if available, otherwise use original
             final originalTitle = translation?['title'] ?? show['title'] ?? '';
-            final originalOverview = translation?['overview'] ?? show['overview'] ?? '';
-            final originalTagline = translation?['tagline'] ?? show['tagline'] ?? '';
+            final originalOverview =
+                translation?['overview'] ?? show['overview'] ?? '';
+            final originalTagline =
+                translation?['tagline'] ?? show['tagline'] ?? '';
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ShowDetailHeader(
+                  ShowDetailHeader(show: show, title: originalTitle),
+                  ShowDescription(
+                    tagline: originalTagline,
+                    overview: originalOverview,
+                  ),
+                  ShowInfoChips(
                     show: show,
-                    translation: translation,
-                    showOriginal: showOriginal.value,
-                    onToggleOriginal: (val) {
-                      showOriginal.value = val;
-                    },
-                    originalTitle: originalTitle,
-                    originalOverview: originalOverview,
-                    originalTagline: originalTagline,
                     certifications: certifications,
                     countryCode: countryCode,
-                    apiService: apiService,
-                    showId: showId,
                   ),
                   SeasonsProgressWidget(
                     showId: showId,
