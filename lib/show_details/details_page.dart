@@ -22,6 +22,16 @@ class ShowDetailPage extends HookConsumerWidget {
     // State hooks
     final fullyWatched = useState(false);
     final sort = useState('likes');
+    final refreshKey = useState(0); // Used to force refresh of data
+    final apiService = ref.watch(traktApiProvider);
+    final countryCode = ref.watch(countryCodeProvider);
+    
+    // Watch for changes to the refresh key to trigger a rebuild
+    useEffect(() {
+      // This will run whenever refreshKey changes
+      return null;
+    }, [refreshKey.value]);
+    
     final sortLabels = const {
       'likes': 'Más likes',
       'newest': 'Más recientes',
@@ -33,13 +43,10 @@ class ShowDetailPage extends HookConsumerWidget {
       'watched': 'Más vistos',
     };
 
-    final apiService = ref.watch(traktApiProvider);
-    final countryCode = ref.watch(countryCodeProvider);
-
-    // Comments future (updates when sort or showId changes)
+    // Comments future (updates when sort, showId, or refreshKey changes)
     final commentsFuture = useMemoized(
       () => apiService.getShowComments(id: showId, sort: sort.value),
-      [apiService, showId, sort.value],
+      [apiService, showId, sort.value, refreshKey.value],
     );
 
     // Intercept back navigation to pass result if fully watched
@@ -145,6 +152,14 @@ class ShowDetailPage extends HookConsumerWidget {
                       if (total > 0 && completed == total) {
                         fullyWatched.value = true;
                       }
+                    },
+                    onEpisodeWatched: () {
+                      // Just increment the refresh key to trigger a rebuild
+                      // The parent widget will handle the actual data refresh
+                      refreshKey.value++;
+                      
+                      // The onProgressChanged callback will be called by SeasonsProgressWidget
+                      // which will update the fullyWatched status if needed
                     },
                   ),
                   ShowDetailVideos(videos: videos),

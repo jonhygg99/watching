@@ -17,6 +17,7 @@ class SeasonDetailPage extends HookConsumerWidget {
   final int seasonNumber;
   final String? showTitle;
   final String? languageCode;
+  final VoidCallback? onEpisodeWatched;
 
   const SeasonDetailPage({
     super.key,
@@ -24,6 +25,7 @@ class SeasonDetailPage extends HookConsumerWidget {
     required this.seasonNumber,
     this.showTitle,
     this.languageCode,
+    this.onEpisodeWatched,
   });
 
   @override
@@ -103,6 +105,11 @@ class SeasonDetailPage extends HookConsumerWidget {
         episodesState: episodes,
         progressState: progress,
       );
+      
+      // Notify parent that an episode's watched status changed
+      if (onEpisodeWatched != null) {
+        onEpisodeWatched!();
+      }
     }
 
     return Scaffold(
