@@ -23,6 +23,7 @@ class ShowDetailPage extends HookConsumerWidget {
     final fullyWatched = useState(false);
     final sort = useState('likes');
     final refreshKey = useState(0); // Used to force refresh of data
+    final refreshTrigger = useState(0); // Separate trigger for episode updates
     final apiService = ref.watch(traktApiProvider);
     final countryCode = ref.watch(countryCodeProvider);
     
@@ -46,8 +47,13 @@ class ShowDetailPage extends HookConsumerWidget {
     // Comments future (updates when sort, showId, or refreshKey changes)
     final commentsFuture = useMemoized(
       () => apiService.getShowComments(id: showId, sort: sort.value),
-      [apiService, showId, sort.value, refreshKey.value],
+      [apiService, showId, sort.value, refreshKey.value, refreshTrigger.value],
     );
+
+    // Function to refresh show data
+    void refreshShowData() {
+      refreshTrigger.value++;
+    }
 
     // Intercept back navigation to pass result if fully watched
     return WillPopScope(
@@ -154,9 +160,8 @@ class ShowDetailPage extends HookConsumerWidget {
                       }
                     },
                     onEpisodeWatched: () {
-                      // Just increment the refresh key to trigger a rebuild
-                      // The parent widget will handle the actual data refresh
-                      refreshKey.value++;
+                      // Refresh the show data when episodes are updated
+                      refreshShowData();
                       
                       // The onProgressChanged callback will be called by SeasonsProgressWidget
                       // which will update the fullyWatched status if needed

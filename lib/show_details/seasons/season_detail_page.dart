@@ -18,7 +18,7 @@ class SeasonDetailPage extends HookConsumerWidget {
   final int seasonNumber;
   final String? showTitle;
   final String? languageCode;
-  final VoidCallback? onEpisodeWatched;
+  final Function()? onEpisodeWatched;
 
   const SeasonDetailPage({
     super.key,
@@ -92,6 +92,10 @@ class SeasonDetailPage extends HookConsumerWidget {
         episodesState: episodes,
         progressState: progress,
       );
+      // Notify parent that episodes were updated
+      if (onEpisodeWatched != null) {
+        onEpisodeWatched!();
+      }
     }
 
     Future<void> handleToggleEpisode(int epNumber, bool watched) async {
@@ -109,10 +113,10 @@ class SeasonDetailPage extends HookConsumerWidget {
           // Update only the specific show in the watchlist
           final container = ProviderScope.containerOf(context);
           final watchlistNotifier = container.read(watchlistProvider.notifier);
-          
+
           // Update just this show's progress
           watchlistNotifier.updateShowProgress(showId);
-          
+
           // Notify parent that an episode's watched status changed
           onEpisodeWatched?.call();
         },

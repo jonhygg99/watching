@@ -23,11 +23,15 @@ class SeasonActions {
         await traktApi.removeFromHistory(
           shows: [
             {
-              "ids": int.tryParse(showId) != null ? {"trakt": int.parse(showId)} : {"slug": showId},
+              "ids":
+                  int.tryParse(showId) != null
+                      ? {"trakt": int.parse(showId)}
+                      : {"slug": showId},
               "seasons": [
                 {
                   "number": seasonNumber,
-                  "episodes": episodes.map((n) => {"number": n['number']}).toList(),
+                  "episodes":
+                      episodes.map((n) => {"number": n['number']}).toList(),
                 },
               ],
             },
@@ -37,11 +41,15 @@ class SeasonActions {
         await traktApi.addToWatchHistory(
           shows: [
             {
-              "ids": int.tryParse(showId) != null ? {"trakt": int.parse(showId)} : {"slug": showId},
+              "ids":
+                  int.tryParse(showId) != null
+                      ? {"trakt": int.parse(showId)}
+                      : {"slug": showId},
               "seasons": [
                 {
                   "number": seasonNumber,
-                  "episodes": episodes.map((n) => {"number": n['number']}).toList(),
+                  "episodes":
+                      episodes.map((n) => {"number": n['number']}).toList(),
                 },
               ],
             },
@@ -61,7 +69,8 @@ class SeasonActions {
       episodesState.value = eps;
       progressState.value = prog;
       final List<dynamic>? seasons = prog["seasons"] as List<dynamic>?;
-      final Map<String, dynamic>? season = seasons?.cast<Map<String, dynamic>>()
+      final Map<String, dynamic>? season = seasons
+          ?.cast<Map<String, dynamic>>()
           .firstWhere((s) => s["number"] == seasonNumber, orElse: () => {});
       final Set<int> watchedNumbers = <int>{};
       if (season != null && season["episodes"] is List) {
@@ -106,7 +115,10 @@ class SeasonActions {
         await traktApi.removeFromHistory(
           shows: [
             {
-              "ids": int.tryParse(showId) != null ? {"trakt": int.parse(showId)} : {"slug": showId},
+              "ids":
+                  int.tryParse(showId) != null
+                      ? {"trakt": int.parse(showId)}
+                      : {"slug": showId},
               "seasons": [
                 {
                   "number": seasonNumber,
@@ -122,7 +134,10 @@ class SeasonActions {
         await traktApi.addToWatchHistory(
           shows: [
             {
-              "ids": int.tryParse(showId) != null ? {"trakt": int.parse(showId)} : {"slug": showId},
+              "ids":
+                  int.tryParse(showId) != null
+                      ? {"trakt": int.parse(showId)}
+                      : {"slug": showId},
               "seasons": [
                 {
                   "number": seasonNumber,
@@ -148,7 +163,8 @@ class SeasonActions {
       episodesState.value = eps;
       progressState.value = prog;
       final List<dynamic>? seasons = prog["seasons"] as List<dynamic>?;
-      final Map<String, dynamic>? season = seasons?.cast<Map<String, dynamic>>()
+      final Map<String, dynamic>? season = seasons
+          ?.cast<Map<String, dynamic>>()
           .firstWhere((s) => s["number"] == seasonNumber, orElse: () => {});
       bool isNowWatched = false;
       if (season != null && season["episodes"] is List) {
