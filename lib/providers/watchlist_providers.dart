@@ -16,18 +16,19 @@ const _kWatchlistCacheDuration = Duration(minutes: 5);
 
 /// State notifier for watchlist cache
 class WatchlistCache {
-  final Map<
-    WatchlistType,
-    (List<Map<String, dynamic>> data, DateTime timestamp)
-  >
-  _cache = {};
+  final Map<WatchlistType, (List<Map<String, dynamic>> data, DateTime timestamp)> _cache = {};
+  
+  /// Get the cache entry for a specific type
+  (List<Map<String, dynamic>>, DateTime)? getCacheEntry(WatchlistType type) => _cache[type];
 
   /// Get cached data if it exists and is not expired
   List<Map<String, dynamic>>? getCached(WatchlistType type) {
     final cached = _cache[type];
-    if (cached != null &&
-        DateTime.now().difference(cached.$2) < _kWatchlistCacheDuration) {
-      return cached.$1;
+    if (cached != null) {
+      final (data, timestamp) = cached;
+      if (DateTime.now().difference(timestamp) < _kWatchlistCacheDuration) {
+        return data;
+      }
     }
     return null;
   }
@@ -222,25 +223,83 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   /// Refresh watchlist data
   Future<void> refresh() async {
     final type = _ref.read(watchlistTypeProvider);
-    _ref.read(watchlistCacheProvider).invalidateCache(type);
+    final cache = _ref.read(watchlistCacheProvider);
+    
+    // Get the cached entry
+    final cachedData = cache.getCached(type);
+    
+    // If we have cached data, check if it's fresh enough
+    if (cachedData != null) {
+      final cacheEntry = cache.getCacheEntry(type);
+      if (cacheEntry != null) {
+        final (_, timestamp) = cacheEntry;
+        final cacheAge = DateTime.now().difference(timestamp);
+        if (cacheAge.inSeconds < 30) {
+          // If cache is fresh, just update the state with cached data
+          state = state.copyWith(
+            items: cachedData,
+            hasData: true,
+            isLoading: false,
+            error: null,
+          );
+          return;
+        }
+      }
+    }
+    
+    // Otherwise, do a full refresh
+    cache.invalidateCache(type);
     await _loadWatchlist();
   }
 
-  /// Update a single item in the watchlist
-  void updateItem(String traktId, Map<String, dynamic> updates) {
-    final index = state.items.indexWhere((item) {
-      final ids = item['show']?['ids'] ?? item['ids'];
-      return (ids?['trakt']?.toString() == traktId || ids?['slug'] == traktId);
-    });
+  /// Update a single show's progress in the watchlist
+  Future<void> updateShowProgress(String traktId) async {
+    try {
+      // Find the show in the current state
+      final index = state.items.indexWhere((item) {
+        final ids = item['show']?['ids'] ?? item['ids'];
+        return (ids?['trakt']?.toString() == traktId || ids?['slug'] == traktId);
+      });
 
-    if (index != -1) {
+      if (index == -1) return;
+
+      final trakt = _ref.read(traktApiProvider);
+      
+      // Fetch fresh progress data for this show
+      final progress = await trakt.getShowWatchedProgress(id: traktId);
+      final nextEpisode = await _getNextEpisode(trakt, traktId, progress);
+      
+      // Update the progress with next episode if available
+      if (nextEpisode != null) {
+        progress['next_episode'] = nextEpisode;
+      }
+
+      // Create updated items list
       final updatedItems = List<Map<String, dynamic>>.from(state.items);
-      updatedItems[index] = {...updatedItems[index], ...updates};
-      state = state.copyWith(items: updatedItems);
+      final item = updatedItems[index];
+      final show = item['show'] ?? item;
 
-      // Update cache
+      updatedItems[index] = {
+        ...item,
+        'progress': progress,
+        'show': {
+          ...show,
+          'progress': progress,
+        },
+      };
+
+      // Update cache first
       final type = _ref.read(watchlistTypeProvider);
       _ref.read(watchlistCacheProvider).updateCache(type, updatedItems);
+
+      // Then update the state
+      state = state.copyWith(
+        items: updatedItems,
+      );
+    } catch (e) {
+      debugPrint('Error updating show progress: $e');
+      // If there's an error, do a full refresh to ensure consistency
+      await refresh();
     }
   }
 }

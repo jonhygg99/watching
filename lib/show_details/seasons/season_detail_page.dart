@@ -106,15 +106,15 @@ class SeasonDetailPage extends HookConsumerWidget {
         episodesState: episodes,
         progressState: progress,
         onEpisodeToggled: () {
-          // Invalidate watchlist cache to force refresh
+          // Update only the specific show in the watchlist
           final container = ProviderScope.containerOf(context);
           final watchlistNotifier = container.read(watchlistProvider.notifier);
-          watchlistNotifier.refresh();
+          
+          // Update just this show's progress
+          watchlistNotifier.updateShowProgress(showId);
           
           // Notify parent that an episode's watched status changed
-          if (onEpisodeWatched != null) {
-            onEpisodeWatched!();
-          }
+          onEpisodeWatched?.call();
         },
       );
     }

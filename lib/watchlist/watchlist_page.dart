@@ -142,12 +142,9 @@ class WatchlistPage extends HookConsumerWidget {
                         animatingOut.value = {...animatingOut.value, traktId};
                         stateUpdater.value++;
 
-                        // Remove from list after animation
-                        Future.delayed(const Duration(milliseconds: 300), () {
-                          ref.read(watchlistProvider.notifier).updateItem(
-                            traktId,
-                            {'is_fully_watched': true},
-                          );
+                        // Remove from list after animation and refresh show progress
+                        Future.delayed(const Duration(milliseconds: 300), () async {
+                          await ref.read(watchlistProvider.notifier).updateShowProgress(traktId);
                           animatingOut.value = {};
                           stateUpdater.value++;
                         });
