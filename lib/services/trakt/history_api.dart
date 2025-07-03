@@ -86,7 +86,7 @@ mixin HistoryApi on TraktApiBase {
 
   Future<List<dynamic>> getWatchlist({
     String type = 'shows',
-    String sort = 'rank',
+    String sort = 'watched',
   }) async {
     try {
       final response = await getJsonList('/users/me/watchlist/$type/$sort');

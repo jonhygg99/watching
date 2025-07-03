@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 
@@ -9,95 +11,257 @@ final watchlistTypeProvider = StateProvider<WatchlistType>(
   (ref) => WatchlistType.shows,
 );
 
-/// Async provider for the filtered watchlist.
-/// Fetches the latest shows/movies from the Trakt API, including progress as provided by the API.
-/// No extra progress fetching is performed. Items are returned as-is.
-/// Provider for the user's watchlist with accurate progress for each show.
-/// For each show, fetches the watched progress using Trakt's /shows/{id}/progress/watched endpoint.
-/// Results are attached as 'progress' and are fully compatible with the UI (WatchProgressInfo).
-final watchlistProvider = FutureProvider.autoDispose<
-  List<Map<String, dynamic>>
->((ref) async {
-  final trakt = ref.watch(traktApiProvider);
-  final type = ref.watch(watchlistTypeProvider);
-  final typeStr = type == WatchlistType.shows ? 'shows' : 'movies';
+/// Cache duration for watchlist data (5 minutes)
+const _kWatchlistCacheDuration = Duration(minutes: 5);
 
-  // Fetch watchlist items from the API
-  final items = await trakt.getWatched(type: typeStr);
+/// State notifier for watchlist cache
+class WatchlistCache {
+  final Map<
+    WatchlistType,
+    (List<Map<String, dynamic>> data, DateTime timestamp)
+  >
+  _cache = {};
 
-  // Filter out items that don't have a show object
-  final filteredItems =
-      items.where((item) {
-        // The item should have a 'show' field that contains the show data
-        final hasShow = item['show'] is Map<String, dynamic>;
-        if (!hasShow) {
-          return false;
-        }
+  /// Get cached data if it exists and is not expired
+  List<Map<String, dynamic>>? getCached(WatchlistType type) {
+    final cached = _cache[type];
+    if (cached != null &&
+        DateTime.now().difference(cached.$2) < _kWatchlistCacheDuration) {
+      return cached.$1;
+    }
+    return null;
+  }
 
-        // For watched items, we don't need to filter by type since we're already getting
-        // the correct type from the API endpoint (/users/me/watched/shows or /users/me/watched/movies)
-        return true;
-      }).toList();
+  /// Update cache for a specific type
+  void updateCache(WatchlistType type, List<Map<String, dynamic>> data) {
+    _cache[type] = (List<Map<String, dynamic>>.from(data), DateTime.now());
+  }
 
-  // For each show, fetch its watched progress and compute the next episode
-  final futures =
-      filteredItems.whereType<Map<String, dynamic>>().map((item) async {
-        final show = item['show'];
-        final ids = show != null ? show['ids'] : null;
-        final traktId =
-            ids != null ? ids['slug'] ?? ids['trakt']?.toString() : null;
+  /// Invalidate cache for a specific type
+  void invalidateCache(WatchlistType type) {
+    _cache.remove(type);
+  }
+}
 
-        if (traktId != null) {
-          try {
-            // Fetch watched progress for this show
-            final progress = await trakt.getShowWatchedProgress(id: traktId);
-            final Map<String, dynamic> mutableProgress = Map.from(progress);
+/// Provider for watchlist cache
+final watchlistCacheProvider = Provider<WatchlistCache>(
+  (ref) => WatchlistCache(),
+);
 
-            // Find the next episode to watch
-            Map<String, dynamic>? nextEpisode;
-            if (progress['seasons'] is List) {
-              final seasons =
-                  (progress['seasons'] as List)
-                      .where((s) => s['number'] != 0)
-                      .toList();
+/// Provider for watchlist state
+class WatchlistState {
+  final List<Map<String, dynamic>> items;
+  final bool isLoading;
+  final Object? error;
+  final bool hasData;
 
-              for (var season in seasons) {
-                if (season['episodes'] is List) {
-                  for (var episode in season['episodes']) {
-                    if (episode['completed'] == false) {
-                      nextEpisode = {
-                        'season': season['number'],
-                        'episode': episode['number'],
-                      };
-                      break;
-                    }
-                  }
-                }
-                if (nextEpisode != null) break;
-              }
-            }
+  const WatchlistState({
+    this.items = const [],
+    this.isLoading = false,
+    this.error,
+    this.hasData = false,
+  });
 
-            // If a next episode is found, fetch its full details
-            if (nextEpisode != null) {
+  WatchlistState copyWith({
+    List<Map<String, dynamic>>? items,
+    bool? isLoading,
+    Object? error,
+    bool? hasData,
+  }) {
+    return WatchlistState(
+      items: items ?? this.items,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      hasData: hasData ?? this.hasData,
+    );
+  }
+}
+
+/// Notifier for watchlist state management
+class WatchlistNotifier extends StateNotifier<WatchlistState> {
+  final Ref _ref;
+  StreamSubscription? _subscription;
+
+  WatchlistNotifier(this._ref) : super(const WatchlistState()) {
+    // Initial load
+    _loadWatchlist();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  /// Load watchlist data with caching
+  Future<void> _loadWatchlist() async {
+    try {
+      final type = _ref.read(watchlistTypeProvider);
+      final cache = _ref.read(watchlistCacheProvider);
+
+      // Check cache first
+      final cachedData = cache.getCached(type);
+      if (cachedData != null) {
+        state = state.copyWith(
+          items: cachedData,
+          hasData: true,
+          isLoading: true, // Still loading fresh data in background
+        );
+      } else {
+        state = state.copyWith(isLoading: true);
+      }
+
+      // Fetch fresh data
+      final trakt = _ref.read(traktApiProvider);
+      final typeStr = type == WatchlistType.shows ? 'shows' : 'movies';
+
+      // Fetch watchlist items from the API
+      final items = await trakt.getWatched(type: typeStr);
+
+      // Process items
+      final processedItems = await _processItems(items);
+
+      // Update cache
+      cache.updateCache(type, processedItems);
+
+      // Update state
+      state = state.copyWith(
+        items: processedItems,
+        isLoading: false,
+        hasData: true,
+        error: null,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Error loading watchlist: $error\n$stackTrace');
+      state = state.copyWith(
+        isLoading: false,
+        error: error,
+        hasData: state.items.isNotEmpty, // Keep existing data if available
+      );
+    }
+  }
+
+  /// Process watchlist items (fetch progress, next episode, etc.)
+  Future<List<Map<String, dynamic>>> _processItems(List<dynamic> items) async {
+    final trakt = _ref.read(traktApiProvider);
+    final filteredItems = items.whereType<Map<String, dynamic>>().toList();
+
+    final results = await Future.wait(
+      filteredItems.map((item) => _processItem(item, trakt)),
+      eagerError: true,
+    );
+
+    return results.whereType<Map<String, dynamic>>().toList();
+  }
+
+  /// Process a single watchlist item
+  Future<Map<String, dynamic>?> _processItem(
+    Map<String, dynamic> item,
+    dynamic trakt,
+  ) async {
+    try {
+      final show = item['show'] ?? item;
+      final ids = show['ids'];
+      final traktId = ids?['slug'] ?? ids?['trakt']?.toString();
+
+      if (traktId == null) return null;
+
+      // Fetch progress and next episode in parallel
+      final progress = await trakt.getShowWatchedProgress(id: traktId);
+      final nextEpisode = await _getNextEpisode(trakt, traktId, progress);
+
+      if (nextEpisode != null) {
+        progress['next_episode'] = nextEpisode;
+      }
+
+      return {...item, 'progress': progress};
+    } catch (e) {
+      debugPrint('Error processing item: $e');
+      return {...item, 'progress': {}};
+    }
+  }
+
+  /// Get next episode to watch
+  Future<Map<String, dynamic>?> _getNextEpisode(
+    dynamic trakt,
+    String traktId,
+    Map<String, dynamic> progress,
+  ) async {
+    try {
+      if (progress['seasons'] is! List) return null;
+
+      final seasons =
+          (progress['seasons'] as List).where((s) => s['number'] != 0).toList();
+
+      for (var season in seasons) {
+        if (season['episodes'] is! List) continue;
+
+        for (var episode in season['episodes']) {
+          if (episode['completed'] == false) {
+            try {
               final episodeInfo = await trakt.getEpisodeInfo(
                 id: traktId,
-                season: nextEpisode['season'],
-                episode: nextEpisode['episode'],
+                season: season['number'],
+                episode: episode['number'],
               );
-              mutableProgress['next_episode'] = episodeInfo;
+              return episodeInfo;
+            } catch (e) {
+              debugPrint('Error fetching episode info: $e');
+              return null;
             }
-
-            return {...item, 'progress': mutableProgress};
-          } catch (e) {
-            // On error, still include the item with empty progress for UI consistency
-            return {...item, 'progress': <String, dynamic>{}};
           }
-        } else {
-          // If no traktId, fallback to empty progress
-          return {...item, 'progress': <String, dynamic>{}};
         }
-      }).toList();
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error finding next episode: $e');
+      return null;
+    }
+  }
 
-  // Wait for all progress fetches to complete
-  return await Future.wait(futures);
+  /// Refresh watchlist data
+  Future<void> refresh() async {
+    final type = _ref.read(watchlistTypeProvider);
+    _ref.read(watchlistCacheProvider).invalidateCache(type);
+    await _loadWatchlist();
+  }
+
+  /// Update a single item in the watchlist
+  void updateItem(String traktId, Map<String, dynamic> updates) {
+    final index = state.items.indexWhere((item) {
+      final ids = item['show']?['ids'] ?? item['ids'];
+      return (ids?['trakt']?.toString() == traktId || ids?['slug'] == traktId);
+    });
+
+    if (index != -1) {
+      final updatedItems = List<Map<String, dynamic>>.from(state.items);
+      updatedItems[index] = {...updatedItems[index], ...updates};
+      state = state.copyWith(items: updatedItems);
+
+      // Update cache
+      final type = _ref.read(watchlistTypeProvider);
+      _ref.read(watchlistCacheProvider).updateCache(type, updatedItems);
+    }
+  }
+}
+
+/// Provider for watchlist state
+final watchlistProvider =
+    StateNotifierProvider<WatchlistNotifier, WatchlistState>((ref) {
+      return WatchlistNotifier(ref);
+    });
+
+/// Provider for watchlist items
+final watchlistItemsProvider = Provider<List<Map<String, dynamic>>>((ref) {
+  return ref.watch(watchlistProvider.select((state) => state.items));
+});
+
+/// Provider for watchlist loading state
+final watchlistLoadingProvider = Provider<bool>((ref) {
+  return ref.watch(watchlistProvider.select((state) => state.isLoading));
+});
+
+/// Provider for watchlist error state
+final watchlistErrorProvider = Provider<Object?>((ref) {
+  return ref.watch(watchlistProvider.select((state) => state.error));
 });
