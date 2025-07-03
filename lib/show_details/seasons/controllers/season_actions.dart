@@ -98,6 +98,7 @@ class SeasonActions {
     required Future<void> Function(int, Color, {int delayMs}) setMarkingColor,
     required ValueNotifier<List<Map<String, dynamic>>> episodesState,
     required ValueNotifier<Map<String, dynamic>?> progressState,
+    VoidCallback? onEpisodeToggled,
   }) async {
     await setMarkingColor(epNumber, Colors.blue);
     try {
@@ -160,8 +161,12 @@ class SeasonActions {
       }
       if (isNowWatched) {
         await setMarkingColor(epNumber, Colors.green);
+        // Notify that an episode was toggled
+        onEpisodeToggled?.call();
       } else {
         await setMarkingColor(epNumber, Colors.grey);
+        // Notify that an episode was toggled
+        onEpisodeToggled?.call();
       }
     } catch (e) {
       await setMarkingColor(epNumber, Colors.red, delayMs: 500);
