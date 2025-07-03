@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../providers/app_providers.dart';
+import '../providers/watchlist_providers.dart';
 import 'seasons_progress_widget.dart';
 import 'show_info_chips.dart';
 import 'show_description.dart';
@@ -26,6 +27,12 @@ class ShowDetailPage extends HookConsumerWidget {
     final refreshTrigger = useState(0); // Separate trigger for episode updates
     final apiService = ref.watch(traktApiProvider);
     final countryCode = ref.watch(countryCodeProvider);
+    final watchlistNotifier = ref.read(watchlistProvider.notifier);
+    
+    // Function to refresh watchlist data
+    Future<void> refreshWatchlist() async {
+      await watchlistNotifier.updateShowProgress(showId);
+    }
     
     // Watch for changes to the refresh key to trigger a rebuild
     useEffect(() {
@@ -58,6 +65,9 @@ class ShowDetailPage extends HookConsumerWidget {
     // Intercept back navigation to pass result if fully watched
     return WillPopScope(
       onWillPop: () async {
+        // Always refresh the watchlist when going back
+        await refreshWatchlist();
+        
         if (fullyWatched.value) {
           Navigator.pop(context, {'traktId': showId, 'fullyWatched': true});
           return false;
@@ -160,12 +170,11 @@ class ShowDetailPage extends HookConsumerWidget {
                       }
                     },
                     onEpisodeWatched: () {
-                      // Refresh the show data when episodes are updated
+                      // Refresh the UI and watchlist data
                       refreshShowData();
-                      
-                      // The onProgressChanged callback will be called by SeasonsProgressWidget
-                      // which will update the fullyWatched status if needed
+                      refreshWatchlist();
                     },
+                    onWatchlistUpdate: refreshWatchlist,
                   ),
                   ShowDetailVideos(videos: videos),
                   ShowDetailCast(

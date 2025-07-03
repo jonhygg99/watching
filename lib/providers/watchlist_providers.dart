@@ -255,50 +255,54 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   /// Update a single show's progress in the watchlist
   Future<void> updateShowProgress(String traktId) async {
     try {
-      // Find the show in the current state
-      final index = state.items.indexWhere((item) {
+      // First, invalidate the cache to force a fresh fetch
+      final type = _ref.read(watchlistTypeProvider);
+      final cache = _ref.read(watchlistCacheProvider);
+      cache.invalidateCache(type);
+      
+      // Fetch fresh data from the API
+      final trakt = _ref.read(traktApiProvider);
+      final progress = await trakt.getShowWatchedProgress(id: traktId);
+      final nextEpisode = await _getNextEpisode(trakt, traktId, progress);
+      
+      if (nextEpisode != null) {
+        progress['next_episode'] = nextEpisode;
+      }
+      
+      // Find the show in the current state and update its progress
+      final updatedItems = List<Map<String, dynamic>>.from(state.items);
+      final index = updatedItems.indexWhere((item) {
         final ids = item['show']?['ids'] ?? item['ids'];
         return (ids?['trakt']?.toString() == traktId || ids?['slug'] == traktId);
       });
 
-      if (index == -1) return;
-
-      final trakt = _ref.read(traktApiProvider);
-      
-      // Fetch fresh progress data for this show
-      final progress = await trakt.getShowWatchedProgress(id: traktId);
-      final nextEpisode = await _getNextEpisode(trakt, traktId, progress);
-      
-      // Update the progress with next episode if available
-      if (nextEpisode != null) {
-        progress['next_episode'] = nextEpisode;
-      }
-
-      // Create updated items list
-      final updatedItems = List<Map<String, dynamic>>.from(state.items);
-      final item = updatedItems[index];
-      final show = item['show'] ?? item;
-
-      updatedItems[index] = {
-        ...item,
-        'progress': progress,
-        'show': {
-          ...show,
+      if (index != -1) {
+        final item = updatedItems[index];
+        final show = item['show'] ?? item;
+        
+        updatedItems[index] = {
+          ...item,
           'progress': progress,
-        },
-      };
-
-      // Update cache first
-      final type = _ref.read(watchlistTypeProvider);
-      _ref.read(watchlistCacheProvider).updateCache(type, updatedItems);
-
-      // Then update the state
-      state = state.copyWith(
-        items: updatedItems,
-      );
+          'show': {
+            ...show,
+            'progress': progress,
+          },
+        };
+        
+        // Update the cache with the fresh data
+        cache.updateCache(type, updatedItems);
+        
+        // Update the state
+        state = state.copyWith(
+          items: updatedItems,
+        );
+      } else {
+        // If show not found in current state, do a full refresh
+        await refresh();
+      }
     } catch (e) {
       debugPrint('Error updating show progress: $e');
-      // If there's an error, do a full refresh to ensure consistency
+      // Fall back to a full refresh if anything goes wrong
       await refresh();
     }
   }

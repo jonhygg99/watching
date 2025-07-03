@@ -19,6 +19,7 @@ class SeasonDetailPage extends HookConsumerWidget {
   final String? showTitle;
   final String? languageCode;
   final Function()? onEpisodeWatched;
+  final Function()? onWatchlistUpdate;
 
   const SeasonDetailPage({
     super.key,
@@ -27,6 +28,7 @@ class SeasonDetailPage extends HookConsumerWidget {
     this.showTitle,
     this.languageCode,
     this.onEpisodeWatched,
+    this.onWatchlistUpdate,
   });
 
   @override

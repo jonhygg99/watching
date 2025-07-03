@@ -12,12 +12,14 @@ class SeasonsProgressWidget extends HookConsumerWidget {
   final String? languageCode;
   final Function()? onProgressChanged;
   final Function()? onEpisodeWatched;
+  final Function()? onWatchlistUpdate;
   const SeasonsProgressWidget({
     super.key,
     required this.showId,
     this.languageCode,
     this.onProgressChanged,
     this.onEpisodeWatched,
+    this.onWatchlistUpdate,
   });
 
   @override
@@ -33,20 +35,29 @@ class SeasonsProgressWidget extends HookConsumerWidget {
 
     // Efecto para cargar datos al montar el widget o cuando showId cambia
     useEffect(() {
+      bool isMounted = true;
+      
       Future<void> fetchData() async {
+        if (!isMounted) return;
         loading.value = true;
         try {
           final s = await traktApi.getSeasons(showId);
           final p = await traktApi.getShowWatchedProgress(id: showId);
-          seasons.value = s;
-          progress.value = p;
+          if (isMounted) {
+            seasons.value = s;
+            progress.value = p;
+          }
         } finally {
-          loading.value = false;
+          if (isMounted) {
+            loading.value = false;
+          }
         }
       }
 
       fetchData();
-      return null;
+      return () {
+        isMounted = false; // Cleanup function
+      };
     }, [showId]);
 
     // (Eliminada función markSeasonAsWatched: ahora la lógica está integrada en el onPressed del botón)
@@ -100,10 +111,12 @@ class SeasonsProgressWidget extends HookConsumerWidget {
                         seasonNumber: number,
                         languageCode: languageCode,
                         onEpisodeWatched: () {
-                          // Call both callbacks if they exist
+                          // Call all callbacks if they exist
                           onEpisodeWatched?.call();
                           onProgressChanged?.call();
+                          onWatchlistUpdate?.call();
                         },
+                        onWatchlistUpdate: onWatchlistUpdate,
                       ),
                 ),
               );
