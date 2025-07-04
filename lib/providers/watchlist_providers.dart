@@ -16,10 +16,15 @@ const _kWatchlistCacheDuration = Duration(minutes: 5);
 
 /// State notifier for watchlist cache
 class WatchlistCache {
-  final Map<WatchlistType, (List<Map<String, dynamic>> data, DateTime timestamp)> _cache = {};
-  
+  final Map<
+    WatchlistType,
+    (List<Map<String, dynamic>> data, DateTime timestamp)
+  >
+  _cache = {};
+
   /// Get the cache entry for a specific type
-  (List<Map<String, dynamic>>, DateTime)? getCacheEntry(WatchlistType type) => _cache[type];
+  (List<Map<String, dynamic>>, DateTime)? getCacheEntry(WatchlistType type) =>
+      _cache[type];
 
   /// Get cached data if it exists and is not expired
   List<Map<String, dynamic>>? getCached(WatchlistType type) {
@@ -148,7 +153,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     final filteredItems = items.whereType<Map<String, dynamic>>().toList();
 
     final results = await Future.wait(
-      filteredItems.map((item) => _processItem(item, trakt)),
+      filteredItems.map((item) => _processItem(item, trakt, ref: _ref)),
       eagerError: true,
     );
 
@@ -158,8 +163,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   /// Process a single watchlist item
   Future<Map<String, dynamic>?> _processItem(
     Map<String, dynamic> item,
-    dynamic trakt,
-  ) async {
+    dynamic trakt, {
+    required Ref ref,
+  }) async {
     try {
       final show = item['show'] ?? item;
       final ids = show['ids'];
@@ -167,6 +173,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       if (traktId == null) return null;
 
+      // Get the user's country code
+      final countryCode = ref.read(countryCodeProvider);
+      
       // Fetch progress and next episode in parallel
       final progress = await trakt.getShowWatchedProgress(id: traktId);
       final nextEpisode = await _getNextEpisode(trakt, traktId, progress);
@@ -175,9 +184,71 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         progress['next_episode'] = nextEpisode;
       }
 
-      return {...item, 'progress': progress};
+      // Create a new show map to avoid modifying the original
+      final updatedShow = Map<String, dynamic>.from(show);
+      
+      // Handle translations like in details page
+      try {
+        if (countryCode.isNotEmpty) {
+          final translations = await trakt.getShowTranslations(
+            id: traktId,
+            language: countryCode.toLowerCase(),
+          );
+
+          if (translations != null && translations.isNotEmpty) {
+            // Filter out translations with null title and convert to List if needed
+            List<dynamic> validTranslations = [];
+            if (translations is List) {
+              validTranslations = translations.where((t) => t['title'] != null).toList();
+            } else if (translations is Map) {
+              if (translations['title'] != null) {
+                validTranslations = [translations];
+              }
+            }
+
+            // Find the best matching translation
+            Map<String, dynamic>? translation;
+            if (validTranslations.isNotEmpty) {
+              // Try to find exact match for user's country
+              translation = validTranslations.firstWhere(
+                (t) => t['language']?.toString().toLowerCase() == 
+                      countryCode.toLowerCase().substring(0, 2),
+                orElse: () => validTranslations.first,
+              );
+
+              // Update title and overview if translation found
+              if (translation != null) {
+                updatedShow['title'] = translation['title'] ?? show['title'];
+                if (translation['overview'] != null) {
+                  updatedShow['overview'] = translation['overview'];
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Continue with original title if translation fails
+      }
+
+      // Create a new item with the updated show and progress
+      final updatedItem = {
+        ...item,
+        'show': {
+          ...updatedShow,
+          // Ensure the title is set at the root level for backward compatibility
+          'title': updatedShow['title'] ?? show['title']
+        },
+        'progress': progress,
+      };
+      
+      // Also set the title at the root level for backward compatibility
+      if (updatedShow['title'] != null) {
+        updatedItem['title'] = updatedShow['title'];
+      }
+      
+      return updatedItem;
     } catch (e) {
-      debugPrint('Error processing item: $e');
+
       return {...item, 'progress': {}};
     }
   }
@@ -188,6 +259,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     String traktId,
     Map<String, dynamic> progress,
   ) async {
+    final countryCode = _ref.read(countryCodeProvider);
     try {
       if (progress['seasons'] is! List) return null;
 
@@ -204,8 +276,18 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
                 id: traktId,
                 season: season['number'],
                 episode: episode['number'],
+                language: countryCode.toLowerCase(),
               );
-              return episodeInfo;
+              
+              // Create a new map with the episode data and merge the translated title
+              return {
+                ...episode,  // Keep all original episode data
+                'title': episodeInfo['title'] ?? episode['title'],  // Use translated title if available
+                'overview': episodeInfo['overview'] ?? episode['overview'],  // Use translated overview if available
+                'season': season['number'],
+                'number': episode['number'],
+                'ids': episode['ids'] ?? {},
+              };
             } catch (e) {
               debugPrint('Error fetching episode info: $e');
               return null;
@@ -224,10 +306,10 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   Future<void> refresh() async {
     final type = _ref.read(watchlistTypeProvider);
     final cache = _ref.read(watchlistCacheProvider);
-    
+
     // Get the cached entry
     final cachedData = cache.getCached(type);
-    
+
     // If we have cached data, check if it's fresh enough
     if (cachedData != null) {
       final cacheEntry = cache.getCacheEntry(type);
@@ -246,7 +328,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         }
       }
     }
-    
+
     // Otherwise, do a full refresh
     cache.invalidateCache(type);
     await _loadWatchlist();
@@ -259,43 +341,39 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       final type = _ref.read(watchlistTypeProvider);
       final cache = _ref.read(watchlistCacheProvider);
       cache.invalidateCache(type);
-      
+
       // Fetch fresh data from the API
       final trakt = _ref.read(traktApiProvider);
       final progress = await trakt.getShowWatchedProgress(id: traktId);
       final nextEpisode = await _getNextEpisode(trakt, traktId, progress);
-      
+
       if (nextEpisode != null) {
         progress['next_episode'] = nextEpisode;
       }
-      
+
       // Find the show in the current state and update its progress
       final updatedItems = List<Map<String, dynamic>>.from(state.items);
       final index = updatedItems.indexWhere((item) {
         final ids = item['show']?['ids'] ?? item['ids'];
-        return (ids?['trakt']?.toString() == traktId || ids?['slug'] == traktId);
+        return (ids?['trakt']?.toString() == traktId ||
+            ids?['slug'] == traktId);
       });
 
       if (index != -1) {
         final item = updatedItems[index];
         final show = item['show'] ?? item;
-        
+
         updatedItems[index] = {
           ...item,
           'progress': progress,
-          'show': {
-            ...show,
-            'progress': progress,
-          },
+          'show': {...show, 'progress': progress},
         };
-        
+
         // Update the cache with the fresh data
         cache.updateCache(type, updatedItems);
-        
+
         // Update the state
-        state = state.copyWith(
-          items: updatedItems,
-        );
+        state = state.copyWith(items: updatedItems);
       } else {
         // If show not found in current state, do a full refresh
         await refresh();

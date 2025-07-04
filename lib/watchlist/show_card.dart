@@ -9,7 +9,6 @@ class ShowCard extends StatelessWidget {
   final Widget infoWidget;
   final TraktApi apiService;
   final BuildContext parentContext;
-  final String? countryCode;
 
   const ShowCard({
     super.key,
@@ -18,7 +17,6 @@ class ShowCard extends StatelessWidget {
     required this.infoWidget,
     required this.apiService,
     required this.parentContext,
-    this.countryCode,
   });
 
   @override

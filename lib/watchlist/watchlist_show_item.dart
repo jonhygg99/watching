@@ -24,9 +24,12 @@ class WatchlistShowItem extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Safely get the show map with proper type handling
-    final show = item['show'] is Map ? Map<String, dynamic>.from(item['show'] as Map) : null;
-    final title = show?['title']?.toString() ?? 'Sin título';
-    
+    final show =
+        item['show'] is Map
+            ? Map<String, dynamic>.from(item['show'] as Map)
+            : null;
+    final title = show?['title']?.toString() ?? 'No title';
+
     // Safely get the ids map with proper type handling
     final idsMap = show?['ids'];
     final ids = idsMap is Map ? Map<String, dynamic>.from(idsMap) : null;
@@ -45,7 +48,10 @@ class WatchlistShowItem extends HookConsumerWidget {
     }
     // Safely get progress with proper type handling
     final progressMap = item['progress'];
-    final progress = progressMap is Map ? Map<String, dynamic>.from(progressMap) : <String, dynamic>{};
+    final progress =
+        progressMap is Map
+            ? Map<String, dynamic>.from(progressMap)
+            : <String, dynamic>{};
     final watched = progress['completed'] as int? ?? 0;
     final total = progress['aired'] as int? ?? 1;
     if (traktId == null || watched == total) {
@@ -71,7 +77,6 @@ class WatchlistShowItem extends HookConsumerWidget {
               infoWidget: child,
               apiService: ref.read(traktApiProvider),
               parentContext: context,
-              countryCode: Localizations.localeOf(context).countryCode,
             ),
         onFullyWatched: () => onFullyWatched?.call(traktId),
       );
@@ -93,7 +98,6 @@ class WatchlistShowItem extends HookConsumerWidget {
         posterUrl: posterUrl,
         apiService: ref.read(traktApiProvider),
         parentContext: context,
-        countryCode: Localizations.localeOf(context).countryCode,
         infoWidget: WatchProgressInfo(
           traktId: traktId,
           title: title,

@@ -14,6 +14,7 @@ class SeasonEpisodeList extends StatelessWidget {
         id: showId,
         season: seasonNumber,
         episode: epNumber,
+        language: languageCode,
       );
       return ep;
     } catch (e) {
