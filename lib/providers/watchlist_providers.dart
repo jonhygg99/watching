@@ -188,6 +188,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     String traktId,
     Map<String, dynamic> progress,
   ) async {
+    final countryCode = _ref.read(countryCodeProvider);
     try {
       if (progress['seasons'] is! List) return null;
 
@@ -204,7 +205,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
                 id: traktId,
                 season: season['number'],
                 episode: episode['number'],
-                language: 'es', // Using Spanish as default
+                language: countryCode.toLowerCase()
               );
               return episodeInfo;
             } catch (e) {
