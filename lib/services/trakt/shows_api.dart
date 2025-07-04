@@ -5,21 +5,20 @@ import 'trakt_api.dart';
 /// Mixin for show and season-related endpoints.
 mixin ShowsApi on TraktApiBase {
   /// Gets detailed info for a show by ID.
-  Future<Map<String, dynamic>> getEpisodeInfo({
-    required String id,
-    required int season,
-    required int episode,
-  }) async {
+  Future<Map<String, dynamic>> getShowById({required String id}) async {
+    return await getJsonMap('/shows/$id?extended=full,images,');
+  }
+
+  /// Gets all seasons for a show.
+  Future<List<dynamic>> getSeasons(String showId) async {
     await ensureValidToken();
-    final url = Uri.parse(
-      '$baseUrl/shows/$id/seasons/$season/episodes/$episode?extended=full,images',
-    );
+    final url = Uri.parse('$baseUrl/shows/$showId/seasons?extended=images');
     final response = await http.get(url, headers: headers);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonDecode(response.body) as List<dynamic>;
     } else {
       throw Exception(
-        'Error GET /shows/$id/seasons/$season/episodes/$episode: ${response.statusCode}\n${response.body}',
+        'Error GET /shows/$showId/seasons:\n${response.statusCode}\n${response.body}',
       );
     }
   }
@@ -51,13 +50,16 @@ mixin ShowsApi on TraktApiBase {
           if (episode is Map<String, dynamic> &&
               episode.containsKey('translations') &&
               episode['translations'] is List) {
-            final translations = List<Map<String, dynamic>>.from(episode['translations']);
+            final translations = List<Map<String, dynamic>>.from(
+              episode['translations'],
+            );
             if (translations.isNotEmpty) {
               // Create a new map with the original episode data and override with translation
               return {
                 ...episode,
                 'title': translations.first['title'] ?? episode['title'],
-                'overview': translations.first['overview'] ?? episode['overview'],
+                'overview':
+                    translations.first['overview'] ?? episode['overview'],
               };
             }
           }
@@ -73,23 +75,24 @@ mixin ShowsApi on TraktApiBase {
     }
   }
 
-  /// Gets all seasons for a show.
-  Future<List<dynamic>> getSeasons(String showId) async {
+  /// Gets detailed info for a show by ID.
+  Future<Map<String, dynamic>> getEpisodeInfo({
+    required String id,
+    required int season,
+    required int episode,
+  }) async {
     await ensureValidToken();
-    final url = Uri.parse('$baseUrl/shows/$showId/seasons?extended=images');
+    final url = Uri.parse(
+      '$baseUrl/shows/$id/seasons/$season/episodes/$episode?extended=full,images',
+    );
     final response = await http.get(url, headers: headers);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
+      return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception(
-        'Error GET /shows/$showId/seasons:\n${response.statusCode}\n${response.body}',
+        'Error GET /shows/$id/seasons/$season/episodes/$episode: ${response.statusCode}\n${response.body}',
       );
     }
-  }
-
-  /// Gets detailed info for a show by ID.
-  Future<Map<String, dynamic>> getShowById({required String id}) async {
-    return await getJsonMap('/shows/$id?extended=full,images,');
   }
 
   /// Gets comments for a show by ID.
