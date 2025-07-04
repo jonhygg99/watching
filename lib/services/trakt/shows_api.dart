@@ -179,7 +179,7 @@ mixin ShowsApi on TraktApiBase {
   /// Gets translations for a show.
   Future<List<dynamic>> getShowTranslations({
     required String id,
-    String language = 'es',
+    required String language,
   }) async {
     return await getJsonList('/shows/$id/translations/$language');
   }

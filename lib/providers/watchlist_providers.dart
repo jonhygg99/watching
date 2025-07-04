@@ -153,7 +153,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     final filteredItems = items.whereType<Map<String, dynamic>>().toList();
 
     final results = await Future.wait(
-      filteredItems.map((item) => _processItem(item, trakt)),
+      filteredItems.map((item) => _processItem(item, trakt, ref: _ref)),
       eagerError: true,
     );
 
@@ -163,8 +163,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   /// Process a single watchlist item
   Future<Map<String, dynamic>?> _processItem(
     Map<String, dynamic> item,
-    dynamic trakt,
-  ) async {
+    dynamic trakt, {
+    required Ref ref,
+  }) async {
     try {
       final show = item['show'] ?? item;
       final ids = show['ids'];
@@ -172,6 +173,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       if (traktId == null) return null;
 
+      // Get the user's country code
+      final countryCode = ref.read(countryCodeProvider);
+      
       // Fetch progress and next episode in parallel
       final progress = await trakt.getShowWatchedProgress(id: traktId);
       final nextEpisode = await _getNextEpisode(trakt, traktId, progress);
@@ -180,9 +184,80 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         progress['next_episode'] = nextEpisode;
       }
 
-      return {...item, 'progress': progress};
+      // Create a new show map to avoid modifying the original
+      final updatedShow = Map<String, dynamic>.from(show);
+      
+      // Try to fetch and use translation if available
+      try {
+        if (countryCode.isNotEmpty) {
+
+          final translations = await trakt.getShowTranslations(
+            id: traktId,
+            language: countryCode.toLowerCase(),
+          );
+          
+
+          
+          if (translations.isNotEmpty) {
+            // The API might return a list of translations or a single translation object
+            // depending on the response format
+            dynamic translation;
+            if (translations is List) {
+              translation = translations.firstWhere(
+                (t) => t['language']?.toLowerCase() == countryCode.toLowerCase(),
+                orElse: () => null,
+              );
+            } else if (translations is Map) {
+              // If it's a single translation object
+              translation = translations;
+            }
+            
+            if (translation != null) {
+              // Check both the root level and in a 'title' field
+              final translatedTitle = translation is Map<String, dynamic> 
+                  ? (translation['title'] ?? translation['name'])
+                  : null;
+                  
+              if (translatedTitle != null) {
+
+                updatedShow['title'] = translatedTitle;
+                
+                // Also update the overview if available
+                if (translation is Map<String, dynamic> && translation['overview'] != null) {
+                  updatedShow['overview'] = translation['overview'];
+                }
+              } else {
+
+              }
+            } else {
+
+            }
+          }
+        }
+      } catch (e) {
+
+        // Continue with original title if translation fails
+      }
+
+      // Create a new item with the updated show and progress
+      final updatedItem = {
+        ...item,
+        'show': {
+          ...updatedShow,
+          // Ensure the title is set at the root level for backward compatibility
+          'title': updatedShow['title'] ?? show['title']
+        },
+        'progress': progress,
+      };
+      
+      // Also set the title at the root level for backward compatibility
+      if (updatedShow['title'] != null) {
+        updatedItem['title'] = updatedShow['title'];
+      }
+      
+      return updatedItem;
     } catch (e) {
-      debugPrint('Error processing item: $e');
+
       return {...item, 'progress': {}};
     }
   }
