@@ -28,18 +28,18 @@ class ShowDetailPage extends HookConsumerWidget {
     final apiService = ref.watch(traktApiProvider);
     final countryCode = ref.watch(countryCodeProvider);
     final watchlistNotifier = ref.read(watchlistProvider.notifier);
-    
+
     // Function to refresh watchlist data
     Future<void> refreshWatchlist() async {
       await watchlistNotifier.updateShowProgress(showId);
     }
-    
+
     // Watch for changes to the refresh key to trigger a rebuild
     useEffect(() {
       // This will run whenever refreshKey changes
       return null;
     }, [refreshKey.value]);
-    
+
     final sortLabels = const {
       'likes': 'Más likes',
       'newest': 'Más recientes',
@@ -67,7 +67,7 @@ class ShowDetailPage extends HookConsumerWidget {
       onWillPop: () async {
         // Always refresh the watchlist when going back
         await refreshWatchlist();
-        
+
         if (fullyWatched.value) {
           Navigator.pop(context, {'traktId': showId, 'fullyWatched': true});
           return false;
@@ -169,6 +169,7 @@ class ShowDetailPage extends HookConsumerWidget {
                         fullyWatched.value = true;
                       }
                     },
+                    languageCode: countryCode.toLowerCase(),
                     onEpisodeWatched: () {
                       // Refresh the UI and watchlist data
                       refreshShowData();

@@ -43,7 +43,29 @@ mixin ShowsApi on TraktApiBase {
     );
     final response = await http.get(url, headers: headers);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
+      final episodes = jsonDecode(response.body) as List<dynamic>;
+
+      // If translations were requested, extract the translated episode data
+      if (translations != null && translations != 'all') {
+        return episodes.map((episode) {
+          if (episode is Map<String, dynamic> &&
+              episode.containsKey('translations') &&
+              episode['translations'] is List) {
+            final translations = List<Map<String, dynamic>>.from(episode['translations']);
+            if (translations.isNotEmpty) {
+              // Create a new map with the original episode data and override with translation
+              return {
+                ...episode,
+                'title': translations.first['title'] ?? episode['title'],
+                'overview': translations.first['overview'] ?? episode['overview'],
+              };
+            }
+          }
+          return episode;
+        }).toList();
+      }
+
+      return episodes;
     } else {
       throw Exception(
         'Error GET /shows/$id/seasons/$season: ${response.statusCode}\n${response.body}',
