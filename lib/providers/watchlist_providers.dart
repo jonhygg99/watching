@@ -16,10 +16,15 @@ const _kWatchlistCacheDuration = Duration(minutes: 5);
 
 /// State notifier for watchlist cache
 class WatchlistCache {
-  final Map<WatchlistType, (List<Map<String, dynamic>> data, DateTime timestamp)> _cache = {};
-  
+  final Map<
+    WatchlistType,
+    (List<Map<String, dynamic>> data, DateTime timestamp)
+  >
+  _cache = {};
+
   /// Get the cache entry for a specific type
-  (List<Map<String, dynamic>>, DateTime)? getCacheEntry(WatchlistType type) => _cache[type];
+  (List<Map<String, dynamic>>, DateTime)? getCacheEntry(WatchlistType type) =>
+      _cache[type];
 
   /// Get cached data if it exists and is not expired
   List<Map<String, dynamic>>? getCached(WatchlistType type) {
@@ -205,7 +210,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
                 id: traktId,
                 season: season['number'],
                 episode: episode['number'],
-                language: countryCode.toLowerCase()
+                language: countryCode.toLowerCase(),
               );
               return episodeInfo;
             } catch (e) {
@@ -226,10 +231,10 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   Future<void> refresh() async {
     final type = _ref.read(watchlistTypeProvider);
     final cache = _ref.read(watchlistCacheProvider);
-    
+
     // Get the cached entry
     final cachedData = cache.getCached(type);
-    
+
     // If we have cached data, check if it's fresh enough
     if (cachedData != null) {
       final cacheEntry = cache.getCacheEntry(type);
@@ -248,7 +253,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         }
       }
     }
-    
+
     // Otherwise, do a full refresh
     cache.invalidateCache(type);
     await _loadWatchlist();
@@ -261,43 +266,39 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       final type = _ref.read(watchlistTypeProvider);
       final cache = _ref.read(watchlistCacheProvider);
       cache.invalidateCache(type);
-      
+
       // Fetch fresh data from the API
       final trakt = _ref.read(traktApiProvider);
       final progress = await trakt.getShowWatchedProgress(id: traktId);
       final nextEpisode = await _getNextEpisode(trakt, traktId, progress);
-      
+
       if (nextEpisode != null) {
         progress['next_episode'] = nextEpisode;
       }
-      
+
       // Find the show in the current state and update its progress
       final updatedItems = List<Map<String, dynamic>>.from(state.items);
       final index = updatedItems.indexWhere((item) {
         final ids = item['show']?['ids'] ?? item['ids'];
-        return (ids?['trakt']?.toString() == traktId || ids?['slug'] == traktId);
+        return (ids?['trakt']?.toString() == traktId ||
+            ids?['slug'] == traktId);
       });
 
       if (index != -1) {
         final item = updatedItems[index];
         final show = item['show'] ?? item;
-        
+
         updatedItems[index] = {
           ...item,
           'progress': progress,
-          'show': {
-            ...show,
-            'progress': progress,
-          },
+          'show': {...show, 'progress': progress},
         };
-        
+
         // Update the cache with the fresh data
         cache.updateCache(type, updatedItems);
-        
+
         // Update the state
-        state = state.copyWith(
-          items: updatedItems,
-        );
+        state = state.copyWith(items: updatedItems);
       } else {
         // If show not found in current state, do a full refresh
         await refresh();
