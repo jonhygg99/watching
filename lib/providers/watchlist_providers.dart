@@ -187,55 +187,46 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       // Create a new show map to avoid modifying the original
       final updatedShow = Map<String, dynamic>.from(show);
       
-      // Try to fetch and use translation if available
+      // Handle translations like in details page
       try {
         if (countryCode.isNotEmpty) {
-
           final translations = await trakt.getShowTranslations(
             id: traktId,
             language: countryCode.toLowerCase(),
           );
-          
 
-          
-          if (translations.isNotEmpty) {
-            // The API might return a list of translations or a single translation object
-            // depending on the response format
-            dynamic translation;
+          if (translations != null && translations.isNotEmpty) {
+            // Filter out translations with null title and convert to List if needed
+            List<dynamic> validTranslations = [];
             if (translations is List) {
-              translation = translations.firstWhere(
-                (t) => t['language']?.toLowerCase() == countryCode.toLowerCase(),
-                orElse: () => null,
-              );
+              validTranslations = translations.where((t) => t['title'] != null).toList();
             } else if (translations is Map) {
-              // If it's a single translation object
-              translation = translations;
+              if (translations['title'] != null) {
+                validTranslations = [translations];
+              }
             }
-            
-            if (translation != null) {
-              // Check both the root level and in a 'title' field
-              final translatedTitle = translation is Map<String, dynamic> 
-                  ? (translation['title'] ?? translation['name'])
-                  : null;
-                  
-              if (translatedTitle != null) {
 
-                updatedShow['title'] = translatedTitle;
-                
-                // Also update the overview if available
-                if (translation is Map<String, dynamic> && translation['overview'] != null) {
+            // Find the best matching translation
+            Map<String, dynamic>? translation;
+            if (validTranslations.isNotEmpty) {
+              // Try to find exact match for user's country
+              translation = validTranslations.firstWhere(
+                (t) => t['language']?.toString().toLowerCase() == 
+                      countryCode.toLowerCase().substring(0, 2),
+                orElse: () => validTranslations.first,
+              );
+
+              // Update title and overview if translation found
+              if (translation != null) {
+                updatedShow['title'] = translation['title'] ?? show['title'];
+                if (translation['overview'] != null) {
                   updatedShow['overview'] = translation['overview'];
                 }
-              } else {
-
               }
-            } else {
-
             }
           }
         }
       } catch (e) {
-
         // Continue with original title if translation fails
       }
 
