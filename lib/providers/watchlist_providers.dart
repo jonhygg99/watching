@@ -212,7 +212,16 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
                 episode: episode['number'],
                 language: countryCode.toLowerCase(),
               );
-              return episodeInfo;
+              
+              // Create a new map with the episode data and merge the translated title
+              return {
+                ...episode,  // Keep all original episode data
+                'title': episodeInfo['title'] ?? episode['title'],  // Use translated title if available
+                'overview': episodeInfo['overview'] ?? episode['overview'],  // Use translated overview if available
+                'season': season['number'],
+                'number': episode['number'],
+                'ids': episode['ids'] ?? {},
+              };
             } catch (e) {
               debugPrint('Error fetching episode info: $e');
               return null;
