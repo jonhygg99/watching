@@ -80,14 +80,62 @@ mixin ShowsApi on TraktApiBase {
     required String id,
     required int season,
     required int episode,
+    String? language,
   }) async {
     await ensureValidToken();
+
+    // First get the episode details with full info and images
     final url = Uri.parse(
       '$baseUrl/shows/$id/seasons/$season/episodes/$episode?extended=full,images',
     );
     final response = await http.get(url, headers: headers);
+
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      final episodeData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      // If a specific language is requested and available in translations, fetch the translation
+      if (language != null && language.isNotEmpty) {
+        final availableTranslations =
+            episodeData['available_translations'] as List<dynamic>?;
+
+        if (availableTranslations != null &&
+            availableTranslations.contains(language)) {
+          final urlTranslation = Uri.parse(
+            '$baseUrl/shows/$id/seasons/$season/episodes/$episode/translations/$language',
+          );
+          final responseTranslation = await http.get(
+            urlTranslation,
+            headers: headers,
+          );
+
+          if (responseTranslation.statusCode == 200) {
+            final translationResponse = jsonDecode(responseTranslation.body);
+
+            // Handle both cases: when the response is a List or a Map
+            if (translationResponse is List && translationResponse.isNotEmpty) {
+              // If it's a list, take the first item (should be the requested language)
+              final translationData =
+                  translationResponse[0] as Map<String, dynamic>;
+
+              // Merge the translation data into the main episode data
+              episodeData.addAll({
+                'title': translationData['title'],
+                'overview': translationData['overview'],
+                'language': language,
+              });
+            } else if (translationResponse is Map<String, dynamic>) {
+              // If it's already a map, use it directly
+              episodeData.addAll({
+                'title': translationResponse['title'],
+                'overview': translationResponse['overview'],
+                'language': language,
+              });
+            }
+          }
+        }
+      }
+
+      return episodeData;
     } else {
       throw Exception(
         'Error GET /shows/$id/seasons/$season/episodes/$episode: ${response.statusCode}\n${response.body}',

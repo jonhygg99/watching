@@ -204,6 +204,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
                 id: traktId,
                 season: season['number'],
                 episode: episode['number'],
+                language: 'es', // Using Spanish as default
               );
               return episodeInfo;
             } catch (e) {

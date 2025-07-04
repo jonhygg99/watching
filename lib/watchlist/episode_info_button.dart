@@ -39,6 +39,7 @@ class EpisodeInfoButton extends StatelessWidget {
                         id: traktId!,
                         season: season,
                         episode: episode,
+                        language: 'es', // Using Spanish as default
                       ),
                     );
                   },
