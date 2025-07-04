@@ -81,7 +81,6 @@ class _SearchScroll extends StatelessWidget {
                         } else {
                           newTypes.remove('movie');
                         }
-                        if (newTypes.isEmpty) newTypes.add('movie');
                         onTypesChanged(newTypes);
                       },
                     ),
@@ -95,7 +94,6 @@ class _SearchScroll extends StatelessWidget {
                         } else {
                           newTypes.remove('show');
                         }
-                        if (newTypes.isEmpty) newTypes.add('show');
                         onTypesChanged(newTypes);
                       },
                     ),
@@ -118,11 +116,10 @@ class _SearchScroll extends StatelessWidget {
 }
 
 /// Grid for trending shows using Freezed model and improved tile widget.
-/// Grid for trending shows using Freezed model and improved tile widget.
 class _TrendingGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final api = ref.watch(apiServiceProvider);
+    final api = ref.watch(traktApiProvider);
     return FutureBuilder<List<dynamic>>(
       future: api.getTrendingShows(),
       builder: (context, snapshot) {
@@ -170,7 +167,6 @@ class _TrendingGrid extends ConsumerWidget {
 }
 
 /// Grid for search results using Freezed model and improved tile widget.
-/// Grid for search results using Freezed model and improved tile widget.
 class _SearchResultsGrid extends ConsumerWidget {
   final String query;
   final List<String> types;
@@ -178,9 +174,20 @@ class _SearchResultsGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final api = ref.watch(apiServiceProvider);
+    // Show message if no types are selected
+    if (types.isEmpty) {
+      return const Center(
+        child: Text('Selecciona al menos un tipo (Película o Serie)'),
+      );
+    }
+
+    final api = ref.watch(traktApiProvider);
+    final searchType = types.join(',');
+    
     return FutureBuilder<List<dynamic>>(
-      future: api.searchMoviesAndShows(query: query, type: 'show'),
+      future: query.isNotEmpty 
+          ? api.searchMoviesAndShows(query: query, type: searchType)
+          : Future.value([]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

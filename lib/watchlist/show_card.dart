@@ -50,11 +50,12 @@ class ShowCard extends StatelessWidget {
                   posterUrl != null
                       ? CachedNetworkImage(
                         imageUrl: posterUrl!,
-                        width: 90,
-                        height: 135,
+                        width: 110, // Increased from 90
+                        height:
+                            165, // Increased from 135 (maintaining 2:3 aspect ratio)
                         fit: BoxFit.cover,
                       )
-                      : Container(width: 90, height: 135, color: Colors.grey),
+                      : Container(width: 110, height: 165, color: Colors.grey),
             ),
             const SizedBox(width: 16),
             // Info principal

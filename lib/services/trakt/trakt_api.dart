@@ -4,8 +4,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'shows_api.dart';
+import 'shows_lists_api.dart';
 import 'history_api.dart';
 import 'user_api.dart';
+import 'search_api.dart';
 
 /// The main entry point for all Trakt API operations.
 ///
@@ -25,7 +27,8 @@ abstract class TraktApiBase {
   Map<String, String> get headers;
 }
 
-class TraktApi extends TraktApiBase with ShowsApi, HistoryApi, UserApi {
+class TraktApi extends TraktApiBase
+    with ShowsApi, ShowsListsApi, HistoryApi, UserApi, SearchApi {
   TraktApi();
 
   // --- BASE CONFIGURATION ---

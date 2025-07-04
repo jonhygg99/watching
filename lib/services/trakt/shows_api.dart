@@ -24,6 +24,55 @@ mixin ShowsApi on TraktApiBase {
     }
   }
 
+  /// Gets all episodes for a single season of a show.
+  ///
+  /// [id]: Trakt ID, slug, or IMDB ID of the show
+  /// [season]: Season number (e.g., 1)
+  /// [translations]: Optional 2-letter language code (e.g., 'es'), or 'all' for all translations
+  /// Returns a List of episode objects for the season.
+  Future<List<dynamic>> getSeasonEpisodes({
+    required String id,
+    required int season,
+    String? translations,
+  }) async {
+    await ensureValidToken();
+    final translationParam =
+        translations != null ? '?translations=$translations' : '';
+    final url = Uri.parse(
+      '$baseUrl/shows/$id/seasons/$season$translationParam',
+    );
+    final response = await http.get(url, headers: headers);
+    if (response.statusCode == 200) {
+      final episodes = jsonDecode(response.body) as List<dynamic>;
+
+      // If translations were requested, extract the translated episode data
+      if (translations != null && translations != 'all') {
+        return episodes.map((episode) {
+          if (episode is Map<String, dynamic> &&
+              episode.containsKey('translations') &&
+              episode['translations'] is List) {
+            final translations = List<Map<String, dynamic>>.from(episode['translations']);
+            if (translations.isNotEmpty) {
+              // Create a new map with the original episode data and override with translation
+              return {
+                ...episode,
+                'title': translations.first['title'] ?? episode['title'],
+                'overview': translations.first['overview'] ?? episode['overview'],
+              };
+            }
+          }
+          return episode;
+        }).toList();
+      }
+
+      return episodes;
+    } else {
+      throw Exception(
+        'Error GET /shows/$id/seasons/$season: ${response.statusCode}\n${response.body}',
+      );
+    }
+  }
+
   /// Gets all seasons for a show.
   Future<List<dynamic>> getSeasons(String showId) async {
     await ensureValidToken();
@@ -81,7 +130,7 @@ mixin ShowsApi on TraktApiBase {
     required String id,
     String language = 'es',
   }) async {
-    return await getJsonList('/shows/$id/translations?language=$language');
+    return await getJsonList('/shows/$id/translations/$language');
   }
 
   /// Gets videos (trailers, teasers) for a show.
@@ -92,53 +141,5 @@ mixin ShowsApi on TraktApiBase {
   /// Gets related shows for a show.
   Future<List<dynamic>> getRelatedShows({required String id}) async {
     return await getJsonList('/shows/$id/related?extended=images');
-  }
-
-  /// Gets trending shows.
-  Future<List<dynamic>> getTrendingShows() async {
-    return await getJsonList('/shows/trending?extended=images');
-  }
-
-  /// Gets popular shows.
-  Future<List<dynamic>> getPopularShows() async {
-    return await getJsonList('/shows/popular?extended=images');
-  }
-
-  /// Gets most favorited shows.
-  Future<List<dynamic>> getMostFavoritedShows({
-    String period = 'monthly',
-  }) async {
-    return await getJsonList('/shows/favorited?extended=images');
-  }
-
-  /// Gets most collected shows.
-  Future<List<dynamic>> getMostCollectedShows({
-    String period = 'monthly',
-  }) async {
-    return await getJsonList('/shows/collected/$period?extended=images');
-  }
-
-  /// Gets most played shows.
-  Future<List<dynamic>> getMostPlayedShows({String period = 'monthly'}) async {
-    return await getJsonList('/shows/played/$period?extended=images');
-  }
-
-  /// Gets most watched shows.
-  Future<List<dynamic>> getMostWatchedShows({String period = 'monthly'}) async {
-    return await getJsonList('/shows/watched/$period?extended=images');
-  }
-
-  /// Gets most anticipated shows.
-  Future<List<dynamic>> getMostAnticipatedShows() async {
-    return await getJsonList('/shows/anticipated?extended=images');
-  }
-
-  /// Searches for movies and shows by query.
-  Future<List<dynamic>> searchMoviesAndShows({
-    required String query,
-    String type = '',
-  }) async {
-    final encodedQuery = Uri.encodeComponent(query);
-    return await getJsonList('/search/multi?query=$encodedQuery&type=$type');
   }
 }

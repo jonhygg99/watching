@@ -6,24 +6,24 @@ part of 'app_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$apiServiceHash() => r'73ad3c2e8c0d458c43bdd728c0f0fb75c5c2af98';
+String _$traktApiHash() => r'e14225c86ddd24ee5b8c37a9ff04e988e59dbc11';
 
-/// Provides a singleton instance of ApiService.
+/// Provides a singleton instance of [TraktApi].
 ///
 /// Copied from [traktApi].
 @ProviderFor(traktApi)
-final apiServiceProvider = AutoDisposeProvider<TraktApi>.internal(
+final traktApiProvider = AutoDisposeProvider<TraktApi>.internal(
   traktApi,
-  name: r'apiServiceProvider',
+  name: r'traktApiProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$apiServiceHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$traktApiHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef ApiServiceRef = AutoDisposeProviderRef<TraktApi>;
+typedef TraktApiRef = AutoDisposeProviderRef<TraktApi>;
 String _$countryCodeHash() => r'5e037e6406dd2c5e562d42464aaad7a6c2ce9577';
 
 /// Provides the user's selected country code, persisted in SharedPreferences.

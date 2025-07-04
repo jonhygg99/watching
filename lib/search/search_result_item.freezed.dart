@@ -1,152 +1,151 @@
+// dart format width=80
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'search_result_item.dart';
 
-// ***************************************************************************
+// **************************************************************************
 // FreezedGenerator
-// ***************************************************************************
+// **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it. Please check the documentation here for more information: https://github.com/rrousselGit/freezed#custom-getters-and-methods',
-);
-
 /// @nodoc
 mixin _$SearchResultItem {
-  Map<String, dynamic> get data => throw _privateConstructorUsedError;
-  String get type => throw _privateConstructorUsedError;
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $SearchResultItemCopyWith<SearchResultItem> get copyWith =>
-      throw _privateConstructorUsedError;
+ Map<String, dynamic> get data; String get type;
+/// Create a copy of SearchResultItem
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SearchResultItemCopyWith<SearchResultItem> get copyWith => _$SearchResultItemCopyWithImpl<SearchResultItem>(this as SearchResultItem, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchResultItem&&const DeepCollectionEquality().equals(other.data, data)&&(identical(other.type, type) || other.type == type));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(data),type);
+
+@override
+String toString() {
+  return 'SearchResultItem(data: $data, type: $type)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $SearchResultItemCopyWith<$Res> {
-  factory $SearchResultItemCopyWith(
-    SearchResultItem value,
-    $Res Function(SearchResultItem) then,
-  ) = _$SearchResultItemCopyWithImpl<$Res, SearchResultItem>;
-  $Res call({Map<String, dynamic> data, String type});
-}
+abstract mixin class $SearchResultItemCopyWith<$Res>  {
+  factory $SearchResultItemCopyWith(SearchResultItem value, $Res Function(SearchResultItem) _then) = _$SearchResultItemCopyWithImpl;
+@useResult
+$Res call({
+ Map<String, dynamic> data, String type
+});
 
+
+
+
+}
 /// @nodoc
-class _$SearchResultItemCopyWithImpl<$Res, $Val extends SearchResultItem>
+class _$SearchResultItemCopyWithImpl<$Res>
     implements $SearchResultItemCopyWith<$Res> {
-  _$SearchResultItemCopyWithImpl(this._value, this._then);
+  _$SearchResultItemCopyWithImpl(this._self, this._then);
 
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final SearchResultItem _self;
+  final $Res Function(SearchResultItem) _then;
 
-  @override
-  $Res call({Object? data = null, Object? type = null}) {
-    return _then(
-      _value.copyWith(
-            data:
-                null == data
-                    ? _value.data
-                    : data // ignore: cast_nullable_to_non_nullable
-                        as Map<String, dynamic>,
-            type:
-                null == type
-                    ? _value.type
-                    : type // ignore: cast_nullable_to_non_nullable
-                        as String,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of SearchResultItem
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? data = null,Object? type = null,}) {
+  return _then(_self.copyWith(
+data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
 }
 
-/// @nodoc
-abstract class _$$_SearchResultItemCopyWith<$Res>
-    implements $SearchResultItemCopyWith<$Res> {
-  factory _$$_SearchResultItemCopyWith(
-    _$_SearchResultItem value,
-    $Res Function(_$_SearchResultItem) then,
-  ) = __$$_SearchResultItemCopyWithImpl<$Res>;
-  @override
-  $Res call({Map<String, dynamic> data, String type});
 }
 
-/// @nodoc
-class __$$_SearchResultItemCopyWithImpl<$Res>
-    extends _$SearchResultItemCopyWithImpl<$Res, _$_SearchResultItem>
-    implements _$$_SearchResultItemCopyWith<$Res> {
-  __$$_SearchResultItemCopyWithImpl(
-    _$_SearchResultItem _value,
-    $Res Function(_$_SearchResultItem) _then,
-  ) : super(_value, _then);
-
-  @override
-  $Res call({Object? data = null, Object? type = null}) {
-    return _then(
-      _$_SearchResultItem(
-        data:
-            null == data
-                ? _value.data
-                : data // ignore: cast_nullable_to_non_nullable
-                    as Map<String, dynamic>,
-        type:
-            null == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
-                    as String,
-      ),
-    );
-  }
-}
 
 /// @nodoc
 
-class _$_SearchResultItem implements _SearchResultItem {
-  const _$_SearchResultItem({required this.data, required this.type});
 
-  @override
-  final Map<String, dynamic> data;
-  @override
-  final String type;
+class _SearchResultItem implements SearchResultItem {
+  const _SearchResultItem({required final  Map<String, dynamic> data, required this.type}): _data = data;
+  
 
-  @override
-  String toString() {
-    return 'SearchResultItem(data: $data, type: $type)';
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$_SearchResultItem &&
-            const DeepCollectionEquality().equals(other.data, data) &&
-            (identical(other.type, type) || other.type == type));
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(data), type);
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  _$$_SearchResultItemCopyWith<_$_SearchResultItem> get copyWith =>
-      __$$_SearchResultItemCopyWithImpl<_$_SearchResultItem>(this, _$identity);
+ final  Map<String, dynamic> _data;
+@override Map<String, dynamic> get data {
+  if (_data is EqualUnmodifiableMapView) return _data;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_data);
 }
 
-abstract class _SearchResultItem implements SearchResultItem {
-  const factory _SearchResultItem({
-    required Map<String, dynamic> data,
-    required String type,
-  }) = _$_SearchResultItem;
+@override final  String type;
 
-  @override
-  Map<String, dynamic> get data;
-  @override
-  String get type;
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$_SearchResultItemCopyWith<_$_SearchResultItem> get copyWith =>
-      throw _privateConstructorUsedError;
+/// Create a copy of SearchResultItem
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SearchResultItemCopyWith<_SearchResultItem> get copyWith => __$SearchResultItemCopyWithImpl<_SearchResultItem>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchResultItem&&const DeepCollectionEquality().equals(other._data, _data)&&(identical(other.type, type) || other.type == type));
 }
+
+
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_data),type);
+
+@override
+String toString() {
+  return 'SearchResultItem(data: $data, type: $type)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SearchResultItemCopyWith<$Res> implements $SearchResultItemCopyWith<$Res> {
+  factory _$SearchResultItemCopyWith(_SearchResultItem value, $Res Function(_SearchResultItem) _then) = __$SearchResultItemCopyWithImpl;
+@override @useResult
+$Res call({
+ Map<String, dynamic> data, String type
+});
+
+
+
+
+}
+/// @nodoc
+class __$SearchResultItemCopyWithImpl<$Res>
+    implements _$SearchResultItemCopyWith<$Res> {
+  __$SearchResultItemCopyWithImpl(this._self, this._then);
+
+  final _SearchResultItem _self;
+  final $Res Function(_SearchResultItem) _then;
+
+/// Create a copy of SearchResultItem
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? data = null,Object? type = null,}) {
+  return _then(_SearchResultItem(
+data: null == data ? _self._data : data // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+// dart format on

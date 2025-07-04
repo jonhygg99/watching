@@ -12,7 +12,7 @@ class DiscoverPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Use Riverpod's generated provider for ApiService (see app_providers.dart)
-    final api = ref.watch(apiServiceProvider);
+    final api = ref.watch(traktApiProvider);
 
     /// Helper function for each carousel to ensure consistent error/loading handling
     Widget buildCarousel({

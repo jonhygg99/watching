@@ -23,10 +23,13 @@ class WatchlistShowItem extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final show = item['show'] as Map<String, dynamic>?;
-    final title =
-        show != null ? show['title'] as String? ?? 'Sin título' : 'Sin título';
-    final ids = show != null ? show['ids'] as Map<String, dynamic>? : null;
+    // Safely get the show map with proper type handling
+    final show = item['show'] is Map ? Map<String, dynamic>.from(item['show'] as Map) : null;
+    final title = show?['title']?.toString() ?? 'Sin título';
+    
+    // Safely get the ids map with proper type handling
+    final idsMap = show?['ids'];
+    final ids = idsMap is Map ? Map<String, dynamic>.from(idsMap) : null;
     final traktId =
         ids != null ? ids['slug'] ?? ids['trakt']?.toString() : null;
     // Extract poster URL defensively (handle missing/relative URLs)
@@ -40,12 +43,11 @@ class WatchlistShowItem extends HookConsumerWidget {
         posterUrl = 'https://$posterUrl';
       }
     }
-    // Defensive: always provide a progress map for downstream widgets
-    final progress = item['progress'] as Map<String, dynamic>? ?? {};
+    // Safely get progress with proper type handling
+    final progressMap = item['progress'];
+    final progress = progressMap is Map ? Map<String, dynamic>.from(progressMap) : <String, dynamic>{};
     final watched = progress['completed'] as int? ?? 0;
     final total = progress['aired'] as int? ?? 1;
-    // print(progress);
-    // print("$title $watched $total");
     if (traktId == null || watched == total) {
       return const SizedBox.shrink();
     }
@@ -59,7 +61,7 @@ class WatchlistShowItem extends HookConsumerWidget {
         infoWidget: WatchProgressInfo(
           traktId: traktId,
           title: title,
-          apiService: ref.read(apiServiceProvider),
+          apiService: ref.read(traktApiProvider),
           progress: progress,
         ),
         builder:
@@ -67,7 +69,7 @@ class WatchlistShowItem extends HookConsumerWidget {
               traktId: traktId,
               posterUrl: posterUrl,
               infoWidget: child,
-              apiService: ref.read(apiServiceProvider),
+              apiService: ref.read(traktApiProvider),
               parentContext: context,
               countryCode: Localizations.localeOf(context).countryCode,
             ),
@@ -89,13 +91,13 @@ class WatchlistShowItem extends HookConsumerWidget {
       child: ShowCard(
         traktId: traktId,
         posterUrl: posterUrl,
-        apiService: ref.read(apiServiceProvider),
+        apiService: ref.read(traktApiProvider),
         parentContext: context,
         countryCode: Localizations.localeOf(context).countryCode,
         infoWidget: WatchProgressInfo(
           traktId: traktId,
           title: title,
-          apiService: ref.read(apiServiceProvider),
+          apiService: ref.read(traktApiProvider),
           progress: progress,
         ),
       ),
