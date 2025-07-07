@@ -5,8 +5,15 @@ import 'trakt_api.dart';
 /// Mixin for show and season-related endpoints.
 mixin ShowsApi on TraktApiBase {
   /// Gets detailed info for a show by ID.
-  Future<Map<String, dynamic>> getShowById({required String id}) async {
-    return await getJsonMap('/shows/$id?extended=full,images,');
+  ///
+  /// [id]: The Trakt ID, Trakt slug, or IMDB ID of the show
+  /// [extended]: If true, includes full extended info (images, full, etc.)
+  Future<Map<String, dynamic>> getShowById({
+    required String id,
+    bool extended = false,
+  }) async {
+    final endpoint = '/shows/$id${extended ? '?extended=full,images' : ''}';
+    return await getJsonMap(endpoint);
   }
 
   /// Gets all seasons for a show.
