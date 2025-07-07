@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import 'mocks/test_shows_api.dart';
-import 'mocks/mock_get_seasons.dart';
-import 'mocks/mock_get_show_by_id.dart';
-import 'mocks/mock_get_episode_info.dart';
-import 'mocks/mock_get_related_shows.dart';
-import 'mocks/mock_get_show_comments.dart';
-import 'mocks/mock_trakt_api_base.dart';
+import 'shows_api/mocks/test_shows_api.dart';
+import 'shows_api/mocks/mock_get_seasons.dart';
+import 'shows_api/mocks/mock_get_show_by_id.dart';
+import 'shows_api/mocks/mock_get_episode_info.dart';
+import 'shows_api/mocks/mock_get_related_shows.dart';
+import 'shows_api/mocks/mock_get_show_comments.dart';
+import 'shows_api/mocks/mock_trakt_api_base.dart';
 
 void main() {
   late TestShowsApi showsApi;
