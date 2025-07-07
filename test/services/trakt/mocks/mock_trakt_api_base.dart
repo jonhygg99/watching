@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 import 'package:watching/services/trakt/trakt_api.dart';
