@@ -1,0 +1,175 @@
+// ignore_for_file: lines_longer_than_80_chars
+
+/// Mock response for most watched shows
+const mostWatchedShowsResponse = [
+  {
+    "watcher_count": 203742,
+    "play_count": 8784154,
+    "collected_count": 2436824,
+    "collector_count": 73224,
+    "show": {
+      "title": "Game of Thrones",
+      "year": 2011,
+      "ids": {
+        "trakt": 1390,
+        "slug": "game-of-thrones",
+        "tvdb": 121361,
+        "imdb": "tt0944947",
+        "tmdb": 1399
+      }
+    }
+  },
+  {
+    "watcher_count": 163097,
+    "play_count": 9945882,
+    "collected_count": 2423833,
+    "collector_count": 57617,
+    "show": {
+      "title": "The Walking Dead",
+      "year": 2010,
+      "ids": {
+        "trakt": 1393,
+        "slug": "the-walking-dead",
+        "tvdb": 153021,
+        "imdb": "tt1520211",
+        "tmdb": 1402
+      }
+    }
+  },
+  {
+    "watcher_count": 155291,
+    "play_count": 23542030,
+    "collected_count": 6635583,
+    "collector_count": 54953,
+    "show": {
+      "title": "The Big Bang Theory",
+      "year": 2007,
+      "ids": {
+        "trakt": 1409,
+        "slug": "the-big-bang-theory",
+        "tvdb": 80379,
+        "imdb": "tt0898266",
+        "tmdb": 1418
+      }
+    }
+  },
+  {
+    "watcher_count": 140725,
+    "play_count": 8576210,
+    "collected_count": 2471061,
+    "collector_count": 49385,
+    "show": {
+      "title": "Breaking Bad",
+      "year": 2008,
+      "ids": {
+        "trakt": 1388,
+        "slug": "breaking-bad",
+        "tvdb": 81189,
+        "imdb": "tt0903747",
+        "tmdb": 1396
+      }
+    }
+  },
+  {
+    "watcher_count": 123797,
+    "play_count": 6173692,
+    "collected_count": 1856666,
+    "collector_count": 43351,
+    "show": {
+      "title": "Arrow",
+      "year": 2012,
+      "ids": {
+        "trakt": 1403,
+        "slug": "arrow",
+        "tvdb": 257655,
+        "imdb": "tt2193021",
+        "tmdb": 1412
+      }
+    }
+  },
+  {
+    "watcher_count": 100242,
+    "play_count": 19787304,
+    "collected_count": 4529880,
+    "collector_count": 32335,
+    "show": {
+      "title": "How I Met Your Mother",
+      "year": 2005,
+      "ids": {
+        "trakt": 1095,
+        "slug": "how-i-met-your-mother",
+        "tvdb": 75760,
+        "imdb": "tt0460649",
+        "tmdb": 1100
+      }
+    }
+  },
+  {
+    "watcher_count": 94282,
+    "play_count": 912066,
+    "collected_count": 260713,
+    "collector_count": 34077,
+    "show": {
+      "title": "Sherlock",
+      "year": 2010,
+      "ids": {
+        "trakt": 19792,
+        "slug": "sherlock",
+        "tvdb": 176941,
+        "imdb": "tt1475582",
+        "tmdb": 19885
+      }
+    }
+  },
+  {
+    "watcher_count": 89242,
+    "play_count": 3375660,
+    "collected_count": 1299956,
+    "collector_count": 39724,
+    "show": {
+      "title": "Homeland",
+      "year": 2011,
+      "ids": {
+        "trakt": 1398,
+        "slug": "homeland",
+        "tvdb": 247897,
+        "imdb": "tt1796960",
+        "tmdb": 1407
+      }
+    }
+  },
+  {
+    "watcher_count": 87059,
+    "play_count": 7799337,
+    "collected_count": 2239477,
+    "collector_count": 33424,
+    "show": {
+      "title": "Dexter",
+      "year": 2006,
+      "ids": {
+        "trakt": 1396,
+        "slug": "dexter",
+        "tvdb": 79349,
+        "imdb": "tt0773262",
+        "tmdb": 1405
+      }
+    }
+  },
+  {
+    "watcher_count": 83087,
+    "play_count": 2795758,
+    "collected_count": 881552,
+    "collector_count": 31982,
+    "show": {
+      "title": "Marvel's Agents of S.H.I.E.L.D.",
+      "year": 2013,
+      "ids": {
+        "trakt": 1394,
+        "slug": "marvel-s-agents-of-s-h-i-e-l-d",
+        "tvdb": 263365,
+        "imdb": "tt2364582",
+        "tmdb": 1403
+      }
+    }
+  }
+];

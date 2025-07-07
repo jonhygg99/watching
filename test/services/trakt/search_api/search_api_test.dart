@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:watching/services/trakt/search_api.dart';
 import 'package:watching/services/trakt/trakt_api.dart';
 import 'mock/search_mock_responses.dart';
@@ -8,27 +7,27 @@ import 'mock/search_mock_responses.dart';
 class TestTraktApi extends TraktApiBase with SearchApi {
   @override
   final String baseUrl = 'https://api.trakt.tv';
-  
+
   @override
   Map<String, String> get headers => {
     'Content-Type': 'application/json',
     'trakt-api-version': '2',
     'trakt-api-key': 'test-client-id',
   };
-  
+
   @override
   Future<void> ensureValidToken() async {}
-  
+
   @override
   Future<Map<String, dynamic>> getJsonMap(String endpoint) async {
     return getJsonMapImpl?.call(endpoint) ?? {};
   }
-  
+
   @override
   Future<List<dynamic>> getJsonList(String endpoint) async {
     return getJsonListImpl?.call(endpoint) ?? [];
   }
-  
+
   // These will be set in tests
   Future<Map<String, dynamic>> Function(String)? getJsonMapImpl;
   Future<List<dynamic>> Function(String)? getJsonListImpl;
@@ -49,9 +48,7 @@ void main() {
       testApi.getJsonListImpl = (_) => Future.value(mockShowSearchResponse);
 
       // Act
-      final results = await searchApi.searchMoviesAndShows(
-        query: 'tron',
-      );
+      final results = await searchApi.searchMoviesAndShows(query: 'tron');
 
       // Assert
       expect(results, mockShowSearchResponse);
@@ -97,9 +94,7 @@ void main() {
       };
 
       // Act
-      await searchApi.searchMoviesAndShows(
-        query: 'tron: legacy',
-      );
+      await searchApi.searchMoviesAndShows(query: 'tron: legacy');
 
       // Assert
       expect(wasCalled, isTrue);
