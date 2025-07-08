@@ -29,14 +29,23 @@ abstract class TraktApiBase {
 
 class TraktApi extends TraktApiBase
     with ShowsApi, ShowsListsApi, HistoryApi, UserApi, SearchApi {
-  TraktApi();
+  TraktApi({String? clientId, String? clientSecret, String? redirectUri})
+    : _clientId = clientId,
+      _clientSecret = clientSecret,
+      _redirectUri = redirectUri;
 
   // --- BASE CONFIGURATION ---
   @override
   final String baseUrl = 'https://api.trakt.tv';
-  final String? clientId = dotenv.env['TRAKT_CLIENT_ID'];
-  final String? clientSecret = dotenv.env['TRAKT_CLIENT_SECRET'];
-  final String? redirectUri = dotenv.env['TRAKT_REDIRECT_URI'];
+
+  final String? _clientId;
+  final String? _clientSecret;
+  final String? _redirectUri;
+
+  String? get clientId => _clientId ?? dotenv.env['TRAKT_CLIENT_ID'];
+  String? get clientSecret =>
+      _clientSecret ?? dotenv.env['TRAKT_CLIENT_SECRET'];
+  String? get redirectUri => _redirectUri ?? dotenv.env['TRAKT_REDIRECT_URI'];
 
   String? _accessToken;
 
