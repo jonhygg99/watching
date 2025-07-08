@@ -10,7 +10,7 @@ mixin ShowsApi on TraktApiBase {
   /// [extended]: If true, includes full extended info (images, full, etc.)
   Future<Map<String, dynamic>> getShowById({
     required String id,
-    bool extended = false,
+    bool extended = true,
   }) async {
     final endpoint = '/shows/$id${extended ? '?extended=full,images' : ''}';
     return await getJsonMap(endpoint);
