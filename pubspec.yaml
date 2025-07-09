@@ -61,6 +61,16 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  patrol: ^3.5.0
+
+patrol:
+  app_name: Watching
+  android:
+    package_name: com.example.watching
+  ios:
+    bundle_id: com.example.watching
+  macos:
+    bundle_id: com.example.macos.watching
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
