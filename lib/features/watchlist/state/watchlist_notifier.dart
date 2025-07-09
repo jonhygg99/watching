@@ -8,6 +8,7 @@ import 'package:watching/features/watchlist/providers/watchlist_cache_provider.d
 import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/features/watchlist/services/watchlist_processor.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:collection/collection.dart';
 
 // Export types for easy importing
 export 'package:watching/features/watchlist/enums/watchlist_type.dart' show WatchlistType;
@@ -21,8 +22,30 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   WatchlistNotifier(this._ref) : super(const WatchlistState()) {
     _episodeService = WatchlistEpisodeService(_ref);
     _processor = WatchlistProcessor(_ref);
-    // Initial load
-    _loadWatchlist();
+    // Initial load with cached data first
+    _loadCachedData().then((_) {
+      // Then load fresh data in background
+      _loadWatchlist();
+    });
+  }
+
+  /// Load cached data immediately
+  Future<void> _loadCachedData() async {
+    try {
+      final type = _ref.read(watchlistTypeProvider);
+      final cache = _ref.read(watchlistCacheProvider);
+      final cachedData = cache.getCached(type);
+      
+      if (cachedData != null) {
+        state = state.copyWith(
+          items: cachedData,
+          hasData: true,
+          isLoading: true, // Still loading fresh data in background
+        );
+      }
+    } catch (e) {
+      debugPrint('Error loading cached data: $e');
+    }
   }
 
   @override
@@ -31,44 +54,62 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     super.dispose();
   }
 
-  /// Load watchlist data with caching
+  /// Load watchlist data with progressive loading
   Future<void> _loadWatchlist() async {
     try {
       final type = _ref.read(watchlistTypeProvider);
       final cache = _ref.read(watchlistCacheProvider);
-
-      // Check cache first
-      final cachedData = cache.getCached(type);
-      if (cachedData != null) {
-        state = state.copyWith(
-          items: cachedData,
-          hasData: true,
-          isLoading: true, // Still loading fresh data in background
-        );
-      } else {
-        state = state.copyWith(isLoading: true);
-      }
-
-      // Fetch fresh data
       final trakt = _ref.read(traktApiProvider);
       final typeStr = type == WatchlistType.shows ? 'shows' : 'movies';
 
+      // Start with loading state if we don't have cached data
+      if (state.items.isEmpty) {
+        state = state.copyWith(isLoading: true);
+      }
+
       // Fetch watchlist items from the API
       final items = await trakt.getWatched(type: typeStr);
-
-      // Process items
-      final processedItems = await _processItems(items);
-
-      // Update cache
-      cache.updateCache(type, processedItems);
-
-      // Update state
-      state = state.copyWith(
-        items: processedItems,
-        isLoading: false,
-        hasData: true,
-        error: null,
-      );
+      
+      // Process items in chunks for progressive loading
+      final chunkSize = 5; // Process 5 items at a time
+      final chunks = items.slices(chunkSize);
+      
+      List<Map<String, dynamic>> allProcessedItems = [];
+      
+      for (final chunk in chunks) {
+        // Process chunk in parallel
+        final processedChunk = await Future.wait(
+          chunk.map((item) => _processItem(item, trakt, ref: _ref)),
+          eagerError: true,
+        );
+        
+        final validItems = processedChunk.whereType<Map<String, dynamic>>().toList();
+        allProcessedItems.addAll(validItems);
+        
+        // Update state with new items as they become available
+        if (validItems.isNotEmpty) {
+          final currentItems = state.items.toList();
+          final newItems = _mergeItems(currentItems, validItems);
+          
+          state = state.copyWith(
+            items: newItems,
+            isLoading: false,
+            hasData: true,
+            error: null,
+          );
+        }
+      }
+      
+      // Final update with all items and update cache
+      if (allProcessedItems.isNotEmpty) {
+        cache.updateCache(type, allProcessedItems);
+        state = state.copyWith(
+          items: allProcessedItems,
+          isLoading: false,
+          hasData: true,
+        );
+      }
+      
     } catch (error, stackTrace) {
       debugPrint('Error loading watchlist: $error\n$stackTrace');
       state = state.copyWith(
@@ -78,18 +119,31 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       );
     }
   }
-
-  /// Process watchlist items (fetch progress, next episode, etc.)
-  Future<List<Map<String, dynamic>>> _processItems(List<dynamic> items) async {
-    final trakt = _ref.read(traktApiProvider);
-    final filteredItems = items.whereType<Map<String, dynamic>>().toList();
-
-    final results = await Future.wait(
-      filteredItems.map((item) => _processItem(item, trakt, ref: _ref)),
-      eagerError: true,
-    );
-
-    return results.whereType<Map<String, dynamic>>().toList();
+  
+  /// Merge new items with existing ones, avoiding duplicates
+  List<Map<String, dynamic>> _mergeItems(
+    List<Map<String, dynamic>> currentItems,
+    List<Map<String, dynamic>> newItems,
+  ) {
+    final merged = List<Map<String, dynamic>>.from(currentItems);
+    final existingIds = currentItems.map((item) => _getItemId(item)).toSet();
+    
+    for (final item in newItems) {
+      final itemId = _getItemId(item);
+      if (!existingIds.contains(itemId)) {
+        merged.add(item);
+        existingIds.add(itemId);
+      }
+    }
+    
+    return merged;
+  }
+  
+  /// Get unique ID for an item
+  String _getItemId(Map<String, dynamic> item) {
+    final show = item['show'] ?? item;
+    final ids = show['ids'] ?? {};
+    return '${ids['trakt'] ?? ''}-${ids['slug'] ?? ''}-${ids['imdb'] ?? ''}';
   }
 
   late final WatchlistEpisodeService _episodeService;

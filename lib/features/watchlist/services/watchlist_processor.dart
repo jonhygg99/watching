@@ -1,84 +1,148 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:collection/collection.dart';
 
 class WatchlistProcessor {
   final Ref _ref;
   late final WatchlistEpisodeService _episodeService;
+  final _translationCache = <String, Map<String, dynamic>>{};
 
   WatchlistProcessor(this._ref) {
     _episodeService = WatchlistEpisodeService(_ref);
   }
 
-  /// Process a single watchlist item
+  /// Process a single watchlist item with timeout and error handling
   Future<Map<String, dynamic>?> processItem(
     Map<String, dynamic> item,
-    dynamic trakt,
-  ) async {
+    dynamic trakt, {
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
     try {
       final show = item['show'] ?? item;
-      final ids = show['ids'];
-      final traktId = ids?['slug'] ?? ids?['trakt']?.toString();
+      final ids = show['ids'] ?? {};
+      final traktId = ids['slug']?.toString() ?? ids['trakt']?.toString();
+      
+      if (traktId == null || traktId.isEmpty) {
+        debugPrint('Skipping item with invalid traktId');
+        return null;
+      }
 
-      if (traktId == null) return null;
+      // Initialize with minimal data structure
+      if (show['title'] == null) {
+        show['title'] = 'Loading...';
+      }
 
       // Get the user's country code
       final countryCode = _ref.read(countryCodeProvider);
       
-      // Fetch progress and next episode in parallel
-      final progress = await trakt.getShowWatchedProgress(id: traktId);
-      final nextEpisode = await _episodeService.getNextEpisode(trakt, traktId, progress);
+      // Get progress first
+      final progress = await _withTimeout(
+        () => trakt.getShowWatchedProgress(id: traktId),
+        timeout: timeout,
+        fallback: <String, dynamic>{},
+      );
 
+      // Get next episode and translations in parallel
+      final results = await Future.wait<dynamic>([
+        _withTimeout(
+          () => _episodeService.getNextEpisode(trakt, traktId, progress),
+          timeout: timeout,
+          fallback: null,
+        ),
+        _withTimeout(
+          () => _applyTranslations(trakt, traktId, show, countryCode),
+          timeout: timeout,
+          fallback: null,
+        ),
+      ], eagerError: true).catchError((e) {
+        debugPrint('Error in parallel processing: $e');
+        return [null, null];
+      });
+
+      final nextEpisode = results[0] as Map<String, dynamic>?;
+      
+      // Update progress with next episode if available
       if (nextEpisode != null) {
         progress['next_episode'] = nextEpisode;
       }
 
-      // Create a new show map to avoid modifying the original
-      final updatedShow = Map<String, dynamic>.from(show);
-      
-      // Handle translations
-      await _applyTranslations(trakt, traktId, updatedShow, countryCode);
-
-      // Create a new item with the updated show and progress
+      // Create the final updated item
       final updatedItem = {
         ...item,
         'show': {
-          ...updatedShow,
-          // Ensure the title is set at the root level for backward compatibility
-          'title': updatedShow['title'] ?? show['title']
+          ...show,
+          'title': show['title'] ?? 'Unknown Title',
+          'progress': progress,
         },
         'progress': progress,
       };
       
-      // Also set the title at the root level for backward compatibility
-      if (updatedShow['title'] != null) {
-        updatedItem['title'] = updatedShow['title'];
-      }
+      // Ensure title is set at root level for backward compatibility
+      updatedItem['title'] = show['title'] ?? 'Unknown Title';
       
       return updatedItem;
     } catch (e) {
       debugPrint('Error processing watchlist item: $e');
-      return {...item, 'progress': {}};
+      // Return minimal valid item with error state
+      return {
+        ...item,
+        'progress': {},
+        'error': e.toString(),
+      };
+    }
+  }
+  
+  /// Helper method to add timeout to futures
+  Future<T> _withTimeout<T>(
+    Future<T> Function() future, {
+    required Duration timeout,
+    required T fallback,
+  }) async {
+    try {
+      return await future().timeout(timeout);
+    } catch (e) {
+      debugPrint('Operation timed out or failed: $e');
+      return fallback;
     }
   }
 
-  /// Process multiple watchlist items
+  /// Process multiple watchlist items with concurrency control
   Future<List<Map<String, dynamic>>> processItems(
-    List<dynamic> items,
-    dynamic trakt,
-  ) async {
+    List<dynamic> items, 
+    dynamic trakt, {
+    int maxConcurrent = 3,
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
     final filteredItems = items.whereType<Map<String, dynamic>>().toList();
-
-    final results = await Future.wait(
-      filteredItems.map((item) => processItem(item, trakt)),
-      eagerError: true,
-    );
-
-    return results.whereType<Map<String, dynamic>>().toList();
+    final results = <Map<String, dynamic>>[];
+    
+    // Process items in batches to control concurrency
+    for (var i = 0; i < filteredItems.length; i += maxConcurrent) {
+      final batch = filteredItems.sublist(
+        i,
+        i + maxConcurrent > filteredItems.length 
+            ? filteredItems.length 
+            : i + maxConcurrent,
+      );
+      
+      final batchResults = await Future.wait(
+        batch.map((item) => processItem(item, trakt, timeout: timeout)),
+        eagerError: true,
+      ).catchError((e) {
+        debugPrint('Error in batch processing: $e');
+        return <Map<String, dynamic>?>[];
+      });
+      
+      results.addAll(batchResults.whereType<Map<String, dynamic>>());
+    }
+    
+    return results;
   }
 
-  /// Apply translations to a show
+  /// Apply translations to a show with caching and fallback
   Future<void> _applyTranslations(
     dynamic trakt,
     String traktId,
@@ -86,6 +150,14 @@ class WatchlistProcessor {
     String countryCode,
   ) async {
     if (countryCode.isEmpty) return;
+    
+    final cacheKey = '${traktId}_${countryCode.toLowerCase()}';
+    
+    // Check cache first
+    if (_translationCache.containsKey(cacheKey)) {
+      _updateShowWithTranslation(show, _translationCache[cacheKey]!);
+      return;
+    }
 
     try {
       final translations = await trakt.getShowTranslations(
@@ -93,38 +165,66 @@ class WatchlistProcessor {
         language: countryCode.toLowerCase(),
       );
 
-      if (translations != null && translations.isNotEmpty) {
-        // Filter out translations with null title and convert to List if needed
-        List<dynamic> validTranslations = [];
-        if (translations is List) {
-          validTranslations = translations.where((t) => t['title'] != null).toList();
-        } else if (translations is Map) {
-          if (translations['title'] != null) {
-            validTranslations = [translations];
-          }
-        }
-
-        // Find the best matching translation
-        Map<String, dynamic>? translation;
-        if (validTranslations.isNotEmpty) {
-          // Try to find exact match for user's country
-          translation = validTranslations.firstWhere(
-            (t) => t['language']?.toString().toLowerCase() == 
-                  countryCode.toLowerCase().substring(0, 2),
-            orElse: () => validTranslations.first,
-          );
-
-          // Update title and overview if translation found
-          if (translation != null) {
-            show['title'] = translation['title'] ?? show['title'];
-            if (translation['overview'] != null) {
-              show['overview'] = translation['overview'];
-            }
-          }
+      if (translations != null) {
+        final translation = _findBestTranslation(translations, countryCode);
+        if (translation != null) {
+          // Update cache
+          _translationCache[cacheKey] = translation;
+          _updateShowWithTranslation(show, translation);
         }
       }
     } catch (e) {
-      debugPrint('Error applying translations: $e');
+      debugPrint('Error applying translations for $traktId: $e');
+    }
+  }
+  
+  /// Find the best matching translation from available translations
+  Map<String, dynamic>? _findBestTranslation(
+    dynamic translations, 
+    String countryCode
+  ) {
+    try {
+      // Convert to list if it's not already
+      final translationsList = translations is List 
+          ? translations 
+          : [if (translations is Map) translations];
+          
+      if (translationsList.isEmpty) return null;
+      
+      final countryPrefix = countryCode.toLowerCase().substring(0, 2);
+      
+      // Try exact match first
+      var translation = translationsList.firstWhereOrNull(
+        (t) => t['language']?.toString().toLowerCase() == countryPrefix
+      );
+      
+      // Fallback to English
+      translation ??= translationsList.firstWhereOrNull(
+        (t) => t['language']?.toString().toLowerCase() == 'en'
+      );
+      
+      // Fallback to first available translation
+      return translation ?? translationsList.first;
+    } catch (e) {
+      debugPrint('Error finding best translation: $e');
+      return null;
+    }
+  }
+  
+  /// Update show data with translation
+  void _updateShowWithTranslation(
+    Map<String, dynamic> show, 
+    Map<String, dynamic> translation
+  ) {
+    try {
+      if (translation['title'] != null) {
+        show['title'] = translation['title'];
+      }
+      if (translation['overview'] != null) {
+        show['overview'] = translation['overview'];
+      }
+    } catch (e) {
+      debugPrint('Error updating show with translation: $e');
     }
   }
 }
