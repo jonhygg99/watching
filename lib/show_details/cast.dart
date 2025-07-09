@@ -17,8 +17,9 @@ class ShowDetailCast extends StatelessWidget {
   Widget build(BuildContext context) {
     if (people == null ||
         people!['cast'] == null ||
-        (people!['cast'] as List).isEmpty)
+        (people!['cast'] as List).isEmpty) {
       return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
