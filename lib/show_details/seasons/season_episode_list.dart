@@ -72,8 +72,7 @@ class SeasonEpisodeList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: 16.0),
       itemCount: episodes.length,
       itemBuilder: (BuildContext context, int idx) {
         final Map<String, dynamic> ep = episodes[idx];
