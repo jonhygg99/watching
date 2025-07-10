@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'trakt_api.dart';
 
@@ -167,9 +168,17 @@ mixin ShowsApi on TraktApiBase {
   Future<Map<String, dynamic>> getShowWatchedProgress({
     required String id,
   }) async {
-    return await getJsonMap(
-      '/shows/$id/progress/watched?hidden=false&specials=false&count_specials=false',
-    );
+    try {
+      final progress = await getJsonMap(
+        '/shows/$id/progress/watched?hidden=false&specials=false&count_specials=false',
+      );
+      
+      // Ensure we always return a valid map with required fields
+      return progress ?? {};
+    } catch (e) {
+log('Error getting show watched progress', error: e);
+      return {}; // Return empty progress on error
+    }
   }
 
   /// Gets people (cast/crew) for a show.
