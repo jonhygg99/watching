@@ -23,7 +23,12 @@ class WatchlistShowItem extends HookConsumerWidget {
   });
 
   // Toggle watched status of the next/last episode
-  Future<void> _toggleWatchedStatus(WidgetRef ref, String traktId, bool markAsWatched, BuildContext context) async {
+  Future<void> _toggleWatchedStatus(
+    WidgetRef ref,
+    String traktId,
+    bool markAsWatched,
+    BuildContext context,
+  ) async {
     try {
       final notifier = ref.read(watchlistProvider.notifier);
       if (markAsWatched) {
@@ -33,13 +38,14 @@ class WatchlistShowItem extends HookConsumerWidget {
       }
       // Force a refresh of the watchlist
       await notifier.updateShowProgress(traktId);
-      
+
       // Show success message
       if (context.mounted) {
-        final message = markAsWatched 
-            ? 'Episode marked as watched' 
-            : 'Episode marked as unwatched';
-            
+        final message =
+            markAsWatched
+                ? 'Episode marked as watched'
+                : 'Episode marked as unwatched';
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
@@ -76,7 +82,7 @@ class WatchlistShowItem extends HookConsumerWidget {
     final ids = idsMap is Map ? Map<String, dynamic>.from(idsMap) : null;
     final traktId =
         ids != null ? ids['slug'] ?? ids['trakt']?.toString() : null;
-    
+
     // Extract poster URL defensively (handle missing/relative URLs)
     String? posterUrl;
     if (show != null &&
@@ -88,14 +94,14 @@ class WatchlistShowItem extends HookConsumerWidget {
         posterUrl = 'https://$posterUrl';
       }
     }
-    
+
     // Safely get progress with proper type handling
     final progressMap = item['progress'];
     final progress =
         progressMap is Map
             ? Map<String, dynamic>.from(progressMap)
             : <String, dynamic>{};
-            
+
     final watched = progress['completed'] as int? ?? 0;
     final total = progress['aired'] as int? ?? 1;
     if (traktId == null || watched == total) {
@@ -127,10 +133,10 @@ class WatchlistShowItem extends HookConsumerWidget {
     }
 
     // Use a state variable to prevent the widget from being dismissed
-    final ValueNotifier<bool> _isProcessing = ValueNotifier<bool>(false);
-    
+    final ValueNotifier<bool> isProcessingNotifier = ValueNotifier<bool>(false);
+
     return ValueListenableBuilder<bool>(
-      valueListenable: _isProcessing,
+      valueListenable: isProcessingNotifier,
       builder: (context, isProcessing, _) {
         return AbsorbPointer(
           absorbing: isProcessing,
@@ -139,7 +145,7 @@ class WatchlistShowItem extends HookConsumerWidget {
             direction: DismissDirection.horizontal,
             confirmDismiss: (direction) async {
               try {
-                _isProcessing.value = true;
+                isProcessingNotifier.value = true;
                 if (direction == DismissDirection.startToEnd) {
                   // Swipe right to mark as unwatched
                   await _toggleWatchedStatus(ref, traktId, false, context);
@@ -152,36 +158,40 @@ class WatchlistShowItem extends HookConsumerWidget {
                 debugPrint('Error in confirmDismiss: $e');
                 return false; // Don't dismiss on error
               } finally {
-                _isProcessing.value = false;
+                isProcessingNotifier.value = false;
               }
             },
             background: Container(
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
               decoration: BoxDecoration(
-                color: isProcessing
-                  ? Colors.grey.withOpacity(0.3)
-                  : Colors.red.withOpacity(0.3),
+                color:
+                    isProcessing
+                        ? Colors.grey.withValues(alpha: 0.3)
+                        : Colors.red[700]?.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.only(left: 20),
-              child: isProcessing
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.undo, color: Colors.white, size: 30),
+              child:
+                  isProcessing
+                      ? const CircularProgressIndicator()
+                      : const Icon(Icons.undo, color: Colors.white, size: 30),
             ),
             secondaryBackground: Container(
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
               decoration: BoxDecoration(
-                color: isProcessing 
-                  ? Colors.grey.withOpacity(0.3)
-                  : Colors.green.withOpacity(0.3),
+                color:
+                    isProcessing
+                        ? Colors.grey.withValues(alpha: 0.3)
+                        : Colors.green[700]?.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 20),
-              child: isProcessing
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.check, color: Colors.white, size: 30),
+              child:
+                  isProcessing
+                      ? const CircularProgressIndicator()
+                      : const Icon(Icons.check, color: Colors.white, size: 30),
             ),
             child: GestureDetector(
               onTap: () {
@@ -190,7 +200,9 @@ class WatchlistShowItem extends HookConsumerWidget {
                 } else {
                   // Default navigation: open ShowDetailPage
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => ShowDetailPage(showId: traktId!)),
+                    MaterialPageRoute(
+                      builder: (_) => ShowDetailPage(showId: traktId!),
+                    ),
                   );
                 }
               },
