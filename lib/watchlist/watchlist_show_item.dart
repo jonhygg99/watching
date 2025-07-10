@@ -166,32 +166,118 @@ class WatchlistShowItem extends HookConsumerWidget {
               decoration: BoxDecoration(
                 color:
                     isProcessing
-                        ? Colors.grey.withValues(alpha: 0.3)
+                        ? Colors.grey[600]?.withValues(alpha: 0.8)
                         : Colors.red[700]?.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.only(left: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child:
                   isProcessing
-                      ? const CircularProgressIndicator()
-                      : const Icon(Icons.undo, color: Colors.white, size: 30),
+                      ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Text(
+                            'Marcando como no visto...',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      )
+                      : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.undo, color: Colors.white, size: 28),
+                          const SizedBox(width: 12),
+                          Text(
+                            'No visto',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
             ),
             secondaryBackground: Container(
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
               decoration: BoxDecoration(
                 color:
                     isProcessing
-                        ? Colors.grey.withValues(alpha: 0.3)
+                        ? Colors.grey[600]?.withValues(alpha: 0.8)
                         : Colors.green[700]?.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child:
                   isProcessing
-                      ? const CircularProgressIndicator()
-                      : const Icon(Icons.check, color: Colors.white, size: 30),
+                      ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Marcando como visto...',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                      : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Visto',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ],
+                      ),
             ),
             child: GestureDetector(
               onTap: () {
