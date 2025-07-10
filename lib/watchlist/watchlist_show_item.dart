@@ -68,6 +68,37 @@ class WatchlistShowItem extends HookConsumerWidget {
     }
   }
 
+  // Reusable loading widget for swipe actions
+  Widget _buildLoadingIndicator() {
+    return const SizedBox(
+      width: 24,
+      height: 24,
+      child: CircularProgressIndicator(
+        strokeWidth: 2.5,
+        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      ),
+    );
+  }
+
+  // Reusable text style for swipe action text
+  static const _actionTextStyle = TextStyle(
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.3,
+  );
+
+  // Reusable container decoration
+  BoxDecoration _buildSwipeDecoration(Color color, bool isProcessing) {
+    return BoxDecoration(
+      color:
+          isProcessing
+              ? Colors.grey[600]?.withValues(alpha: 0.8)
+              : color.withValues(alpha: 0.8),
+      borderRadius: BorderRadius.circular(16),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Safely get the show map with proper type handling
@@ -163,13 +194,7 @@ class WatchlistShowItem extends HookConsumerWidget {
             },
             background: Container(
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-              decoration: BoxDecoration(
-                color:
-                    isProcessing
-                        ? Colors.grey[600]?.withValues(alpha: 0.8)
-                        : Colors.red[700]?.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(16),
-              ),
+              decoration: _buildSwipeDecoration(Colors.red[700]!, isProcessing),
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child:
@@ -178,25 +203,11 @@ class WatchlistShowItem extends HookConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          ),
+                          _buildLoadingIndicator(),
                           const SizedBox(width: 16),
                           Text(
                             'Marcando como no visto...',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.3,
-                            ),
+                            style: _actionTextStyle,
                           ),
                         ],
                       )
@@ -206,26 +217,15 @@ class WatchlistShowItem extends HookConsumerWidget {
                         children: [
                           const Icon(Icons.undo, color: Colors.white, size: 28),
                           const SizedBox(width: 12),
-                          Text(
-                            'No visto',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
+                          Text('No visto', style: _actionTextStyle),
                         ],
                       ),
             ),
             secondaryBackground: Container(
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-              decoration: BoxDecoration(
-                color:
-                    isProcessing
-                        ? Colors.grey[600]?.withValues(alpha: 0.8)
-                        : Colors.green[700]?.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(16),
+              decoration: _buildSwipeDecoration(
+                Colors.green[700]!,
+                isProcessing,
               ),
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -237,39 +237,17 @@ class WatchlistShowItem extends HookConsumerWidget {
                         children: [
                           Text(
                             'Marcando como visto...',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.3,
-                            ),
+                            style: _actionTextStyle,
                           ),
                           const SizedBox(width: 16),
-                          const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
-                          ),
+                          _buildLoadingIndicator(),
                         ],
                       )
                       : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Visto',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
+                          Text('Visto', style: _actionTextStyle),
                           const SizedBox(width: 12),
                           const Icon(
                             Icons.check,
