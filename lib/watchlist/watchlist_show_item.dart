@@ -141,11 +141,11 @@ class WatchlistShowItem extends HookConsumerWidget {
               try {
                 _isProcessing.value = true;
                 if (direction == DismissDirection.startToEnd) {
-                  // Swipe right to mark as watched
-                  await _toggleWatchedStatus(ref, traktId, true, context);
-                } else if (direction == DismissDirection.endToStart) {
-                  // Swipe left to mark as not watched
+                  // Swipe right to mark as unwatched
                   await _toggleWatchedStatus(ref, traktId, false, context);
+                } else if (direction == DismissDirection.endToStart) {
+                  // Swipe left to mark as watched
+                  await _toggleWatchedStatus(ref, traktId, true, context);
                 }
                 return false; // Never dismiss the item
               } catch (e) {
@@ -158,30 +158,30 @@ class WatchlistShowItem extends HookConsumerWidget {
             background: Container(
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
               decoration: BoxDecoration(
-                color: isProcessing 
+                color: isProcessing
                   ? Colors.grey.withOpacity(0.3)
-                  : Colors.green.withOpacity(0.3),
+                  : Colors.red.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.only(left: 20),
               child: isProcessing
                   ? const CircularProgressIndicator()
-                  : const Icon(Icons.check, color: Colors.white, size: 30),
+                  : const Icon(Icons.undo, color: Colors.white, size: 30),
             ),
             secondaryBackground: Container(
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
               decoration: BoxDecoration(
-                color: isProcessing
+                color: isProcessing 
                   ? Colors.grey.withOpacity(0.3)
-                  : Colors.red.withOpacity(0.3),
+                  : Colors.green.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 20),
               child: isProcessing
                   ? const CircularProgressIndicator()
-                  : const Icon(Icons.undo, color: Colors.white, size: 30),
+                  : const Icon(Icons.check, color: Colors.white, size: 30),
             ),
             child: GestureDetector(
               onTap: () {
