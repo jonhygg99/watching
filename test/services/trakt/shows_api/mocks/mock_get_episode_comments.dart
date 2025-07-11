@@ -1,0 +1,24 @@
+List<Map<String, dynamic>> getMockEpisodeComments() {
+  return [
+    {
+      "id": 8,
+      "parent_id": 0,
+      "created_at": "2011-03-25T22:35:17.000Z",
+      "updated_at": "2011-03-25T22:35:17.000Z",
+      "comment": "Great episode!",
+      "spoiler": false,
+      "review": false,
+      "replies": 1,
+      "likes": 0,
+      "user_stats": {"rating": 8, "play_count": 1, "completed_count": 1},
+      "user": {
+        "username": "sean",
+        "private": false,
+        "name": "Sean Rudford",
+        "vip": true,
+        "vip_ep": false,
+        "ids": {"slug": "sean"},
+      },
+    },
+  ];
+}

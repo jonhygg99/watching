@@ -21,7 +21,7 @@ class TestShowsApi implements ShowsApi {
 
   @override
   String get baseUrl => _api.baseUrl;
-  
+
   @override
   Map<String, String> get headers => _api.headers;
 
@@ -47,7 +47,9 @@ class TestShowsApi implements ShowsApi {
   }) async {
     final translationParam =
         translations != null ? '?translations=$translations' : '';
-    return await getJsonList('/shows/$id/seasons/$season/episodes$translationParam');
+    return await getJsonList(
+      '/shows/$id/seasons/$season/episodes$translationParam',
+    );
   }
 
   @override
@@ -81,11 +83,15 @@ class TestShowsApi implements ShowsApi {
     return await getJsonMap('/shows/$id/ratings');
   }
 
-  Future<Map<String, dynamic>> getShowWatchedProgress({required String id}) async {
+  Future<Map<String, dynamic>> getShowWatchedProgress({
+    required String id,
+  }) async {
     return await getJsonMap('/shows/$id/progress/watched');
   }
 
-  Future<Map<String, dynamic>> getShowWatchingUsers({required String id}) async {
+  Future<Map<String, dynamic>> getShowWatchingUsers({
+    required String id,
+  }) async {
     return await getJsonMap('/shows/$id/watching');
   }
 
@@ -102,7 +108,8 @@ class TestShowsApi implements ShowsApi {
     required String id,
     bool extended = false,
   }) async {
-    final endpoint = '/shows/$id/people${extended ? '?extended=guest_stars' : ''}';
+    final endpoint =
+        '/shows/$id/people${extended ? '?extended=guest_stars' : ''}';
     return await getJsonMap(endpoint);
   }
 
@@ -112,5 +119,17 @@ class TestShowsApi implements ShowsApi {
     required String language,
   }) async {
     return await getJsonList('/shows/$id/translations/$language');
+  }
+
+  @override
+  Future<List<dynamic>> getEpisodeComments({
+    required String id,
+    required int season,
+    required int episode,
+    String sort = 'likes',
+  }) async {
+    return await getJsonList(
+      '/shows/$id/seasons/$season/episodes/$episode/comments/$sort',
+    );
   }
 }

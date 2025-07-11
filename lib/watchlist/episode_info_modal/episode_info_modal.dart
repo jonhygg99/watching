@@ -98,13 +98,13 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
 
   Future<void> _handleWatchedStatusChanged(
     BuildContext context,
-    WidgetRef ref, 
-    Map<String, dynamic> episode, 
-    bool newWatchedState
+    WidgetRef ref,
+    Map<String, dynamic> episode,
+    bool newWatchedState,
   ) async {
     final notifier = ref.read(watchlistProvider.notifier);
     final showId = widget.showData['ids']['trakt']?.toString() ?? '';
-    
+
     try {
       await notifier.toggleEpisodeWatchedStatus(
         showTraktId: showId,
@@ -118,7 +118,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
         setState(() {
           episode['watched'] = newWatchedState;
         });
-        
+
         // Notify parent about the watched status change
         if (widget.onWatchedStatusChanged != null) {
           widget.onWatchedStatusChanged!();
@@ -136,7 +136,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
       future: widget.episodeFuture,
       builder: (context, snapshot) {
         Widget content;
-        
+
         if (snapshot.connectionState == ConnectionState.waiting) {
           content = const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
@@ -147,18 +147,20 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
             content = const SizedBox.shrink();
           } else {
             final img = _getScreenshotUrl(episode);
-            final imageUrl = img != null ? (img is String && !img.startsWith('http') ? 'https://$img' : img) : null;
-            
+            final imageUrl =
+                img != null
+                    ? (img is String && !img.startsWith('http')
+                        ? 'https://$img'
+                        : img)
+                    : null;
+
             content = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                EpisodeHeader(
-                  episode: episode,
-                  imageUrl: imageUrl,
-                ),
-                
+                EpisodeHeader(episode: episode, imageUrl: imageUrl),
+
                 EpisodeDetails(episode: episode),
-                
+
                 Consumer(
                   builder: (context, ref, _) {
                     return EpisodeActions(
@@ -168,12 +170,13 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                       episodeNumber: widget.episodeNumber,
                       currentRating: episodeRating,
                       onRatingChanged: _handleRatingUpdate,
-                      onWatchedStatusChanged: (isWatched) => _handleWatchedStatusChanged(
-                        context, 
-                        ref, 
-                        episode, 
-                        isWatched
-                      ),
+                      onWatchedStatusChanged:
+                          (isWatched) => _handleWatchedStatusChanged(
+                            context,
+                            ref,
+                            episode,
+                            isWatched,
+                          ),
                     );
                   },
                 ),
@@ -181,7 +184,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
             );
           }
         }
-        
+
         return Padding(
           padding: const EdgeInsets.all(20),
           child: SingleChildScrollView(child: content),
@@ -189,7 +192,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
       },
     );
   }
-  
+
   dynamic _getScreenshotUrl(Map<String, dynamic> episode) {
     if (episode['images']?['screenshot'] is List &&
         (episode['images']?['screenshot'] as List).isNotEmpty) {

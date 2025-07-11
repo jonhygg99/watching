@@ -151,6 +151,24 @@ mixin ShowsApi on TraktApiBase {
     }
   }
 
+  /// Gets all top level comments for an episode.
+  ///
+  /// [id]: Trakt ID, slug, or IMDB ID of the show
+  /// [season]: Season number
+  /// [episode]: Episode number
+  /// [sort]: How to sort the comments. Options: newest, oldest, likes, replies, highest, lowest, plays
+  /// Returns a list of comment objects for the episode.
+  Future<List<dynamic>> getEpisodeComments({
+    required String id,
+    required int season,
+    required int episode,
+    String sort = 'likes',
+  }) async {
+    return await getJsonList(
+      '/shows/$id/seasons/$season/episodes/$episode/comments/$sort',
+    );
+  }
+
   /// Gets comments for a show by ID.
   Future<List<dynamic>> getShowComments({
     required String id,
@@ -172,11 +190,11 @@ mixin ShowsApi on TraktApiBase {
       final progress = await getJsonMap(
         '/shows/$id/progress/watched?hidden=false&specials=false&count_specials=false',
       );
-      
+
       // Ensure we always return a valid map with required fields
       return progress ?? {};
     } catch (e) {
-log('Error getting show watched progress', error: e);
+      log('Error getting show watched progress', error: e);
       return {}; // Return empty progress on error
     }
   }
