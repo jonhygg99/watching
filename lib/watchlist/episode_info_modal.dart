@@ -8,9 +8,9 @@ import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/services/trakt/trakt_api.dart';
 
 class _StarRating extends StatefulWidget {
-  final double initialRating;
+  final double? initialRating;
   final double size;
-  final ValueChanged<double> onRatingChanged;
+  final ValueChanged<double?> onRatingChanged;
 
   const _StarRating({
     this.initialRating = 0.0,
@@ -24,41 +24,50 @@ class _StarRating extends StatefulWidget {
 
 class _StarRatingState extends State<_StarRating> {
   late double _currentRating;
-  double? _lastTappedRating;
   DateTime? _lastTapTime;
 
   @override
+  @override
   void initState() {
     super.initState();
-    _currentRating = widget.initialRating;
+    _currentRating = widget.initialRating ?? 0.0;
   }
 
   @override
   void didUpdateWidget(_StarRating oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialRating != oldWidget.initialRating) {
-      _currentRating = widget.initialRating;
+      _currentRating = widget.initialRating ?? 0.0;
     }
   }
 
   void _handleRatingUpdate(double newRating) {
     final now = DateTime.now();
-    final isDoubleTap =
-        _lastTappedRating == newRating &&
-        _lastTapTime != null &&
-        now.difference(_lastTapTime!) < const Duration(milliseconds: 300);
+    bool isDoubleTap = false;
+
+    // Check if this is a double tap (within 300ms) on the same star value
+    if (_lastTapTime != null &&
+        now.difference(_lastTapTime!) < const Duration(milliseconds: 300) &&
+        _currentRating == newRating) {
+      isDoubleTap = true;
+    }
 
     setState(() {
       if (isDoubleTap) {
         _currentRating = 0.0;
       } else {
-        _currentRating = newRating;
+        _currentRating = newRating > 0 ? newRating : _currentRating;
       }
-      _lastTappedRating = newRating;
       _lastTapTime = now;
     });
 
-    widget.onRatingChanged(_currentRating);
+    // If it's a double tap, remove the rating (pass null)
+    // Otherwise, update the rating if it's greater than 0
+    if (isDoubleTap) {
+      widget.onRatingChanged(null);
+    } else if (newRating > 0) {
+      widget.onRatingChanged(newRating);
+    }
   }
 
   @override
@@ -105,16 +114,23 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
   bool _isRating = false;
   final TraktApi _traktApi = TraktApi();
 
-  Future<void> _handleRatingUpdate(double newRating) async {
-    if (_isRating) return;
+  Future<void> _handleRatingUpdate(double? newRating) async {
+    // If we're already processing a rating update, queue this one
+    if (_isRating) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (_isRating) {
+        // If still processing after delay, ignore this update
+        return;
+      }
+    }
 
     setState(() {
       _isRating = true;
-      episodeRating = newRating > 0 ? newRating : null;
+      episodeRating = (newRating != null && newRating > 0) ? newRating : null;
     });
 
     try {
-      if (newRating > 0) {
+      if (newRating != null && newRating > 0) {
         await _addRating(newRating);
       } else {
         await _removeRating();
@@ -127,6 +143,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
           episodeRating = episodeRating == 0 ? null : episodeRating;
         });
       }
+      rethrow; // Re-throw the error after handling
     } finally {
       if (mounted) {
         setState(() {
@@ -192,54 +209,63 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
   }
 
   Future<void> _removeRating() async {
-    try {
-      final snapshot = await widget.episodeFuture;
-      if (snapshot.isEmpty) return;
+    const maxRetries = 3;
+    int attempt = 0;
 
-      // Get the show data from the widget
-      final showIds = widget.showData['ids'] as Map<String, dynamic>? ?? {};
-      final showTraktId = showIds['trakt'] ?? 0;
+    while (attempt < maxRetries) {
+      try {
+        final snapshot = await widget.episodeFuture;
+        if (snapshot.isEmpty) return;
 
-      if (showTraktId == 0) {
-        debugPrint('Error: Invalid show Trakt ID');
-        return;
-      }
+        // Get the show data from the widget
+        final showIds = widget.showData['ids'] as Map<String, dynamic>? ?? {};
+        final showTraktId = showIds['trakt'] ?? 0;
 
-      // Build the request payload
-      final showPayload = {
-        'ids': {
-          'trakt': showTraktId,
-          'slug': showIds['slug'],
-          'imdb': showIds['imdb'],
-          'tmdb': showIds['tmdb'],
-          'tvdb': showIds['tvdb'],
-        },
-        'title': widget.showData['title'] ?? 'Unknown',
-        'year': widget.showData['year'],
-        'seasons': [
-          {
-            'number': widget.seasonNumber,
-            'episodes': [
-              {'number': widget.episodeNumber},
-            ],
+        if (showTraktId == 0) return;
+
+        // Build the request payload
+        final showPayload = {
+          'ids': {
+            'trakt': showTraktId,
+            'slug': showIds['slug'],
+            'imdb': showIds['imdb'],
+            'tmdb': showIds['tmdb'],
+            'tvdb': showIds['tvdb'],
           },
-        ],
-      };
+          'title': widget.showData['title'] ?? 'Unknown',
+          'year': widget.showData['year'],
+          'seasons': [
+            {
+              'number': widget.seasonNumber,
+              'episodes': [
+                {'number': widget.episodeNumber},
+              ],
+            },
+          ],
+        };
 
-      debugPrint('Sending remove rating payload: ${jsonEncode(showPayload)}');
+        await _traktApi.removeRatings(shows: [showPayload]);
+        return;
+      } catch (e) {
+        attempt++;
 
-      final response = await _traktApi.removeRatings(shows: [showPayload]);
+        // Check if this is a rate limit error
+        if (e.toString().contains('429') && attempt < maxRetries) {
+          int waitTime = 1;
+          final match = RegExp(r'wait (\d+) seconds').firstMatch(e.toString());
+          if (match != null) {
+            waitTime = int.tryParse(match.group(1) ?? '1') ?? 1;
+          }
 
-      debugPrint('Rating removed: ${jsonEncode(response)}');
-
-      if (response['not_found']?['shows']?.isNotEmpty == true) {
-        debugPrint(
-          'Show not found in Trakt. Full response: ${jsonEncode(response)}',
-        );
+          // Add some jitter and exponential backoff
+          final backoffTime = Duration(
+            seconds: (waitTime * (1 << (attempt - 1))).clamp(1, 30),
+          );
+          await Future.delayed(backoffTime);
+        } else if (attempt >= maxRetries) {
+          rethrow;
+        }
       }
-    } catch (e) {
-      debugPrint('Error removing rating: $e');
-      rethrow;
     }
   }
 
