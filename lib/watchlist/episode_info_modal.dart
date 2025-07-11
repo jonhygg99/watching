@@ -4,7 +4,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 
-class _StarRating extends StatelessWidget {
+class _StarRating extends StatefulWidget {
   final double initialRating;
   final double size;
   final ValueChanged<double> onRatingChanged;
@@ -16,22 +16,62 @@ class _StarRating extends StatelessWidget {
   });
 
   @override
+  _StarRatingState createState() => _StarRatingState();
+}
+
+class _StarRatingState extends State<_StarRating> {
+  late double _currentRating;
+  double? _lastTappedRating;
+  DateTime? _lastTapTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentRating = widget.initialRating;
+  }
+
+  @override
+  void didUpdateWidget(_StarRating oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialRating != oldWidget.initialRating) {
+      _currentRating = widget.initialRating;
+    }
+  }
+
+  void _handleRatingUpdate(double newRating) {
+    final now = DateTime.now();
+    final isDoubleTap = _lastTappedRating == newRating &&
+        _lastTapTime != null &&
+        now.difference(_lastTapTime!) < const Duration(milliseconds: 300);
+
+    setState(() {
+      if (isDoubleTap) {
+        _currentRating = 0.0;
+      } else {
+        _currentRating = newRating;
+      }
+      _lastTappedRating = newRating;
+      _lastTapTime = now;
+    });
+
+    widget.onRatingChanged(_currentRating);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return RatingBar.builder(
-      initialRating: initialRating,
+      initialRating: _currentRating,
       minRating: 0,
       maxRating: 5,
       direction: Axis.horizontal,
       allowHalfRating: true,
       itemCount: 5,
-      itemSize: size,
+      itemSize: widget.size,
       itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
       itemBuilder: (context, index) {
         return Icon(Icons.star, color: Colors.amber);
       },
-      onRatingUpdate: (rating) {
-        onRatingChanged(rating);
-      },
+      onRatingUpdate: _handleRatingUpdate,
       updateOnDrag: true,
       glow: false,
     );
