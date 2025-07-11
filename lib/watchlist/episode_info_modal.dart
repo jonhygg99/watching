@@ -19,13 +19,16 @@ class _StarRating extends StatelessWidget {
   Widget build(BuildContext context) {
     return RatingBar.builder(
       initialRating: initialRating,
-      minRating: 0.5,
+      minRating: 0,
+      maxRating: 5,
       direction: Axis.horizontal,
       allowHalfRating: true,
       itemCount: 5,
       itemSize: size,
       itemPadding: const EdgeInsets.symmetric(horizontal: 2.0),
-      itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+      itemBuilder: (context, index) {
+        return Icon(Icons.star, color: Colors.amber);
+      },
       onRatingUpdate: (rating) {
         onRatingChanged(rating);
       },
@@ -151,8 +154,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                     const Spacer(),
                     if (ep['watched'] == true)
                       _StarRating(
-                        initialRating:
-                            _episodeRating ?? (ep['rating']?.toDouble() ?? 0.0),
+                        initialRating: 0.0,
                         size: 20,
                         onRatingChanged: (rating) {
                           setState(() {
