@@ -3,6 +3,121 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 
+class _StarRating extends StatefulWidget {
+  final double initialRating;
+  final double size;
+  final ValueChanged<double>? onRatingChanged;
+
+  const _StarRating({
+    this.initialRating = 0.0,
+    this.size = 20.0,
+    this.onRatingChanged,
+  });
+
+  @override
+  _StarRatingState createState() => _StarRatingState();
+}
+
+class _StarRatingState extends State<_StarRating> {
+  late double _currentRating;
+  double? _tempRating;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentRating = widget.initialRating;
+  }
+
+  @override
+  void didUpdateWidget(_StarRating oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialRating != oldWidget.initialRating) {
+      _currentRating = widget.initialRating;
+    }
+  }
+
+  double _getRatingFromOffset(Offset offset, BoxConstraints constraints) {
+    final boxWidth = constraints.maxWidth;
+    final starWidth = boxWidth / 5;
+    var rating = (offset.dx / starWidth).clamp(0.0, 5.0);
+    // Round to nearest 0.5
+    rating = (rating * 2).round() / 2;
+    return rating;
+  }
+
+  void _updateRating(Offset localPosition, BoxConstraints constraints) {
+    final newRating = _getRatingFromOffset(localPosition, constraints);
+    setState(() {
+      _currentRating = newRating;
+      _tempRating = null;
+    });
+    widget.onRatingChanged?.call(_currentRating);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final displayRating = _tempRating ?? _currentRating;
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragStart: (details) {
+            final box = context.findRenderObject() as RenderBox;
+            final localPosition = box.globalToLocal(details.globalPosition);
+            final newRating = _getRatingFromOffset(localPosition, constraints);
+            setState(() => _tempRating = newRating);
+          },
+          onHorizontalDragUpdate: (details) {
+            final box = context.findRenderObject() as RenderBox;
+            final localPosition = box.globalToLocal(details.globalPosition);
+            final newRating = _getRatingFromOffset(localPosition, constraints);
+            setState(() => _tempRating = newRating);
+          },
+          onHorizontalDragEnd: (_) {
+            if (_tempRating != null) {
+              setState(() {
+                _currentRating = _tempRating!;
+                _tempRating = null;
+              });
+              widget.onRatingChanged?.call(_currentRating);
+            }
+          },
+          onTapDown: (details) {
+            final box = context.findRenderObject() as RenderBox;
+            final localPosition = box.globalToLocal(details.globalPosition);
+            _updateRating(localPosition, constraints);
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(5, (index) {
+              final starPosition = index + 1;
+              final starSize = widget.size;
+              final starSpacing = 2.0;
+              
+              return GestureDetector(
+                onTap: () {
+                  final newRating = displayRating == starPosition ? 0.0 : starPosition.toDouble();
+                  setState(() => _currentRating = newRating);
+                  widget.onRatingChanged?.call(_currentRating);
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: starSpacing / 2),
+                  child: Icon(
+                    displayRating >= starPosition ? Icons.star : Icons.star_border,
+                    color: displayRating >= starPosition ? Colors.amber : Colors.grey,
+                    size: starSize,
+                  ),
+                ),
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class EpisodeInfoModal extends StatefulWidget {
   final Future<Map<String, dynamic>> episodeFuture;
   final String showId;
@@ -22,6 +137,7 @@ class EpisodeInfoModal extends StatefulWidget {
 }
 
 class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
+  double? _episodeRating;
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>>(
@@ -115,6 +231,19 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                     ),
 
                     // Spacer to push the watched button to the right
+                    const Spacer(),
+                    if (ep['watched'] == true) 
+                      _StarRating(
+                        initialRating: _episodeRating ?? (ep['rating']?.toDouble() ?? 0.0),
+                        size: 20,
+                        onRatingChanged: (rating) {
+                          setState(() {
+                            _episodeRating = rating;
+                            // Here you would typically save the rating to your backend
+                            // For example: _saveRatingToBackend(rating);
+                          });
+                        },
+                      ),
                     const Spacer(),
 
                     // Watched toggle button (aligned right)
