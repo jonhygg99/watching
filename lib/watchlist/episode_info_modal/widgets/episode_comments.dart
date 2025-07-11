@@ -56,8 +56,8 @@ class _EpisodeCommentsState extends ConsumerState<EpisodeComments> {
             child: Text(
               'Error loading comments: ${snapshot.error}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           );
         }
@@ -69,8 +69,8 @@ class _EpisodeCommentsState extends ConsumerState<EpisodeComments> {
             child: Text(
               'No comments yet',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           );
         }
@@ -112,34 +112,31 @@ class _EpisodeCommentsState extends ConsumerState<EpisodeComments> {
                     radius: 20,
                   )
                 else
-                  const CircleAvatar(
-                    child: Icon(Icons.person),
-                    radius: 20,
-                  ),
+                  const CircleAvatar(radius: 20, child: Icon(Icons.person)),
                 const SizedBox(width: 12),
                 Text(
                   userName,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 if (isSpoiler)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
+                      horizontal: 8,
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.orange,
+                      color: Colors.red,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       'SPOILER',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 if (isReview) ...[
@@ -156,27 +153,27 @@ class _EpisodeCommentsState extends ConsumerState<EpisodeComments> {
                     child: Text(
                       'REVIEW',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              commentText,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            Text(commentText, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 8),
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Icon(Icons.thumb_up, size: 16),
-                const SizedBox(width: 4),
+                const Icon(Icons.thumb_up, size: 20),
+                const SizedBox(width: 6),
                 Text(
                   likes.toString(),
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.normal,
+                  ),
                 ),
               ],
             ),
