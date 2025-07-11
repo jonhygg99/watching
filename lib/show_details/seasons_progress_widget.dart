@@ -9,6 +9,7 @@ import 'seasons/season_detail_page.dart';
 /// Usa hooks y Riverpod para el manejo de estado y side-effects.
 class SeasonsProgressWidget extends HookConsumerWidget {
   final String showId;
+  final Map<String, dynamic> showData;
   final String? languageCode;
   final Function()? onProgressChanged;
   final Function()? onEpisodeWatched;
@@ -16,6 +17,7 @@ class SeasonsProgressWidget extends HookConsumerWidget {
   const SeasonsProgressWidget({
     super.key,
     required this.showId,
+    required this.showData,
     this.languageCode,
     this.onProgressChanged,
     this.onEpisodeWatched,
@@ -108,6 +110,7 @@ class SeasonsProgressWidget extends HookConsumerWidget {
                   builder:
                       (context) => SeasonDetailPage(
                         showId: showId,
+                        showData: showData,
                         seasonNumber: number,
                         languageCode: languageCode,
                         onEpisodeWatched: () {

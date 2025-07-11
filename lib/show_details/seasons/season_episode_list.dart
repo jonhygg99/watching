@@ -12,6 +12,7 @@ class SeasonEpisodeList extends StatefulWidget {
   final bool loading;
   final int seasonNumber;
   final String showId;
+  final Map<String, dynamic> showData;
   final String? languageCode;
   final Future<void> Function(int epNumber, bool watched) onToggleEpisode;
   final void Function(int epNumber, Color color, {int delayMs}) setMarkingColor;
@@ -24,6 +25,7 @@ class SeasonEpisodeList extends StatefulWidget {
     required this.loading,
     required this.seasonNumber,
     required this.showId,
+    required this.showData,
     required this.languageCode,
     required this.onToggleEpisode,
     required this.setMarkingColor,
@@ -127,7 +129,7 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                 }
                 return EpisodeInfoModal(
                   episodeFuture: Future.value(epInfo),
-                  showId: widget.showId,
+                  showData: widget.showData,
                   seasonNumber: widget.seasonNumber,
                   episodeNumber: epNumber,
                 );

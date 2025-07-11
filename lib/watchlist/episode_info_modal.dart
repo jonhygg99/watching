@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
+import 'package:watching/services/trakt/trakt_api.dart';
 
 class _StarRating extends StatefulWidget {
   final double initialRating;
@@ -81,14 +84,14 @@ class _StarRatingState extends State<_StarRating> {
 
 class EpisodeInfoModal extends StatefulWidget {
   final Future<Map<String, dynamic>> episodeFuture;
-  final String showId;
+  final Map<String, dynamic> showData;
   final int seasonNumber;
   final int episodeNumber;
 
   const EpisodeInfoModal({
     super.key,
     required this.episodeFuture,
-    required this.showId,
+    required this.showData,
     required this.seasonNumber,
     required this.episodeNumber,
   });
@@ -99,6 +102,147 @@ class EpisodeInfoModal extends StatefulWidget {
 
 class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
   double? episodeRating;
+  bool _isRating = false;
+  final TraktApi _traktApi = TraktApi();
+
+  Future<void> _handleRatingUpdate(double newRating) async {
+    if (_isRating) return;
+
+    setState(() {
+      _isRating = true;
+      episodeRating = newRating > 0 ? newRating : null;
+    });
+
+    try {
+      if (newRating > 0) {
+        await _addRating(newRating);
+      } else {
+        await _removeRating();
+      }
+    } catch (e) {
+      debugPrint('Error updating rating: $e');
+      // Revert the UI if the API call fails
+      if (mounted) {
+        setState(() {
+          episodeRating = episodeRating == 0 ? null : episodeRating;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRating = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _addRating(double rating) async {
+    try {
+      final snapshot = await widget.episodeFuture;
+      if (snapshot.isEmpty) return;
+
+      // Convert 0-5 rating to 1-10 scale
+      final traktRating = (rating * 2).round().clamp(1, 10);
+
+      // Get the show data from the widget
+      final showIds = widget.showData['ids'] as Map<String, dynamic>? ?? {};
+      final showTraktId = showIds['trakt'] ?? 0;
+
+      if (showTraktId == 0) {
+        debugPrint('Error: Invalid show Trakt ID');
+        return;
+      }
+
+      // Build the request payload
+      final showPayload = {
+        'ids': {
+          'trakt': showTraktId,
+          'slug': showIds['slug'],
+          'imdb': showIds['imdb'],
+          'tmdb': showIds['tmdb'],
+          'tvdb': showIds['tvdb'],
+        },
+        'title': widget.showData['title'] ?? 'Unknown',
+        'year': widget.showData['year'],
+        'seasons': [
+          {
+            'number': widget.seasonNumber,
+            'episodes': [
+              {'number': widget.episodeNumber, 'rating': traktRating},
+            ],
+          },
+        ],
+      };
+
+      await _traktApi.addRatings(shows: [showPayload]);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Error al guardar la valoración. Por favor, inténtalo de nuevo.',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _removeRating() async {
+    try {
+      final snapshot = await widget.episodeFuture;
+      if (snapshot.isEmpty) return;
+
+      // Get the show data from the widget
+      final showIds = widget.showData['ids'] as Map<String, dynamic>? ?? {};
+      final showTraktId = showIds['trakt'] ?? 0;
+
+      if (showTraktId == 0) {
+        debugPrint('Error: Invalid show Trakt ID');
+        return;
+      }
+
+      // Build the request payload
+      final showPayload = {
+        'ids': {
+          'trakt': showTraktId,
+          'slug': showIds['slug'],
+          'imdb': showIds['imdb'],
+          'tmdb': showIds['tmdb'],
+          'tvdb': showIds['tvdb'],
+        },
+        'title': widget.showData['title'] ?? 'Unknown',
+        'year': widget.showData['year'],
+        'seasons': [
+          {
+            'number': widget.seasonNumber,
+            'episodes': [
+              {'number': widget.episodeNumber},
+            ],
+          },
+        ],
+      };
+
+      debugPrint('Sending remove rating payload: ${jsonEncode(showPayload)}');
+
+      final response = await _traktApi.removeRatings(shows: [showPayload]);
+
+      debugPrint('Rating removed: ${jsonEncode(response)}');
+
+      if (response['not_found']?['shows']?.isNotEmpty == true) {
+        debugPrint(
+          'Show not found in Trakt. Full response: ${jsonEncode(response)}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error removing rating: $e');
+      rethrow;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>>(
@@ -195,15 +339,9 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                     const Spacer(),
                     if (ep['watched'] == true)
                       _StarRating(
-                        initialRating: 0.0,
+                        initialRating: episodeRating ?? 0.0,
                         size: 20,
-                        onRatingChanged: (rating) {
-                          setState(() {
-                            episodeRating = rating;
-                            // Here you would typically save the rating to your backend
-                            // For example: _saveRatingToBackend(rating);
-                          });
-                        },
+                        onRatingChanged: _handleRatingUpdate,
                       ),
                     const Spacer(),
 
@@ -223,7 +361,10 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                                     final notifier = ref.read(
                                       watchlistProvider.notifier,
                                     );
-                                    final showId = widget.showId;
+                                    final showId =
+                                        widget.showData['ids']['trakt']
+                                            ?.toString() ??
+                                        '';
                                     final seasonNumber = widget.seasonNumber;
                                     final episodeNumber = widget.episodeNumber;
                                     final newWatchedState = !isWatched;

@@ -11,6 +11,7 @@ class EpisodeInfoButton extends HookConsumerWidget {
   final int episode;
   final TraktApi apiService;
   final String? countryCode;
+  final Map<String, dynamic> showData;
 
   const EpisodeInfoButton({
     super.key,
@@ -18,6 +19,7 @@ class EpisodeInfoButton extends HookConsumerWidget {
     required this.season,
     required this.episode,
     required this.apiService,
+    required this.showData,
     this.countryCode,
   });
 
@@ -48,7 +50,7 @@ class EpisodeInfoButton extends HookConsumerWidget {
                         episode: episode,
                         language: effectiveCountryCode.toLowerCase(),
                       ),
-                      showId: traktId!,
+                      showData: showData,
                       seasonNumber: season,
                       episodeNumber: episode,
                     );

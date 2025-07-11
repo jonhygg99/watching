@@ -15,12 +15,14 @@ class WatchProgressInfo extends StatelessWidget {
   final String title;
   final TraktApi apiService;
   final Map<String, dynamic>? progress;
+  final Map<String, dynamic> showData;
 
   const WatchProgressInfo({
     super.key,
     required this.traktId,
     required this.title,
     required this.apiService,
+    required this.showData,
     this.progress,
   });
 
@@ -42,7 +44,7 @@ class WatchProgressInfo extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: titleStyle),
+          if (titleStyle != null) Text(title, style: titleStyle),
           const SizedBox(height: 8),
           Text('Sin progreso disponible', style: TextStyle(color: Colors.grey)),
         ],
@@ -52,9 +54,10 @@ class WatchProgressInfo extends StatelessWidget {
     // If progress exists, show details
     return _ProgressDetails(
       title: title,
-      progress: progress!,
       traktId: traktId!,
+      progress: progress!,
       apiService: apiService,
+      showData: showData,
       titleStyle: titleStyle,
       episodeStyle: episodeStyle,
     );
@@ -65,19 +68,21 @@ class WatchProgressInfo extends StatelessWidget {
 /// Internal widget to render progress details, next episode, and progress bar.
 class _ProgressDetails extends StatelessWidget {
   final String title;
-  final Map<String, dynamic> progress;
   final String traktId;
+  final Map<String, dynamic> progress;
   final TraktApi apiService;
+  final Map<String, dynamic> showData;
   final TextStyle? titleStyle;
   final TextStyle? episodeStyle;
 
   const _ProgressDetails({
     required this.title,
-    required this.progress,
     required this.traktId,
+    required this.progress,
     required this.apiService,
-    required this.titleStyle,
-    required this.episodeStyle,
+    required this.showData,
+    this.titleStyle,
+    this.episodeStyle,
   });
 
   @override
@@ -85,19 +90,21 @@ class _ProgressDetails extends StatelessWidget {
     final episodesWatched = progress['completed'] ?? 0;
     final totalEpisodes = progress['aired'] ?? 1;
     final nextEpisode = progress['next_episode'];
-    final percent =
-        totalEpisodes > 0
-            ? (episodesWatched / totalEpisodes).clamp(0.0, 1.0)
-            : 0.0;
+    final percent = totalEpisodes > 0 ? (episodesWatched / totalEpisodes).clamp(0.0, 1.0) : 0.0;
+    
+    final effectiveTitleStyle = titleStyle ?? 
+        Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
+    final effectiveEpisodeStyle = episodeStyle ?? 
+        Theme.of(context).textTheme.bodyMedium;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: titleStyle),
+        if (effectiveTitleStyle != null) Text(title, style: effectiveTitleStyle),
         if (nextEpisode != null) ...[
           const SizedBox(height: 6),
           Text(
             'T${nextEpisode['season']}E${nextEpisode['number']} - ${nextEpisode['title']}',
-            style: episodeStyle?.copyWith(color: Colors.grey[700]),
+            style: effectiveEpisodeStyle?.copyWith(color: Colors.grey[700]),
           ),
           const SizedBox(height: 6),
           ProgressBar(
@@ -111,6 +118,7 @@ class _ProgressDetails extends StatelessWidget {
             season: nextEpisode['season'],
             episode: nextEpisode['number'],
             apiService: apiService,
+            showData: showData,
           ),
         ],
       ],

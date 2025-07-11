@@ -135,6 +135,7 @@ class WatchlistShowItem extends HookConsumerWidget {
           title: title,
           apiService: ref.read(traktApiProvider),
           progress: progress,
+          showData: show ?? {},
         ),
         builder:
             (context, child) => ShowCard(
@@ -266,6 +267,7 @@ class WatchlistShowItem extends HookConsumerWidget {
                   title: title,
                   apiService: ref.read(traktApiProvider),
                   progress: progress,
+                  showData: show ?? {},
                 ),
               ),
             ),

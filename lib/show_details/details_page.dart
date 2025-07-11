@@ -157,6 +157,7 @@ class ShowDetailPage extends HookConsumerWidget {
                   ),
                   SeasonsProgressWidget(
                     showId: showId,
+                    showData: show,
                     onProgressChanged: () async {
                       // Check if all seasons are now watched
                       final api = ref.read(traktApiProvider);
