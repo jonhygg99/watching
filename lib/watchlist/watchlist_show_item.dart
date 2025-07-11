@@ -38,21 +38,6 @@ class WatchlistShowItem extends HookConsumerWidget {
       }
       // Force a refresh of the watchlist
       await notifier.updateShowProgress(traktId);
-
-      // Show success message
-      if (context.mounted) {
-        final message =
-            markAsWatched
-                ? 'Episode marked as watched'
-                : 'Episode marked as unwatched';
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
     } catch (e) {
       debugPrint('Error toggling watched status: $e');
       // Show error to user
