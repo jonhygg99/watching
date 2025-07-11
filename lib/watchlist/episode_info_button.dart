@@ -46,8 +46,11 @@ class EpisodeInfoButton extends HookConsumerWidget {
                         id: traktId!,
                         season: season,
                         episode: episode,
-                        language: effectiveCountryCode.toLowerCase()
+                        language: effectiveCountryCode.toLowerCase(),
                       ),
+                      showId: traktId!,
+                      seasonNumber: season,
+                      episodeNumber: episode,
                     );
                   },
                 );

@@ -5,23 +5,7 @@ import '../../../services/trakt/trakt_api.dart';
 /// Lista modular de episodios de temporada según Windsurf Guidelines.
 /// Permite marcar/desmarcar episodios y feedback visual según progreso.
 
-class SeasonEpisodeList extends StatelessWidget {
-  // --- Nuevo helper para obtener info del episodio ---
-  Future<Map<String, dynamic>?> _fetchEpisodeInfo(int epNumber) async {
-    final traktApi = TraktApi();
-    try {
-      final ep = await traktApi.getEpisodeInfo(
-        id: showId,
-        season: seasonNumber,
-        episode: epNumber,
-        language: languageCode,
-      );
-      return ep;
-    } catch (e) {
-      return null;
-    }
-  }
-
+class SeasonEpisodeList extends StatefulWidget {
   final List<Map<String, dynamic>> episodes;
   final Map<String, dynamic>? progress;
   final Map<int, Color> markingColors;
@@ -45,37 +29,55 @@ class SeasonEpisodeList extends StatelessWidget {
     required this.setMarkingColor,
   });
 
-  /// Devuelve true si el episodio está visto según la estructura de progreso.
-  bool _isEpisodeWatched(Map<String, dynamic> e) {
-    final dynamic completed = e["completed"];
-    if (completed is int) return completed > 0;
-    if (completed is bool) return completed;
-    return false;
+  @override
+  State<SeasonEpisodeList> createState() => _SeasonEpisodeListState();
+}
+
+class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
+  // --- Helper to fetch episode info ---
+  Future<Map<String, dynamic>?> _fetchEpisodeInfo(int epNumber) async {
+    final traktApi = TraktApi();
+    try {
+      final ep = await traktApi.getEpisodeInfo(
+        id: widget.showId,
+        season: widget.seasonNumber,
+        episode: epNumber,
+        language: widget.languageCode,
+      );
+      return ep;
+    } catch (e) {
+      return null;
+    }
   }
+
+
 
   /// Devuelve true si el episodio con epNumber está visto.
   bool _epWatched(int epNumber) {
-    final List<dynamic>? seasons = progress?["seasons"] as List<dynamic>?;
-    final Map<String, dynamic>? season = seasons
-        ?.cast<Map<String, dynamic>>()
-        .firstWhere((s) => s["number"] == seasonNumber, orElse: () => {});
-    if (season == null || season.isEmpty || season["episodes"] is! List) {
-      return false;
+    if (widget.progress == null) return false;
+    if (widget.progress!['seasons'] == null) return false;
+    final seasons = widget.progress!['seasons'] as List;
+    for (final season in seasons) {
+      if (season['number'] == widget.seasonNumber) {
+        final episodes = season['episodes'] as List?;
+        if (episodes == null) return false;
+        for (final ep in episodes) {
+          if (ep['number'] == epNumber) {
+            return ep['completed'] == true;
+          }
+        }
+      }
     }
-    return (season["episodes"] as List).any(
-      (e) =>
-          e["number"] == epNumber &&
-          _isEpisodeWatched(Map<String, dynamic>.from(e)),
-    );
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 16.0),
-      itemCount: episodes.length,
+      itemCount: widget.episodes.length,
       itemBuilder: (BuildContext context, int idx) {
-        final Map<String, dynamic> ep = episodes[idx];
+        final Map<String, dynamic> ep = widget.episodes[idx];
         final int epNumber = ep['number'] as int;
         final String epTitle = ep['title'] ?? '';
         final bool watched = _epWatched(epNumber);
@@ -83,24 +85,34 @@ class SeasonEpisodeList extends StatelessWidget {
           leading: CircleAvatar(child: Text('$epNumber')),
           title: Text(epTitle),
           trailing: IconButton(
+            onLongPress: () {
+              final newWatchedState = !watched;
+              widget.onToggleEpisode(epNumber, newWatchedState);
+              widget.setMarkingColor(
+                epNumber,
+                newWatchedState ? Colors.green : Colors.red,
+                delayMs: 500,
+              );
+            },
             icon: Icon(
               Icons.check_circle,
               color:
                   watched
-                      ? (markingColors[epNumber] ?? Colors.green)
-                      : (markingColors[epNumber] ?? Colors.grey),
+                      ? (widget.markingColors[epNumber] ?? Colors.green)
+                      : (widget.markingColors[epNumber] ?? Colors.grey),
             ),
             tooltip:
                 watched
                     ? 'Eliminar episodio del historial'
                     : 'Marcar como visto',
             onPressed:
-                loading ? null : () => onToggleEpisode(epNumber, watched),
+                widget.loading ? null : () => widget.onToggleEpisode(epNumber, watched),
           ),
           onTap: () async {
             // Espera a que la info esté lista antes de mostrar el modal
             final epInfo = await _fetchEpisodeInfo(epNumber);
-            // TODO: Manejar el caso de que el contexto ya no esté montado
+            if (!mounted) return;
+            
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -113,7 +125,12 @@ class SeasonEpisodeList extends StatelessWidget {
                     child: Text('No hay información del episodio.'),
                   );
                 }
-                return EpisodeInfoModal(episodeFuture: Future.value(epInfo));
+                return EpisodeInfoModal(
+                  episodeFuture: Future.value(epInfo),
+                  showId: widget.showId,
+                  seasonNumber: widget.seasonNumber,
+                  episodeNumber: epNumber,
+                );
               },
             );
           },
