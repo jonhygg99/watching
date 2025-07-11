@@ -40,7 +40,8 @@ class _StarRatingState extends State<_StarRating> {
 
   void _handleRatingUpdate(double newRating) {
     final now = DateTime.now();
-    final isDoubleTap = _lastTappedRating == newRating &&
+    final isDoubleTap =
+        _lastTappedRating == newRating &&
         _lastTapTime != null &&
         now.difference(_lastTapTime!) < const Duration(milliseconds: 300);
 
@@ -97,7 +98,7 @@ class EpisodeInfoModal extends StatefulWidget {
 }
 
 class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
-  double? _episodeRating;
+  double? episodeRating;
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>>(
@@ -198,7 +199,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                         size: 20,
                         onRatingChanged: (rating) {
                           setState(() {
-                            _episodeRating = rating;
+                            episodeRating = rating;
                             // Here you would typically save the rating to your backend
                             // For example: _saveRatingToBackend(rating);
                           });
