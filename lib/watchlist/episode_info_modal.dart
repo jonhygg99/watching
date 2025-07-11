@@ -104,22 +104,14 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                   children: [
                     // Comments button (aligned left)
                     TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Función de comentarios próximamente',
-                            ),
-                          ),
-                        );
-                      },
-                      child: const Text('Comentarios'),
+                      onPressed: () {},
                       style: TextButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           vertical: 12,
                           horizontal: 16,
                         ),
                       ),
+                      child: const Text('Comentarios'),
                     ),
 
                     // Spacer to push the watched button to the right
@@ -161,20 +153,19 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                                         });
                                       }
                                     } catch (e) {
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Error al actualizar el estado del episodio',
-                                            ),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                      }
+                                      // Error handled silently
                                     }
                                   },
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            backgroundColor:
+                                isWatched
+                                    ? Colors.green.withValues(alpha: 0.1)
+                                    : null,
+                          ),
                           child:
                               isWatching
                                   ? const SizedBox(
@@ -213,16 +204,6 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                                       ),
                                     ],
                                   ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
-                              horizontal: 16,
-                            ),
-                            backgroundColor:
-                                isWatched
-                                    ? Colors.green.withValues(alpha: 0.1)
-                                    : null,
-                          ),
                         );
                       },
                     ),
