@@ -11,6 +11,7 @@ class EpisodeActions extends ConsumerWidget {
   final double? currentRating;
   final ValueChanged<double?> onRatingChanged;
   final Function(bool) onWatchedStatusChanged;
+  final VoidCallback? onCommentsPressed;
 
   const EpisodeActions({
     super.key,
@@ -21,6 +22,7 @@ class EpisodeActions extends ConsumerWidget {
     required this.currentRating,
     required this.onRatingChanged,
     required this.onWatchedStatusChanged,
+    this.onCommentsPressed,
   });
 
   @override
@@ -35,7 +37,7 @@ class EpisodeActions extends ConsumerWidget {
       children: [
         // Comments button (aligned left)
         TextButton(
-          onPressed: () {},
+          onPressed: onCommentsPressed,
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(
               vertical: 12,
