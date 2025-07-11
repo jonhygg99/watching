@@ -98,51 +98,49 @@ class SeasonActions {
 
   /// Acción de marcar/desmarcar un episodio individual.
   static Future<void> handleToggleEpisode({
+    required String showId,
+    required int seasonNumber,
     required int epNumber,
     required bool watched,
-    required int seasonNumber,
-    required String showId,
-    required String? languageCode,
     required TraktApi traktApi,
     required Future<void> Function(int, Color, {int delayMs}) setMarkingColor,
     required ValueNotifier<List<Map<String, dynamic>>> episodesState,
     required ValueNotifier<Map<String, dynamic>?> progressState,
+    String? languageCode,
     VoidCallback? onEpisodeToggled,
   }) async {
     await setMarkingColor(epNumber, Colors.blue);
     try {
       if (watched) {
-        await traktApi.removeFromHistory(
-          shows: [
-            {
-              "ids":
-                  int.tryParse(showId) != null
-                      ? {"trakt": int.parse(showId)}
-                      : {"slug": showId},
-              "seasons": [
-                {
-                  "number": seasonNumber,
-                  "episodes": [
-                    {"number": epNumber},
-                  ],
-                },
-              ],
-            },
-          ],
-        );
-      } else {
         await traktApi.addToWatchHistory(
           shows: [
             {
-              "ids":
-                  int.tryParse(showId) != null
-                      ? {"trakt": int.parse(showId)}
-                      : {"slug": showId},
+              "ids": int.tryParse(showId) != null 
+                  ? {"trakt": int.parse(showId)} 
+                  : {"slug": showId},
               "seasons": [
                 {
                   "number": seasonNumber,
                   "episodes": [
-                    {"number": epNumber},
+                    {"number": epNumber}
+                  ],
+                },
+              ],
+            },
+          ],
+        );
+      } else {
+        await traktApi.removeFromHistory(
+          shows: [
+            {
+              "ids": int.tryParse(showId) != null 
+                  ? {"trakt": int.parse(showId)} 
+                  : {"slug": showId},
+              "seasons": [
+                {
+                  "number": seasonNumber,
+                  "episodes": [
+                    {"number": epNumber}
                   ],
                 },
               ],
@@ -150,43 +148,53 @@ class SeasonActions {
           ],
         );
       }
-      final List<Map<String, dynamic>> eps = List<Map<String, dynamic>>.from(
-        await traktApi.getSeasonEpisodes(
-          id: showId,
-          season: seasonNumber,
-          translations: languageCode,
-        ),
+
+      // Refresh the data
+      final eps = await traktApi.getSeasonEpisodes(
+        id: showId,
+        season: seasonNumber,
+        translations: languageCode,
       );
-      final Map<String, dynamic> prog = Map<String, dynamic>.from(
-        await traktApi.getShowWatchedProgress(id: showId),
+      final prog = await traktApi.getShowWatchedProgress(id: showId);
+      
+      // Update state
+      episodesState.value = List<Map<String, dynamic>>.from(eps);
+      progressState.value = Map<String, dynamic>.from(prog);
+      
+      // Update marking color based on new state
+      final isWatched = _isEpisodeWatched(prog, seasonNumber, epNumber);
+      await setMarkingColor(
+        epNumber,
+        isWatched ? Colors.green : Colors.grey,
       );
-      episodesState.value = eps;
-      progressState.value = prog;
-      final List<dynamic>? seasons = prog["seasons"] as List<dynamic>?;
-      final Map<String, dynamic>? season = seasons
-          ?.cast<Map<String, dynamic>>()
-          .firstWhere((s) => s["number"] == seasonNumber, orElse: () => {});
-      bool isNowWatched = false;
-      if (season != null && season["episodes"] is List) {
-        isNowWatched = (season["episodes"] as List).any(
-          (e) =>
-              e["number"] == epNumber &&
-              (e["completed"] == true ||
-                  (e["completed"] is int && e["completed"] > 0)),
-        );
-      }
-      if (isNowWatched) {
-        await setMarkingColor(epNumber, Colors.green);
-        // Notify that an episode was toggled
-        onEpisodeToggled?.call();
-      } else {
-        await setMarkingColor(epNumber, Colors.grey);
-        // Notify that an episode was toggled
-        onEpisodeToggled?.call();
-      }
+      
+      // Notify that an episode was toggled
+      onEpisodeToggled?.call();
     } catch (e) {
       await setMarkingColor(epNumber, Colors.red, delayMs: 500);
       await setMarkingColor(epNumber, Colors.grey);
+      onEpisodeToggled?.call();
+      rethrow;
     }
+  }
+
+  static bool _isEpisodeWatched(Map<String, dynamic> progress, int seasonNumber, int epNumber) {
+    final seasons = progress['seasons'] as List?;
+    if (seasons == null) return false;
+    
+    for (final season in seasons.cast<Map<String, dynamic>>()) {
+      if (season['number'] == seasonNumber) {
+        final episodes = season['episodes'] as List?;
+        if (episodes == null) return false;
+        
+        for (final ep in episodes.cast<Map<String, dynamic>>()) {
+          if (ep['number'] == epNumber) {
+            final completed = ep['completed'];
+            return (completed is int && completed > 0) || completed == true;
+          }
+        }
+      }
+    }
+    return false;
   }
 }

@@ -12,6 +12,7 @@ class EpisodeInfoModal extends StatefulWidget {
   final Map<String, dynamic> showData;
   final int seasonNumber;
   final int episodeNumber;
+  final void Function()? onWatchedStatusChanged;
 
   const EpisodeInfoModal({
     super.key,
@@ -19,6 +20,7 @@ class EpisodeInfoModal extends StatefulWidget {
     required this.showData,
     required this.seasonNumber,
     required this.episodeNumber,
+    this.onWatchedStatusChanged,
   });
 
   @override
@@ -116,6 +118,11 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
         setState(() {
           episode['watched'] = newWatchedState;
         });
+        
+        // Notify parent about the watched status change
+        if (widget.onWatchedStatusChanged != null) {
+          widget.onWatchedStatusChanged!();
+        }
       }
     } catch (e) {
       // Error handled silently

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../watchlist/episode_info_modal.dart';
+import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
 import '../../../services/trakt/trakt_api.dart';
 
 /// Lista modular de episodios de temporada según Windsurf Guidelines.
@@ -51,8 +51,6 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
       return null;
     }
   }
-
-
 
   /// Devuelve true si el episodio con epNumber está visto.
   bool _epWatched(int epNumber) {
@@ -108,13 +106,15 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                     ? 'Eliminar episodio del historial'
                     : 'Marcar como visto',
             onPressed:
-                widget.loading ? null : () => widget.onToggleEpisode(epNumber, watched),
+                widget.loading
+                    ? null
+                    : () => widget.onToggleEpisode(epNumber, !watched),
           ),
           onTap: () async {
             // Espera a que la info esté lista antes de mostrar el modal
             final epInfo = await _fetchEpisodeInfo(epNumber);
             if (!mounted) return;
-            
+
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -132,6 +132,11 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                   showData: widget.showData,
                   seasonNumber: widget.seasonNumber,
                   episodeNumber: epNumber,
+                  onWatchedStatusChanged: () {
+                    // Trigger a refresh of the parent component with the new watched state
+                    final currentWatchedState = _epWatched(epNumber);
+                    widget.onToggleEpisode(epNumber, !currentWatchedState);
+                  },
                 );
               },
             );
