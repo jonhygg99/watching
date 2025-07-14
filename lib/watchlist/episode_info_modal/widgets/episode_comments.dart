@@ -53,10 +53,14 @@ class _EpisodeCommentsState extends ConsumerState<EpisodeComments> {
 
         if (snapshot.hasError) {
           return Center(
-            child: Text(
-              'Error loading comments: ${snapshot.error}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.error,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Error loading comments: ${snapshot.error}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           );
@@ -66,18 +70,20 @@ class _EpisodeCommentsState extends ConsumerState<EpisodeComments> {
 
         if (comments.isEmpty) {
           return Center(
-            child: Text(
-              'No comments yet',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'No comments yet',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           );
         }
 
         return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 16.0),
           itemCount: comments.length,
           itemBuilder: (context, index) {
             final comment = comments[index];

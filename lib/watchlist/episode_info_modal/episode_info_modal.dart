@@ -7,6 +7,7 @@ import 'widgets/episode_header.dart';
 import 'widgets/episode_details.dart';
 import 'widgets/episode_actions.dart';
 import 'widgets/episode_comments.dart';
+import 'dart:io' show Platform;
 
 class EpisodeInfoModal extends StatefulWidget {
   final Future<Map<String, dynamic>> episodeFuture;
@@ -33,7 +34,6 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
   bool _isRating = false;
   late final EpisodeRatingService _ratingService;
   late final TraktApi _traktApi;
-  bool _showComments = false;
 
   @override
   void initState() {
@@ -42,10 +42,49 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
     _ratingService = EpisodeRatingService(_traktApi);
   }
 
-  void _toggleComments() {
-    setState(() {
-      _showComments = !_showComments;
-    });
+  Future<void> _showCommentsModal() async {
+    if (!mounted) return;
+    
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.9,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Comments',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: EpisodeComments(
+                showId: widget.showData['ids']['trakt'],
+                seasonNumber: widget.seasonNumber,
+                episodeNumber: widget.episodeNumber,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _handleRatingUpdate(double? newRating) async {
@@ -183,18 +222,10 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                             episode,
                             isWatched,
                           ),
-                      onCommentsPressed: _toggleComments,
+                      onCommentsPressed: _showCommentsModal,
                     );
                   },
                 ),
-                if (_showComments) ...[
-                  const SizedBox(height: 16),
-                  EpisodeComments(
-                    showId: widget.showData['ids']['trakt'],
-                    seasonNumber: widget.seasonNumber,
-                    episodeNumber: widget.episodeNumber,
-                  ),
-                ],
               ],
             );
           }
