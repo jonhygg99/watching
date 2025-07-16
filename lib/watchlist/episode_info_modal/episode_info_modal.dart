@@ -47,10 +47,10 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
     try {
       final showId = widget.showData['ids']['trakt']?.toString();
       if (showId == null) return;
-      
+
       final progress = await _traktApi.getShowWatchedProgress(id: showId);
       final seasons = progress['seasons'] as List<dynamic>?;
-      
+
       if (seasons != null) {
         for (final season in seasons) {
           if (season['number'] == widget.seasonNumber) {
@@ -199,7 +199,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
       // Update local state
       if (mounted) {
         setState(() {
-          episode['watched'] = newWatchedState;
+          _isWatched = newWatchedState;
         });
 
         // Notify parent about the watched status change
