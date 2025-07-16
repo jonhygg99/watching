@@ -84,15 +84,21 @@ class ShowDetailComments extends StatelessWidget {
               );
             }
 
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 16.0),
-              itemCount: comments.length,
-              itemBuilder: (context, index) {
-                final comment = comments[index];
-                return _buildCommentTile(context, comment);
-              },
+            return ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 400), // Set a max height for the scrollable area
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 16.0, right: 8.0, left: 8.0),
+                itemCount: comments.length,
+                itemBuilder: (context, index) {
+                  final comment = comments[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: _buildCommentTile(context, comment),
+                  );
+                },
+              ),
             );
           },
         ),

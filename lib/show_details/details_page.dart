@@ -10,7 +10,6 @@ import 'header.dart';
 import 'videos.dart';
 import 'cast.dart';
 import 'related.dart';
-import 'comments.dart';
 
 /// Displays detailed information about a TV show, including header, seasons, videos, cast, related shows, and comments.
 /// Uses Riverpod for dependency injection and state management.
@@ -27,11 +26,277 @@ class ShowDetailPage extends HookConsumerWidget {
     final refreshTrigger = useState(0); // Separate trigger for episode updates
     final apiService = ref.watch(traktApiProvider);
     final countryCode = ref.watch(countryCodeProvider);
-    final watchlistNotifier = ref.read(watchlistProvider.notifier);
 
     // Function to refresh watchlist data
     Future<void> refreshWatchlist() async {
-      await watchlistNotifier.updateShowProgress(showId);
+      await ref.read(watchlistProvider.notifier).updateShowProgress(showId);
+    }
+
+    Future<void> showAllComments(
+      BuildContext context,
+      String showId,
+      ValueNotifier<String> sort,
+      Map<String, String> sortLabels,
+    ) async {
+      final apiService = ref.read(traktApiProvider);
+      // Fetch comments with the current sort order when the modal is opened
+      final commentsFuture = apiService.getShowComments(
+        id: showId,
+        sort: sort.value,
+      );
+
+      await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder:
+            (context) => Container(
+              height: MediaQuery.of(context).size.height * 0.9,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Comentarios',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: FutureBuilder<List<dynamic>>(
+                      future: commentsFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                'Error loading comments: ${snapshot.error}',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          );
+                        }
+
+                        final comments = snapshot.data ?? [];
+
+                        if (comments.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                'No comments yet',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 8.0,
+                          ),
+                          itemCount: comments.length,
+                          itemBuilder: (context, index) {
+                            final comment = comments[index];
+                            final user = comment['user'] ?? {};
+                            final userName = user['username'] ?? 'Unknown';
+                            final userAvatar =
+                                user['images']?['avatar']?['full'];
+                            final commentText = comment['comment'] ?? '';
+                            final likes = comment['likes'] ?? 0;
+                            final isSpoiler = comment['spoiler'] == true;
+                            final isReview = comment['review'] == true;
+                            final date =
+                                comment['created_at']?.substring(0, 10) ?? '';
+
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                vertical: 4.0,
+                                horizontal: 8.0,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (userAvatar != null)
+                                          CircleAvatar(
+                                            backgroundImage: NetworkImage(
+                                              userAvatar,
+                                            ),
+                                            radius: 20,
+                                          )
+                                        else
+                                          const CircleAvatar(
+                                            radius: 20,
+                                            child: Icon(Icons.person),
+                                          ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                userName,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleSmall
+                                                    ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                              ),
+                                              if (date.isNotEmpty)
+                                                Text(
+                                                  date,
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.bodySmall?.copyWith(
+                                                    color:
+                                                        Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        if (isSpoiler || isReview) ...[
+                                          if (isSpoiler)
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
+                                              margin: const EdgeInsets.only(
+                                                left: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                'SPOILER',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelSmall
+                                                    ?.copyWith(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                              ),
+                                            ),
+                                          if (isReview)
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
+                                              margin: const EdgeInsets.only(
+                                                left: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                'REVIEW',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelSmall
+                                                    ?.copyWith(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                              ),
+                                            ),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      commentText,
+                                      style:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        const Icon(Icons.thumb_up, size: 16),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          likes.toString(),
+                                          style:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodySmall,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+      );
     }
 
     // Watch for changes to the refresh key to trigger a rebuild
@@ -50,12 +315,6 @@ class ShowDetailPage extends HookConsumerWidget {
       'plays': 'Más reproducidos',
       'watched': 'Más vistos',
     };
-
-    // Comments future (updates when sort, showId, or refreshKey changes)
-    final commentsFuture = useMemoized(
-      () => apiService.getShowComments(id: showId, sort: sort.value),
-      [apiService, showId, sort.value, refreshKey.value, refreshTrigger.value],
-    );
 
     // Function to refresh show data
     void refreshShowData() {
@@ -189,15 +448,32 @@ class ShowDetailPage extends HookConsumerWidget {
                     apiService: apiService,
                     countryCode: countryCode,
                   ),
-                  ShowDetailComments(
-                    commentsFuture: commentsFuture,
-                    sort: sort.value,
-                    sortLabels: sortLabels,
-                    onChangeSort: (value) {
-                      if (value != null && value != sort.value) {
-                        sort.value = value;
-                      }
-                    },
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Comentarios',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        TextButton.icon(
+                          onPressed:
+                              () => showAllComments(
+                                context,
+                                showId,
+                                sort,
+                                sortLabels,
+                              ),
+                          icon: const Icon(Icons.comment_outlined),
+                          label: const Text('Ver todos'),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
