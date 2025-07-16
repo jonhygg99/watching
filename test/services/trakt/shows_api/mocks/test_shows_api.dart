@@ -129,9 +129,11 @@ class TestShowsApi implements ShowsApi {
     required int season,
     required int episode,
     String sort = 'likes',
+    int page = 1,
+    int limit = 10,
   }) async {
     return await getJsonList(
-      '/shows/$id/seasons/$season/episodes/$episode/comments/$sort',
+      '/shows/$id/seasons/$season/episodes/$episode/comments/$sort?page=$page&limit=$limit',
     );
   }
 }

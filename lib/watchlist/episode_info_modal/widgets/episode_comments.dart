@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/services/trakt/trakt_api.dart';
 
-class EpisodeComments extends ConsumerStatefulWidget {
+class EpisodeComments extends HookConsumerWidget {
   final int showId;
   final int seasonNumber;
   final int episodeNumber;
@@ -15,82 +16,244 @@ class EpisodeComments extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<EpisodeComments> createState() => _EpisodeCommentsState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sort = useState<String>('newest');
+    final sortLabels = const {
+      'likes': 'Más likes',
+      'newest': 'Más recientes',
+      'oldest': 'Más antiguos',
+      'replies': 'Más respuestas',
+      'highest': 'Mejor valorados',
+      'lowest': 'Peor valorados',
+      'plays': 'Más reproducidos',
+      'watched': 'Más vistos',
+    };
+
+    return _EpisodeCommentsList(
+      showId: showId.toString(),
+      seasonNumber: seasonNumber,
+      episodeNumber: episodeNumber,
+      sort: sort,
+      sortLabels: sortLabels,
+    );
+  }
 }
 
-class _EpisodeCommentsState extends ConsumerState<EpisodeComments> {
-  late final Future<List<Map<String, dynamic>>> _commentsFuture;
+class _EpisodeCommentsList extends ConsumerStatefulWidget {
+  final String showId;
+  final int seasonNumber;
+  final int episodeNumber;
+  final ValueNotifier<String> sort;
+  final Map<String, String> sortLabels;
+
+  const _EpisodeCommentsList({
+    required this.showId,
+    required this.seasonNumber,
+    required this.episodeNumber,
+    required this.sort,
+    required this.sortLabels,
+  });
+
+  @override
+  ConsumerState<_EpisodeCommentsList> createState() =>
+      _EpisodeCommentsListState();
+}
+
+class _EpisodeCommentsListState extends ConsumerState<_EpisodeCommentsList> {
+  final List<Map<String, dynamic>> _allComments = [];
+  final _scrollController = ScrollController();
+  final int _commentsPerPage = 10;
+  int _currentPage = 1;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  bool _isInitialLoading = true;
+  String? _errorMessage;
+  final _apiService = TraktApi();
 
   @override
   void initState() {
     super.initState();
-    _commentsFuture = _fetchComments();
+    _scrollController.addListener(_onScroll);
+    _loadComments();
   }
 
-  Future<List<Map<String, dynamic>>> _fetchComments() async {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreComments();
+    }
+  }
+
+  Future<void> _loadComments() async {
+    if (_isLoadingMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
+      _isInitialLoading = _currentPage == 1;
+      _errorMessage = null;
+    });
+
     try {
-      final traktApi = TraktApi();
-      final comments = await traktApi.getEpisodeComments(
-        id: widget.showId.toString(),
+      final response = await _apiService.getEpisodeComments(
+        id: widget.showId,
         season: widget.seasonNumber,
         episode: widget.episodeNumber,
+        sort: widget.sort.value,
+        page: _currentPage,
+        limit: _commentsPerPage,
       );
-      return List<Map<String, dynamic>>.from(comments);
+
+      // Convert the response to List<Map<String, dynamic>>
+      final List<Map<String, dynamic>> comments =
+          response
+              .map<Map<String, dynamic>>((item) => item as Map<String, dynamic>)
+              .toList();
+
+      if (mounted) {
+        setState(() {
+          _allComments.addAll(comments);
+          _hasMore = comments.length == _commentsPerPage;
+          _isLoadingMore = false;
+          _isInitialLoading = false;
+        });
+      }
     } catch (e) {
-      debugPrint('Error fetching comments: $e');
-      rethrow;
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error loading comments: $e';
+          _isLoadingMore = false;
+          _isInitialLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadMoreComments() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() {
+      _currentPage++;
+    });
+
+    await _loadComments();
+  }
+
+  Future<void> _handleSortChanged(String? newSort) async {
+    if (newSort != null && newSort != widget.sort.value) {
+      if (!mounted) return;
+
+      setState(() {
+        widget.sort.value = newSort;
+        _currentPage = 1;
+        _hasMore = true;
+        _allComments.clear();
+        _isLoadingMore = false;
+      });
+
+      await _loadComments();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _commentsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    if (_isInitialLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Error loading comments: ${snapshot.error}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            _errorMessage!,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.error,
             ),
-          );
-        }
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
 
-        final comments = snapshot.data ?? [];
-
-        if (comments.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'No comments yet',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
+    if (_allComments.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'No comments yet',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-          );
-        }
+          ),
+        ),
+      );
+    }
 
-        return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 16.0),
-          itemCount: comments.length,
-          itemBuilder: (context, index) {
-            final comment = comments[index];
-            return _buildCommentTile(comment);
-          },
-        );
-      },
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Filtros',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 8),
+              DropdownButton<String>(
+                value: widget.sort.value,
+                icon: const Icon(Icons.arrow_drop_down),
+                onChanged: _handleSortChanged,
+                items:
+                    widget.sortLabels.entries.map((entry) {
+                      return DropdownMenuItem<String>(
+                        value: entry.key,
+                        child: Text(entry.value),
+                      );
+                    }).toList(),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.only(bottom: 16.0),
+            itemCount: _allComments.length + (_hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index >= _allComments.length) {
+                return _buildLoadMoreButton();
+              }
+              final comment = _allComments[index];
+              return _buildCommentTile(comment);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadMoreButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Center(
+        child:
+            _isLoadingMore
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                  onPressed: _hasMore ? _loadMoreComments : null,
+                  child: const Text('Load more'),
+                ),
+      ),
     );
   }
 
