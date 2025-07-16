@@ -174,7 +174,29 @@ mixin ShowsApi on TraktApiBase {
     required String id,
     String sort = 'newest',
   }) async {
-    return await getJsonList('/shows/$id/comments?sort=$sort');
+    try {
+      final uri = Uri.https('api.trakt.tv', '/shows/$id/comments/$sort', {
+        // Asegurar que no haya caché
+        '_t': DateTime.now().millisecondsSinceEpoch.toString(),
+      });
+
+      // Headers requeridos por la API de Trakt
+      final requestHeaders = Map<String, String>.from(headers)..addAll({
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': headers['trakt-api-key'] ?? '',
+      });
+
+      final response = await http.get(uri, headers: requestHeaders);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      } else {
+        throw Exception('Error ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// Gets ratings for a show by ID.

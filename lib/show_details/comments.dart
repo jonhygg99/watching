@@ -100,25 +100,60 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
     super.dispose();
   }
   
-  void _handleSortChanged(String? newSort) {
+  Future<void> _handleSortChanged(String? newSort) async {
     if (newSort != null && newSort != _currentSort) {
+      if (!mounted) return;
+      
+      // Guardar la posición actual del scroll
+      final scrollOffset = _scrollController.position.pixels;
+      
+      // Mostrar indicador de carga
       setState(() {
         _currentSort = newSort;
-        // Save the current scroll position
-        final scrollOffset = _scrollController.position.pixels;
-        // Update the comments future with the new sort
+      });
+      
+      try {
+        // Crear un nuevo Future para forzar la actualización
         final apiService = ref.read(traktApiProvider);
-        _commentsFuture = apiService.getShowComments(
+        
+        // Crear un nuevo Future para forzar la actualización
+        final newFuture = apiService.getShowComments(
           id: widget.showId,
           sort: newSort,
-        ).then((comments) {
-          // Schedule the scroll restoration after the build is complete
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollController.jumpTo(scrollOffset);
-          });
-          return comments;
+        )..then((comments) {
+          if (mounted) {
+            setState(() {
+              _commentsFuture = Future.value(comments);
+            });
+            
+            // Restaurar la posición del scroll después de que se complete la construcción
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(scrollOffset);
+              }
+            });
+          }
+        }).catchError((error) {
+          if (mounted) {
+            setState(() {
+              _commentsFuture = Future.error(error);
+            });
+          }
         });
-      });
+        
+        // Actualizar el estado con el nuevo Future
+        if (mounted) {
+          setState(() {
+            _commentsFuture = newFuture;
+          });
+        }
+      } catch (error) {
+        if (mounted) {
+          setState(() {
+            _commentsFuture = Future.error(error);
+          });
+        }
+      }
     }
   }
   
@@ -170,7 +205,7 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   DropdownButton<String>(
-                    value: widget.sort,
+                    value: _currentSort,
                     underline: const SizedBox(),
                     items: widget.sortLabels.entries
                         .map((entry) => DropdownMenuItem(
@@ -178,7 +213,9 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
                               child: Text(entry.value),
                             ))
                         .toList(),
-                    onChanged: _handleSortChanged,
+                    onChanged: (value) {
+                      _handleSortChanged(value);
+                    },
                     isExpanded: false,
                   ),
                 ],
