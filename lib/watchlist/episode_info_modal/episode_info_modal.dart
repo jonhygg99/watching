@@ -209,7 +209,6 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
       }
     } catch (e) {
       // Error handled silently
-      debugPrint('Error toggling watched status: $e');
     }
   }
 

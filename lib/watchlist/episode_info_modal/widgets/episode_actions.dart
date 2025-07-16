@@ -33,9 +33,6 @@ class EpisodeActions extends ConsumerWidget {
       watchlistProvider.select((state) => state.isLoading),
     );
 
-    // Debug log to help with troubleshooting
-    debugPrint('Episode watched status: $isWatched');
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -43,10 +40,7 @@ class EpisodeActions extends ConsumerWidget {
         TextButton(
           onPressed: onCommentsPressed,
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 16,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           ),
           child: const Text('Comentarios'),
         ),
@@ -63,43 +57,40 @@ class EpisodeActions extends ConsumerWidget {
 
         // Watched toggle button (aligned right)
         TextButton(
-          onPressed: isWatching
-              ? null
-              : () => onWatchedStatusChanged(!isWatched),
+          onPressed:
+              isWatching ? null : () => onWatchedStatusChanged(!isWatched),
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 16,
-            ),
-            backgroundColor: isWatched ? Colors.green.withOpacity(0.1) : null,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            backgroundColor:
+                isWatched ? Colors.green.withValues(alpha: 0.1) : null,
             foregroundColor: isWatched ? Colors.green[700] : null,
           ),
-          child: isWatching
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                  ),
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isWatched ? Icons.visibility : Icons.visibility_off,
-                      size: 18,
-                      color: isWatched ? Colors.green[700] : null,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      isWatched ? 'Visto' : 'No visto',
-                      style: TextStyle(
+          child:
+              isWatching
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isWatched ? Icons.visibility : Icons.visibility_off,
+                        size: 18,
                         color: isWatched ? Colors.green[700] : null,
-                        fontWeight: isWatched ? FontWeight.bold : FontWeight.normal,
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 8),
+                      Text(
+                        isWatched ? 'Visto' : 'No visto',
+                        style: TextStyle(
+                          color: isWatched ? Colors.green[700] : null,
+                          fontWeight:
+                              isWatched ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
         ),
       ],
     );
