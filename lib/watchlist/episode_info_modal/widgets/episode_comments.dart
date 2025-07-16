@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/services/trakt/trakt_api.dart';
+import 'package:watching/shared/constants/sort_options.dart';
 
 class EpisodeComments extends HookConsumerWidget {
   final int showId;
@@ -18,23 +19,13 @@ class EpisodeComments extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sort = useState<String>('newest');
-    final sortLabels = const {
-      'likes': 'Más likes',
-      'newest': 'Más recientes',
-      'oldest': 'Más antiguos',
-      'replies': 'Más respuestas',
-      'highest': 'Mejor valorados',
-      'lowest': 'Peor valorados',
-      'plays': 'Más reproducidos',
-      'watched': 'Más vistos',
-    };
 
     return _EpisodeCommentsList(
       showId: showId.toString(),
       seasonNumber: seasonNumber,
       episodeNumber: episodeNumber,
       sort: sort,
-      sortLabels: sortLabels,
+      sortLabels: commentSortOptions,
     );
   }
 }

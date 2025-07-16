@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/providers/watchlist_providers.dart';
+import 'package:watching/shared/constants/sort_options.dart';
 import 'package:watching/show_details/comments.dart';
 import 'seasons_progress_widget.dart';
 import 'show_info_chips.dart';
@@ -32,17 +33,8 @@ class ShowDetailPage extends HookConsumerWidget {
       await ref.read(watchlistProvider.notifier).updateShowProgress(showId);
     }
 
-    // Sort options for comments
-    final sortLabels = const {
-      'likes': 'Más likes',
-      'newest': 'Más recientes',
-      'oldest': 'Más antiguos',
-      'replies': 'Más respuestas',
-      'highest': 'Mejor valorados',
-      'lowest': 'Peor valorados',
-      'plays': 'Más reproducidos',
-      'watched': 'Más vistos',
-    };
+    // Use shared sort options for comments
+    final sortLabels = commentSortOptions;
 
     // Function to refresh show data
     Future<void> refreshShowData() async {
@@ -190,13 +182,14 @@ class ShowDetailPage extends HookConsumerWidget {
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         TextButton.icon(
-                          onPressed: () => showAllComments(
-                            context,
-                            showId,
-                            sort,
-                            sortLabels,
-                            ref,
-                          ),
+                          onPressed:
+                              () => showAllComments(
+                                context,
+                                showId,
+                                sort,
+                                commentSortOptions,
+                                ref,
+                              ),
                           icon: const Icon(Icons.comment_outlined),
                           label: const Text('Ver todos'),
                         ),
