@@ -74,8 +74,10 @@ class TestShowsApi implements ShowsApi {
   Future<List<dynamic>> getShowComments({
     required String id,
     String sort = 'newest',
+    int page = 1,
+    int limit = 10,
   }) async {
-    return await getJsonList('/shows/$id/comments/$sort');
+    return await getJsonList('/shows/$id/comments/$sort?page=$page&limit=$limit');
   }
 
   @override

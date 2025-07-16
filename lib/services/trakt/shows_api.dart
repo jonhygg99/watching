@@ -169,13 +169,22 @@ mixin ShowsApi on TraktApiBase {
     );
   }
 
-  /// Gets comments for a show by ID.
+  /// Gets comments for a show by ID with pagination support.
+  ///
+  /// [id]: The Trakt ID, Trakt slug, or IMDB ID of the show
+  /// [sort]: Sort order for comments (newest, oldest, likes, replies)
+  /// [page]: Page number to fetch (1-based)
+  /// [limit]: Number of items per page (1-1000, default 10)
   Future<List<dynamic>> getShowComments({
     required String id,
     String sort = 'newest',
+    int page = 1,
+    int limit = 10,
   }) async {
     try {
       final uri = Uri.https('api.trakt.tv', '/shows/$id/comments/$sort', {
+        'page': page.toString(),
+        'limit': limit.toString(),
         // Asegurar que no haya caché
         '_t': DateTime.now().millisecondsSinceEpoch.toString(),
       });

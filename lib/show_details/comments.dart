@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:watching/services/trakt/trakt_api.dart';
 
 /// Shows a modal bottom sheet with all comments for a show
 Future<void> showAllComments(
@@ -85,73 +86,113 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
   late final ScrollController _scrollController;
   late String _currentSort;
   late Future<List<dynamic>> _commentsFuture;
+  final List<dynamic> _allComments = [];
+  int _currentPage = 1;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  static const int _commentsPerPage = 10;
+  final _apiService = TraktApi();
 
   @override
   void initState() {
     super.initState();
     _currentSort = widget.sort;
-    _commentsFuture = widget.commentsFuture;
-    _scrollController = ScrollController();
+    _commentsFuture = widget.commentsFuture.then((comments) {
+      _allComments.addAll(comments);
+      _hasMore = comments.length == _commentsPerPage;
+      return _allComments;
+    });
+    _scrollController = ScrollController()..addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+  
+  void _onScroll() {
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreComments();
+    }
+  }
+  
+  Future<void> _loadMoreComments() async {
+    if (_isLoadingMore || !_hasMore) return;
+    
+    setState(() {
+      _isLoadingMore = true;
+    });
+    
+    try {
+      final nextPage = _currentPage + 1;
+      final newComments = await _apiService.getShowComments(
+        id: widget.showId,
+        sort: _currentSort,
+        page: nextPage,
+        limit: _commentsPerPage,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _allComments.addAll(newComments);
+          _hasMore = newComments.length == _commentsPerPage;
+          _currentPage = nextPage;
+          _isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+      // Optionally show error message
+    }
   }
   
   Future<void> _handleSortChanged(String? newSort) async {
     if (newSort != null && newSort != _currentSort) {
       if (!mounted) return;
       
-      // Guardar la posición actual del scroll
-      final scrollOffset = _scrollController.position.pixels;
-      
-      // Mostrar indicador de carga
       setState(() {
         _currentSort = newSort;
+        _currentPage = 1;
+        _hasMore = true;
+        _allComments.clear();
+        _isLoadingMore = false;
       });
       
       try {
-        // Crear un nuevo Future para forzar la actualización
-        final apiService = ref.read(traktApiProvider);
-        
-        // Crear un nuevo Future para forzar la actualización
-        final newFuture = apiService.getShowComments(
+        final newComments = await _apiService.getShowComments(
           id: widget.showId,
           sort: newSort,
-        )..then((comments) {
-          if (mounted) {
-            setState(() {
-              _commentsFuture = Future.value(comments);
-            });
-            
-            // Restaurar la posición del scroll después de que se complete la construcción
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_scrollController.hasClients) {
-                _scrollController.jumpTo(scrollOffset);
-              }
-            });
-          }
-        }).catchError((error) {
-          if (mounted) {
-            setState(() {
-              _commentsFuture = Future.error(error);
-            });
-          }
-        });
+          page: 1,
+          limit: _commentsPerPage,
+        );
         
-        // Actualizar el estado con el nuevo Future
         if (mounted) {
           setState(() {
-            _commentsFuture = newFuture;
+            _allComments.clear();
+            _allComments.addAll(newComments);
+            _hasMore = newComments.length == _commentsPerPage;
+            _currentPage = 1;
           });
         }
       } catch (error) {
         if (mounted) {
           setState(() {
-            _commentsFuture = Future.error(error);
+            _hasMore = false;
           });
+          // Optionally show error message to user
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Error loading comments. Please try again.'),
+              duration: Duration(seconds: 3),
+            ),
+          );
         }
       }
     }
@@ -162,11 +203,11 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
     return FutureBuilder<List<dynamic>>(
       future: _commentsFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting && _allComments.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (snapshot.hasError) {
+        if (snapshot.hasError && _allComments.isEmpty) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -181,9 +222,7 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
           );
         }
 
-        final comments = snapshot.data ?? [];
-
-        if (comments.isEmpty) {
+        if (_allComments.isEmpty) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -219,9 +258,7 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
                               child: Text(entry.value),
                             ))
                         .toList(),
-                    onChanged: (value) {
-                      _handleSortChanged(value);
-                    },
+                    onChanged: _handleSortChanged,
                     isExpanded: false,
                   ),
                 ],
@@ -231,10 +268,13 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
               child: ListView.builder(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-                itemCount: comments.length,
+                itemCount: _allComments.length + (_hasMore ? 1 : 0),
                 key: PageStorageKey<String>('comments_${widget.showId}_$_currentSort'),
                 itemBuilder: (context, index) {
-                  final comment = comments[index];
+                  if (index >= _allComments.length) {
+                    return _buildLoadMoreButton();
+                  }
+                  final comment = _allComments[index];
                   return _buildCommentTile(context, comment);
                 },
               ),
@@ -242,6 +282,20 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
           ],
         );
       },
+    );
+  }
+  
+  Widget _buildLoadMoreButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+      child: Center(
+        child: _isLoadingMore
+            ? const CircularProgressIndicator()
+            : ElevatedButton(
+                onPressed: _hasMore ? _loadMoreComments : null,
+                child: const Text('Ver más'),
+              ),
+      ),
     );
   }
   
