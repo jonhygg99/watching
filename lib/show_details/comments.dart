@@ -22,46 +22,45 @@ Future<void> showAllComments(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => Container(
-      height: MediaQuery.of(context).size.height * 0.9,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(16),
-        ),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Comentarios',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+    builder:
+        (context) => Container(
+          height: MediaQuery.of(context).size.height * 0.9,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Comentarios',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: _CommentsList(
+                  commentsFuture: commentsFuture,
+                  sort: sort.value,
+                  sortLabels: sortLabels,
+                  showId: showId,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const Divider(height: 1),
-          Expanded(
-            child: _CommentsList(
-              commentsFuture: commentsFuture,
-              sort: sort.value,
-              sortLabels: sortLabels,
-              showId: showId,
-            ),
-          ),
-        ],
-      ),
-    ),
+        ),
   );
 }
 
@@ -70,7 +69,7 @@ class _CommentsList extends ConsumerStatefulWidget {
   final String sort;
   final Map<String, String> sortLabels;
   final String showId;
-  
+
   const _CommentsList({
     required this.commentsFuture,
     required this.sort,
@@ -111,21 +110,21 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
     _scrollController.dispose();
     super.dispose();
   }
-  
+
   void _onScroll() {
-    if (_scrollController.position.pixels >= 
+    if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       _loadMoreComments();
     }
   }
-  
+
   Future<void> _loadMoreComments() async {
     if (_isLoadingMore || !_hasMore) return;
-    
+
     setState(() {
       _isLoadingMore = true;
     });
-    
+
     try {
       final nextPage = _currentPage + 1;
       final newComments = await _apiService.getShowComments(
@@ -134,7 +133,7 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
         page: nextPage,
         limit: _commentsPerPage,
       );
-      
+
       if (mounted) {
         setState(() {
           _allComments.addAll(newComments);
@@ -152,11 +151,11 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
       // Optionally show error message
     }
   }
-  
+
   Future<void> _handleSortChanged(String? newSort) async {
     if (newSort != null && newSort != _currentSort) {
       if (!mounted) return;
-      
+
       setState(() {
         _currentSort = newSort;
         _currentPage = 1;
@@ -164,7 +163,7 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
         _allComments.clear();
         _isLoadingMore = false;
       });
-      
+
       try {
         final newComments = await _apiService.getShowComments(
           id: widget.showId,
@@ -172,7 +171,7 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
           page: 1,
           limit: _commentsPerPage,
         );
-        
+
         if (mounted) {
           setState(() {
             _allComments.clear();
@@ -197,13 +196,14 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
       }
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<dynamic>>(
       future: _commentsFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting && _allComments.isEmpty) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            _allComments.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -239,25 +239,31 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
         return Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Filtros',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   DropdownButton<String>(
                     value: _currentSort,
                     underline: const SizedBox(),
-                    items: widget.sortLabels.entries
-                        .map((entry) => DropdownMenuItem(
-                              value: entry.key,
-                              child: Text(entry.value),
-                            ))
-                        .toList(),
+                    items:
+                        widget.sortLabels.entries
+                            .map(
+                              (entry) => DropdownMenuItem(
+                                value: entry.key,
+                                child: Text(entry.value),
+                              ),
+                            )
+                            .toList(),
                     onChanged: _handleSortChanged,
                     isExpanded: false,
                   ),
@@ -267,9 +273,16 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                padding: const EdgeInsets.only(
+                  left: 8.0,
+                  right: 8.0,
+                  top: 8.0,
+                  bottom: 24.0, // Add bottom padding to ensure space at the end
+                ),
                 itemCount: _allComments.length + (_hasMore ? 1 : 0),
-                key: PageStorageKey<String>('comments_${widget.showId}_$_currentSort'),
+                key: PageStorageKey<String>(
+                  'comments_${widget.showId}_$_currentSort',
+                ),
                 itemBuilder: (context, index) {
                   if (index >= _allComments.length) {
                     return _buildLoadMoreButton();
@@ -284,21 +297,26 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
       },
     );
   }
-  
+
   Widget _buildLoadMoreButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-      child: Center(
-        child: _isLoadingMore
-            ? const CircularProgressIndicator()
-            : ElevatedButton(
-                onPressed: _hasMore ? _loadMoreComments : null,
-                child: const Text('Ver más'),
-              ),
-      ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+          child: Center(
+            child:
+                _isLoadingMore
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                      onPressed: _hasMore ? _loadMoreComments : null,
+                      child: const Text('Ver más'),
+                    ),
+          ),
+        ),
+      ],
     );
   }
-  
+
   Widget _buildCommentTile(BuildContext context, dynamic comment) {
     final user = comment['user'] ?? {};
 
@@ -333,14 +351,14 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
                     Text(
                       userName,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       date,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -358,9 +376,9 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
                     child: Text(
                       'SPOILER',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 if (isReview) ...[
@@ -377,19 +395,16 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
                     child: Text(
                       'REVIEW',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
               ],
             ),
             const SizedBox(height: 8),
-            Text(
-              commentText,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            Text(commentText, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -399,8 +414,8 @@ class _CommentsListState extends ConsumerState<_CommentsList> {
                 Text(
                   likes.toString(),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.normal,
-                      ),
+                    fontWeight: FontWeight.normal,
+                  ),
                 ),
               ],
             ),
