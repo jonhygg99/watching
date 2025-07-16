@@ -55,14 +55,7 @@ Future<void> showAllComments(
               commentsFuture: commentsFuture,
               sort: sort.value,
               sortLabels: sortLabels,
-              onSortChanged: (value) {
-                if (value != null && value != sort.value) {
-                  sort.value = value;
-                  // Close and reopen the modal with new sort order
-                  Navigator.of(context).pop();
-                  showAllComments(context, showId, sort, sortLabels, ref);
-                }
-              },
+              showId: showId,
             ),
           ),
         ],
@@ -71,23 +64,68 @@ Future<void> showAllComments(
   );
 }
 
-class _CommentsList extends StatelessWidget {
+class _CommentsList extends ConsumerStatefulWidget {
   final Future<List<dynamic>> commentsFuture;
   final String sort;
   final Map<String, String> sortLabels;
-  final ValueChanged<String?> onSortChanged;
+  final String showId;
   
   const _CommentsList({
     required this.commentsFuture,
     required this.sort,
     required this.sortLabels,
-    required this.onSortChanged,
+    required this.showId,
   });
 
   @override
+  ConsumerState<_CommentsList> createState() => _CommentsListState();
+}
+
+class _CommentsListState extends ConsumerState<_CommentsList> {
+  late final ScrollController _scrollController;
+  late String _currentSort;
+  late Future<List<dynamic>> _commentsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentSort = widget.sort;
+    _commentsFuture = widget.commentsFuture;
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+  
+  void _handleSortChanged(String? newSort) {
+    if (newSort != null && newSort != _currentSort) {
+      setState(() {
+        _currentSort = newSort;
+        // Save the current scroll position
+        final scrollOffset = _scrollController.position.pixels;
+        // Update the comments future with the new sort
+        final apiService = ref.read(traktApiProvider);
+        _commentsFuture = apiService.getShowComments(
+          id: widget.showId,
+          sort: newSort,
+        ).then((comments) {
+          // Schedule the scroll restoration after the build is complete
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollController.jumpTo(scrollOffset);
+          });
+          return comments;
+        });
+      });
+    }
+  }
+  
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<dynamic>>(
-      future: commentsFuture,
+      future: _commentsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -132,23 +170,26 @@ class _CommentsList extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   DropdownButton<String>(
-                    value: sort,
+                    value: widget.sort,
                     underline: const SizedBox(),
-                    items: sortLabels.entries
+                    items: widget.sortLabels.entries
                         .map((entry) => DropdownMenuItem(
                               value: entry.key,
                               child: Text(entry.value),
                             ))
                         .toList(),
-                    onChanged: onSortChanged,
+                    onChanged: _handleSortChanged,
+                    isExpanded: false,
                   ),
                 ],
               ),
             ),
             Expanded(
               child: ListView.builder(
+                controller: _scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
                 itemCount: comments.length,
+                key: PageStorageKey<String>('comments_${widget.showId}_$_currentSort'),
                 itemBuilder: (context, index) {
                   final comment = comments[index];
                   return _buildCommentTile(context, comment);
