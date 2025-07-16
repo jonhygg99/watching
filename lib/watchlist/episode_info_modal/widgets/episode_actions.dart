@@ -27,10 +27,14 @@ class EpisodeActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Default to false if 'watched' is null
     final isWatched = episode['watched'] == true;
     final isWatching = ref.watch(
       watchlistProvider.select((state) => state.isLoading),
     );
+
+    // Debug log to help with troubleshooting
+    debugPrint('Episode watched status: $isWatched');
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -49,7 +53,7 @@ class EpisodeActions extends ConsumerWidget {
 
         // Spacer to push the watched button to the right
         const Spacer(),
-        if (episode['watched'] == true)
+        if (isWatched)
           StarRating(
             initialRating: currentRating ?? 0.0,
             size: 20,
@@ -67,7 +71,8 @@ class EpisodeActions extends ConsumerWidget {
               vertical: 12,
               horizontal: 16,
             ),
-            backgroundColor: isWatched ? Colors.green.withValues(alpha: 0.1) : null,
+            backgroundColor: isWatched ? Colors.green.withOpacity(0.1) : null,
+            foregroundColor: isWatched ? Colors.green[700] : null,
           ),
           child: isWatching
               ? const SizedBox(

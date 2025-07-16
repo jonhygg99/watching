@@ -31,6 +31,7 @@ class EpisodeInfoModal extends StatefulWidget {
 class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
   double? episodeRating;
   bool _isRating = false;
+  bool? _isWatched;
   late final EpisodeRatingService _ratingService;
   late final TraktApi _traktApi;
 
@@ -39,6 +40,39 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
     super.initState();
     _traktApi = TraktApi();
     _ratingService = EpisodeRatingService(_traktApi);
+    _loadWatchedStatus();
+  }
+
+  Future<void> _loadWatchedStatus() async {
+    try {
+      final showId = widget.showData['ids']['trakt']?.toString();
+      if (showId == null) return;
+      
+      final progress = await _traktApi.getShowWatchedProgress(id: showId);
+      final seasons = progress['seasons'] as List<dynamic>?;
+      
+      if (seasons != null) {
+        for (final season in seasons) {
+          if (season['number'] == widget.seasonNumber) {
+            final episodes = season['episodes'] as List<dynamic>?;
+            if (episodes != null) {
+              final episode = episodes.firstWhere(
+                (e) => e['number'] == widget.episodeNumber,
+                orElse: () => null,
+              );
+              if (episode != null && mounted) {
+                setState(() {
+                  _isWatched = episode['completed'] == true;
+                });
+                break;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading watched status: $e');
+    }
   }
 
   Future<void> _showCommentsModal() async {
@@ -195,7 +229,13 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
           if (episode == null) {
             content = const SizedBox.shrink();
           } else {
-            final img = _getScreenshotUrl(episode);
+            // Merge the watched status into the episode data
+            final episodeWithWatched = Map<String, dynamic>.from(episode);
+            if (_isWatched != null) {
+              episodeWithWatched['watched'] = _isWatched;
+            }
+
+            final img = _getScreenshotUrl(episodeWithWatched);
             final imageUrl =
                 img != null
                     ? (img is String && !img.startsWith('http')
@@ -206,24 +246,27 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
             content = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                EpisodeHeader(episode: episode, imageUrl: imageUrl),
-                EpisodeDetails(episode: episode),
+                EpisodeHeader(episode: episodeWithWatched, imageUrl: imageUrl),
+                EpisodeDetails(episode: episodeWithWatched),
                 Consumer(
                   builder: (context, ref, _) {
                     return EpisodeActions(
-                      episode: episode,
+                      episode: episodeWithWatched,
                       showData: widget.showData,
                       seasonNumber: widget.seasonNumber,
                       episodeNumber: widget.episodeNumber,
                       currentRating: episodeRating,
                       onRatingChanged: _handleRatingUpdate,
-                      onWatchedStatusChanged:
-                          (isWatched) => _handleWatchedStatusChanged(
-                            context,
-                            ref,
-                            episode,
-                            isWatched,
-                          ),
+                      onWatchedStatusChanged: (isWatched) async {
+                        await _handleWatchedStatusChanged(
+                          context,
+                          ref,
+                          episodeWithWatched,
+                          isWatched,
+                        );
+                        // Refresh the watched status after toggling
+                        await _loadWatchedStatus();
+                      },
                       onCommentsPressed: _showCommentsModal,
                     );
                   },
