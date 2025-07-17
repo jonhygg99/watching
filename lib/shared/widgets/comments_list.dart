@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 
-enum CommentType {
-  show,
-  episode,
-}
+enum CommentType { show, episode }
 
 class CommentsList extends ConsumerStatefulWidget {
   final CommentType type;
@@ -95,9 +92,9 @@ class _CommentsListState extends ConsumerState<CommentsList> {
     try {
       final sortValue = widget.sort.value; // Get current sort value
       final traktApi = ref.read(traktApiProvider);
-      
+
       List<dynamic> response;
-      
+
       if (widget.type == CommentType.show) {
         response = await traktApi.getShowComments(
           id: widget.id,
@@ -107,7 +104,9 @@ class _CommentsListState extends ConsumerState<CommentsList> {
         );
       } else {
         if (widget.seasonNumber == null || widget.episodeNumber == null) {
-          throw Exception('Season and episode numbers are required for episode comments');
+          throw Exception(
+            'Season and episode numbers are required for episode comments',
+          );
         }
         response = await traktApi.getEpisodeComments(
           id: widget.id,
@@ -161,18 +160,21 @@ class _CommentsListState extends ConsumerState<CommentsList> {
               children: [
                 Text(
                   widget.title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 DropdownButton<String>(
                   value: widget.sort.value,
-                  items: widget.sortLabels.entries
-                      .map((e) => DropdownMenuItem(
-                            value: e.key,
-                            child: Text(e.value),
-                          ))
-                      .toList(),
+                  items:
+                      widget.sortLabels.entries
+                          .map(
+                            (e) => DropdownMenuItem(
+                              value: e.key,
+                              child: Text(e.value),
+                            ),
+                          )
+                          .toList(),
                   onChanged: (value) {
                     if (value != null) {
                       widget.sort.value = value;
@@ -187,91 +189,169 @@ class _CommentsListState extends ConsumerState<CommentsList> {
           const Divider(height: 1),
         ],
         Expanded(
-          child: _isInitialLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _errorMessage != null
+          child:
+              _isInitialLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _errorMessage != null
                   ? Center(child: Text(_errorMessage!))
                   : _allComments.isEmpty
-                      ? const Center(child: Text('No comments found'))
-                      : RefreshIndicator(
-                          onRefresh: _refresh,
-                          child: ListView.builder(
-                            controller: _scrollController,
-                            padding: const EdgeInsets.all(8.0),
-                            itemCount: _allComments.length + (_hasMore ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (index >= _allComments.length) {
-                                return const Center(
-                                    child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: CircularProgressIndicator(),
-                                ));
-                              }
+                  ? const Center(child: Text('No comments found'))
+                  : RefreshIndicator(
+                    onRefresh: _refresh,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(8.0),
+                      itemCount: _allComments.length + (_hasMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= _allComments.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
 
-                              final comment = _allComments[index];
-                              return _buildCommentItem(comment);
-                            },
-                          ),
-                        ),
+                        final comment = _allComments[index];
+                        return _buildCommentItem(comment);
+                      },
+                    ),
+                  ),
         ),
       ],
     );
   }
 
   Widget _buildCommentItem(Map<String, dynamic> comment) {
+    final isSpoiler = comment['spoiler'] == true;
+    final isReview = comment['review'] == true;
+    final likes = comment['likes'] ?? 0;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Stack(
+        children: [
+          // Main content
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  backgroundImage: comment['user']?['avatar'] != null
-                      ? NetworkImage(
-                          'https://www.gravatar.com/avatar/${comment['user']['avatar']}')
-                      : null,
-                  child: comment['user']?['avatar'] == null
-                      ? const Icon(Icons.person)
-                      : null,
+                // User info row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      backgroundImage:
+                          comment['user']?['avatar'] != null
+                              ? NetworkImage(
+                                'https://www.gravatar.com/avatar/${comment['user']['avatar']}',
+                              )
+                              : null,
+                      child:
+                          comment['user']?['avatar'] == null
+                              ? const Icon(Icons.person)
+                              : null,
+                    ),
+                    const SizedBox(width: 8.0),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            comment['user']?['username'] ?? 'Unknown',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8.0),
-                Text(
-                  comment['user']?['username'] ?? 'Unknown',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const Spacer(),
-                Text(
-                  _formatDate(comment['created_at']),
-                  style: Theme.of(context).textTheme.bodySmall,
+                const SizedBox(height: 8.0),
+                // Comment text
+                Text(comment['comment'] ?? ''),
+                const SizedBox(height: 8.0),
+                // Action buttons row
+                Row(
+                  children: [
+                    // Like button
+                    IconButton(
+                      icon: const Icon(Icons.thumb_up_outlined, size: 20.0),
+                      onPressed: () {},
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    Text(
+                      likes > 0 ? '$likes' : '',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(width: 16.0),
+                    // Reply button
+                    IconButton(
+                      icon: const Icon(Icons.reply_outlined, size: 20.0),
+                      onPressed: () {},
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                    const Spacer(),
+                    // Date
+                    Text(
+                      _formatDate(comment['created_at']),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 8.0),
-            Text(comment['comment'] ?? ''),
-            const SizedBox(height: 8.0),
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.thumb_up_outlined, size: 20.0),
-                  onPressed: () {},
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                Text('${comment['likes'] ?? 0}'),
-                const SizedBox(width: 16.0),
-                IconButton(
-                  icon: const Icon(Icons.reply_outlined, size: 20.0),
-                  onPressed: () {},
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
+          ),
+          // Spoiler/Review badges
+          if (isSpoiler || isReview)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isSpoiler)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'SPOILER',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  if (isSpoiler && isReview) const SizedBox(width: 8),
+                  if (isReview)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'REVIEW',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -295,8 +375,11 @@ Future<void> showCommentsModal(
   required Map<String, String> sortLabels,
   String title = 'Comentarios',
 }) async {
-  if (type == CommentType.episode && (seasonNumber == null || episodeNumber == null)) {
-    throw ArgumentError('seasonNumber and episodeNumber are required for episode comments');
+  if (type == CommentType.episode &&
+      (seasonNumber == null || episodeNumber == null)) {
+    throw ArgumentError(
+      'seasonNumber and episodeNumber are required for episode comments',
+    );
   }
 
   return showModalBottomSheet(
@@ -325,12 +408,16 @@ Future<void> showCommentsModal(
                         onSelected: (value) {
                           sort.value = value;
                         },
-                        itemBuilder: (context) => sortLabels.entries
-                            .map((e) => PopupMenuItem<String>(
-                                  value: e.key,
-                                  child: Text(e.value),
-                                ))
-                            .toList(),
+                        itemBuilder:
+                            (context) =>
+                                sortLabels.entries
+                                    .map(
+                                      (e) => PopupMenuItem<String>(
+                                        value: e.key,
+                                        child: Text(e.value),
+                                      ),
+                                    )
+                                    .toList(),
                         icon: const Icon(Icons.sort),
                       ),
                     ],
