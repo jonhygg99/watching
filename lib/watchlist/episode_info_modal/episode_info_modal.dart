@@ -6,7 +6,8 @@ import 'services/episode_rating_service.dart';
 import 'widgets/episode_header.dart';
 import 'widgets/episode_details.dart';
 import 'widgets/episode_actions.dart';
-import 'widgets/episode_comments.dart' show showEpisodeComments;
+import 'package:watching/shared/widgets/comments_list.dart';
+import 'package:watching/shared/constants/sort_options.dart';
 
 class EpisodeInfoModal extends StatefulWidget {
   final Future<Map<String, dynamic>> episodeFuture;
@@ -218,14 +219,19 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                         // Refresh the watched status after toggling
                         await _loadWatchedStatus();
                       },
-                      onCommentsPressed:
-                          () => showEpisodeComments(
-                            context,
-                            widget.showData['ids']['trakt'],
-                            seasonNumber: widget.seasonNumber,
-                            episodeNumber: widget.episodeNumber,
-                            title: 'Comentarios del episodio',
-                          ),
+                      onCommentsPressed: () {
+                        final sortNotifier = ValueNotifier<String>('newest');
+                        showCommentsModal(
+                          context,
+                          type: CommentType.episode,
+                          id: widget.showData['ids']['trakt'].toString(),
+                          seasonNumber: widget.seasonNumber,
+                          episodeNumber: widget.episodeNumber,
+                          sort: sortNotifier,
+                          sortLabels: commentSortOptions,
+                          title: 'Comentarios del episodio',
+                        );
+                      },
                     );
                   },
                 ),
