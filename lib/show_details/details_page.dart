@@ -3,10 +3,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/providers/watchlist_providers.dart';
-import 'package:watching/shared/constants/sort_options.dart';
+
+import 'package:watching/show_details/seasons_progress_widget.dart';
+import 'package:watching/show_details/show_info_chips.dart';
 import 'package:watching/show_details/comments.dart';
-import 'seasons_progress_widget.dart';
-import 'show_info_chips.dart';
 import 'show_description.dart';
 import 'header.dart';
 import 'videos.dart';
@@ -23,7 +23,7 @@ class ShowDetailPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // State hooks
     final fullyWatched = useState(false);
-    final sort = useState('likes');
+
     final refreshKey = useState(0); // Used to force refresh of data
     final apiService = ref.watch(traktApiProvider);
     final countryCode = ref.watch(countryCodeProvider);
@@ -32,9 +32,6 @@ class ShowDetailPage extends HookConsumerWidget {
     Future<void> refreshWatchlist() async {
       await ref.read(watchlistProvider.notifier).updateShowProgress(showId);
     }
-
-    // Use shared sort options for comments
-    final sortLabels = commentSortOptions;
 
     // Function to refresh show data
     Future<void> refreshShowData() async {
@@ -182,14 +179,11 @@ class ShowDetailPage extends HookConsumerWidget {
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         TextButton.icon(
-                          onPressed:
-                              () => showAllComments(
-                                context,
-                                showId,
-                                sort,
-                                commentSortOptions,
-                                ref,
-                              ),
+                          onPressed: () => showAllComments(
+                            context,
+                            showId,
+                            title: 'Comentarios',
+                          ),
                           icon: const Icon(Icons.comment_outlined),
                           label: const Text('Ver todos'),
                         ),
