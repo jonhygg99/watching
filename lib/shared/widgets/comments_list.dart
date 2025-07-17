@@ -299,62 +299,54 @@ Future<void> showCommentsModal(
     throw ArgumentError('seasonNumber and episodeNumber are required for episode comments');
   }
 
-  await showModalBottomSheet(
+  return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
     builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return DraggableScrollableSheet(
-            initialChildSize: 0.9,
-            minChildSize: 0.5,
-            maxChildSize: 0.9,
-            expand: false,
-            builder: (_, controller) {
-              return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                child: Column(
-                  children: [
-                    AppBar(
-                      title: Text(title),
-                      leading: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      actions: [
-                        PopupMenuButton<String>(
-                          onSelected: (value) {
-                            setState(() {
-                              sort.value = value;
-                            });
-                          },
-                          itemBuilder: (context) => sortLabels.entries
-                              .map((e) => PopupMenuItem<String>(
-                                    value: e.key,
-                                    child: Text(e.value),
-                                  ))
-                              .toList(),
-                          icon: const Icon(Icons.sort),
-                        ),
-                      ],
+      return DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (_, controller) {
+          return ValueListenableBuilder<String>(
+            valueListenable: sort,
+            builder: (context, sortValue, _) {
+              return Column(
+                children: [
+                  AppBar(
+                    title: Text(title),
+                    leading: IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                    Expanded(
-                      child: CommentsList(
-                        type: type,
-                        id: id,
-                        seasonNumber: seasonNumber,
-                        episodeNumber: episodeNumber,
-                        sort: sort,
-                        sortLabels: sortLabels,
-                        showTitle: false,
+                    actions: [
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          sort.value = value;
+                        },
+                        itemBuilder: (context) => sortLabels.entries
+                            .map((e) => PopupMenuItem<String>(
+                                  value: e.key,
+                                  child: Text(e.value),
+                                ))
+                            .toList(),
+                        icon: const Icon(Icons.sort),
                       ),
+                    ],
+                  ),
+                  Expanded(
+                    child: CommentsList(
+                      type: type,
+                      id: id,
+                      seasonNumber: seasonNumber,
+                      episodeNumber: episodeNumber,
+                      sort: sort,
+                      sortLabels: sortLabels,
+                      showTitle: false,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               );
             },
           );
