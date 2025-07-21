@@ -38,7 +38,7 @@ class SeasonsProgressWidget extends HookConsumerWidget {
     // Efecto para cargar datos al montar el widget o cuando showId cambia
     useEffect(() {
       bool isMounted = true;
-      
+
       Future<void> fetchData() async {
         if (!isMounted) return;
         loading.value = true;
@@ -70,9 +70,18 @@ class SeasonsProgressWidget extends HookConsumerWidget {
     if (seasons.value == null || progress.value == null) {
       return const SizedBox();
     }
-    final progressSeasons = Map.fromEntries(
-      (progress.value!["seasons"] as List).map((s) => MapEntry(s["number"], s)),
-    );
+    // Handle case where seasons list might be null in the progress data
+    final progressSeasons = <int, dynamic>{};
+    final seasonsList = progress.value!["seasons"] as List?;
+    if (seasonsList != null) {
+      progressSeasons.addAll(
+        Map.fromEntries(
+          seasonsList.map<MapEntry<int, dynamic>>(
+            (s) => MapEntry(s["number"] as int, s),
+          ),
+        ),
+      );
+    }
 
     // Filtrar temporadas: ocultar SOLO la temporada 0 (especiales) si tiene 0 episodios.
     // Mostrar SIEMPRE todas las temporadas "reales" aunque tengan 0 episodios.
