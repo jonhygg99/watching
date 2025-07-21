@@ -9,6 +9,7 @@ import 'seasons/season_detail_page.dart';
 /// Usa hooks y Riverpod para el manejo de estado y side-effects.
 class SeasonsProgressWidget extends HookConsumerWidget {
   final String showId;
+  final Map<String, dynamic> showData;
   final String? languageCode;
   final Function()? onProgressChanged;
   final Function()? onEpisodeWatched;
@@ -16,6 +17,7 @@ class SeasonsProgressWidget extends HookConsumerWidget {
   const SeasonsProgressWidget({
     super.key,
     required this.showId,
+    required this.showData,
     this.languageCode,
     this.onProgressChanged,
     this.onEpisodeWatched,
@@ -36,7 +38,7 @@ class SeasonsProgressWidget extends HookConsumerWidget {
     // Efecto para cargar datos al montar el widget o cuando showId cambia
     useEffect(() {
       bool isMounted = true;
-      
+
       Future<void> fetchData() async {
         if (!isMounted) return;
         loading.value = true;
@@ -68,9 +70,18 @@ class SeasonsProgressWidget extends HookConsumerWidget {
     if (seasons.value == null || progress.value == null) {
       return const SizedBox();
     }
-    final progressSeasons = Map.fromEntries(
-      (progress.value!["seasons"] as List).map((s) => MapEntry(s["number"], s)),
-    );
+    // Handle case where seasons list might be null in the progress data
+    final progressSeasons = <int, dynamic>{};
+    final seasonsList = progress.value!["seasons"] as List?;
+    if (seasonsList != null) {
+      progressSeasons.addAll(
+        Map.fromEntries(
+          seasonsList.map<MapEntry<int, dynamic>>(
+            (s) => MapEntry(s["number"] as int, s),
+          ),
+        ),
+      );
+    }
 
     // Filtrar temporadas: ocultar SOLO la temporada 0 (especiales) si tiene 0 episodios.
     // Mostrar SIEMPRE todas las temporadas "reales" aunque tengan 0 episodios.
@@ -108,6 +119,7 @@ class SeasonsProgressWidget extends HookConsumerWidget {
                   builder:
                       (context) => SeasonDetailPage(
                         showId: showId,
+                        showData: showData,
                         seasonNumber: number,
                         languageCode: languageCode,
                         onEpisodeWatched: () {

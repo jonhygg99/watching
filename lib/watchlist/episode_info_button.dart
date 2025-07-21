@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/watchlist/episode_info_modal.dart';
+import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
 import 'package:watching/services/trakt/trakt_api.dart';
 import 'package:watching/providers/app_providers.dart';
 
@@ -11,6 +11,7 @@ class EpisodeInfoButton extends HookConsumerWidget {
   final int episode;
   final TraktApi apiService;
   final String? countryCode;
+  final Map<String, dynamic> showData;
 
   const EpisodeInfoButton({
     super.key,
@@ -18,6 +19,7 @@ class EpisodeInfoButton extends HookConsumerWidget {
     required this.season,
     required this.episode,
     required this.apiService,
+    required this.showData,
     this.countryCode,
   });
 
@@ -46,8 +48,11 @@ class EpisodeInfoButton extends HookConsumerWidget {
                         id: traktId!,
                         season: season,
                         episode: episode,
-                        language: effectiveCountryCode.toLowerCase()
+                        language: effectiveCountryCode.toLowerCase(),
                       ),
+                      showData: showData,
+                      seasonNumber: season,
+                      episodeNumber: episode,
                     );
                   },
                 );

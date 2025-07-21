@@ -14,18 +14,18 @@ import 'controllers/season_actions.dart';
 
 /// Page to display details and episodes of a season, with actions to mark all or individual episodes as watched.
 class SeasonDetailPage extends HookConsumerWidget {
-  final String showId;
   final int seasonNumber;
-  final String? showTitle;
+  final String showId;
+  final Map<String, dynamic> showData;
   final String? languageCode;
   final Function()? onEpisodeWatched;
   final Function()? onWatchlistUpdate;
 
   const SeasonDetailPage({
     super.key,
-    required this.showId,
     required this.seasonNumber,
-    this.showTitle,
+    required this.showId,
+    required this.showData,
     this.languageCode,
     this.onEpisodeWatched,
     this.onWatchlistUpdate,
@@ -184,6 +184,7 @@ class SeasonDetailPage extends HookConsumerWidget {
                       loading: loading.value,
                       seasonNumber: seasonNumber,
                       showId: showId,
+                      showData: showData,
                       languageCode: languageCode,
                       setMarkingColor: setMarkingColor,
                       onToggleEpisode: handleToggleEpisode,

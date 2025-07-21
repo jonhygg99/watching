@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'trakt_api.dart';
 
@@ -150,12 +151,100 @@ mixin ShowsApi on TraktApiBase {
     }
   }
 
-  /// Gets comments for a show by ID.
+  /// Gets all top level comments for an episode with pagination support.
+  ///
+  /// [id]: Trakt ID, slug, or IMDB ID of the show
+  /// [season]: Season number
+  /// [episode]: Episode number
+  /// [sort]: How to sort the comments. Options: newest, oldest, likes, replies, highest, lowest, plays
+  /// [page]: Page number to fetch (1-based)
+  /// [limit]: Number of items per page (1-1000, default 10)
+  /// Returns a list of comment objects for the episode.
+  Future<List<dynamic>> getEpisodeComments({
+    required String id,
+    required int season,
+    required int episode,
+    String sort = 'likes',
+    int page = 1,
+    int limit = 10,
+  }) async {
+    try {
+      final uri = Uri.https(
+        'api.trakt.tv',
+        '/shows/$id/seasons/$season/episodes/$episode/comments/$sort',
+        {
+          'page': page.toString(),
+          'limit': limit.toString(),
+          // Ensure no caching
+          '_t': DateTime.now().millisecondsSinceEpoch.toString(),
+        },
+      );
+      
+      print('Fetching episode comments:');
+      print('  URL: $uri');
+      print('  Show ID: $id');
+      print('  Season: $season');
+      print('  Episode: $episode');
+      print('  Sort: $sort');
+      print('  Page: $page');
+      print('  Limit: $limit');
+
+      // Headers required by Trakt API
+      final requestHeaders = Map<String, String>.from(headers)..addAll({
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': headers['trakt-api-key'] ?? '',
+      });
+
+      final response = await http.get(uri, headers: requestHeaders);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      } else {
+        throw Exception('Error ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Gets comments for a show by ID with pagination support.
+  ///
+  /// [id]: The Trakt ID, Trakt slug, or IMDB ID of the show
+  /// [sort]: Sort order for comments (newest, oldest, likes, replies)
+  /// [page]: Page number to fetch (1-based)
+  /// [limit]: Number of items per page (1-1000, default 10)
   Future<List<dynamic>> getShowComments({
     required String id,
     String sort = 'newest',
+    int page = 1,
+    int limit = 10,
   }) async {
-    return await getJsonList('/shows/$id/comments?sort=$sort');
+    try {
+      final uri = Uri.https('api.trakt.tv', '/shows/$id/comments/$sort', {
+        'page': page.toString(),
+        'limit': limit.toString(),
+        // Asegurar que no haya caché
+        '_t': DateTime.now().millisecondsSinceEpoch.toString(),
+      });
+
+      // Headers requeridos por la API de Trakt
+      final requestHeaders = Map<String, String>.from(headers)..addAll({
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': headers['trakt-api-key'] ?? '',
+      });
+
+      final response = await http.get(uri, headers: requestHeaders);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      } else {
+        throw Exception('Error ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// Gets ratings for a show by ID.
@@ -167,9 +256,17 @@ mixin ShowsApi on TraktApiBase {
   Future<Map<String, dynamic>> getShowWatchedProgress({
     required String id,
   }) async {
-    return await getJsonMap(
-      '/shows/$id/progress/watched?hidden=false&specials=false&count_specials=false',
-    );
+    try {
+      final progress = await getJsonMap(
+        '/shows/$id/progress/watched?hidden=false&specials=false&count_specials=false',
+      );
+
+      // Ensure we always return a valid map with required fields
+      return progress ?? {};
+    } catch (e) {
+      log('Error getting show watched progress', error: e);
+      return {}; // Return empty progress on error
+    }
   }
 
   /// Gets people (cast/crew) for a show.

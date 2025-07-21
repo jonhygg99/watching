@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../providers/app_providers.dart';
-import '../providers/watchlist_providers.dart';
-import 'seasons_progress_widget.dart';
-import 'show_info_chips.dart';
+import 'package:watching/providers/app_providers.dart';
+import 'package:watching/providers/watchlist_providers.dart';
+
+import 'package:watching/show_details/seasons_progress_widget.dart';
+import 'package:watching/show_details/show_info_chips.dart';
+import 'package:watching/shared/widgets/comments_list.dart';
+import 'package:watching/shared/constants/sort_options.dart';
 import 'show_description.dart';
 import 'header.dart';
 import 'videos.dart';
 import 'cast.dart';
 import 'related.dart';
-import 'comments.dart';
 
 /// Displays detailed information about a TV show, including header, seasons, videos, cast, related shows, and comments.
 /// Uses Riverpod for dependency injection and state management.
@@ -22,54 +24,29 @@ class ShowDetailPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // State hooks
     final fullyWatched = useState(false);
-    final sort = useState('likes');
+
     final refreshKey = useState(0); // Used to force refresh of data
-    final refreshTrigger = useState(0); // Separate trigger for episode updates
     final apiService = ref.watch(traktApiProvider);
     final countryCode = ref.watch(countryCodeProvider);
-    final watchlistNotifier = ref.read(watchlistProvider.notifier);
 
     // Function to refresh watchlist data
     Future<void> refreshWatchlist() async {
-      await watchlistNotifier.updateShowProgress(showId);
+      await ref.read(watchlistProvider.notifier).updateShowProgress(showId);
     }
 
-    // Watch for changes to the refresh key to trigger a rebuild
-    useEffect(() {
-      // This will run whenever refreshKey changes
-      return null;
-    }, [refreshKey.value]);
-
-    final sortLabels = const {
-      'likes': 'Más likes',
-      'newest': 'Más recientes',
-      'oldest': 'Más antiguos',
-      'replies': 'Más respuestas',
-      'highest': 'Mejor valorados',
-      'lowest': 'Peor valorados',
-      'plays': 'Más reproducidos',
-      'watched': 'Más vistos',
-    };
-
-    // Comments future (updates when sort, showId, or refreshKey changes)
-    final commentsFuture = useMemoized(
-      () => apiService.getShowComments(id: showId, sort: sort.value),
-      [apiService, showId, sort.value, refreshKey.value, refreshTrigger.value],
-    );
-
     // Function to refresh show data
-    void refreshShowData() {
-      refreshTrigger.value++;
+    Future<void> refreshShowData() async {
+      await refreshWatchlist();
+      refreshKey.value++;
     }
 
     // Intercept back navigation to pass result if fully watched
     return WillPopScope(
       onWillPop: () async {
-        // Always refresh the watchlist when going back
         await refreshWatchlist();
 
         if (fullyWatched.value) {
-          Navigator.pop(context, {'traktId': showId, 'fullyWatched': true});
+          Navigator.of(context).pop({'traktId': showId, 'fullyWatched': true});
           return false;
         }
         return true;
@@ -150,6 +127,36 @@ class ShowDetailPage extends HookConsumerWidget {
                     tagline: originalTagline,
                     overview: originalOverview,
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Lo que otros dicen',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        TextButton.icon(
+                          onPressed: () {
+                            final sortNotifier = ValueNotifier<String>('likes');
+                            showAllComments(
+                              context,
+                              showId,
+                              sortNotifier,
+                              commentSortOptions,
+                              ref,
+                            );
+                          },
+                          icon: const Icon(Icons.comment_outlined),
+                          label: const Text('Comentarios'),
+                        ),
+                      ],
+                    ),
+                  ),
                   ShowInfoChips(
                     show: show,
                     certifications: certifications,
@@ -157,6 +164,7 @@ class ShowDetailPage extends HookConsumerWidget {
                   ),
                   SeasonsProgressWidget(
                     showId: showId,
+                    showData: show,
                     onProgressChanged: () async {
                       // Check if all seasons are now watched
                       final api = ref.read(traktApiProvider);
@@ -187,16 +195,6 @@ class ShowDetailPage extends HookConsumerWidget {
                     relatedShows: relatedShows,
                     apiService: apiService,
                     countryCode: countryCode,
-                  ),
-                  ShowDetailComments(
-                    commentsFuture: commentsFuture,
-                    sort: sort.value,
-                    sortLabels: sortLabels,
-                    onChangeSort: (value) {
-                      if (value != null && value != sort.value) {
-                        sort.value = value;
-                      }
-                    },
                   ),
                 ],
               ),
