@@ -127,6 +127,36 @@ class ShowDetailPage extends HookConsumerWidget {
                     tagline: originalTagline,
                     overview: originalOverview,
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Lo que otros dicen',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        TextButton.icon(
+                          onPressed: () {
+                            final sortNotifier = ValueNotifier<String>('likes');
+                            showAllComments(
+                              context,
+                              showId,
+                              sortNotifier,
+                              commentSortOptions,
+                              ref,
+                            );
+                          },
+                          icon: const Icon(Icons.comment_outlined),
+                          label: const Text('Comentarios'),
+                        ),
+                      ],
+                    ),
+                  ),
                   ShowInfoChips(
                     show: show,
                     certifications: certifications,
@@ -165,38 +195,6 @@ class ShowDetailPage extends HookConsumerWidget {
                     relatedShows: relatedShows,
                     apiService: apiService,
                     countryCode: countryCode,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 8.0,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Comentarios',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        TextButton.icon(
-                          onPressed: () {
-                            final sortNotifier = ValueNotifier<String>(
-                              'likes',
-                            );
-                            showAllComments(
-                              context,
-                              showId,
-                              sortNotifier,
-                              commentSortOptions,
-                              ref,
-                            );
-                          },
-                          icon: const Icon(Icons.comment_outlined),
-                          label: const Text('Ver todos'),
-                        ),
-                      ],
-                    ),
                   ),
                 ],
               ),
