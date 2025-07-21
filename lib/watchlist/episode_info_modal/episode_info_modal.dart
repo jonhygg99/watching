@@ -220,7 +220,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                         await _loadWatchedStatus();
                       },
                       onCommentsPressed: () {
-                        final sortNotifier = ValueNotifier<String>('newest');
+                        final sortNotifier = ValueNotifier<String>('likes');
                         showAllComments(
                           context,
                           widget.showData['ids']['trakt'].toString(),

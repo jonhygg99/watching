@@ -182,7 +182,7 @@ class ShowDetailPage extends HookConsumerWidget {
                         TextButton.icon(
                           onPressed: () {
                             final sortNotifier = ValueNotifier<String>(
-                              'newest',
+                              'likes',
                             );
                             showAllComments(
                               context,
