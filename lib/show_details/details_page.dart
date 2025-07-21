@@ -181,14 +181,15 @@ class ShowDetailPage extends HookConsumerWidget {
                         ),
                         TextButton.icon(
                           onPressed: () {
-                            final sortNotifier = ValueNotifier<String>('newest');
-                            showCommentsModal(
+                            final sortNotifier = ValueNotifier<String>(
+                              'newest',
+                            );
+                            showAllComments(
                               context,
-                              type: CommentType.show,
-                              id: showId,
-                              sort: sortNotifier,
-                              sortLabels: commentSortOptions,
-                              title: 'Comentarios',
+                              showId,
+                              sortNotifier,
+                              commentSortOptions,
+                              ref,
                             );
                           },
                           icon: const Icon(Icons.comment_outlined),

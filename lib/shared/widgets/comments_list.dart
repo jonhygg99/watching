@@ -2,35 +2,75 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 
-enum CommentType { show, episode }
+/// Shows a modal bottom sheet with all comments for a show
+Future<void> showAllComments(
+  BuildContext context,
+  String showId,
+  ValueNotifier<String> sort,
+  Map<String, String> sortLabels,
+  WidgetRef ref,
+) async {
+  await showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder:
+        (context) => Container(
+          height: MediaQuery.of(context).size.height * 0.9,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Comentarios',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: _CommentsList(
+                  sort: sort,
+                  sortLabels: sortLabels,
+                  showId: showId,
+                ),
+              ),
+            ],
+          ),
+        ),
+  );
+}
 
-class CommentsList extends ConsumerStatefulWidget {
-  final CommentType type;
-  final String id;
-  final int? seasonNumber;
-  final int? episodeNumber;
+class _CommentsList extends ConsumerStatefulWidget {
   final ValueNotifier<String> sort;
   final Map<String, String> sortLabels;
-  final String title;
-  final bool showTitle;
+  final String showId;
 
-  const CommentsList({
-    super.key,
-    required this.type,
-    required this.id,
-    this.seasonNumber,
-    this.episodeNumber,
+  const _CommentsList({
     required this.sort,
     required this.sortLabels,
-    this.title = 'Comentarios',
-    this.showTitle = true,
+    required this.showId,
   });
 
   @override
-  ConsumerState<CommentsList> createState() => _CommentsListState();
+  ConsumerState<_CommentsList> createState() => _CommentsListState();
 }
 
-class _CommentsListState extends ConsumerState<CommentsList> {
+class _CommentsListState extends ConsumerState<_CommentsList> {
   final List<Map<String, dynamic>> _allComments = [];
   final ScrollController _scrollController = ScrollController();
   final int _commentsPerPage = 10;
@@ -39,8 +79,6 @@ class _CommentsListState extends ConsumerState<CommentsList> {
   bool _isLoadingMore = false;
   bool _isInitialLoading = true;
   String? _errorMessage;
-
-  _CommentsListState();
 
   @override
   void initState() {
@@ -53,6 +91,7 @@ class _CommentsListState extends ConsumerState<CommentsList> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     widget.sort.removeListener(_onSortChanged);
     super.dispose();
@@ -60,13 +99,7 @@ class _CommentsListState extends ConsumerState<CommentsList> {
 
   void _onSortChanged() {
     if (mounted) {
-      setState(() {
-        _currentPage = 1;
-        _allComments.clear();
-        _hasMore = true;
-        _isInitialLoading = true;
-        _loadComments();
-      });
+      _resetAndLoadComments();
     }
   }
 
@@ -75,6 +108,18 @@ class _CommentsListState extends ConsumerState<CommentsList> {
         _scrollController.position.maxScrollExtent - 200) {
       _loadMoreComments();
     }
+  }
+
+  void _resetAndLoadComments() {
+    setState(() {
+      _currentPage = 1;
+      _allComments.clear();
+      _hasMore = true;
+      _isInitialLoading = true;
+      _isLoadingMore = false;
+      _errorMessage = null;
+    });
+    _loadComments();
   }
 
   Future<void> _loadComments() async {
@@ -90,130 +135,191 @@ class _CommentsListState extends ConsumerState<CommentsList> {
     });
 
     try {
-      final sortValue = widget.sort.value; // Get current sort value
+      final sortValue = widget.sort.value;
       final traktApi = ref.read(traktApiProvider);
 
-      List<dynamic> response;
+      // Cargar la página actual
+      final response = await traktApi.getShowComments(
+        id: widget.showId,
+        sort: sortValue,
+        page: _currentPage,
+        limit: _commentsPerPage,
+      );
 
-      if (widget.type == CommentType.show) {
-        response = await traktApi.getShowComments(
-          id: widget.id,
-          sort: sortValue,
-          page: _currentPage,
-          limit: _commentsPerPage,
-        );
-      } else {
-        if (widget.seasonNumber == null || widget.episodeNumber == null) {
-          throw Exception(
-            'Season and episode numbers are required for episode comments',
+      if (mounted) {
+        final List<Map<String, dynamic>> currentPageComments =
+            (response).cast<Map<String, dynamic>>();
+
+        // Verificar si hay una siguiente página
+        bool hasNextPage = false;
+        try {
+          final nextPageResponse = await traktApi.getShowComments(
+            id: widget.showId,
+            sort: sortValue,
+            page: _currentPage + 1,
+            limit: 1, // Solo necesitamos un comentario para verificar
           );
+          hasNextPage = nextPageResponse.isNotEmpty;
+        } catch (e) {
+          // Si hay un error al verificar la siguiente página, asumimos que hay más
+          hasNextPage = true;
         }
-        response = await traktApi.getEpisodeComments(
-          id: widget.id,
-          season: widget.seasonNumber!,
-          episode: widget.episodeNumber!,
-          sort: sortValue,
-          page: _currentPage,
-          limit: _commentsPerPage,
-        );
-      }
 
-      setState(() {
-        if (_currentPage == 1) {
-          _allComments.clear();
-        }
-        _allComments.addAll(response.cast<Map<String, dynamic>>());
-        _hasMore = response.length == _commentsPerPage;
-        _isLoadingMore = false;
-        _isInitialLoading = false;
-      });
+        setState(() {
+          if (_currentPage == 1) {
+            _allComments.clear();
+          }
+
+          // Filtrar comentarios duplicados
+          final existingIds = _allComments.map((c) => c['id']).toSet();
+          final newComments =
+              currentPageComments
+                  .where((comment) => !existingIds.contains(comment['id']))
+                  .toList();
+
+          _allComments.addAll(newComments);
+
+          // Actualizar el estado de carga
+          _isLoadingMore = false;
+          _isInitialLoading = false;
+
+          // Determinar si hay más comentarios por cargar
+          _hasMore =
+              hasNextPage ||
+              (currentPageComments.isNotEmpty &&
+                  currentPageComments.length >= _commentsPerPage);
+        });
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Error loading comments: ${e.toString()}';
-        _isLoadingMore = false;
-        _isInitialLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error al cargar comentarios: ${e.toString()}';
+          _isLoadingMore = false;
+          _isInitialLoading = false;
+          // En caso de error, asumimos que podría haber más comentarios
+          _hasMore = true;
+        });
+      }
     }
   }
 
   Future<void> _loadMoreComments() async {
-    if (_isLoadingMore || !_hasMore) return;
+    if (_isLoadingMore || !_hasMore || _isInitialLoading) return;
+
+    // Incrementar el contador de página
     _currentPage++;
+
+    // Cargar los comentarios de la siguiente página
     await _loadComments();
   }
 
   Future<void> _refresh() async {
-    _currentPage = 1;
-    await _loadComments();
+    _resetAndLoadComments();
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (widget.showTitle) ...[
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  widget.title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                DropdownButton<String>(
-                  value: widget.sort.value,
-                  items:
-                      widget.sortLabels.entries
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e.key,
-                              child: Text(e.value),
-                            ),
-                          )
-                          .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      widget.sort.value = value;
-                      _currentPage = 1;
-                      _loadComments();
-                    }
-                  },
-                ),
-              ],
-            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Filtros',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              DropdownButton<String>(
+                value: widget.sort.value,
+                underline: const SizedBox(),
+                items:
+                    widget.sortLabels.entries
+                        .map(
+                          (entry) => DropdownMenuItem(
+                            value: entry.key,
+                            child: Text(entry.value),
+                          ),
+                        )
+                        .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    widget.sort.value = value;
+                  }
+                },
+                isExpanded: false,
+              ),
+            ],
           ),
-          const Divider(height: 1),
-        ],
+        ),
         Expanded(
           child:
               _isInitialLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _errorMessage != null
-                  ? Center(child: Text(_errorMessage!))
+                  ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _errorMessage!,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _refresh,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
                   : _allComments.isEmpty
-                  ? const Center(child: Text('No comments found'))
+                  ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'No comments yet',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  )
                   : RefreshIndicator(
                     onRefresh: _refresh,
                     child: ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.only(
+                        left: 8.0,
+                        right: 8.0,
+                        top: 8.0,
+                        bottom: 24.0,
+                      ),
                       itemCount: _allComments.length + (_hasMore ? 1 : 0),
+                      key: PageStorageKey<String>(
+                        'comments_${widget.showId}_${widget.sort.value}',
+                      ),
                       itemBuilder: (context, index) {
                         if (index >= _allComments.length) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
+                          // Loading indicator for more comments
+                          return _isLoadingMore
+                              ? const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                              : const SizedBox.shrink();
                         }
-
                         final comment = _allComments[index];
-                        return _buildCommentItem(comment);
+                        return _buildCommentTile(context, comment);
                       },
                     ),
                   ),
@@ -222,223 +328,110 @@ class _CommentsListState extends ConsumerState<CommentsList> {
     );
   }
 
-  Widget _buildCommentItem(Map<String, dynamic> comment) {
+  Widget _buildCommentTile(BuildContext context, Map<String, dynamic> comment) {
+    final user = comment['user'] ?? {};
+    final userName = user['username'] ?? 'Unknown';
+    final userAvatar = user['images']?['avatar']?['full'];
+    final commentText = comment['comment'] ?? '';
+    final likes = comment['likes'] ?? 0;
     final isSpoiler = comment['spoiler'] == true;
     final isReview = comment['review'] == true;
-    final likes = comment['likes'] ?? 0;
+    final date = comment['created_at']?.substring(0, 10) ?? '';
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-      child: Stack(
-        children: [
-          // Main content
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                // User info row
-                Row(
+                if (userAvatar != null)
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(userAvatar),
+                    radius: 20,
+                  )
+                else
+                  const CircleAvatar(radius: 20, child: Icon(Icons.person)),
+                const SizedBox(width: 12),
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      backgroundImage:
-                          comment['user']?['avatar'] != null
-                              ? NetworkImage(
-                                'https://www.gravatar.com/avatar/${comment['user']['avatar']}',
-                              )
-                              : null,
-                      child:
-                          comment['user']?['avatar'] == null
-                              ? const Icon(Icons.person)
-                              : null,
+                    Text(
+                      userName,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const SizedBox(width: 8.0),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            comment['user']?['username'] ?? 'Unknown',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                    Text(
+                      date,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8.0),
-                // Comment text
-                Text(comment['comment'] ?? ''),
-                const SizedBox(height: 8.0),
-                // Action buttons row
-                Row(
-                  children: [
-                    // Like button
-                    IconButton(
-                      icon: const Icon(Icons.thumb_up_outlined, size: 20.0),
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                const Spacer(),
+                if (isSpoiler)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
                     ),
-                    Text(
-                      likes > 0 ? '$likes' : '',
-                      style: Theme.of(context).textTheme.bodySmall,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    const SizedBox(width: 16.0),
-                    // Reply button
-                    IconButton(
-                      icon: const Icon(Icons.reply_outlined, size: 20.0),
-                      onPressed: () {},
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                    child: Text(
+                      'SPOILER',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const Spacer(),
-                    // Date
-                    Text(
-                      _formatDate(comment['created_at']),
-                      style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                if (isReview) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
                     ),
-                  ],
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'REVIEW',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(commentText, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Icon(Icons.thumb_up, size: 20),
+                const SizedBox(width: 6),
+                Text(
+                  likes.toString(),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.normal,
+                  ),
                 ),
               ],
             ),
-          ),
-          // Spoiler/Review badges
-          if (isSpoiler || isReview)
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isSpoiler)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'SPOILER',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  if (isSpoiler && isReview) const SizedBox(width: 8),
-                  if (isReview)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'REVIEW',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
-
-  String _formatDate(String? dateString) {
-    if (dateString == null) return '';
-    final date = DateTime.tryParse(dateString);
-    if (date == null) return '';
-    return '${date.day}/${date.month}/${date.year}';
-  }
-}
-
-/// Shows a modal bottom sheet with all comments for a show or episode
-Future<void> showCommentsModal(
-  BuildContext context, {
-  required CommentType type,
-  required String id,
-  int? seasonNumber,
-  int? episodeNumber,
-  required ValueNotifier<String> sort,
-  required Map<String, String> sortLabels,
-  String title = 'Comentarios',
-}) async {
-  if (type == CommentType.episode &&
-      (seasonNumber == null || episodeNumber == null)) {
-    throw ArgumentError(
-      'seasonNumber and episodeNumber are required for episode comments',
-    );
-  }
-
-  return showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (BuildContext context) {
-      return DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (_, controller) {
-          return ValueListenableBuilder<String>(
-            valueListenable: sort,
-            builder: (context, sortValue, _) {
-              return Column(
-                children: [
-                  AppBar(
-                    title: Text(title),
-                    leading: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    actions: [
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          sort.value = value;
-                        },
-                        itemBuilder:
-                            (context) =>
-                                sortLabels.entries
-                                    .map(
-                                      (e) => PopupMenuItem<String>(
-                                        value: e.key,
-                                        child: Text(e.value),
-                                      ),
-                                    )
-                                    .toList(),
-                        icon: const Icon(Icons.sort),
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                    child: CommentsList(
-                      type: type,
-                      id: id,
-                      seasonNumber: seasonNumber,
-                      episodeNumber: episodeNumber,
-                      sort: sort,
-                      sortLabels: sortLabels,
-                      showTitle: false,
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      );
-    },
-  );
 }

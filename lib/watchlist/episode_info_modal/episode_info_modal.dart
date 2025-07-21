@@ -221,15 +221,12 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                       },
                       onCommentsPressed: () {
                         final sortNotifier = ValueNotifier<String>('newest');
-                        showCommentsModal(
+                        showAllComments(
                           context,
-                          type: CommentType.episode,
-                          id: widget.showData['ids']['trakt'].toString(),
-                          seasonNumber: widget.seasonNumber,
-                          episodeNumber: widget.episodeNumber,
-                          sort: sortNotifier,
-                          sortLabels: commentSortOptions,
-                          title: 'Comentarios del episodio',
+                          widget.showData['ids']['trakt'].toString(),
+                          sortNotifier,
+                          commentSortOptions,
+                          ref,
                         );
                       },
                     );
