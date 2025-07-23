@@ -250,6 +250,19 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     }
   }
 
+  /// Check if a show is completely watched based on its progress
+  bool _isShowCompleted(Map<String, dynamic> progress) {
+    final int? aired =
+        progress['aired'] is int ? progress['aired'] as int : null;
+    final int? completed =
+        progress['completed'] is int ? progress['completed'] as int : null;
+
+    return aired != null &&
+        completed != null &&
+        aired > 0 &&
+        completed >= aired;
+  }
+
   /// Mark the next episode as watched
   Future<void> markEpisodeAsWatched(String traktId) async {
     if (traktId.isEmpty) {
@@ -342,8 +355,6 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
           ],
         };
 
-        debugPrint('Sending watch history update: $watchData');
-
         // Add to watch history
         await trakt.addToWatchHistory(
           shows: [
@@ -365,8 +376,45 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         await Future.delayed(const Duration(seconds: 1));
 
         // Update the progress
+        final updatedProgress = await trakt.getShowWatchedProgress(
+          id: showIdToUse,
+        );
+        final isCompleted = _isShowCompleted(updatedProgress);
+
+        // Update the progress in the state
         await updateShowProgress(showIdToUse);
 
+        // If show is now completed, remove it from the local watchlist state
+        if (isCompleted) {
+          try {
+            // Update the local state to remove the show
+            final updatedItems = List<Map<String, dynamic>>.from(state.items);
+            updatedItems.removeWhere((item) {
+              final showData = item['show'] ?? item;
+              final ids = showData['ids'] as Map<String, dynamic>? ?? {};
+              return (ids['trakt']?.toString() == traktId ||
+                  ids['slug'] == traktId);
+            });
+
+            state = state.copyWith(
+              items: updatedItems,
+              hasData: updatedItems.isNotEmpty,
+              isLoading: false,
+            );
+
+            // Update the cache
+            final type = _ref.read(watchlistTypeProvider);
+            final cache = _ref.read(watchlistCacheProvider);
+            cache.updateCache(type, updatedItems);
+
+            return; // Skip the refresh since we've already updated the state
+          } catch (e) {
+            debugPrint('Failed to update local watchlist state: $e');
+            // Continue with refresh as fallback
+          }
+        }
+
+        // If we get here, either the show isn't completed or we couldn't remove it
         // Force a full refresh to ensure UI is in sync
         await refresh();
       } catch (e) {
@@ -429,9 +477,6 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
                       'last_watched_at': lastWatched['last_watched_at'],
                     };
                     foundNext = true;
-                    debugPrint(
-                      'Found last watched episode before unwatched: $lastWatchedEpisode',
-                    );
                     break outerLoop;
                   }
                 }
@@ -530,7 +575,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   }
 
   /// Toggle watched status for a specific episode
-  /// 
+  ///
   /// [showTraktId] - The Trakt ID of the show
   /// [seasonNumber] - The season number
   /// [episodeNumber] - The episode number
@@ -543,16 +588,17 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   }) async {
     try {
       state = state.copyWith(isLoading: true);
-      
+
       final trakt = _ref.read(traktApiProvider);
       final showIdToUse = showTraktId;
       final isNumericId = int.tryParse(showIdToUse) != null;
 
       // Prepare the show data with the correct ID format
       final Map<String, dynamic> showData = {
-        'ids': isNumericId 
-            ? {'trakt': int.parse(showIdToUse)}
-            : {'slug': showIdToUse},
+        'ids':
+            isNumericId
+                ? {'trakt': int.parse(showIdToUse)}
+                : {'slug': showIdToUse},
       };
 
       if (watched) {
@@ -593,41 +639,37 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       // Update the local state
       state = state.copyWith(
-        items: state.items.map((show) {
-          if (_getItemId(show) == _getItemId(showData)) {
-            // Find and update the specific episode in the show's seasons
-            final updatedSeasons = (show['seasons'] as List?)?.map((season) {
-              if (season['number'] == seasonNumber) {
-                final episodes = (season['episodes'] as List?)?.map((episode) {
-                  if (episode['number'] == episodeNumber) {
-                    return {
-                      ...episode,
-                      'completed': watched,
-                      'watched': watched,
-                    };
-                  }
-                  return episode;
-                }).toList();
-                return {
-                  ...season,
-                  'episodes': episodes,
-                };
-              }
-              return season;
-            }).toList();
+        items:
+            state.items.map((show) {
+              if (_getItemId(show) == _getItemId(showData)) {
+                // Find and update the specific episode in the show's seasons
+                final updatedSeasons =
+                    (show['seasons'] as List?)?.map((season) {
+                      if (season['number'] == seasonNumber) {
+                        final episodes =
+                            (season['episodes'] as List?)?.map((episode) {
+                              if (episode['number'] == episodeNumber) {
+                                return {
+                                  ...episode,
+                                  'completed': watched,
+                                  'watched': watched,
+                                };
+                              }
+                              return episode;
+                            }).toList();
+                        return {...season, 'episodes': episodes};
+                      }
+                      return season;
+                    }).toList();
 
-            return {
-              ...show,
-              'seasons': updatedSeasons,
-            };
-          }
-          return show;
-        }).toList(),
+                return {...show, 'seasons': updatedSeasons};
+              }
+              return show;
+            }).toList(),
       );
 
       // Force a refresh of the progress
       await updateShowProgress(showIdToUse);
-      
     } catch (e) {
       state = state.copyWith(
         error: 'Error al actualizar el estado del episodio: ${e.toString()}',
