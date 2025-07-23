@@ -7,6 +7,7 @@ import 'package:watching/features/watchlist/providers/watchlist_type_provider.da
 import 'package:watching/features/watchlist/providers/watchlist_cache_provider.dart';
 import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/features/watchlist/services/watchlist_processor.dart';
+import 'package:watching/features/watchlist/state/watchlist_notifier/watchlist_state_mixin.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:collection/collection.dart';
 
@@ -17,7 +18,8 @@ export 'package:watching/features/watchlist/models/watchlist_state.dart'
     show WatchlistState;
 
 /// Notifier for watchlist state management
-class WatchlistNotifier extends StateNotifier<WatchlistState> {
+class WatchlistNotifier extends StateNotifier<WatchlistState>
+    with WatchlistStateMixin {
   final Ref _ref;
   late final WatchlistEpisodeService _episodeService;
   late final WatchlistProcessor _processor;
@@ -72,9 +74,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       final cachedData = cache.getCached(type);
 
       if (cachedData != null) {
-        state = state.copyWith(
-          items: cachedData,
-          hasData: true,
+        updateStateWithItems(
+          cachedData,
           isLoading: true, // Still loading fresh data in background
         );
       }
@@ -94,7 +95,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     try {
       if (_isLoading) return;
       _isLoading = true;
-      state = state.copyWith(isLoading: true, error: null);
+      updateLoadingState(true);
 
       final trakt = _ref.read(traktApiProvider);
       final type = _ref.read(watchlistTypeProvider);
@@ -108,7 +109,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       // Start with loading state if we don't have cached data or forcing refresh
       if (state.items.isEmpty || forceRefresh) {
-        state = state.copyWith(isLoading: true, error: null);
+        updateLoadingState(true);
       }
 
       // Fetch watchlist items from the API
@@ -134,60 +135,23 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         // Update state with new items as they become available
         if (validItems.isNotEmpty) {
           final currentItems = state.items.toList();
-          final newItems = _mergeItems(currentItems, validItems);
+          final newItems = mergeItems(currentItems, validItems);
 
-          state = state.copyWith(
-            items: newItems,
-            isLoading: false,
-            hasData: true,
-            error: null,
-          );
+          updateStateWithItems(newItems);
         }
       }
 
       // Final update with all items and update cache
       if (allProcessedItems.isNotEmpty) {
         cache.updateCache(type, allProcessedItems);
-        state = state.copyWith(
-          items: allProcessedItems,
-          isLoading: false,
-          hasData: true,
-        );
+        updateStateWithItems(allProcessedItems);
       }
     } catch (error) {
-      state = state.copyWith(
-        isLoading: false,
-        error: error,
-        hasData: state.items.isNotEmpty, // Keep existing data if available
-      );
+      updateLoadingState(false, error: error);
     }
   }
 
-  /// Merge new items with existing ones, avoiding duplicates
-  List<Map<String, dynamic>> _mergeItems(
-    List<Map<String, dynamic>> currentItems,
-    List<Map<String, dynamic>> newItems,
-  ) {
-    final merged = List<Map<String, dynamic>>.from(currentItems);
-    final existingIds = currentItems.map((item) => _getItemId(item)).toSet();
-
-    for (final item in newItems) {
-      final itemId = _getItemId(item);
-      if (!existingIds.contains(itemId)) {
-        merged.add(item);
-        existingIds.add(itemId);
-      }
-    }
-
-    return merged;
-  }
-
-  /// Get unique ID for an item
-  String _getItemId(Map<String, dynamic> item) {
-    final show = item['show'] ?? item;
-    final ids = show['ids'] ?? {};
-    return '${ids['trakt'] ?? ''}-${ids['slug'] ?? ''}-${ids['imdb'] ?? ''}';
-  }
+  // Moved to WatchlistStateMixin
 
   /// Process a single watchlist item
   Future<Map<String, dynamic>?> _processItem(
@@ -208,7 +172,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   /// If not, it will perform a full refresh from the API.
   Future<void> refresh() async {
     try {
-      state = state.copyWith(isLoading: true, error: null);
+      updateLoadingState(true);
 
       final type = _ref.read(watchlistTypeProvider);
       final cache = _ref.read(watchlistCacheProvider);
@@ -241,27 +205,12 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       final error =
           e is Exception ? e : Exception('Failed to refresh watchlist: $e');
       debugPrint('Error in refresh: $error');
-      state = state.copyWith(
-        error: error.toString(),
-        isLoading: false,
-        hasData: state.items.isNotEmpty, // Keep existing data if we have any
-      );
+      updateLoadingState(false, error: error.toString());
       rethrow;
     }
   }
 
-  /// Check if a show is completely watched based on its progress
-  bool _isShowCompleted(Map<String, dynamic> progress) {
-    final int? aired =
-        progress['aired'] is int ? progress['aired'] as int : null;
-    final int? completed =
-        progress['completed'] is int ? progress['completed'] as int : null;
-
-    return aired != null &&
-        completed != null &&
-        aired > 0 &&
-        completed >= aired;
-  }
+  // Moved to WatchlistStateMixin
 
   /// Mark the next episode as watched
   Future<void> markEpisodeAsWatched(String traktId) async {
@@ -379,7 +328,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         final updatedProgress = await trakt.getShowWatchedProgress(
           id: showIdToUse,
         );
-        final isCompleted = _isShowCompleted(updatedProgress);
+        final isCompleted = isShowCompleted(updatedProgress);
 
         // Update the progress in the state
         await updateShowProgress(showIdToUse);
@@ -396,11 +345,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
                   ids['slug'] == traktId);
             });
 
-            state = state.copyWith(
-              items: updatedItems,
-              hasData: updatedItems.isNotEmpty,
-              isLoading: false,
-            );
+            updateStateWithItems(updatedItems, isLoading: false);
+            state = state.copyWith(hasData: updatedItems.isNotEmpty);
 
             // Update the cache
             final type = _ref.read(watchlistTypeProvider);
@@ -466,8 +412,36 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
             for (int i = 0; i < episodes.length; i++) {
               final episode = episodes[i];
               if (episode['completed'] == false) {
-                // Found first unwatched episode, previous one is last watched
-                if (i > 0) {
+                // If this is the first episode of the season and it's unwatched,
+                // check if there's a previous season with a watched episode
+                if (i == 0 && season['number'] > 1) {
+                  // Look for the last episode of the previous season
+                  final prevSeason = seasons.firstWhere(
+                    (s) => s['number'] == (season['number'] as int) - 1,
+                    orElse: () => <String, dynamic>{},
+                  );
+
+                  if (prevSeason.isNotEmpty && prevSeason['episodes'] is List) {
+                    final prevEpisodes = List<Map<String, dynamic>>.from(
+                      prevSeason['episodes'],
+                    );
+                    // Get the last episode of the previous season
+                    if (prevEpisodes.isNotEmpty) {
+                      final lastPrevEpisode = prevEpisodes.last;
+                      if (lastPrevEpisode['completed'] == true) {
+                        lastWatchedEpisode = {
+                          'season': prevSeason['number'],
+                          'number': lastPrevEpisode['number'],
+                          'completed': true,
+                          'last_watched_at': lastPrevEpisode['last_watched_at'],
+                        };
+                        foundNext = true;
+                        break outerLoop;
+                      }
+                    }
+                  }
+                } else if (i > 0) {
+                  // Original logic for non-first episodes
                   final lastWatched = episodes[i - 1];
                   if (lastWatched['completed'] == true) {
                     lastWatchedEpisode = {
@@ -641,7 +615,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       state = state.copyWith(
         items:
             state.items.map((show) {
-              if (_getItemId(show) == _getItemId(showData)) {
+              if (getItemId(show) == getItemId(showData)) {
                 // Find and update the specific episode in the show's seasons
                 final updatedSeasons =
                     (show['seasons'] as List?)?.map((season) {
