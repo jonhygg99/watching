@@ -24,7 +24,7 @@ class WatchlistProcessor {
       final show = item['show'] ?? item;
       final ids = show['ids'] ?? {};
       final traktId = ids['slug']?.toString() ?? ids['trakt']?.toString();
-      
+
       if (traktId == null || traktId.isEmpty) {
         debugPrint('Skipping item with invalid traktId');
         return null;
@@ -37,7 +37,7 @@ class WatchlistProcessor {
 
       // Get the user's country code
       final countryCode = _ref.read(countryCodeProvider);
-      
+
       // Get progress first
       final progress = await _withTimeout(
         () => trakt.getShowWatchedProgress(id: traktId),
@@ -63,7 +63,7 @@ class WatchlistProcessor {
       });
 
       final nextEpisode = results[0] as Map<String, dynamic>?;
-      
+
       // Update progress with next episode if available
       if (nextEpisode != null) {
         progress['next_episode'] = nextEpisode;
@@ -79,22 +79,18 @@ class WatchlistProcessor {
         },
         'progress': progress,
       };
-      
+
       // Ensure title is set at root level for backward compatibility
       updatedItem['title'] = show['title'] ?? 'Unknown Title';
-      
+
       return updatedItem;
     } catch (e) {
       debugPrint('Error processing watchlist item: $e');
       // Return minimal valid item with error state
-      return {
-        ...item,
-        'progress': {},
-        'error': e.toString(),
-      };
+      return {...item, 'progress': {}, 'error': e.toString()};
     }
   }
-  
+
   /// Helper method to add timeout to futures
   Future<T> _withTimeout<T>(
     Future<T> Function() future, {
@@ -111,23 +107,23 @@ class WatchlistProcessor {
 
   /// Process multiple watchlist items with concurrency control
   Future<List<Map<String, dynamic>>> processItems(
-    List<dynamic> items, 
+    List<dynamic> items,
     dynamic trakt, {
     int maxConcurrent = 3,
     Duration timeout = const Duration(seconds: 10),
   }) async {
     final filteredItems = items.whereType<Map<String, dynamic>>().toList();
     final results = <Map<String, dynamic>>[];
-    
+
     // Process items in batches to control concurrency
     for (var i = 0; i < filteredItems.length; i += maxConcurrent) {
       final batch = filteredItems.sublist(
         i,
-        i + maxConcurrent > filteredItems.length 
-            ? filteredItems.length 
+        i + maxConcurrent > filteredItems.length
+            ? filteredItems.length
             : i + maxConcurrent,
       );
-      
+
       final batchResults = await Future.wait(
         batch.map((item) => processItem(item, trakt, timeout: timeout)),
         eagerError: true,
@@ -135,10 +131,10 @@ class WatchlistProcessor {
         debugPrint('Error in batch processing: $e');
         return <Map<String, dynamic>?>[];
       });
-      
+
       results.addAll(batchResults.whereType<Map<String, dynamic>>());
     }
-    
+
     return results;
   }
 
@@ -149,10 +145,13 @@ class WatchlistProcessor {
     Map<String, dynamic> show,
     String countryCode,
   ) async {
-    if (countryCode.isEmpty) return;
-    
+    if (countryCode.isEmpty) {
+      debugPrint('No country code provided for translations');
+      return;
+    }
+
     final cacheKey = '${traktId}_${countryCode.toLowerCase()}';
-    
+
     // Check cache first
     if (_translationCache.containsKey(cacheKey)) {
       _updateShowWithTranslation(show, _translationCache[cacheKey]!);
@@ -160,13 +159,16 @@ class WatchlistProcessor {
     }
 
     try {
+      final languageCode = countryCode.toLowerCase().substring(0, 2);
+
       final translations = await trakt.getShowTranslations(
         id: traktId,
-        language: countryCode.toLowerCase(),
+        language: languageCode,
       );
 
-      if (translations != null) {
+      if (translations != null && translations.isNotEmpty) {
         final translation = _findBestTranslation(translations, countryCode);
+
         if (translation != null) {
           // Update cache
           _translationCache[cacheKey] = translation;
@@ -174,47 +176,58 @@ class WatchlistProcessor {
         }
       }
     } catch (e) {
-      debugPrint('Error applying translations for $traktId: $e');
+      // Only log if it's not a 404 - 404 is expected for some shows
+      if (e.toString().contains('404') == false) {
+        debugPrint('Error applying translations for $traktId: $e');
+      }
     }
   }
-  
+
   /// Find the best matching translation from available translations
   Map<String, dynamic>? _findBestTranslation(
-    dynamic translations, 
-    String countryCode
+    dynamic translations,
+    String countryCode,
   ) {
     try {
-      // Convert to list if it's not already
-      final translationsList = translations is List 
-          ? translations 
-          : [if (translations is Map) translations];
-          
-      if (translationsList.isEmpty) return null;
-      
+      // Convert to list if it's not already and filter out null titles
+      final translationsList =
+          (translations is List
+                  ? translations
+                  : [if (translations is Map) translations])
+              .where(
+                (t) => t['title'] != null,
+              ) // Filter out translations with null titles
+              .toList();
+
+      if (translationsList.isEmpty) {
+        return null;
+      }
+
       final countryPrefix = countryCode.toLowerCase().substring(0, 2);
-      
+
       // Try exact match first
       var translation = translationsList.firstWhereOrNull(
-        (t) => t['language']?.toString().toLowerCase() == countryPrefix
+        (t) => t['language']?.toString().toLowerCase() == countryPrefix,
       );
-      
+
       // Fallback to English
       translation ??= translationsList.firstWhereOrNull(
-        (t) => t['language']?.toString().toLowerCase() == 'en'
+        (t) => t['language']?.toString().toLowerCase() == 'en',
       );
-      
-      // Fallback to first available translation
-      return translation ?? translationsList.first;
+
+      // Fallback to first available translation with a title
+      return translation ??
+          translationsList.firstWhereOrNull((t) => t['title'] != null);
     } catch (e) {
       debugPrint('Error finding best translation: $e');
       return null;
     }
   }
-  
+
   /// Update show data with translation
   void _updateShowWithTranslation(
-    Map<String, dynamic> show, 
-    Map<String, dynamic> translation
+    Map<String, dynamic> show,
+    Map<String, dynamic> translation,
   ) {
     try {
       if (translation['title'] != null) {
