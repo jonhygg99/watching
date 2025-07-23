@@ -8,6 +8,7 @@ import 'package:watching/features/watchlist/providers/watchlist_cache_provider.d
 import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/features/watchlist/services/watchlist_processor.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier/watchlist_state_mixin.dart';
+import 'package:watching/features/watchlist/state/watchlist_notifier/watchlist_cache_handler.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:collection/collection.dart';
 
@@ -23,6 +24,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
   final Ref _ref;
   late final WatchlistEpisodeService _episodeService;
   late final WatchlistProcessor _processor;
+  late final WatchlistCacheHandler _cacheHandler;
   StreamSubscription? _subscription;
   bool _isLoading = false;
 
@@ -30,6 +32,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
     : _episodeService = WatchlistEpisodeService(_ref),
       super(const WatchlistState()) {
     _processor = WatchlistProcessor(_ref);
+    _cacheHandler = WatchlistCacheHandler(_ref);
+    
     // Initial load with cached data first
     _loadCachedData().then((_) {
       // Then load fresh data in background
@@ -70,8 +74,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
   Future<void> _loadCachedData() async {
     try {
       final type = _ref.read(watchlistTypeProvider);
-      final cache = _ref.read(watchlistCacheProvider);
-      final cachedData = cache.getCached(type);
+      final cachedData = await _cacheHandler.loadCachedData(type);
 
       if (cachedData != null) {
         updateStateWithItems(
@@ -80,7 +83,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
         );
       }
     } catch (e) {
-      // Error loading cached data
+      debugPrint('Error loading cached data: $e');
     }
   }
 
@@ -99,10 +102,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
 
       final trakt = _ref.read(traktApiProvider);
       final type = _ref.read(watchlistTypeProvider);
-      final cache = _ref.read(watchlistCacheProvider);
 
       if (forceRefresh) {
-        cache.invalidateCache(type);
+        _cacheHandler.invalidateCache(type);
       }
 
       final typeStr = type == WatchlistType.shows ? 'show' : 'movie';
@@ -143,7 +145,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
 
       // Final update with all items and update cache
       if (allProcessedItems.isNotEmpty) {
-        cache.updateCache(type, allProcessedItems);
+        _cacheHandler.updateCache(type, allProcessedItems);
         updateStateWithItems(allProcessedItems);
       }
     } catch (error) {
@@ -175,27 +177,13 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
       updateLoadingState(true);
 
       final type = _ref.read(watchlistTypeProvider);
-      final cache = _ref.read(watchlistCacheProvider);
 
-      // Get the cached entry
-      final cachedData = cache.getCached(type);
-
-      // If we have cached data, check if it's fresh enough
-      if (cachedData != null) {
-        final cacheEntry = cache.getCacheEntry(type);
-        if (cacheEntry != null) {
-          final (_, timestamp) = cacheEntry;
-          final cacheAge = DateTime.now().difference(timestamp);
-          if (cacheAge.inSeconds < 30) {
-            // If cache is fresh, just update the state with cached data
-            state = state.copyWith(
-              items: cachedData,
-              hasData: true,
-              isLoading: false,
-              error: null,
-            );
-            return;
-          }
+      // If we have fresh cached data, use it
+      if (_cacheHandler.isCacheFresh(type)) {
+        final cachedData = await _cacheHandler.loadCachedData(type);
+        if (cachedData != null) {
+          updateStateWithItems(cachedData);
+          return;
         }
       }
 
@@ -350,8 +338,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
 
             // Update the cache
             final type = _ref.read(watchlistTypeProvider);
-            final cache = _ref.read(watchlistCacheProvider);
-            cache.updateCache(type, updatedItems);
+            _cacheHandler.updateCache(type, updatedItems);
 
             return; // Skip the refresh since we've already updated the state
           } catch (e) {
@@ -661,10 +648,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
     }
 
     try {
-      // First, invalidate the cache to force a fresh fetch
+      // Invalidate the cache to force a fresh fetch
       final type = _ref.read(watchlistTypeProvider);
-      final cache = _ref.read(watchlistCacheProvider);
-      cache.invalidateCache(type);
+      _cacheHandler.invalidateCache(type);
 
       // Fetch fresh data from the API
       final trakt = _ref.read(traktApiProvider);
@@ -707,7 +693,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
 
         try {
           // Update the cache with the fresh data
-          cache.updateCache(type, updatedItems);
+          _cacheHandler.updateCache(type, updatedItems);
 
           // Update the state
           state = state.copyWith(
