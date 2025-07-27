@@ -73,13 +73,13 @@ class WatchlistShowItem extends HookConsumerWidget {
     );
   }
 
-
   // Reusable container decoration for swipe actions
   BoxDecoration _buildSwipeDecoration(Color color, bool isProcessing) {
     return BoxDecoration(
-      color: isProcessing
-          ? Colors.grey[600]?.withOpacity(0.8) ?? Colors.grey[600]!
-          : color.withOpacity(0.8),
+      color:
+          isProcessing
+              ? Colors.grey[600]?.withValues(alpha: 0.8) ?? Colors.grey[600]!
+              : color.withValues(alpha: 0.8),
       borderRadius: BorderRadius.circular(16),
     );
   }
@@ -155,125 +155,122 @@ class WatchlistShowItem extends HookConsumerWidget {
     return AbsorbPointer(
       absorbing: isProcessingNotifier.value,
       child: Dismissible(
-            key: ValueKey('dismissible_$traktId'),
-            direction: DismissDirection.horizontal,
-            confirmDismiss: (direction) async {
-              try {
-                isProcessingNotifier.value = true;
-                
-                // Add a small delay to ensure the UI updates to show the loading state
-                await Future.delayed(const Duration(milliseconds: 50));
-                
-                if (direction == DismissDirection.startToEnd) {
-                  // Swipe right to mark as unwatched
-                  await _toggleWatchedStatus(ref, traktId, false, context);
-                } else if (direction == DismissDirection.endToStart) {
-                  // Swipe left to mark as watched
-                  await _toggleWatchedStatus(ref, traktId, true, context);
-                }
-                return false; // Never dismiss the item
-              } catch (e) {
-                debugPrint('Error in confirmDismiss: $e');
-                return false; // Don't dismiss on error
-              } finally {
-                // Add a small delay before resetting the loading state
-                await Future.delayed(const Duration(milliseconds: 300));
-                isProcessingNotifier.value = false;
-              }
-            },
-            background: Container(
-              margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-              decoration: _buildSwipeDecoration(Colors.red[700]!, isProcessingNotifier.value),
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: isProcessingNotifier.value
+        key: ValueKey('dismissible_$traktId'),
+        direction: DismissDirection.horizontal,
+        confirmDismiss: (direction) async {
+          try {
+            isProcessingNotifier.value = true;
+
+            // Add a small delay to ensure the UI updates to show the loading state
+            await Future.delayed(const Duration(milliseconds: 50));
+
+            if (direction == DismissDirection.startToEnd) {
+              // Swipe right to mark as unwatched
+              await _toggleWatchedStatus(ref, traktId, false, context);
+            } else if (direction == DismissDirection.endToStart) {
+              // Swipe left to mark as watched
+              await _toggleWatchedStatus(ref, traktId, true, context);
+            }
+            return false; // Never dismiss the item
+          } catch (e) {
+            debugPrint('Error in confirmDismiss: $e');
+            return false; // Don't dismiss on error
+          } finally {
+            // Add a small delay before resetting the loading state
+            await Future.delayed(const Duration(milliseconds: 300));
+            isProcessingNotifier.value = false;
+          }
+        },
+        background: Container(
+          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+          decoration: _buildSwipeDecoration(
+            Colors.red[700]!,
+            isProcessingNotifier.value,
+          ),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child:
+              isProcessingNotifier.value
                   ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildLoadingIndicator(),
-                        const SizedBox(width: 16),
-                        const Text(
-                          'Marcando...',
-                          style: _actionTextStyle,
-                        ),
-                      ],
-                    )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildLoadingIndicator(),
+                      const SizedBox(width: 16),
+                      const Text('Marcando...', style: _actionTextStyle),
+                    ],
+                  )
                   : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.undo, color: Colors.white, size: 28),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'No visto',
-                          style: _actionTextStyle,
-                        ),
-                      ],
-                    ),
-            ),
-            secondaryBackground: Container(
-              margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
-              decoration: _buildSwipeDecoration(Colors.green[700]!, isProcessingNotifier.value),
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: isProcessingNotifier.value
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.undo, color: Colors.white, size: 28),
+                      const SizedBox(width: 12),
+                      const Text('No visto', style: _actionTextStyle),
+                    ],
+                  ),
+        ),
+        secondaryBackground: Container(
+          margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+          decoration: _buildSwipeDecoration(
+            Colors.green[700]!,
+            isProcessingNotifier.value,
+          ),
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child:
+              isProcessingNotifier.value
                   ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildLoadingIndicator(),
-                        const SizedBox(width: 16),
-                        const Text(
-                          'Marcando...',
-                          style: _actionTextStyle,
-                        ),
-                      ],
-                    )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildLoadingIndicator(),
+                      const SizedBox(width: 16),
+                      const Text('Marcando...', style: _actionTextStyle),
+                    ],
+                  )
                   : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'Visto',
-                          style: _actionTextStyle,
-                        ),
-                        const SizedBox(width: 12),
-                        const Icon(Icons.check, color: Colors.white, size: 28),
-                      ],
-                    ),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Visto', style: _actionTextStyle),
+                      const SizedBox(width: 12),
+                      const Icon(Icons.check, color: Colors.white, size: 28),
+                    ],
+                  ),
+        ),
+        onDismissed: (direction) {},
+        child: GestureDetector(
+          onTap: () {
+            if (onTap != null) {
+              onTap!(traktId);
+            }
+          },
+          child: AnimatedShowCard(
+            key: ValueKey('watchlist_show_$traktId'),
+            traktId: traktId,
+            posterUrl: posterUrl,
+            watched: watched,
+            total: total,
+            infoWidget: WatchProgressInfo(
+              traktId: traktId,
+              title: title,
+              apiService: ref.read(traktApiProvider),
+              progress: progress,
+              showData: show ?? {},
             ),
-            onDismissed: (direction) {},
-            child: GestureDetector(
-              onTap: () {
-                if (onTap != null) {
-                  onTap!(traktId);
-                }
-              },
-              child: AnimatedShowCard(
-                key: ValueKey('watchlist_show_$traktId'),
-                traktId: traktId,
-                posterUrl: posterUrl,
-                watched: watched,
-                total: total,
-                infoWidget: WatchProgressInfo(
-                  traktId: traktId,
-                  title: title,
-                  apiService: ref.read(traktApiProvider),
-                  progress: progress,
-                  showData: show ?? {},
-                ),
-                builder: (context, child) => ShowCard(
+            builder:
+                (context, child) => ShowCard(
                   traktId: traktId,
                   posterUrl: posterUrl,
                   infoWidget: child,
                   apiService: ref.read(traktApiProvider),
                   parentContext: context,
                 ),
-                onFullyWatched: () => onFullyWatched?.call(traktId),
-              ),
-            ),
+            onFullyWatched: () => onFullyWatched?.call(traktId),
           ),
-        );
+        ),
+      ),
+    );
   }
 }
