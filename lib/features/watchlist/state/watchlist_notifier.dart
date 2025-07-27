@@ -1,17 +1,15 @@
 import 'dart:async';
-import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/enums/watchlist_type.dart';
 import 'package:watching/features/watchlist/models/watchlist_state.dart';
-import 'package:watching/features/watchlist/providers/watchlist_type_provider.dart';
 import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/features/watchlist/services/watchlist_processor.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier/watchlist_state_mixin.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier/watchlist_cache_handler.dart';
 import 'package:watching/features/watchlist/services/watchlist_episode_actions.dart';
 import 'package:watching/providers/app_providers.dart';
-import 'package:collection/collection.dart';
 import 'watchlist_actions.dart';
+import 'watchlist_loader.dart';
 
 // Export types for easy importing
 export 'package:watching/features/watchlist/enums/watchlist_type.dart'
@@ -36,8 +34,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
   late final WatchlistCacheHandler _cacheHandler;
   late final WatchlistEpisodeActions _episodeActions;
   late final WatchlistActions _watchlistActions;
+  late final WatchlistLoader _watchlistLoader;
   StreamSubscription? _subscription;
-  bool _isLoading = false;
 
   WatchlistNotifier(this._ref)
     : _episodeService = WatchlistEpisodeService(_ref),
@@ -60,21 +58,30 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
       getTypeString: (type) => type == WatchlistType.shows ? 'show' : 'movie',
     );
 
+    _watchlistLoader = WatchlistLoader(
+      ref: _ref,
+      cacheHandler: _cacheHandler,
+      processItem: _processItem,
+      mergeItems: mergeItems,
+      updateStateWithItems: updateStateWithItems,
+      updateLoadingState: (isLoading, {error}) => updateLoadingState(isLoading, error: error),
+    );
+
     _watchlistActions = WatchlistActions(
       ref: _ref,
       cacheHandler: _cacheHandler,
       episodeService: _episodeService,
       updateLoadingState: (isLoading, {error}) => updateLoadingState(isLoading, error: error),
       updateStateWithItems: updateStateWithItems,
-      loadWatchlist: _loadWatchlist,
+      loadWatchlist: _watchlistLoader.loadWatchlist,
       getCurrentState: () => state,
       updateState: (newState) => state = newState,
     );
 
     // Initial load with cached data first
-    _loadCachedData().then((_) {
+    _watchlistLoader.loadCachedData().then((_) {
       // Then load fresh data in background
-      _loadWatchlist();
+      _watchlistLoader.loadWatchlist();
     });
   }
 
@@ -95,90 +102,13 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
     watched: watched,
   );
 
-  /// Load cached data immediately
-  Future<void> _loadCachedData() async {
-    try {
-      final type = _ref.read(watchlistTypeProvider);
-      final cachedData = await _cacheHandler.loadCachedData(type);
 
-      if (cachedData != null) {
-        updateStateWithItems(
-          cachedData,
-          isLoading: true, // Still loading fresh data in background
-        );
-      }
-    } catch (e) {
-      debugPrint('Error loading cached data: $e');
-    }
-  }
 
   @override
   void dispose() {
     _subscription?.cancel();
     super.dispose();
   }
-
-  /// Load watchlist data with progressive loading
-  Future<void> _loadWatchlist({bool forceRefresh = false}) async {
-    try {
-      if (_isLoading) return;
-      _isLoading = true;
-      updateLoadingState(true);
-
-      final trakt = _ref.read(traktApiProvider);
-      final type = _ref.read(watchlistTypeProvider);
-
-      if (forceRefresh) {
-        _cacheHandler.invalidateCache(type);
-      }
-
-      final typeStr = type == WatchlistType.shows ? 'show' : 'movie';
-
-      // Start with loading state if we don't have cached data or forcing refresh
-      if (state.items.isEmpty || forceRefresh) {
-        updateLoadingState(true);
-      }
-
-      // Fetch watchlist items from the API
-      final items = await trakt.getWatched(type: typeStr);
-
-      // Process items in chunks for progressive loading
-      final chunkSize = 5; // Process 5 items at a time
-      final chunks = items.slices(chunkSize);
-
-      List<Map<String, dynamic>> allProcessedItems = [];
-
-      for (final chunk in chunks) {
-        // Process chunk in parallel
-        final processedChunk = await Future.wait(
-          chunk.map((item) => _processItem(item, trakt, ref: _ref)),
-          eagerError: true,
-        );
-
-        final validItems =
-            processedChunk.whereType<Map<String, dynamic>>().toList();
-        allProcessedItems.addAll(validItems);
-
-        // Update state with new items as they become available
-        if (validItems.isNotEmpty) {
-          final currentItems = state.items.toList();
-          final newItems = mergeItems(currentItems, validItems);
-
-          updateStateWithItems(newItems);
-        }
-      }
-
-      // Final update with all items and update cache
-      if (allProcessedItems.isNotEmpty) {
-        _cacheHandler.updateCache(type, allProcessedItems);
-        updateStateWithItems(allProcessedItems);
-      }
-    } catch (error) {
-      updateLoadingState(false, error: error);
-    }
-  }
-
-  // Moved to WatchlistStateMixin
 
   /// Process a single watchlist item
   Future<Map<String, dynamic>?> _processItem(
