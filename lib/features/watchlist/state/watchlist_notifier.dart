@@ -41,34 +41,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
     });
   }
 
-  /// Find the next episode to watch based on progress data
-  Map<String, dynamic>? _findNextEpisode(Map<String, dynamic> progress) {
-    try {
-      final seasons = (progress['seasons'] as List?) ?? [];
-
-      // Find the first unwatched episode
-      for (final season in seasons.cast<Map<String, dynamic>>()) {
-        final episodes = (season['episodes'] as List?) ?? [];
-        for (final ep in episodes.cast<Map<String, dynamic>>()) {
-          if (ep['completed'] != true) {
-            return {
-              'show': {
-                'ids': {'trakt': progress['ids']?['trakt']},
-              },
-              'episode': {
-                'season': season['number'],
-                'number': ep['number'],
-                'title': ep['title'],
-              },
-            };
-          }
-        }
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
+  // Moved to WatchlistEpisodeService
 
   /// Load cached data immediately
   Future<void> _loadCachedData() async {
@@ -216,7 +189,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
       // Get current progress with error handling
       Map<String, dynamic> progress;
       try {
-        progress = await trakt.getShowWatchedProgress(id: showIdToUse);
+        progress = await _episodeService.updateShowProgress(trakt, showIdToUse);
       } catch (e) {
         rethrow;
       }
@@ -229,9 +202,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
           showIdToUse,
           progress,
         );
-        nextEpisode ??= _findNextEpisode(progress);
+        nextEpisode ??= _episodeService.findNextEpisode(progress);
       } catch (e) {
-        nextEpisode = _findNextEpisode(progress);
+        nextEpisode = _episodeService.findNextEpisode(progress);
       }
 
       if (nextEpisode == null) {
@@ -292,29 +265,21 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
           ],
         };
 
-        // Add to watch history
-        await trakt.addToWatchHistory(
-          shows: [
-            {
-              ...showData,
-              'seasons': [
-                {
-                  'number': seasonNumber,
-                  'episodes': [
-                    {'number': episodeNumber},
-                  ],
-                },
-              ],
-            },
-          ],
+        // Mark the episode as watched using the service
+        await _episodeService.markEpisodeAsWatched(
+          trakt: trakt,
+          traktId: showIdToUse,
+          seasonNumber: seasonNumber,
+          episodeNumber: episodeNumber,
         );
 
         // Add a small delay to ensure the server has processed the update
         await Future.delayed(const Duration(seconds: 1));
 
         // Update the progress
-        final updatedProgress = await trakt.getShowWatchedProgress(
-          id: showIdToUse,
+        final updatedProgress = await _episodeService.updateShowProgress(
+          trakt,
+          showIdToUse,
         );
         final isCompleted = isShowCompleted(updatedProgress);
 
@@ -497,21 +462,12 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
               };
 
       try {
-        // Remove the episode from watched history
-        await trakt.removeFromHistory(
-          shows: [
-            {
-              ...showDataMap,
-              'seasons': [
-                {
-                  'number': seasonNumber,
-                  'episodes': [
-                    {'number': episodeNumber},
-                  ],
-                },
-              ],
-            },
-          ],
+        // Mark the episode as unwatched using the service
+        await _episodeService.markEpisodeAsUnwatched(
+          trakt: trakt,
+          traktId: traktId,
+          seasonNumber: seasonNumber,
+          episodeNumber: episodeNumber,
         );
 
         // Add a small delay to ensure the server has processed the update
