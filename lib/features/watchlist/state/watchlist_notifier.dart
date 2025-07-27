@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/enums/watchlist_type.dart';
 import 'package:watching/features/watchlist/models/watchlist_state.dart';
 import 'package:watching/features/watchlist/providers/watchlist_type_provider.dart';
-import 'package:watching/features/watchlist/providers/watchlist_cache_provider.dart';
 import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/features/watchlist/services/watchlist_processor.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier/watchlist_state_mixin.dart';
@@ -33,7 +32,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
       super(const WatchlistState()) {
     _processor = WatchlistProcessor(_ref);
     _cacheHandler = WatchlistCacheHandler(_ref);
-    
+
     // Initial load with cached data first
     _loadCachedData().then((_) {
       // Then load fresh data in background
@@ -181,15 +180,10 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
 
     try {
       final trakt = _ref.read(traktApiProvider);
-
-      // Handle both numeric IDs and slugs
-      final bool isNumericId = int.tryParse(traktId) != null;
-      final String showIdToUse = traktId;
-
       // Get current progress with error handling
       Map<String, dynamic> progress;
       try {
-        progress = await _episodeService.updateShowProgress(trakt, showIdToUse);
+        progress = await _episodeService.updateShowProgress(trakt, traktId);
       } catch (e) {
         rethrow;
       }
@@ -199,7 +193,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
       try {
         nextEpisode = await _episodeService.getNextEpisode(
           trakt,
-          showIdToUse,
+          traktId,
           progress,
         );
         nextEpisode ??= _episodeService.findNextEpisode(progress);
@@ -243,32 +237,10 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
       }
 
       try {
-        // Prepare the show data with the correct ID format
-        final Map<String, dynamic> showData = {
-          'ids':
-              isNumericId ? {'trakt': int.parse(traktId)} : {'slug': traktId},
-        };
-
-        final watchData = {
-          'shows': [
-            {
-              ...showData,
-              'seasons': [
-                {
-                  'number': seasonNumber,
-                  'episodes': [
-                    {'number': episodeNumber},
-                  ],
-                },
-              ],
-            },
-          ],
-        };
-
         // Mark the episode as watched using the service
         await _episodeService.markEpisodeAsWatched(
           trakt: trakt,
-          traktId: showIdToUse,
+          traktId: traktId,
           seasonNumber: seasonNumber,
           episodeNumber: episodeNumber,
         );
@@ -279,12 +251,12 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
         // Update the progress
         final updatedProgress = await _episodeService.updateShowProgress(
           trakt,
-          showIdToUse,
+          traktId,
         );
         final isCompleted = isShowCompleted(updatedProgress);
 
         // Update the progress in the state
-        await updateShowProgress(showIdToUse);
+        await updateShowProgress(traktId);
 
         // If show is now completed, remove it from the local watchlist state
         if (isCompleted) {
