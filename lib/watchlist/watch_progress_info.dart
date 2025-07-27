@@ -28,7 +28,9 @@ class WatchProgressInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
+    final titleStyle = Theme.of(
+      context,
+    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
     final episodeStyle = Theme.of(context).textTheme.bodyMedium;
 
     // Defensive: If no traktId, show only the title.
@@ -64,7 +66,6 @@ class WatchProgressInfo extends StatelessWidget {
   }
 }
 
-
 /// Internal widget to render progress details, next episode, and progress bar.
 class _ProgressDetails extends StatelessWidget {
   final String title;
@@ -90,16 +91,23 @@ class _ProgressDetails extends StatelessWidget {
     final episodesWatched = progress['completed'] ?? 0;
     final totalEpisodes = progress['aired'] ?? 1;
     final nextEpisode = progress['next_episode'];
-    final percent = totalEpisodes > 0 ? (episodesWatched / totalEpisodes).clamp(0.0, 1.0) : 0.0;
-    
-    final effectiveTitleStyle = titleStyle ?? 
-        Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
-    final effectiveEpisodeStyle = episodeStyle ?? 
-        Theme.of(context).textTheme.bodyMedium;
+    final percent =
+        totalEpisodes > 0
+            ? (episodesWatched / totalEpisodes).clamp(0.0, 1.0)
+            : 0.0;
+
+    final effectiveTitleStyle =
+        titleStyle ??
+        Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
+    final effectiveEpisodeStyle =
+        episodeStyle ?? Theme.of(context).textTheme.bodyMedium;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (effectiveTitleStyle != null) Text(title, style: effectiveTitleStyle),
+        if (effectiveTitleStyle != null)
+          Text(title, style: effectiveTitleStyle),
         if (nextEpisode != null) ...[
           const SizedBox(height: 6),
           Text(

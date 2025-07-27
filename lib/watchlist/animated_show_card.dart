@@ -106,18 +106,7 @@ class _AnimatedShowCardState extends State<AnimatedShowCard>
             offset: Offset(0, _slideAnim.value),
             child: widget.builder(
               context,
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  widget.infoWidget,
-                  const SizedBox(height: 8),
-                  ProgressBar(
-                    percent: _progressAnim.value,
-                    watched: widget.total,
-                    total: widget.total,
-                  ),
-                ],
-              ),
+              widget.infoWidget,
             ),
           ),
         );
