@@ -18,6 +18,14 @@ export 'package:watching/features/watchlist/enums/watchlist_type.dart'
 export 'package:watching/features/watchlist/models/watchlist_state.dart'
     show WatchlistState;
 
+// Export providers from the watchlist_provider.dart file
+export 'watchlist_provider.dart' show 
+  watchlistProvider,
+  watchlistItemsProvider,
+  watchlistLoadingProvider,
+  watchlistErrorProvider,
+  watchlistHasDataProvider;
+
 /// Notifier for watchlist state management
 class WatchlistNotifier extends StateNotifier<WatchlistState>
     with WatchlistStateMixin {
@@ -285,28 +293,4 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
   }
 }
 
-/// Provider for watchlist state
-final watchlistProvider =
-    StateNotifierProvider<WatchlistNotifier, WatchlistState>((ref) {
-      final notifier = WatchlistNotifier(ref);
-      // Initial load
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifier.refresh();
-      });
-      return notifier;
-    });
 
-/// Provider for watchlist items
-final watchlistItemsProvider = Provider<List<Map<String, dynamic>>>((ref) {
-  return ref.watch(watchlistProvider.select((state) => state.items));
-});
-
-/// Provider for watchlist loading state
-final watchlistLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(watchlistProvider.select((state) => state.isLoading));
-});
-
-/// Provider for watchlist error state
-final watchlistErrorProvider = Provider<Object?>((ref) {
-  return ref.watch(watchlistProvider.select((state) => state.error));
-});

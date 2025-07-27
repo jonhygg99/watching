@@ -164,6 +164,8 @@ class WatchlistShowItem extends HookConsumerWidget {
             // Add a small delay to ensure the UI updates to show the loading state
             await Future.delayed(const Duration(milliseconds: 50));
 
+            if (!context.mounted) return false;
+            
             if (direction == DismissDirection.startToEnd) {
               // Swipe right to mark as unwatched
               await _toggleWatchedStatus(ref, traktId, false, context);
