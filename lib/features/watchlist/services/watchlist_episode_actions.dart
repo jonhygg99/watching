@@ -4,9 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/enums/watchlist_type.dart';
 import 'package:watching/features/watchlist/models/watchlist_state.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier/watchlist_cache_handler.dart';
-import 'package:watching/features/watchlist/providers/watchlist_providers.dart';
-import 'package:watching/providers/app_providers.dart';
 import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
+import 'package:watching/providers/app_providers.dart';
 
 /// Handles all episode-related actions for the watchlist
 class WatchlistEpisodeActions {
@@ -40,6 +39,9 @@ class WatchlistEpisodeActions {
 
   /// Mark the next episode as watched
   Future<void> markEpisodeAsWatched(String traktId) async {
+    if (_isProcessing) return;
+    _isProcessing = true;
+
     try {
       updateLoadingState(true);
       final trakt = ref.read(traktApiProvider);
@@ -47,130 +49,86 @@ class WatchlistEpisodeActions {
       // Get the current progress to find the next episode
       final progress = await trakt.getShowWatchedProgress(id: traktId);
 
-      // Find the next episode to mark as watched
+      if (progress.isEmpty) {
+        return;
+      }
+
       final nextEpisode = await episodeService.findNextEpisode(progress);
 
-      if (nextEpisode == null) {
-        throw Exception(
-          'No next episode found to mark as watched for show: $traktId',
-        );
-      }
+      if (nextEpisode != null) {
+        final episodeData =
+            nextEpisode['episode'] ?? nextEpisode['Episode'] ?? nextEpisode;
+        final seasonNumber = (episodeData['season'] as num?)?.toInt();
+        final episodeNumber = (episodeData['number'] as num?)?.toInt();
 
-      // Handle different possible response formats
-      final episodeData =
-          nextEpisode['episode'] ?? nextEpisode['Episode'] ?? nextEpisode;
+        if (seasonNumber != null && episodeNumber != null) {
+          // Handle both numeric IDs and slugs
+          final payload = {
+            'ids':
+                int.tryParse(traktId) != null
+                    ? {'trakt': int.parse(traktId)}
+                    : {'slug': traktId},
+            'seasons': [
+              {
+                'number': seasonNumber,
+                'episodes': [
+                  {'number': episodeNumber},
+                ],
+              },
+            ],
+          };
 
-      // If we don't have episode data, we can't proceed
-      if (episodeData == null) {
-        throw Exception('Could not find episode information in: $nextEpisode');
-      }
+          try {
+            // Mark the episode as watched
+            await trakt.addToWatchHistory(shows: [payload]);
 
-      // Safely extract episode information
-      final Map<String, dynamic> episodeMap = Map<String, dynamic>.from(
-        episodeData,
-      );
+            // Add a small delay to ensure the server has processed the update
+            await Future.delayed(const Duration(seconds: 1));
 
-      final seasonNumber =
-          episodeMap['season'] is num
-              ? (episodeMap['season'] as num).toInt()
-              : null;
-      final episodeNumber =
-          episodeMap['number'] is num
-              ? (episodeMap['number'] as num).toInt()
-              : null;
+            // Update the show's progress
+            await updateShowProgress(traktId);
 
-      if (seasonNumber == null || episodeNumber == null) {
-        throw Exception(
-          'Missing required episode data (season: $seasonNumber, episode: $episodeNumber)',
-        );
-      }
-
-      // Mark the episode as watched using the service
-      await episodeService.markEpisodeAsWatched(
-        trakt: trakt,
-        traktId: traktId,
-        seasonNumber: seasonNumber,
-        episodeNumber: episodeNumber,
-      );
-
-      // Add a small delay to ensure the server has processed the update
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Update the progress
-      final updatedProgress = await episodeService.updateShowProgress(
-        trakt,
-        traktId,
-      );
-      final completed = isShowCompleted(updatedProgress);
-
-      // If show is now completed, remove it from the local watchlist state
-      if (completed) {
-        try {
-          // Get the current state
-          final currentState = ref.read(watchlistProvider);
-          final updatedItems = List<Map<String, dynamic>>.from(
-            currentState.items,
-          );
-
-          // Remove the show from the local state
-          updatedItems.removeWhere((item) {
-            final showData = item['show'] ?? item;
-            final ids = showData['ids'] as Map<String, dynamic>? ?? {};
-            return (ids['trakt']?.toString() == traktId ||
-                ids['slug'] == traktId);
-          });
-
-          updateStateWithItems(updatedItems, isLoading: false);
-          updateState(
-            WatchlistState(
-              items: updatedItems,
-              hasData: updatedItems.isNotEmpty,
-              isLoading: false,
-            ),
-          );
-
-          // Update the cache
-          final type = ref.read(watchlistTypeProvider);
-          cacheHandler.updateCache(type, updatedItems);
-          return; // Skip the refresh since we've already updated the state
-        } catch (e) {
-          debugPrint('Failed to update local watchlist state: $e');
-          // Continue with refresh as fallback
+            // Refresh the watchlist to ensure consistency
+            await refresh();
+          } catch (e) {
+            debugPrint('markEpisodeAsWatched: Error marking as watched: $e');
+            rethrow;
+          }
+        } else {
+          debugPrint('markEpisodeAsWatched: Invalid season or episode number');
         }
       }
-
-      // If we get here, either the show isn't completed or we couldn't remove it
-      // Force a full refresh to ensure UI is in sync
-      await refresh();
     } catch (e) {
-      // Update state to reflect the error
-      updateState(
-        WatchlistState(
-          error: 'Failed to mark episode as watched: ${e.toString()}',
-          isLoading: false,
-        ),
-      );
+      debugPrint('Error marking episode as watched: $e');
       rethrow;
     } finally {
+      _isProcessing = false;
       updateLoadingState(false);
     }
   }
 
   /// Mark the last watched episode as unwatched
   Future<void> markEpisodeAsUnwatched(String traktId) async {
+    if (_isProcessing) return;
+    _isProcessing = true;
+
     try {
       updateLoadingState(true);
       final trakt = ref.read(traktApiProvider);
 
-      // Get the current progress
+      // Get the current progress to find the last watched episode
       final progress = await trakt.getShowWatchedProgress(id: traktId);
+
+      if (progress.isEmpty) {
+        return;
+      }
+
+      final seasons = (progress['seasons'] as List<dynamic>?) ?? [];
 
       // Find the last watched episode
       Map<String, dynamic>? lastWatchedEpisode;
-      final seasons = progress['seasons'] as List<dynamic>? ?? [];
-
       for (var season in seasons) {
-        final episodes = season['episodes'] as List<dynamic>? ?? [];
+        final episodes = (season['episodes'] as List<dynamic>?) ?? [];
         for (var episode in episodes) {
           if (episode['completed'] == true || episode['watched'] == true) {
             lastWatchedEpisode = {
@@ -181,72 +139,76 @@ class WatchlistEpisodeActions {
         }
       }
 
-      if (lastWatchedEpisode == null) {
-        throw Exception(
-          'No watched episodes found to unwatch for show: $traktId',
-        );
+      if (lastWatchedEpisode != null) {
+        final seasonNumber = lastWatchedEpisode['season'] as int;
+        final episodeNumber = lastWatchedEpisode['number'] as int;
+        // Handle both numeric IDs and slugs
+        final payload = {
+          'ids':
+              int.tryParse(traktId) != null
+                  ? {'trakt': int.parse(traktId)}
+                  : {'slug': traktId},
+          'seasons': [
+            {
+              'number': seasonNumber,
+              'episodes': [
+                {'number': episodeNumber},
+              ],
+            },
+          ],
+        };
+
+        try {
+          // Remove the episode from watch history
+          await trakt.removeFromHistory(shows: [payload]);
+
+          // Add a small delay to ensure the server has processed the update
+          await Future.delayed(const Duration(seconds: 1));
+
+          // Update the show's progress
+          await updateShowProgress(traktId);
+
+          // Refresh the watchlist to ensure consistency
+          await refresh();
+        } catch (e) {
+          debugPrint('markEpisodeAsUnwatched: Error marking as unwatched: $e');
+          rethrow;
+        }
+      } else {
+        debugPrint('markEpisodeAsUnwatched: No watched episodes found');
       }
-
-      final seasonNumber = lastWatchedEpisode['season'] as int;
-      final episodeNumber = lastWatchedEpisode['number'] as int;
-
-      // Mark the episode as unwatched using the service
-      await episodeService.markEpisodeAsUnwatched(
-        trakt: trakt,
-        traktId: traktId,
-        seasonNumber: seasonNumber,
-        episodeNumber: episodeNumber,
-      );
-
-      // Add a small delay to ensure the server has processed the update
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Refresh the progress
-      await updateShowProgress(traktId);
-
-      // Force a refresh of the watchlist
-      await refresh();
     } catch (e) {
-      // Update state to reflect the error
-      updateState(
-        WatchlistState(
-          error: 'Failed to mark episode as unwatched: ${e.toString()}',
-          isLoading: false,
-        ),
-      );
+      debugPrint('Error marking episode as unwatched: $e');
       rethrow;
     } finally {
+      _isProcessing = false;
       updateLoadingState(false);
     }
   }
 
-  /// Toggle watched status for a specific episode
+  /// Toggle watched status for an episode
   Future<void> toggleEpisodeWatchedStatus({
     required String showTraktId,
     required int seasonNumber,
     required int episodeNumber,
     required bool watched,
   }) async {
+    if (_isProcessing) return;
+    _isProcessing = true;
+
     try {
       updateLoadingState(true);
       final trakt = ref.read(traktApiProvider);
-      final showIdToUse = showTraktId;
-      final isNumericId = int.tryParse(showIdToUse) != null;
-
-      // Prepare the show data with the correct ID format
-      final Map<String, dynamic> showData = {
-        'ids':
-            isNumericId
-                ? {'trakt': int.parse(showIdToUse)}
-                : {'slug': showIdToUse},
-      };
 
       if (watched) {
-        // Mark as watched
+        // Mark episode as watched
         await trakt.addToWatchHistory(
           shows: [
             {
-              ...showData,
+              'ids':
+                  int.tryParse(showTraktId) != null
+                      ? {'trakt': int.parse(showTraktId)}
+                      : {'slug': showTraktId},
               'seasons': [
                 {
                   'number': seasonNumber,
@@ -259,11 +221,11 @@ class WatchlistEpisodeActions {
           ],
         );
       } else {
-        // Mark as unwatched by removing from history
+        // Mark episode as unwatched by removing from history
         await trakt.removeFromHistory(
           shows: [
             {
-              ...showData,
+              'ids': {'trakt': int.tryParse(showTraktId) ?? 0},
               'seasons': [
                 {
                   'number': seasonNumber,
@@ -277,54 +239,20 @@ class WatchlistEpisodeActions {
         );
       }
 
-      // Add a small delay to ensure the server has processed the update
-      await Future.delayed(const Duration(seconds: 1));
-
       // Update the show's progress
       await updateShowProgress(showTraktId);
 
-      // Force a refresh of the watchlist
+      // Refresh the watchlist to ensure consistency
       await refresh();
     } catch (e) {
-      // Update state to reflect the error
-      updateState(
-        WatchlistState(
-          error: 'Failed to toggle episode watched status: ${e.toString()}',
-          isLoading: false,
-        ),
-      );
+      debugPrint('Error toggling episode watched status: $e');
       rethrow;
     } finally {
+      _isProcessing = false;
       updateLoadingState(false);
     }
   }
 }
 
-/// Extension to easily access WatchlistEpisodeActions from a Ref
-extension WatchlistEpisodeActionsRef on Ref {
-  /// Get the WatchlistEpisodeActions instance with all dependencies
-  WatchlistEpisodeActions get watchlistEpisodeActions {
-    final notifier = read(watchlistProvider.notifier) as dynamic; // Cast to access notifier methods
-    final currentState = read(watchlistProvider);
-
-    return WatchlistEpisodeActions(
-      ref: this,
-      episodeService: WatchlistEpisodeService(this),
-      updateState: (newState) => notifier.state = newState,
-      updateLoadingState: (isLoading) {
-        notifier.state = currentState.copyWith(isLoading: isLoading);
-      },
-      updateStateWithItems: (items, {isLoading = false}) {
-        notifier.updateStateWithItems(items, isLoading: isLoading);
-      },
-      mergeItems: (existingItems, newItems) {
-        return notifier.mergeItems(existingItems, newItems);
-      },
-      updateShowProgress: (traktId) => notifier.updateShowProgress(traktId),
-      refresh: () => notifier.refresh(),
-      isShowCompleted: (progress) => notifier.isShowCompleted(progress),
-      cacheHandler: WatchlistCacheHandler(this),
-      getTypeString: (type) => type == WatchlistType.shows ? 'show' : 'movie',
-    );
-  }
-}
+// Flag to prevent multiple simultaneous operations
+bool _isProcessing = false;

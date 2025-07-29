@@ -17,6 +17,7 @@ class WatchlistActions {
   final Future<void> Function({bool forceRefresh}) loadWatchlist;
   final Function() getCurrentState;
   final Function(WatchlistState) updateState;
+  bool _isUpdatingProgress = false;
 
   WatchlistActions({
     required Ref ref,
@@ -32,13 +33,9 @@ class WatchlistActions {
        _episodeService = episodeService;
 
   /// Refresh the watchlist data
-  ///
-  /// This will first check if we have fresh cached data (less than 30 seconds old).
-  /// If not, it will perform a full refresh from the API.
   Future<void> refreshWatchlist() async {
     try {
       updateLoadingState(true);
-
       final type = _ref.read(watchlistTypeProvider);
 
       // If we have fresh cached data, use it
@@ -50,24 +47,24 @@ class WatchlistActions {
         }
       }
 
-      // Otherwise, do a full refresh
+      // Otherwise, perform a full refresh
       await loadWatchlist(forceRefresh: true);
     } catch (e) {
-      final error =
-          e is Exception ? e : Exception('Failed to refresh watchlist: $e');
-      debugPrint('Error in refresh: $error');
-      updateLoadingState(false, error: error.toString());
+      debugPrint('Failed to refresh watchlist: $e');
       rethrow;
+    } finally {
+      updateLoadingState(false);
     }
   }
 
-  /// Update a single show's progress in the watchlist
+  /// Update a show's progress in the watchlist
   Future<void> updateShowProgress(String traktId) async {
-    if (traktId.isEmpty) {
-      return;
-    }
-
+    if (_isUpdatingProgress || traktId.isEmpty) return;
+    _isUpdatingProgress = true;
+    
     try {
+      updateLoadingState(true);
+
       // Invalidate the cache to force a fresh fetch
       final type = _ref.read(watchlistTypeProvider);
       _cacheHandler.invalidateCache(type);
@@ -79,10 +76,9 @@ class WatchlistActions {
       final progress = await trakt.getShowWatchedProgress(id: traktId);
 
       // Get the next episode if progress data is available
-      final nextEpisode =
-          progress.isNotEmpty
-              ? await _episodeService.getNextEpisode(trakt, traktId, progress)
-              : null;
+      final nextEpisode = progress.isNotEmpty
+          ? await _episodeService.getNextEpisode(trakt, traktId, progress)
+          : null;
 
       if (nextEpisode != null) {
         progress['next_episode'] = nextEpisode;
@@ -94,58 +90,51 @@ class WatchlistActions {
       final index = updatedItems.indexWhere((item) {
         final showData = item['show'] ?? item;
         final ids = showData['ids'] ?? {};
-        final matches =
-            (ids['trakt']?.toString() == traktId || ids['slug'] == traktId);
-        return matches;
+        return (ids['trakt']?.toString() == traktId || ids['slug'] == traktId);
       });
 
       if (index != -1) {
         final item = updatedItems[index];
         final show = item['show'] ?? item;
-
-        // Create updated item with new progress
-        final updatedItem = {
+        
+        // Update the show with new progress data
+        updatedItems[index] = {
           ...item,
           'progress': progress,
-          'show': {...show, 'progress': progress, 'ids': show['ids'] ?? {}},
+          'show': {
+            ...show,
+            'progress': progress,
+            'ids': show['ids'] ?? {},
+          },
         };
 
-        updatedItems[index] = updatedItem;
+        // Update the state with the modified items
+        updateState(currentState.copyWith(
+          items: updatedItems,
+          hasData: true,
+          isLoading: false,
+        ));
 
-        try {
-          // Update the cache with the fresh data
-          _cacheHandler.updateCache(type, updatedItems);
-
-          // Update the state
-          updateState(
-            currentState.copyWith(
-              items: updatedItems,
-              hasData: true,
-              isLoading: false,
-            ),
-          );
-        } catch (cacheError) {
-          // Try a full refresh if cache update fails
-          await refreshWatchlist();
-        }
+        // Update the cache with the fresh data
+        _cacheHandler.updateCache(type, updatedItems);
       } else {
         // If show not found in current state, do a full refresh
         await refreshWatchlist();
       }
     } catch (e) {
-      // Fall back to a full refresh if anything goes wrong
-      try {
-        await refreshWatchlist();
-      } catch (refreshError) {
-        // Update state to reflect the error
-        final currentState = getCurrentState();
-        updateState(
-          currentState.copyWith(
-            error: 'Failed to update show progress: ${e.toString()}',
-            isLoading: false,
-          ),
-        );
-      }
+      debugPrint('Failed to update show progress: $e');
+      // Update state to reflect the error
+      final currentState = getCurrentState();
+      updateState(
+        currentState.copyWith(
+          error: 'Failed to update show progress: ${e.toString()}',
+          isLoading: false,
+        ),
+      );
+      rethrow;
+    } finally {
+      _isUpdatingProgress = false;
+      updateLoadingState(false);
     }
   }
 }

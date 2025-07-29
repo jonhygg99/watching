@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/enums/watchlist_type.dart';
 import 'package:watching/features/watchlist/providers/watchlist_providers.dart';
@@ -8,20 +7,30 @@ import 'package:watching/watchlist/loading_skeleton.dart';
 import 'package:watching/watchlist/watchlist_show_item.dart';
 
 /// Main Watchlist Page - Riverpod + Hooks
-class WatchlistPage extends HookConsumerWidget {
+class WatchlistPage extends ConsumerStatefulWidget {
   const WatchlistPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WatchlistPage> createState() => _WatchlistPageState();
+}
+
+class _WatchlistPageState extends ConsumerState<WatchlistPage> {
+  final ValueNotifier<Set<String>> animatingOut = ValueNotifier<Set<String>>({});
+  final ValueNotifier<int> stateUpdater = ValueNotifier<int>(0);
+  
+  @override
+  void dispose() {
+    animatingOut.dispose();
+    stateUpdater.dispose();
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
     // Watch the watchlist state
     final watchlistState = ref.watch(watchlistProvider);
     final watchlistItems = ref.watch(watchlistItemsProvider);
     final isLoading = ref.watch(watchlistLoadingProvider);
     final error = ref.watch(watchlistErrorProvider);
-
-    // Animation state for items being removed
-    final animatingOut = useState<Set<String>>({});
-    final stateUpdater = useState(0); // For forcing rebuilds
 
     // Refresh the watchlist data
     Future<void> refreshWatchlist() async {
@@ -135,21 +144,35 @@ class WatchlistPage extends HookConsumerWidget {
 
                     if (traktId == null) return const SizedBox.shrink();
 
+                    // Skip if this item is already being animated out
+                    if (animatingOut.value.contains(traktId)) {
+                      return const SizedBox.shrink();
+                    }
+                    
                     return WatchlistShowItem(
                       key: ValueKey(traktId),
                       item: item,
                       animatingOut: animatingOut.value,
-                      onFullyWatched: (traktId) {
-                        // Update UI optimistically
-                        animatingOut.value = {...animatingOut.value, traktId};
-                        stateUpdater.value++;
-
-                        // Remove from list after animation and refresh show progress
-                        Future.delayed(const Duration(milliseconds: 300), () async {
-                          await ref.read(watchlistProvider.notifier).updateShowProgress(traktId);
-                          animatingOut.value = {};
-                          stateUpdater.value++;
+                      onFullyWatched: (traktId) async {
+                        if (!mounted) return;
+                        
+                        // Immediately update the animatingOut set to remove the show
+                        setState(() {
+                          animatingOut.value = {...animatingOut.value, traktId};
                         });
+                        
+                        try {
+                          // Update the show progress in the background
+                          await ref.read(watchlistProvider.notifier).updateShowProgress(traktId);
+                        } catch (e) {
+                          debugPrint('Error updating show progress: $e');
+                          // If there's an error, remove the show from animatingOut so it can be retried
+                          if (mounted) {
+                            setState(() {
+                              animatingOut.value = {...animatingOut.value}..remove(traktId);
+                            });
+                          }
+                        }
                       },
                     );
                   },

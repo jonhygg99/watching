@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
-import 'package:watching/watchlist/animated_show_card.dart';
+
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/watchlist/show_card.dart';
 import 'package:watching/watchlist/watch_progress_info.dart';
@@ -37,15 +37,35 @@ class WatchlistShowItem extends HookConsumerWidget {
     bool markAsWatched,
     BuildContext context,
   ) async {
+    if (!context.mounted) return;
+    
     try {
       final notifier = ref.read(watchlistProvider.notifier);
+      
       if (markAsWatched) {
+        // First, check if this will make the show fully watched
+        final progress = item['progress'] as Map<String, dynamic>? ?? {};
+        final watched = progress['completed'] as int? ?? 0;
+        final total = progress['aired'] as int? ?? 1;
+        final willBeFullyWatched = (watched + 1) >= total && total > 0;
+        
+        // Mark the episode as watched
         await notifier.markEpisodeAsWatched(traktId);
+        
+        if (willBeFullyWatched && onFullyWatched != null) {
+          // Notify parent to remove the show immediately
+          onFullyWatched!(traktId);
+          // Don't update progress here to prevent flickering
+          return;
+        }
       } else {
         await notifier.markEpisodeAsUnwatched(traktId);
       }
-      // Force a refresh of the watchlist
-      await notifier.updateShowProgress(traktId);
+      
+      // Only update progress if not fully watched
+      if (onFullyWatched == null || !markAsWatched) {
+        await notifier.updateShowProgress(traktId);
+      }
     } catch (e) {
       debugPrint('Error toggling watched status: $e');
       // Show error to user
@@ -125,32 +145,20 @@ class WatchlistShowItem extends HookConsumerWidget {
     }
 
     if (animatingOut.contains(traktId)) {
-      return AnimatedShowCard(
-        traktId: traktId,
-        posterUrl: posterUrl,
-        watched: watched,
-        total: total,
-        infoWidget: WatchProgressInfo(
-          traktId: traktId,
-          title: title,
-          apiService: ref.read(traktApiProvider),
-          progress: progress,
-          showData: show ?? {},
-        ),
-        builder:
-            (context, child) => ShowCard(
-              traktId: traktId,
-              posterUrl: posterUrl,
-              infoWidget: child,
-              apiService: ref.read(traktApiProvider),
-              parentContext: context,
-            ),
-        onFullyWatched: () => onFullyWatched?.call(traktId),
-      );
+      return const SizedBox.shrink();
     }
 
     // Use a state variable to track processing state for swipe actions
     final isProcessingNotifier = useState<bool>(false);
+    // Use a cancellation token to handle async operations
+    final cancelToken = useRef<bool>(false);
+
+    // Cancel any pending operations when the widget is disposed
+    useEffect(() {
+      return () {
+        cancelToken.value = true;
+      };
+    }, []);
 
     return AbsorbPointer(
       absorbing: isProcessingNotifier.value,
@@ -158,13 +166,19 @@ class WatchlistShowItem extends HookConsumerWidget {
         key: ValueKey('dismissible_$traktId'),
         direction: DismissDirection.horizontal,
         confirmDismiss: (direction) async {
+          if (isProcessingNotifier.value) return false;
+          
+          isProcessingNotifier.value = true;
+          cancelToken.value = false;
+          
           try {
-            isProcessingNotifier.value = true;
-
             // Add a small delay to ensure the UI updates to show the loading state
             await Future.delayed(const Duration(milliseconds: 50));
 
-            if (!context.mounted) return false;
+            // Check if the widget is still mounted and the operation wasn't cancelled
+            if (!context.mounted || cancelToken.value) {
+              return false;
+            }
             
             if (direction == DismissDirection.startToEnd) {
               // Swipe right to mark as unwatched
@@ -173,14 +187,20 @@ class WatchlistShowItem extends HookConsumerWidget {
               // Swipe left to mark as watched
               await _toggleWatchedStatus(ref, traktId, true, context);
             }
+            
             return false; // Never dismiss the item
           } catch (e) {
             debugPrint('Error in confirmDismiss: $e');
             return false; // Don't dismiss on error
           } finally {
-            // Add a small delay before resetting the loading state
-            await Future.delayed(const Duration(milliseconds: 300));
-            isProcessingNotifier.value = false;
+            // Only update if the widget is still mounted and the operation wasn't cancelled
+            if (context.mounted && !cancelToken.value) {
+              // Add a small delay before resetting the loading state
+              await Future.delayed(const Duration(milliseconds: 300));
+              if (context.mounted && !cancelToken.value) {
+                isProcessingNotifier.value = false;
+              }
+            }
           }
         },
         background: Container(
@@ -248,12 +268,10 @@ class WatchlistShowItem extends HookConsumerWidget {
               onTap!(traktId);
             }
           },
-          child: AnimatedShowCard(
+          child: ShowCard(
             key: ValueKey('watchlist_show_$traktId'),
             traktId: traktId,
             posterUrl: posterUrl,
-            watched: watched,
-            total: total,
             infoWidget: WatchProgressInfo(
               traktId: traktId,
               title: title,
@@ -261,15 +279,8 @@ class WatchlistShowItem extends HookConsumerWidget {
               progress: progress,
               showData: show ?? {},
             ),
-            builder:
-                (context, child) => ShowCard(
-                  traktId: traktId,
-                  posterUrl: posterUrl,
-                  infoWidget: child,
-                  apiService: ref.read(traktApiProvider),
-                  parentContext: context,
-                ),
-            onFullyWatched: () => onFullyWatched?.call(traktId),
+            apiService: ref.read(traktApiProvider),
+            parentContext: context,
           ),
         ),
       ),

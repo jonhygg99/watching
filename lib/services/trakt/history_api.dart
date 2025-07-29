@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'trakt_api.dart';
 
@@ -11,22 +12,39 @@ mixin HistoryApi on TraktApiBase {
     List<Map<String, dynamic>>? seasons,
     List<Map<String, dynamic>>? episodes,
   }) async {
-    await ensureValidToken();
-    final Map<String, dynamic> payload = {};
-    if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
-    if (shows != null && shows.isNotEmpty) payload['shows'] = shows;
-    if (seasons != null && seasons.isNotEmpty) payload['seasons'] = seasons;
-    if (episodes != null && episodes.isNotEmpty) payload['episodes'] = episodes;
-    final url = Uri.parse('$baseUrl/sync/history');
-    final response = await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(payload),
-    );
-    if (response.statusCode != 201) {
-      throw Exception(
-        'Error POST /sync/history: ${response.statusCode}\n${response.body}',
+    try {
+      await ensureValidToken();
+
+      final Map<String, dynamic> payload = {};
+      if (movies != null && movies.isNotEmpty) {
+        payload['movies'] = movies;
+      }
+      if (shows != null && shows.isNotEmpty) {
+        payload['shows'] = shows;
+      }
+      if (seasons != null && seasons.isNotEmpty) {
+        payload['seasons'] = seasons;
+      }
+      if (episodes != null && episodes.isNotEmpty) {
+        payload['episodes'] = episodes;
+      }
+
+      final url = Uri.parse('$baseUrl/sync/history');
+
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(payload),
       );
+
+      if (response.statusCode != 201) {
+        final error =
+            'Error POST /sync/history: ${response.statusCode}\n${response.body}';
+        throw Exception(error);
+      }
+    } catch (e) {
+      debugPrint('addToWatchHistory: Error - $e');
+      rethrow;
     }
   }
 
@@ -130,7 +148,7 @@ mixin HistoryApi on TraktApiBase {
     List<Map<String, dynamic>>? episodes,
   }) async {
     await ensureValidToken();
-    
+
     final Map<String, dynamic> payload = {};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;
@@ -183,7 +201,7 @@ mixin HistoryApi on TraktApiBase {
     List<Map<String, dynamic>>? episodes,
   }) async {
     await ensureValidToken();
-    
+
     final Map<String, dynamic> payload = {};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;

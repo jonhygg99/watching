@@ -36,28 +36,20 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
   late final WatchlistActions _watchlistActions;
   late final WatchlistLoader _watchlistLoader;
   StreamSubscription? _subscription;
+  bool _isInitialized = false;
 
-  WatchlistNotifier(this._ref)
-    : _episodeService = WatchlistEpisodeService(_ref),
-      super(const WatchlistState()) {
+  WatchlistNotifier(this._ref) : super(const WatchlistState()) {
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    if (_isInitialized) return;
+    
+    _episodeService = WatchlistEpisodeService(_ref);
     _processor = WatchlistProcessor(_ref);
     _cacheHandler = WatchlistCacheHandler(_ref);
-    _episodeActions = WatchlistEpisodeActions(
-      ref: _ref,
-      episodeService: _episodeService,
-      updateState: (state) => this.state = state,
-      updateLoadingState: (isLoading) {
-        state = state.copyWith(isLoading: isLoading);
-      },
-      updateStateWithItems: updateStateWithItems,
-      mergeItems: mergeItems,
-      updateShowProgress: updateShowProgress,
-      refresh: refresh,
-      isShowCompleted: isShowCompleted,
-      cacheHandler: _cacheHandler,
-      getTypeString: (type) => type == WatchlistType.shows ? 'show' : 'movie',
-    );
-
+    
+    // Initialize loader first as it's needed by actions
     _watchlistLoader = WatchlistLoader(
       ref: _ref,
       cacheHandler: _cacheHandler,
@@ -67,6 +59,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
       updateLoadingState: (isLoading, {error}) => updateLoadingState(isLoading, error: error),
     );
 
+    // Then initialize actions
     _watchlistActions = WatchlistActions(
       ref: _ref,
       cacheHandler: _cacheHandler,
@@ -78,11 +71,27 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
       updateState: (newState) => state = newState,
     );
 
+    // Finally initialize episode actions
+    _episodeActions = WatchlistEpisodeActions(
+      ref: _ref,
+      episodeService: _episodeService,
+      updateState: (state) => this.state = state,
+      updateLoadingState: (isLoading) => state = state.copyWith(isLoading: isLoading),
+      updateStateWithItems: updateStateWithItems,
+      mergeItems: mergeItems,
+      updateShowProgress: updateShowProgress,
+      refresh: refresh,
+      isShowCompleted: isShowCompleted,
+      cacheHandler: _cacheHandler,
+      getTypeString: (type) => type == WatchlistType.shows ? 'show' : 'movie',
+    );
+
+    _isInitialized = true;
+
     // Initial load with cached data first
-    _watchlistLoader.loadCachedData().then((_) {
-      // Then load fresh data in background
-      _watchlistLoader.loadWatchlist();
-    });
+    await _watchlistLoader.loadCachedData();
+    // Then load fresh data in background
+    unawaited(_watchlistLoader.loadWatchlist());
   }
 
   // Delegate episode-related actions to WatchlistEpisodeActions
@@ -123,15 +132,15 @@ class WatchlistNotifier extends StateNotifier<WatchlistState>
     }
   }
 
-  /// Refresh the watchlist data
-  ///
-  /// This will first check if we have fresh cached data (less than 30 seconds old).
-  /// If not, it will perform a full refresh from the API.
-  Future<void> refresh() => _watchlistActions.refreshWatchlist();
+  Future<void> updateShowProgress(String traktId) async {
+    if (!_isInitialized) await _initialize();
+    return _watchlistActions.updateShowProgress(traktId);
+  }
 
-  /// Update a single show's progress in the watchlist
-  Future<void> updateShowProgress(String traktId) => 
-      _watchlistActions.updateShowProgress(traktId);
+  Future<void> refresh() async {
+    if (!_isInitialized) await _initialize();
+    return _watchlistActions.refreshWatchlist();
+  }
 }
 
 

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/features/watchlist/enums/watchlist_type.dart';
 
 // Re-export all watchlist-related providers
@@ -33,3 +34,8 @@ class WatchlistCache {
     _cache.remove(type);
   }
 }
+
+// Cache provider - moved to its own provider to prevent circular deps
+final watchlistCacheProvider = Provider<WatchlistCache>((ref) {
+  return WatchlistCache();
+});
