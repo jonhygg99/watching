@@ -3,16 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/providers/app_providers.dart';
-import 'package:collection/collection.dart';
 
 class WatchlistProcessor {
   final Ref _ref;
-  late final WatchlistEpisodeService _episodeService;
+  final WatchlistEpisodeService _episodeService;
   final _translationCache = <String, Map<String, dynamic>>{};
 
-  WatchlistProcessor(this._ref) {
-    _episodeService = WatchlistEpisodeService(_ref);
-  }
+  WatchlistProcessor(this._ref, [WatchlistEpisodeService? episodeService])
+      : _episodeService = episodeService ?? WatchlistEpisodeService(_ref);
 
   /// Process a single watchlist item with timeout and error handling
   Future<Map<String, dynamic>?> processItem(
@@ -160,12 +158,23 @@ class WatchlistProcessor {
     }
 
     try {
-      final translations = await trakt.getShowTranslations(
+      final result = await trakt.getShowTranslations(
         id: traktId,
         language: countryCode.toLowerCase(),
       );
 
-      if (translations != null) {
+      if (result != null) {
+        // Ensure we have a List<Map> before proceeding
+        List<Map<String, dynamic>> translations;
+        if (result is List) {
+          translations = result.cast<Map<String, dynamic>>();
+        } else if (result is Map) {
+          translations = [result.cast<String, dynamic>()];
+        } else {
+          debugPrint('Unexpected translations type: ${result.runtimeType}');
+          return;
+        }
+        
         final translation = _findBestTranslation(translations, countryCode);
         if (translation != null) {
           // Update cache
@@ -185,16 +194,39 @@ class WatchlistProcessor {
     String countryCode
   ) {
     try {
+      // If translations is null, return early
+      if (translations == null) return null;
+      
+      // If translations is a Function, call it to get the actual value
+      if (translations is Function()) {
+        try {
+          final result = translations();
+          // If the result is a Future, return null as we can't handle it here
+          if (result is Future) return null;
+          translations = result;
+        } catch (e) {
+          return null;
+        }
+      }
+      
+      // If translations is a Future, return null as we can't handle it here
+      if (translations is Future) return null;
+      
       // Convert to list if it's not already
-      final translationsList = translations is List 
-          ? translations 
-          : [if (translations is Map) translations];
-          
+      List<dynamic> translationsList;
+      if (translations is List) {
+        translationsList = translations;
+      } else if (translations is Map) {
+        translationsList = [translations];
+      } else {
+        return null;
+      }
+      
       if (translationsList.isEmpty) return null;
       
       // Filter out translations with null titles (same as show details)
       final validTranslations = translationsList
-          .where((t) => t['title'] != null)
+          .where((t) => t != null && t is Map && t['title'] != null)
           .toList();
           
       if (validTranslations.isEmpty) return null;
@@ -202,12 +234,14 @@ class WatchlistProcessor {
       final countryPrefix = countryCode.toLowerCase().substring(0, 2);
       
       // Try exact match for user's country (same as show details)
-      var translation = validTranslations.firstWhere(
-        (t) => t['language']?.toString().toLowerCase() == countryPrefix,
-        orElse: () => validTranslations.first, // Fallback to first valid translation
-      );
-      
-      return translation;
+      try {
+        return validTranslations.firstWhere(
+          (t) => t['language']?.toString().toLowerCase() == countryPrefix,
+          orElse: () => validTranslations.first as Map<String, dynamic>,
+        ) as Map<String, dynamic>;
+      } catch (e) {
+        return null;
+      }
     } catch (e) {
       debugPrint('Error finding best translation: $e');
       return null;
