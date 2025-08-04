@@ -179,6 +179,7 @@ class WatchlistProcessor {
   }
   
   /// Find the best matching translation from available translations
+  /// Matches the behavior of ShowDetailPage
   Map<String, dynamic>? _findBestTranslation(
     dynamic translations, 
     String countryCode
@@ -191,20 +192,22 @@ class WatchlistProcessor {
           
       if (translationsList.isEmpty) return null;
       
+      // Filter out translations with null titles (same as show details)
+      final validTranslations = translationsList
+          .where((t) => t['title'] != null)
+          .toList();
+          
+      if (validTranslations.isEmpty) return null;
+      
       final countryPrefix = countryCode.toLowerCase().substring(0, 2);
       
-      // Try exact match first
-      var translation = translationsList.firstWhereOrNull(
-        (t) => t['language']?.toString().toLowerCase() == countryPrefix
+      // Try exact match for user's country (same as show details)
+      var translation = validTranslations.firstWhere(
+        (t) => t['language']?.toString().toLowerCase() == countryPrefix,
+        orElse: () => validTranslations.first, // Fallback to first valid translation
       );
       
-      // Fallback to English
-      translation ??= translationsList.firstWhereOrNull(
-        (t) => t['language']?.toString().toLowerCase() == 'en'
-      );
-      
-      // Fallback to first available translation
-      return translation ?? translationsList.first;
+      return translation;
     } catch (e) {
       debugPrint('Error finding best translation: $e');
       return null;
@@ -212,16 +215,25 @@ class WatchlistProcessor {
   }
   
   /// Update show data with translation
+  /// Matches the behavior of ShowDetailPage
   void _updateShowWithTranslation(
     Map<String, dynamic> show, 
     Map<String, dynamic> translation
   ) {
     try {
+      // Update title if available in translation
       if (translation['title'] != null) {
         show['title'] = translation['title'];
       }
+      
+      // Update overview if available in translation
       if (translation['overview'] != null) {
         show['overview'] = translation['overview'];
+      }
+      
+      // Update tagline if available in translation (matching show details behavior)
+      if (translation['tagline'] != null) {
+        show['tagline'] = translation['tagline'];
       }
     } catch (e) {
       debugPrint('Error updating show with translation: $e');
