@@ -595,31 +595,41 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       state = state.copyWith(
         items: state.items.map((show) {
           if (_getItemId(show) == _getItemId(showData)) {
-            // Find and update the specific episode in the show's seasons
-            final updatedSeasons = (show['seasons'] as List?)?.map((season) {
+            // Create a deep copy of the show to avoid direct mutations
+            final updatedShow = Map<String, dynamic>.from(show);
+            
+            // Update the specific episode in the show's seasons
+            final seasons = List<Map<String, dynamic>>.from(show['seasons'] ?? []);
+            
+            for (int i = 0; i < seasons.length; i++) {
+              final season = Map<String, dynamic>.from(seasons[i]);
               if (season['number'] == seasonNumber) {
-                final episodes = (season['episodes'] as List?)?.map((episode) {
+                final episodes = List<Map<String, dynamic>>.from(season['episodes'] ?? []);
+                
+                for (int j = 0; j < episodes.length; j++) {
+                  final episode = episodes[j];
                   if (episode['number'] == episodeNumber) {
-                    return {
+                    // Update only the necessary fields while preserving the rest
+                    episodes[j] = {
                       ...episode,
                       'completed': watched,
                       'watched': watched,
+                      'last_watched_at': watched ? DateTime.now().toIso8601String() : null,
                     };
+                    break;
                   }
-                  return episode;
-                }).toList();
-                return {
-                  ...season,
-                  'episodes': episodes,
-                };
+                }
+                
+                // Update the season with modified episodes
+                season['episodes'] = episodes;
+                seasons[i] = season;
+                break;
               }
-              return season;
-            }).toList();
-
-            return {
-              ...show,
-              'seasons': updatedSeasons,
-            };
+            }
+            
+            // Update the show with modified seasons
+            updatedShow['seasons'] = seasons;
+            return updatedShow;
           }
           return show;
         }).toList(),

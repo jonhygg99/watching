@@ -83,57 +83,49 @@ class ShowDetailHeader extends StatelessWidget {
     Widget showTitle(String title) {
       return Text(
         title,
-        maxLines: 1,
+        maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          height: 1.1,
-        ),
-      );
-    }
-
-    Widget followButton() {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[800],
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: IconButton(
-          onPressed: () {
-            // TODO: Implement follow functionality
-          },
-          padding: const EdgeInsets.all(8),
-          constraints: const BoxConstraints(),
-          icon: const Icon(Icons.add, size: 20, color: Colors.white),
-        ),
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       );
     }
 
     Widget showMetadata() {
-      return Row(
-        children: [
-          if (show['year'] != null)
-            Text('${show['year']}', style: const TextStyle(fontSize: 14)),
-          if (show['year'] != null && show['runtime'] != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Text('·', style: TextStyle(fontSize: 16)),
-            ),
-          if (show['runtime'] != null)
-            Text(
-              '${show['runtime']} min',
-              style: const TextStyle(fontSize: 14),
-            ),
-          if ((show['year'] != null || show['runtime'] != null) &&
-              show['status'] != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Text('·', style: TextStyle(fontSize: 16)),
-            ),
-          if (show['status'] != null)
-            Text(show['status'], style: const TextStyle(fontSize: 14)),
-        ],
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (show['year'] != null)
+              Text(
+                '${show['year']}',
+                style: const TextStyle(fontSize: 14),
+                overflow: TextOverflow.visible,
+              ),
+            if (show['year'] != null && show['runtime'] != null)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.0),
+                child: Text('·', style: TextStyle(fontSize: 16)),
+              ),
+            if (show['runtime'] != null)
+              Text(
+                '${show['runtime']} min',
+                style: const TextStyle(fontSize: 14),
+                overflow: TextOverflow.visible,
+              ),
+            if ((show['year'] != null || show['runtime'] != null) &&
+                show['status'] != null)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.0),
+                child: Text('·', style: TextStyle(fontSize: 16)),
+              ),
+            if (show['status'] != null)
+              Text(
+                show['status'],
+                style: const TextStyle(fontSize: 14),
+                overflow: TextOverflow.visible,
+              ),
+          ],
+        ),
       );
     }
 
@@ -147,29 +139,43 @@ class ShowDetailHeader extends StatelessWidget {
               fanartImage,
               Positioned(
                 left: 16,
-                bottom: -85,
-                right: 16, // Add right constraint to prevent overflow
-                child: Container(
-                  color:
-                      Colors.transparent, // Ensure the container takes up space
+                bottom: -95,
+                right: 16,
+                child: SizedBox(
+                  height: 170, // Match the height of the poster image
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       posterImage(posterUrl),
                       const SizedBox(width: 14),
                       Expanded(
-                        child: Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(child: showTitle(title)),
-                                const SizedBox(width: 8),
-                                followButton(),
-                              ],
-                            ),
-                            showMetadata(),
-                          ],
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 65),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minHeight: 65,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 14),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        showTitle(title),
+                                        showMetadata(),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
