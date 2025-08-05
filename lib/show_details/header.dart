@@ -90,29 +90,42 @@ class ShowDetailHeader extends StatelessWidget {
     }
 
     Widget showMetadata() {
-      return Row(
-        children: [
-          if (show['year'] != null)
-            Text('${show['year']}', style: const TextStyle(fontSize: 14)),
-          if (show['year'] != null && show['runtime'] != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Text('·', style: TextStyle(fontSize: 16)),
-            ),
-          if (show['runtime'] != null)
-            Text(
-              '${show['runtime']} min',
-              style: const TextStyle(fontSize: 14),
-            ),
-          if ((show['year'] != null || show['runtime'] != null) &&
-              show['status'] != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Text('·', style: TextStyle(fontSize: 16)),
-            ),
-          if (show['status'] != null)
-            Text(show['status'], style: const TextStyle(fontSize: 14)),
-        ],
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (show['year'] != null)
+              Text(
+                '${show['year']}',
+                style: const TextStyle(fontSize: 14),
+                overflow: TextOverflow.visible,
+              ),
+            if (show['year'] != null && show['runtime'] != null)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.0),
+                child: Text('·', style: TextStyle(fontSize: 16)),
+              ),
+            if (show['runtime'] != null)
+              Text(
+                '${show['runtime']} min',
+                style: const TextStyle(fontSize: 14),
+                overflow: TextOverflow.visible,
+              ),
+            if ((show['year'] != null || show['runtime'] != null) &&
+                show['status'] != null)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4.0),
+                child: Text('·', style: TextStyle(fontSize: 16)),
+              ),
+            if (show['status'] != null)
+              Text(
+                show['status'],
+                style: const TextStyle(fontSize: 14),
+                overflow: TextOverflow.visible,
+              ),
+          ],
+        ),
       );
     }
 
