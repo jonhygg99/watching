@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:watching/shared/widgets/expandable_text.dart';
 
 class EpisodeDetails extends StatelessWidget {
   final Map<String, dynamic> episode;
@@ -15,9 +16,13 @@ class EpisodeDetails extends StatelessWidget {
       children: [
         if (episode['overview'] != null &&
             episode['overview'].toString().isNotEmpty)
-          Text(
+          ExpandableText(
             episode['overview'],
             style: Theme.of(context).textTheme.bodyMedium,
+            buttonStyle: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         const SizedBox(height: 16),
         Row(

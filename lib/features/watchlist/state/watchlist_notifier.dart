@@ -342,8 +342,6 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
           ],
         };
 
-        debugPrint('Sending watch history update: $watchData');
-
         // Add to watch history
         await trakt.addToWatchHistory(
           shows: [
@@ -429,9 +427,6 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
                       'last_watched_at': lastWatched['last_watched_at'],
                     };
                     foundNext = true;
-                    debugPrint(
-                      'Found last watched episode before unwatched: $lastWatchedEpisode',
-                    );
                     break outerLoop;
                   }
                 }
@@ -530,7 +525,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   }
 
   /// Toggle watched status for a specific episode
-  /// 
+  ///
   /// [showTraktId] - The Trakt ID of the show
   /// [seasonNumber] - The season number
   /// [episodeNumber] - The episode number
@@ -543,16 +538,17 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   }) async {
     try {
       state = state.copyWith(isLoading: true);
-      
+
       final trakt = _ref.read(traktApiProvider);
       final showIdToUse = showTraktId;
       final isNumericId = int.tryParse(showIdToUse) != null;
 
       // Prepare the show data with the correct ID format
       final Map<String, dynamic> showData = {
-        'ids': isNumericId 
-            ? {'trakt': int.parse(showIdToUse)}
-            : {'slug': showIdToUse},
+        'ids':
+            isNumericId
+                ? {'trakt': int.parse(showIdToUse)}
+                : {'slug': showIdToUse},
       };
 
       if (watched) {
@@ -593,51 +589,56 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       // Update the local state
       state = state.copyWith(
-        items: state.items.map((show) {
-          if (_getItemId(show) == _getItemId(showData)) {
-            // Create a deep copy of the show to avoid direct mutations
-            final updatedShow = Map<String, dynamic>.from(show);
-            
-            // Update the specific episode in the show's seasons
-            final seasons = List<Map<String, dynamic>>.from(show['seasons'] ?? []);
-            
-            for (int i = 0; i < seasons.length; i++) {
-              final season = Map<String, dynamic>.from(seasons[i]);
-              if (season['number'] == seasonNumber) {
-                final episodes = List<Map<String, dynamic>>.from(season['episodes'] ?? []);
-                
-                for (int j = 0; j < episodes.length; j++) {
-                  final episode = episodes[j];
-                  if (episode['number'] == episodeNumber) {
-                    // Update only the necessary fields while preserving the rest
-                    episodes[j] = {
-                      ...episode,
-                      'completed': watched,
-                      'watched': watched,
-                      'last_watched_at': watched ? DateTime.now().toIso8601String() : null,
-                    };
+        items:
+            state.items.map((show) {
+              if (_getItemId(show) == _getItemId(showData)) {
+                // Create a deep copy of the show to avoid direct mutations
+                final updatedShow = Map<String, dynamic>.from(show);
+
+                // Update the specific episode in the show's seasons
+                final seasons = List<Map<String, dynamic>>.from(
+                  show['seasons'] ?? [],
+                );
+
+                for (int i = 0; i < seasons.length; i++) {
+                  final season = Map<String, dynamic>.from(seasons[i]);
+                  if (season['number'] == seasonNumber) {
+                    final episodes = List<Map<String, dynamic>>.from(
+                      season['episodes'] ?? [],
+                    );
+
+                    for (int j = 0; j < episodes.length; j++) {
+                      final episode = episodes[j];
+                      if (episode['number'] == episodeNumber) {
+                        // Update only the necessary fields while preserving the rest
+                        episodes[j] = {
+                          ...episode,
+                          'completed': watched,
+                          'watched': watched,
+                          'last_watched_at':
+                              watched ? DateTime.now().toIso8601String() : null,
+                        };
+                        break;
+                      }
+                    }
+
+                    // Update the season with modified episodes
+                    season['episodes'] = episodes;
+                    seasons[i] = season;
                     break;
                   }
                 }
-                
-                // Update the season with modified episodes
-                season['episodes'] = episodes;
-                seasons[i] = season;
-                break;
+
+                // Update the show with modified seasons
+                updatedShow['seasons'] = seasons;
+                return updatedShow;
               }
-            }
-            
-            // Update the show with modified seasons
-            updatedShow['seasons'] = seasons;
-            return updatedShow;
-          }
-          return show;
-        }).toList(),
+              return show;
+            }).toList(),
       );
 
       // Force a refresh of the progress
       await updateShowProgress(showIdToUse);
-      
     } catch (e) {
       state = state.copyWith(
         error: 'Error al actualizar el estado del episodio: ${e.toString()}',
