@@ -83,30 +83,9 @@ class ShowDetailHeader extends StatelessWidget {
     Widget showTitle(String title) {
       return Text(
         title,
-        maxLines: 1,
+        maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          height: 1.1,
-        ),
-      );
-    }
-
-    Widget followButton() {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[800],
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: IconButton(
-          onPressed: () {
-            // TODO: Implement follow functionality
-          },
-          padding: const EdgeInsets.all(8),
-          constraints: const BoxConstraints(),
-          icon: const Icon(Icons.add, size: 20, color: Colors.white),
-        ),
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       );
     }
 
@@ -159,17 +138,8 @@ class ShowDetailHeader extends StatelessWidget {
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(child: showTitle(title)),
-                                const SizedBox(width: 8),
-                                followButton(),
-                              ],
-                            ),
-                            showMetadata(),
-                          ],
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [showTitle(title), showMetadata()],
                         ),
                       ),
                     ],
