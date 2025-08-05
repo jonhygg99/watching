@@ -126,20 +126,43 @@ class ShowDetailHeader extends StatelessWidget {
               fanartImage,
               Positioned(
                 left: 16,
-                bottom: -85,
-                right: 16, // Add right constraint to prevent overflow
-                child: Container(
-                  color:
-                      Colors.transparent, // Ensure the container takes up space
+                bottom: -95,
+                right: 16,
+                child: SizedBox(
+                  height: 170, // Match the height of the poster image
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       posterImage(posterUrl),
                       const SizedBox(width: 14),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [showTitle(title), showMetadata()],
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 65),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minHeight: 65,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 14),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        showTitle(title),
+                                        showMetadata(),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
