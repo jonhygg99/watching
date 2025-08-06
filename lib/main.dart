@@ -53,6 +53,21 @@ class MyApp extends ConsumerWidget {
     const WatchlistPage(),
     const MyShowsPage(),
   ];
+  
+  static final List<BottomNavigationBarItem> _navItems = const [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.explore),
+      label: 'Discover',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.bookmark_border),
+      label: 'Watchlist',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.tv), 
+      label: 'My Shows'
+    ),
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -142,22 +157,23 @@ class MyApp extends ConsumerWidget {
               ),
             ],
           ),
-          body: _pages[navIndex],
-          bottomNavigationBar: BottomNavigationBar(
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.explore),
-                label: 'Discover',
+          body: Column(
+            children: [
+              // Main content area with IndexedStack
+              Expanded(
+                child: IndexedStack(
+                  index: navIndex,
+                  children: _pages,
+                ),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.bookmark_border),
-                label: 'Watchlist',
+              // Bottom Navigation Bar
+              BottomNavigationBar(
+                items: _navItems,
+                currentIndex: navIndex,
+                selectedItemColor: Colors.redAccent,
+                onTap: (index) => ref.read(navIndexProvider.notifier).set(index),
               ),
-              BottomNavigationBarItem(icon: Icon(Icons.tv), label: 'My Shows'),
             ],
-            currentIndex: navIndex,
-            selectedItemColor: Colors.redAccent,
-            onTap: (index) => ref.read(navIndexProvider.notifier).set(index),
           ),
         );
       },
