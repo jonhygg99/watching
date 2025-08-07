@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:watching/shared/constants/measures.dart';
 
 /// A skeleton loading widget for discover page carousels that matches the actual UI
 class DiscoverSkeleton extends StatelessWidget {
@@ -8,11 +9,8 @@ class DiscoverSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Fixed dimensions for skeleton items
-        const itemWidth = 145.0;
-        const imageHeight = 206.0;
         // Calculate carousel height to fit the image and text
-        final carouselHeight = imageHeight + 40;
+        final carouselHeight = kDiscoverShowImageHeight + 40;
 
         return SizedBox(
           width: double.infinity,
@@ -54,17 +52,17 @@ class DiscoverSkeleton extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder:
                       (context, index) => SizedBox(
-                        width: itemWidth,
+                        width: kDiscoverShowItemWidth,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Image placeholder - matches the actual image container
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: kShowBorderRadius,
                               child: Container(
-                                width: itemWidth,
-                                height: imageHeight,
+                                width: kDiscoverShowItemWidth,
+                                height: kDiscoverShowImageHeight,
                                 color:
                                     Theme.of(context).brightness ==
                                             Brightness.dark
@@ -76,7 +74,7 @@ class DiscoverSkeleton extends StatelessWidget {
                             Container(
                               margin: const EdgeInsets.only(top: 8),
                               height: 16,
-                              width: itemWidth * 0.7,
+                              width: kDiscoverShowItemWidth * 0.7,
                               decoration: BoxDecoration(
                                 color:
                                     Theme.of(context).brightness ==

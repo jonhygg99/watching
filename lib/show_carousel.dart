@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:watching/shared/constants/measures.dart';
 
 import 'show_details/details_page.dart';
 
@@ -28,10 +29,7 @@ class ShowCarousel extends StatelessWidget {
         ),
         LayoutBuilder(
           builder: (context, constraints) {
-            const itemWidth = 145.0;
-            const imageHeight = 206.0;
-            // Increased carousel height to accommodate all elements
-            final carouselHeight = imageHeight + 50;
+            final carouselHeight = kDiscoverShowImageHeight + 50;
             if (shows.isEmpty) {
               return SizedBox(
                 height: carouselHeight,
@@ -48,8 +46,8 @@ class ShowCarousel extends StatelessWidget {
                     (context, index) => _buildShowItem(
                       context: context,
                       show: extractShow(shows[index]),
-                      itemWidth: itemWidth,
-                      imageHeight: imageHeight,
+                      itemWidth: kDiscoverShowItemWidth,
+                      imageHeight: kDiscoverShowImageHeight,
                       shows: shows,
                       index: index,
                     ),
@@ -96,7 +94,7 @@ class ShowCarousel extends StatelessWidget {
                   }
                 },
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: kShowBorderRadius,
                   child: CachedNetworkImage(
                     imageUrl: posterUrl,
                     width: itemWidth,

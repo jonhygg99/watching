@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/show_details/details_page.dart';
 import 'package:watching/services/trakt/trakt_api.dart';
 
@@ -37,13 +38,13 @@ class ShowCard extends StatelessWidget {
         elevation: 0,
         color: Colors.transparent,
         shadowColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: kShowBorderRadius),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             // Poster grande y redondeado
             ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: kShowBorderRadius,
               child:
                   posterUrl != null
                       ? CachedNetworkImage(
