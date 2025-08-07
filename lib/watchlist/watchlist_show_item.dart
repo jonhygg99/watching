@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/watchlist/animated_show_card.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/watchlist/show_card.dart';
@@ -80,7 +81,7 @@ class WatchlistShowItem extends HookConsumerWidget {
           isProcessing
               ? Colors.grey[600]?.withValues(alpha: 0.8)
               : color.withValues(alpha: 0.8),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: kShowBorderRadius,
     );
   }
 

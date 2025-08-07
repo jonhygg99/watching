@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:watching/shared/constants/measures.dart';
 
 class ShowDetailHeader extends StatelessWidget {
   final Map<String, dynamic> show;
@@ -19,13 +20,11 @@ class ShowDetailHeader extends StatelessWidget {
             ? 'https://${(images['poster'] as List).first}'
             : null;
 
-    // Debug prints removed for production
-
     Widget? buildFanartImage(String? fanartUrl) {
       if (fanartUrl == null) return null;
 
       return ClipRRect(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: kShowPosterBorderRadius,
         child: SizedBox(
           width: double.infinity,
           height: 170,
@@ -47,13 +46,13 @@ class ShowDetailHeader extends StatelessWidget {
 
     Widget? fanartImage = buildFanartImage(fanartUrl);
 
-    Widget posterImage(String? posterUrl) {
+    Widget showImage(String? posterUrl) {
       if (posterUrl == null) {
         return Container(
           height: 170,
           width: 120,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: kShowBorderRadius,
             color: Colors.grey[800],
           ),
           child: const Icon(Icons.movie, size: 40, color: Colors.grey),
@@ -61,7 +60,7 @@ class ShowDetailHeader extends StatelessWidget {
       }
 
       return ClipRRect(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: kShowBorderRadius,
         child: CachedNetworkImage(
           imageUrl: posterUrl,
           height: 170,
@@ -146,7 +145,7 @@ class ShowDetailHeader extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      posterImage(posterUrl),
+                      showImage(posterUrl),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Padding(

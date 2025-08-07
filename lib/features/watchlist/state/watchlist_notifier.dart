@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/enums/watchlist_type.dart';
 import 'package:watching/features/watchlist/models/watchlist_state.dart';
 import 'package:watching/features/watchlist/providers/watchlist_type_provider.dart';
-import 'package:watching/features/watchlist/providers/watchlist_cache_provider.dart';
 import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/features/watchlist/services/watchlist_processor.dart';
 import 'package:watching/providers/app_providers.dart';
@@ -21,72 +20,49 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   final Ref _ref;
   late final WatchlistEpisodeService _episodeService;
   late final WatchlistProcessor _processor;
-  StreamSubscription? _subscription;
   bool _isLoading = false;
 
   WatchlistNotifier(this._ref)
     : _episodeService = WatchlistEpisodeService(_ref),
       super(const WatchlistState()) {
     _processor = WatchlistProcessor(_ref);
-    // Initial load with cached data first
-    _loadCachedData().then((_) {
-      // Then load fresh data in background
-      _loadWatchlist();
-    });
+    // Initial load
+    _loadWatchlist();
   }
 
-  /// Find the next episode to watch based on progress data
-  Map<String, dynamic>? _findNextEpisode(Map<String, dynamic> progress) {
+  /// Find the next episode to watch based on the show's progress
+  /// Returns the next episode or null if all episodes are watched
+  Map<String, dynamic>? _findNextEpisode(Map<String, dynamic> showData) {
     try {
-      final seasons = (progress['seasons'] as List?) ?? [];
+      final progress = showData['progress'] as Map<String, dynamic>?;
+      final seasons = showData['seasons'] as List<dynamic>?;
 
-      // Find the first unwatched episode
-      for (final season in seasons.cast<Map<String, dynamic>>()) {
-        final episodes = (season['episodes'] as List?) ?? [];
-        for (final ep in episodes.cast<Map<String, dynamic>>()) {
-          if (ep['completed'] != true) {
-            return {
-              'show': {
-                'ids': {'trakt': progress['ids']?['trakt']},
-              },
-              'episode': {
-                'season': season['number'],
-                'number': ep['number'],
-                'title': ep['title'],
-              },
-            };
+      if (progress == null || seasons == null) return null;
+      final nextEpisode = progress['next_episode'] as Map<String, dynamic>?;
+
+      // If we have a next episode from the API, use it
+      if (nextEpisode != null) {
+        return nextEpisode;
+      }
+
+      // Otherwise, find the first unwatched episode
+      for (final seasonData in seasons.cast<Map<String, dynamic>>()) {
+        final episodes = seasonData['episodes'] as List<dynamic>?;
+        if (episodes == null) continue;
+
+        for (final episode in episodes.cast<Map<String, dynamic>>()) {
+          final watched = episode['watched'] as bool? ?? false;
+          if (!watched) {
+            return episode;
           }
         }
       }
+
       return null;
     } catch (e) {
+      debugPrint('Error in _findNextEpisode: $e');
       return null;
     }
-  }
-
-  /// Load cached data immediately
-  Future<void> _loadCachedData() async {
-    try {
-      final type = _ref.read(watchlistTypeProvider);
-      final cache = _ref.read(watchlistCacheProvider);
-      final cachedData = cache.getCached(type);
-
-      if (cachedData != null) {
-        state = state.copyWith(
-          items: cachedData,
-          hasData: true,
-          isLoading: true, // Still loading fresh data in background
-        );
-      }
-    } catch (e) {
-      // Error loading cached data
-    }
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
   }
 
   /// Load watchlist data with progressive loading
@@ -98,20 +74,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       final trakt = _ref.read(traktApiProvider);
       final type = _ref.read(watchlistTypeProvider);
-      final cache = _ref.read(watchlistCacheProvider);
-
-      if (forceRefresh) {
-        cache.invalidateCache(type);
-      }
-
       final typeStr = type == WatchlistType.shows ? 'show' : 'movie';
 
-      // Start with loading state if we don't have cached data or forcing refresh
-      if (state.items.isEmpty || forceRefresh) {
-        state = state.copyWith(isLoading: true, error: null);
-      }
-
-      // Fetch watchlist items from the API
+      // Fetch fresh data from the API
       final items = await trakt.getWatched(type: typeStr);
 
       // Process items in chunks for progressive loading
@@ -145,9 +110,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         }
       }
 
-      // Final update with all items and update cache
+      // Final update with all items
       if (allProcessedItems.isNotEmpty) {
-        cache.updateCache(type, allProcessedItems);
         state = state.copyWith(
           items: allProcessedItems,
           isLoading: false,
@@ -202,40 +166,10 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     }
   }
 
-  /// Refresh the watchlist data
-  ///
-  /// This will first check if we have fresh cached data (less than 30 seconds old).
-  /// If not, it will perform a full refresh from the API.
+  /// Refresh the watchlist data by loading fresh data from the API
   Future<void> refresh() async {
     try {
       state = state.copyWith(isLoading: true, error: null);
-
-      final type = _ref.read(watchlistTypeProvider);
-      final cache = _ref.read(watchlistCacheProvider);
-
-      // Get the cached entry
-      final cachedData = cache.getCached(type);
-
-      // If we have cached data, check if it's fresh enough
-      if (cachedData != null) {
-        final cacheEntry = cache.getCacheEntry(type);
-        if (cacheEntry != null) {
-          final (_, timestamp) = cacheEntry;
-          final cacheAge = DateTime.now().difference(timestamp);
-          if (cacheAge.inSeconds < 30) {
-            // If cache is fresh, just update the state with cached data
-            state = state.copyWith(
-              items: cachedData,
-              hasData: true,
-              isLoading: false,
-              error: null,
-            );
-            return;
-          }
-        }
-      }
-
-      // Otherwise, do a full refresh
       await _loadWatchlist(forceRefresh: true);
     } catch (e) {
       final error =
@@ -324,22 +258,6 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         final Map<String, dynamic> showData = {
           'ids':
               isNumericId ? {'trakt': int.parse(traktId)} : {'slug': traktId},
-        };
-
-        final watchData = {
-          'shows': [
-            {
-              ...showData,
-              'seasons': [
-                {
-                  'number': seasonNumber,
-                  'episodes': [
-                    {'number': episodeNumber},
-                  ],
-                },
-              ],
-            },
-          ],
         };
 
         // Add to watch history
@@ -656,11 +574,6 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     }
 
     try {
-      // First, invalidate the cache to force a fresh fetch
-      final type = _ref.read(watchlistTypeProvider);
-      final cache = _ref.read(watchlistCacheProvider);
-      cache.invalidateCache(type);
-
       // Fetch fresh data from the API
       final trakt = _ref.read(traktApiProvider);
 
@@ -701,17 +614,15 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         updatedItems[index] = updatedItem;
 
         try {
-          // Update the cache with the fresh data
-          cache.updateCache(type, updatedItems);
-
-          // Update the state
+          // Update the state with the new items
           state = state.copyWith(
             items: updatedItems,
             hasData: true,
             isLoading: false,
           );
-        } catch (cacheError) {
-          // Try a full refresh if cache update fails
+        } catch (error) {
+          // If there's an error updating the state, do a full refresh
+          debugPrint('Error updating watchlist state: $error');
           await refresh();
         }
       } else {
