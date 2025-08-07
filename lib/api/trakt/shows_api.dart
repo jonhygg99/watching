@@ -179,15 +179,6 @@ mixin ShowsApi on TraktApiBase {
           '_t': DateTime.now().millisecondsSinceEpoch.toString(),
         },
       );
-      
-      print('Fetching episode comments:');
-      print('  URL: $uri');
-      print('  Show ID: $id');
-      print('  Season: $season');
-      print('  Episode: $episode');
-      print('  Sort: $sort');
-      print('  Page: $page');
-      print('  Limit: $limit');
 
       // Headers required by Trakt API
       final requestHeaders = Map<String, String>.from(headers)..addAll({
