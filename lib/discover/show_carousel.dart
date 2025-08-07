@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/features/discover/services/show_translation_service.dart';
+import 'package:watching/api/trakt/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/show_details/details_page.dart';
 

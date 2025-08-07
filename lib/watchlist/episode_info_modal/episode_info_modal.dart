@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
-import 'package:watching/services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 import 'services/episode_rating_service.dart';
 import 'widgets/episode_header.dart';
 import 'widgets/episode_details.dart';

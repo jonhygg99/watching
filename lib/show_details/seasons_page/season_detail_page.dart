@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../../services/trakt/trakt_api.dart';
-import '../../../providers/watchlist_providers.dart';
-import '../../watchlist/progress_bar.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/providers/watchlist_providers.dart';
+import 'package:watching/watchlist/progress_bar.dart';
 import 'season_bulk_actions.dart';
 import 'season_episode_list.dart';
 import 'helpers/season_helpers.dart';

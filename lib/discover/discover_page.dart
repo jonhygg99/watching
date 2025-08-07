@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watching/show_carousel.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/discover/discover_skeleton.dart';
+import 'package:watching/discover/show_carousel.dart';
 
 /// DiscoverPage displays curated carousels of TV shows using data from ApiService.
 /// - Follows Windsurf Development Guidelines for Riverpod usage and code structure.
