@@ -23,7 +23,7 @@ void main() {
 
         when(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes/1/comments/likes',
+            '/shows/game-of-thrones/seasons/1/episodes/1/comments/likes?page=1&limit=10',
           ),
         ).thenAnswer((_) async => mockComments);
 
@@ -46,7 +46,7 @@ void main() {
 
         verify(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes/1/comments/likes',
+            '/shows/game-of-thrones/seasons/1/episodes/1/comments/likes?page=1&limit=10',
           ),
         ).called(1);
       },
@@ -60,7 +60,7 @@ void main() {
 
         when(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes/1/comments/likes',
+            '/shows/game-of-thrones/seasons/1/episodes/1/comments/likes?page=1&limit=10',
           ),
         ).thenAnswer((_) async => mockComments);
 
@@ -74,7 +74,7 @@ void main() {
         // Assert
         verify(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes/1/comments/likes',
+            '/shows/game-of-thrones/seasons/1/episodes/1/comments/likes?page=1&limit=10',
           ),
         ).called(1);
       },
@@ -84,7 +84,7 @@ void main() {
       // Arrange
       when(
         mockTraktApiBase.getJsonList(
-          '/shows/game-of-thrones/seasons/1/episodes/1/comments/newest',
+          '/shows/game-of-thrones/seasons/1/episodes/1/comments/newest?page=1&limit=10',
         ),
       ).thenAnswer((_) async => []);
 

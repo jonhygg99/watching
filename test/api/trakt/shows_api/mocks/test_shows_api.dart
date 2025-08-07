@@ -1,4 +1,4 @@
-import 'package:watching/services/trakt/shows_api.dart';
+import 'package:watching/api/trakt/shows_api.dart';
 import 'mock_trakt_api_base.dart';
 
 class TestShowsApi implements ShowsApi {
@@ -77,7 +77,9 @@ class TestShowsApi implements ShowsApi {
     int page = 1,
     int limit = 10,
   }) async {
-    return await getJsonList('/shows/$id/comments/$sort?page=$page&limit=$limit');
+    return await getJsonList(
+      '/shows/$id/comments/$sort?page=$page&limit=$limit',
+    );
   }
 
   @override
