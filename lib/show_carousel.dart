@@ -47,9 +47,8 @@ class ShowCarousel extends StatelessWidget {
         ),
         LayoutBuilder(
           builder: (context, constraints) {
-            final screenWidth = constraints.maxWidth;
-            final itemWidth = ((screenWidth / 2.2).clamp(140, 260)).toDouble();
-            final imageHeight = (itemWidth * 1.3).toDouble();
+            const itemWidth = 145.0;
+            const imageHeight = 206.0;
             final carouselHeight = imageHeight + 30;
             if (shows.isEmpty) {
               return SizedBox(

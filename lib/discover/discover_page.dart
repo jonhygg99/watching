@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/show_carousel.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:watching/discover/discover_skeleton.dart';
 
 /// DiscoverPage displays curated carousels of TV shows using data from ApiService.
 /// - Follows Windsurf Development Guidelines for Riverpod usage and code structure.
@@ -24,8 +25,9 @@ class DiscoverPage extends ConsumerWidget {
       return FutureBuilder<List<dynamic>>(
         future: future,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+          // Always show skeleton while waiting for data
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const DiscoverSkeleton();
           }
           if (snapshot.hasError) {
             // Use user-friendly, i18n-ready error message
