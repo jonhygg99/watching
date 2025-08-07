@@ -49,7 +49,8 @@ class ShowCarousel extends StatelessWidget {
           builder: (context, constraints) {
             const itemWidth = 145.0;
             const imageHeight = 206.0;
-            final carouselHeight = imageHeight + 30;
+            // Increased carousel height to accommodate all elements
+            final carouselHeight = imageHeight + 50;
             if (shows.isEmpty) {
               return SizedBox(
                 height: carouselHeight,
@@ -258,14 +259,20 @@ class ShowCarousel extends StatelessWidget {
                   ),
                 ],
               ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            softWrap: true,
+          const SizedBox(height: 4),
+          SizedBox(
+            width: itemWidth - 8, // Slightly less than full width for padding
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold, 
+                fontSize: 12,
+                height: 1.2,
+              ),
+            ),
           ),
         ],
       ),
