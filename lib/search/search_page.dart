@@ -9,7 +9,12 @@ import 'search_results_grid.dart';
 /// Main search page using hooks and Riverpod for state management.
 /// Main search page using Riverpod for state management.
 class SearchPage extends ConsumerStatefulWidget {
-  const SearchPage({super.key});
+  final List<dynamic>? initialTrendingShows;
+  
+  const SearchPage({
+    super.key,
+    this.initialTrendingShows,
+  });
 
   @override
   ConsumerState<SearchPage> createState() => _SearchPageState();
@@ -30,6 +35,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       body: _SearchScroll(
         query: query,
         types: types,
+        initialTrendingShows: widget.initialTrendingShows,
         onQueryChanged: _onQueryChanged,
         onTypesChanged: _onTypesChanged,
       ),
@@ -41,11 +47,13 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 class _SearchScroll extends StatelessWidget {
   final String query;
   final List<String> types;
+  final List<dynamic>? initialTrendingShows;
   final ValueChanged<String> onQueryChanged;
   final ValueChanged<List<String>> onTypesChanged;
   const _SearchScroll({
     required this.query,
     required this.types,
+    this.initialTrendingShows,
     required this.onQueryChanged,
     required this.onTypesChanged,
   });
@@ -109,7 +117,7 @@ class _SearchScroll extends StatelessWidget {
         SliverToBoxAdapter(
           child:
               query.isEmpty
-                  ? _TrendingGrid()
+                  ? _TrendingGrid(initialTrendingShows: initialTrendingShows)
                   : SearchResultsGrid(query: query, types: types),
         ),
       ],
@@ -119,8 +127,45 @@ class _SearchScroll extends StatelessWidget {
 
 /// Grid for trending shows using Freezed model and improved tile widget.
 class _TrendingGrid extends ConsumerWidget {
-  @override
+  final List<dynamic>? initialTrendingShows;
+  
+  const _TrendingGrid({this.initialTrendingShows});
+
   Widget build(BuildContext context, WidgetRef ref) {
+    if (initialTrendingShows != null) {
+      return GridView.count(
+        padding: const EdgeInsets.all(12),
+        crossAxisCount: 3,
+        childAspectRatio: 0.55,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 0,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          for (final item in initialTrendingShows!)
+            SearchResultGridTile(
+              item: SearchResultItem(
+                data: item['show'],
+                type: 'show',
+              ),
+              onTap: () {
+                final show = item['show'];
+                final showId =
+                    show['ids']?['trakt']?.toString() ??
+                    show['ids']?['slug'] ??
+                    '';
+                if (showId.isEmpty) return;
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ShowDetailPage(showId: showId),
+                  ),
+                );
+              },
+            ),
+        ],
+      );
+    }
+    
     final api = ref.watch(traktApiProvider);
     final translationService = ref.watch(showTranslationServiceProvider);
     final countryCode = ref.watch(countryCodeProvider);
