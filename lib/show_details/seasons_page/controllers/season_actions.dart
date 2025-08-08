@@ -109,7 +109,15 @@ class SeasonActions {
     String? languageCode,
     VoidCallback? onEpisodeToggled,
   }) async {
+    // Save the current state before making changes
+    final previousEpisodesState = List<Map<String, dynamic>>.from(episodesState.value);
+    final previousProgressState = progressState.value != null 
+        ? Map<String, dynamic>.from(progressState.value!) 
+        : null;
+    
+    // Update UI optimistically
     await setMarkingColor(epNumber, Colors.blue);
+    
     try {
       if (watched) {
         await traktApi.addToWatchHistory(
@@ -171,8 +179,25 @@ class SeasonActions {
       // Notify that an episode was toggled
       onEpisodeToggled?.call();
     } catch (e) {
+      // Revert to previous state on error
+      episodesState.value = previousEpisodesState;
+      progressState.value = previousProgressState;
+      
+      // Show error feedback
       await setMarkingColor(epNumber, Colors.red, delayMs: 500);
-      await setMarkingColor(epNumber, Colors.grey);
+      
+      // Revert to the correct state based on the actual watched status
+      final isCurrentlyWatched = _isEpisodeWatched(
+        previousProgressState ?? <String, dynamic>{},
+        seasonNumber, 
+        epNumber,
+      );
+      await setMarkingColor(
+        epNumber,
+        isCurrentlyWatched ? Colors.green : Colors.grey,
+      );
+      
+      // Notify about the error state
       onEpisodeToggled?.call();
       rethrow;
     }
