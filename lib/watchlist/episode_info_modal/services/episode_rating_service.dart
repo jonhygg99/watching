@@ -1,4 +1,4 @@
-import 'package:watching/services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 
 class EpisodeRatingService {
   final TraktApi _traktApi;

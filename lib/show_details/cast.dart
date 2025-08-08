@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 import 'cast_guest.dart';
 
 class ShowDetailCast extends StatelessWidget {

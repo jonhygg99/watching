@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:watching/services/trakt/search_api.dart';
-import 'package:watching/services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/search_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 import 'mock/search_mock_responses.dart';
 
 // Create a concrete implementation of TraktApiBase that includes SearchApi

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:watching/services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 part 'app_providers.g.dart';
 
@@ -45,3 +45,60 @@ class NavIndex extends _$NavIndex {
   int build() => 0;
   void set(int index) => state = index;
 }
+
+/// State for trending shows
+class TrendingShowsState {
+  final List<dynamic>? shows;
+  final bool isLoading;
+  final String? error;
+
+  const TrendingShowsState({
+    this.shows,
+    this.isLoading = false,
+    this.error,
+  });
+
+  TrendingShowsState copyWith({
+    List<dynamic>? shows,
+    bool? isLoading,
+    String? error,
+  }) {
+    return TrendingShowsState(
+      shows: shows ?? this.shows,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+/// Notifier for trending shows
+class TrendingShowsNotifier extends StateNotifier<TrendingShowsState> {
+  final Ref _ref;
+  
+  TrendingShowsNotifier(this._ref) : super(const TrendingShowsState(isLoading: true)) {
+    _loadTrendingShows();
+  }
+
+  Future<void> _loadTrendingShows() async {
+    try {
+      state = state.copyWith(isLoading: true);
+      final api = _ref.read(traktApiProvider);
+      final shows = await api.getTrendingShows();
+      state = state.copyWith(
+        shows: shows,
+        isLoading: false,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to load trending shows',
+      );
+    }
+  }
+}
+
+/// Provider for trending shows
+final trendingShowsProvider = StateNotifierProvider<TrendingShowsNotifier, TrendingShowsState>((ref) {
+  return TrendingShowsNotifier(ref);
+});

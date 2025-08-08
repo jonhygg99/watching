@@ -1,6 +1,6 @@
 import 'package:mockito/mockito.dart';
 import 'dart:async';
-import 'package:watching/services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 
 class MockTraktApiBase extends Mock implements TraktApiBase {
   @override

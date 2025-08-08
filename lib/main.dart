@@ -71,6 +71,8 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Watch the trending shows state
+    final trendingShowsState = ref.watch(trendingShowsProvider);
     final navIndex = ref.watch(navIndexProvider);
     final countryCode = ref.watch(countryCodeProvider);
 
@@ -150,10 +152,14 @@ class MyApp extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.search),
                 onPressed: () {
-                  Navigator.of(
-                    context,
-                  ).push(MaterialPageRoute(builder: (_) => const SearchPage()));
-                },
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => SearchPage(
+                      initialTrendingShows: trendingShowsState.shows,
+                    ),
+                  ),
+                );
+              },
               ),
             ],
           ),

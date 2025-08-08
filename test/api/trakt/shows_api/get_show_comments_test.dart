@@ -20,7 +20,7 @@ void main() {
       final mockComments = getMockShowComments();
 
       when(
-        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest'),
+        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest?page=1&limit=10'),
       ).thenAnswer((_) async => mockComments);
 
       // Act
@@ -48,7 +48,7 @@ void main() {
       expect(review['user_rating'], 9.5);
 
       verify(
-        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest'),
+        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest?page=1&limit=10'),
       ).called(1);
     });
 
@@ -57,7 +57,7 @@ void main() {
       final mockComments = getMockShowComments().sublist(0, 2);
 
       when(
-        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/likes'),
+        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/likes?page=1&limit=10'),
       ).thenAnswer((_) async => mockComments);
 
       // Act
@@ -71,14 +71,14 @@ void main() {
       expect(result.length, 2);
 
       verify(
-        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/likes'),
+        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/likes?page=1&limit=10'),
       ).called(1);
     });
 
     test('should handle empty comments response', () async {
       // Arrange
       when(
-        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest'),
+        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest?page=1&limit=10'),
       ).thenAnswer((_) async => []);
 
       // Act
@@ -89,14 +89,14 @@ void main() {
       expect(result.isEmpty, true);
 
       verify(
-        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest'),
+        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest?page=1&limit=10'),
       ).called(1);
     });
 
     test('should throw an exception when API call fails', () async {
       // Arrange
       when(
-        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest'),
+        mockTraktApiBase.getJsonList('/shows/game-of-thrones/comments/newest?page=1&limit=10'),
       ).thenThrow(Exception('API Error'));
 
       // Act & Assert

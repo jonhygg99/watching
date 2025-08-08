@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 import 'package:watching/providers/app_providers.dart';
-import 'package:watching/services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
 
 // Test wrapper widget to provide dependencies

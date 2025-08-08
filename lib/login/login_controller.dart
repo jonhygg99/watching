@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../services/trakt/trakt_api.dart';
-import '../providers/auth_provider.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/providers/auth_provider.dart';
 
 /// State for the login flow.
 class LoginState {

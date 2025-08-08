@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
-import '../../../services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 
 /// Lista modular de episodios de temporada según Windsurf Guidelines.
 /// Permite marcar/desmarcar episodios y feedback visual según progreso.

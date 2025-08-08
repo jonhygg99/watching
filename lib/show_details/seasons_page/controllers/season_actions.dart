@@ -1,6 +1,6 @@
 /// Controlador de acciones bulk y toggle para episodios de temporada.
 import 'package:flutter/material.dart';
-import '../../../services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 
 class SeasonActions {
   /// Acción bulk: marcar o desmarcar todos los episodios de la temporada.

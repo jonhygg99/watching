@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/app_providers.dart';
-import '../show_details/details_page.dart';
-import 'search_result_item.dart';
+import 'search_results_grid.dart';
+import 'trending_grid.dart';
 
 /// Main search page using hooks and Riverpod for state management.
 /// Main search page using Riverpod for state management.
 class SearchPage extends ConsumerStatefulWidget {
-  const SearchPage({super.key});
+  final List<dynamic>? initialTrendingShows;
+  
+  const SearchPage({
+    super.key,
+    this.initialTrendingShows,
+  });
 
   @override
   ConsumerState<SearchPage> createState() => _SearchPageState();
@@ -28,6 +32,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       body: _SearchScroll(
         query: query,
         types: types,
+        initialTrendingShows: widget.initialTrendingShows,
         onQueryChanged: _onQueryChanged,
         onTypesChanged: _onTypesChanged,
       ),
@@ -39,11 +44,13 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 class _SearchScroll extends StatelessWidget {
   final String query;
   final List<String> types;
+  final List<dynamic>? initialTrendingShows;
   final ValueChanged<String> onQueryChanged;
   final ValueChanged<List<String>> onTypesChanged;
   const _SearchScroll({
     required this.query,
     required this.types,
+    this.initialTrendingShows,
     required this.onQueryChanged,
     required this.onTypesChanged,
   });
@@ -107,140 +114,12 @@ class _SearchScroll extends StatelessWidget {
         SliverToBoxAdapter(
           child:
               query.isEmpty
-                  ? _TrendingGrid()
-                  : _SearchResultsGrid(query: query, types: types),
+                  ? TrendingGrid(initialTrendingShows: initialTrendingShows)
+                  : SearchResultsGrid(query: query, types: types),
         ),
       ],
     );
   }
 }
 
-/// Grid for trending shows using Freezed model and improved tile widget.
-class _TrendingGrid extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final api = ref.watch(traktApiProvider);
-    return FutureBuilder<List<dynamic>>(
-      future: api.getTrendingShows(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final shows = snapshot.data ?? [];
-        if (shows.isEmpty) {
-          return const Center(child: Text('No hay shows en tendencia.'));
-        }
-        return GridView.count(
-          padding: const EdgeInsets.all(12),
-          crossAxisCount: 3,
-          childAspectRatio: 0.55,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 0,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            for (final item in shows)
-              SearchResultGridTile(
-                item: SearchResultItem(
-                  data: Map<String, dynamic>.from(item['show'] as Map),
-                  type: 'show',
-                ),
-                onTap: () {
-                  final show = Map<String, dynamic>.from(item['show'] as Map);
-                  final showId =
-                      show['ids']?['trakt']?.toString() ??
-                      show['ids']?['slug'] ??
-                      '';
-                  if (showId.isEmpty) return;
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ShowDetailPage(showId: showId),
-                    ),
-                  );
-                },
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
 
-/// Grid for search results using Freezed model and improved tile widget.
-class _SearchResultsGrid extends ConsumerWidget {
-  final String query;
-  final List<String> types;
-  const _SearchResultsGrid({required this.query, required this.types});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Show message if no types are selected
-    if (types.isEmpty) {
-      return const Center(
-        child: Text('Selecciona al menos un tipo (Película o Serie)'),
-      );
-    }
-
-    final api = ref.watch(traktApiProvider);
-    final searchType = types.join(',');
-    
-    return FutureBuilder<List<dynamic>>(
-      future: query.isNotEmpty 
-          ? api.searchMoviesAndShows(query: query, type: searchType)
-          : Future.value([]),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return const Center(child: Text('Error al buscar.'));
-        }
-        final results = snapshot.data ?? [];
-        final filtered =
-            results
-                .where(
-                  (item) => item['type'] == 'show' || item['type'] == 'movie',
-                )
-                .toList();
-        if (filtered.isEmpty) {
-          return Center(
-            child: Text('No se encontraron resultados para "$query".'),
-          );
-        }
-        return GridView.count(
-          padding: const EdgeInsets.all(12),
-          crossAxisCount: 3,
-          childAspectRatio: 0.55,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 0,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            for (final item in filtered)
-              SearchResultGridTile(
-                item: SearchResultItem(
-                  data: Map<String, dynamic>.from(item[item['type']] as Map),
-                  type: item['type'] as String,
-                ),
-                onTap: () {
-                  final show = Map<String, dynamic>.from(
-                    item[item['type']] as Map,
-                  );
-                  final showId =
-                      show['ids']?['trakt']?.toString() ??
-                      show['ids']?['slug'] ??
-                      '';
-                  if (showId.isEmpty) return;
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ShowDetailPage(showId: showId),
-                    ),
-                  );
-                },
-              ),
-          ],
-        );
-      },
-    );
-  }
-}

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:watching/watchlist/progress_bar.dart';
 import 'package:watching/watchlist/episode_info_button.dart';
-import 'package:watching/services/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 
 /// Displays the user's progress for a show, including next episode info and progress bar.
 /// Accepts progress data directly or fetches it if not provided.

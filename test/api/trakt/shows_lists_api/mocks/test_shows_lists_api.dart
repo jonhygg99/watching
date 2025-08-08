@@ -1,6 +1,6 @@
 import 'package:mockito/mockito.dart';
-import 'package:watching/services/trakt/trakt_api.dart';
-import 'package:watching/services/trakt/shows_lists_api.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/api/trakt/shows_lists_api.dart';
 
 // Create a mock TraktApiBase
 class MockTraktApiBase extends Mock implements TraktApiBase {
