@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/api/trakt/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:watching/show_details/details_page.dart' show ShowDetailPage;
 
 class ShowListPage extends ConsumerStatefulWidget {
   final String title;
@@ -30,7 +31,7 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
   int _currentPage = 1;
   bool _hasMore = true;
   bool _isLoadingMore = false;
-  bool _isInitialLoading = false;
+  bool isInitialLoading = false;
   String? _errorMessage;
   late List<dynamic> _allShows = [];
   late dynamic Function(dynamic) _extractShow;
@@ -116,7 +117,7 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       body:
-          _allShows.isEmpty && !_isInitialLoading
+          _allShows.isEmpty && !isInitialLoading
               ? const Center(child: Text('No hay shows disponibles'))
               : Stack(
                 children: [
@@ -228,12 +229,11 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
           onTap: () {
             final showId = _getShowId(show);
             if (showId.isNotEmpty) {
-              // TODO: Navigate to show details when the page is implemented
-              // Navigator.of(context).push(
-              //   MaterialPageRoute(
-              //     builder: (context) => ShowDetailsPage(showId: showId),
-              //   ),
-              // );
+                Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ShowDetailPage(showId: showId),
+                ),
+              );
             }
           },
           child: Column(
