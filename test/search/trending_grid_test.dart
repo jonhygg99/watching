@@ -105,41 +105,55 @@ void main() {
     });
   });
 
-  testWidgets('shows loading indicator when loading', (tester) async {
+  testWidgets('shows loading indicator when loading and translating', (tester) async {
     // Create a delayed future to test loading state
     final completer = Completer<List<dynamic>>();
     when(mockTraktApi.getTrendingShows()).thenAnswer((_) => completer.future);
 
     await tester.pumpWidget(createTestWidget(initialTrendingShows: null));
     
-    // Initial build - should show loading indicator
+    // Initial build - should show loading indicator for API call
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text('No hay shows en tendencia.'), findsNothing);
 
-    // Complete the future and pump until settled
+    // Complete the API future
     completer.complete(testShows);
+    await tester.pump();
+    
+    // Should still show loading while translating
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    
+    // Complete translations
     await tester.pumpAndSettle();
     
-    // Verify the shows are displayed using SearchResultGridTile
+    // Verify the translated shows are displayed
     final tiles = tester.widgetList<SearchResultGridTile>(find.byType(SearchResultGridTile));
     expect(tiles.length, testShows.length);
+    expect(tiles.first.item.data['title'], 'Translated Test Show 1');
+    expect(translationTracker.callCount, testShows.length);
   });
 
-  testWidgets('displays shows when loaded', (tester) async {
+  testWidgets('displays shows when loaded and translates them', (tester) async {
     await tester.pumpWidget(createTestWidget(initialTrendingShows: testShows));
+    
+    // Initial pump shows loading indicator while translating
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    
+    // Wait for translations to complete
     await tester.pumpAndSettle();
     
     // Verify shows are displayed using SearchResultGridTile
     final tiles = tester.widgetList<SearchResultGridTile>(find.byType(SearchResultGridTile));
     expect(tiles.length, testShows.length);
     
-    // Verify the first show's data is passed correctly
+    // Verify the first show's data is passed with translated title
     final firstTile = tiles.first;
-    // Expect the original title since initialShows are used as-is
-    expect(firstTile.item.data['title'], 'Test Show 1');
+    expect(firstTile.item.data['title'], 'Translated Test Show 1');
     
-    // Verify translation service was not called since we're using initialShows
-    expect(translationTracker.callCount, 0);
+    // Verify translation service was called for each show
+    expect(translationTracker.callCount, testShows.length);
+    expect(translationTracker.translatedTitles, contains('Translated Test Show 1'));
+    expect(translationTracker.translatedTitles, contains('Translated Test Show 2'));
   });
 
   testWidgets('shows empty state when API returns empty list', (tester) async {
@@ -175,7 +189,7 @@ void main() {
     expect(translationTracker.callCount, 0);
   });
 
-  testWidgets('uses initialShows when provided', (tester) async {
+  testWidgets('uses and translates initialShows when provided', (tester) async {
     // Reset tracker for this test
     translationTracker = TranslationCallTracker();
     
@@ -196,22 +210,13 @@ void main() {
       ),
     );
     
-    // Should show shows immediately without loading
+    // Should show loading indicator while translating
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    
+    // Wait for translations to complete
     await tester.pumpAndSettle();
     
-    // Verify shows are displayed using SearchResultGridTile
-    final tiles = tester.widgetList<SearchResultGridTile>(find.byType(SearchResultGridTile));
-    expect(tiles.length, testShows.length);
-    
-    // Verify the first show's data is passed correctly
-    final firstTile = tiles.first;
-    // Expect the original title since initialShows are used as-is
-    expect(firstTile.item.data['title'], 'Test Show 1');
-    
-    // Verify translation service was not called since we're using initialShows
-    expect(translationTracker.callCount, 0);
-    
-    // Verify no API call was made
+    // Verify the API was never called
     verifyNever(mockUnusedApi.getTrendingShows());
   });
 }
