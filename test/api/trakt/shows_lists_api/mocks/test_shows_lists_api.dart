@@ -25,11 +25,14 @@ class MockTraktApiBase extends Mock implements TraktApiBase {
       );
       
   @override
-  Future<List<dynamic>> getJsonList(String endpoint) => 
-      super.noSuchMethod(
-        Invocation.method(#getJsonList, [endpoint]),
-        returnValue: Future<List<dynamic>>.value([]),
-      );
+  Future<List<dynamic>> getJsonList(String endpoint) {
+    // Handle the endpoint with pagination parameters
+    return super.noSuchMethod(
+      Invocation.method(#getJsonList, [endpoint]),
+      returnValue: Future<List<dynamic>>.value([]),
+      returnValueForMissingStub: Future<List<dynamic>>.value([]),
+    );
+  }
 }
 
 // Create a test class that extends Mock and implements the required interfaces

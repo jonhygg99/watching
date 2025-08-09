@@ -19,11 +19,15 @@ void main() {
       () async {
         // Arrange
         when(
-          mockTraktApiBase.getJsonList('/shows/favorited?extended=images'),
+          mockTraktApiBase.getJsonList('/shows/favorited/monthly?extended=images&page=1&limit=10'),
         ).thenAnswer((_) async => mostFavoritedShowsResponse);
 
         // Act
-        final result = await showsListsApi.getMostFavoritedShows();
+        final result = await showsListsApi.getMostFavoritedShows(
+          period: 'monthly',
+          page: 1,
+          limit: 10,
+        );
 
         // Assert
         expect(result, isA<List<dynamic>>());
@@ -31,36 +35,40 @@ void main() {
         expect(result[0]['show']['title'], 'The Big Bang Theory');
         expect(result[0]['user_count'], 155291);
         verify(
-          mockTraktApiBase.getJsonList('/shows/favorited?extended=images'),
+          mockTraktApiBase.getJsonList('/shows/favorited/monthly?extended=images&page=1&limit=10'),
         ).called(1);
       },
     );
 
-    test('should call the correct endpoint', () async {
+    test('should call the correct endpoint with pagination', () async {
       // Arrange
       when(
-        mockTraktApiBase.getJsonList('/shows/favorited?extended=images'),
+        mockTraktApiBase.getJsonList('/shows/favorited/weekly?extended=images&page=2&limit=20'),
       ).thenAnswer((_) async => []);
 
       // Act
-      await showsListsApi.getMostFavoritedShows();
+      await showsListsApi.getMostFavoritedShows(
+        period: 'weekly',
+        page: 2,
+        limit: 20,
+      );
 
       // Assert
-      verify(mockTraktApiBase.getJsonList('/shows/favorited?extended=images'));
+      verify(mockTraktApiBase.getJsonList('/shows/favorited/weekly?extended=images&page=2&limit=20'));
     });
 
     test('should include period parameter when specified', () async {
       // Arrange
       const testPeriod = 'weekly';
       when(
-        mockTraktApiBase.getJsonList('/shows/favorited?extended=images'),
+        mockTraktApiBase.getJsonList('/shows/favorited/$testPeriod?extended=images&page=1&limit=10'),
       ).thenAnswer((_) async => []);
 
       // Act
       await showsListsApi.getMostFavoritedShows(period: testPeriod);
 
-      // Assert - Note: The period parameter doesn't affect the endpoint for favorited shows
-      verify(mockTraktApiBase.getJsonList('/shows/favorited?extended=images'));
+      // Assert
+      verify(mockTraktApiBase.getJsonList('/shows/favorited/$testPeriod?extended=images&page=1&limit=10'));
     });
   });
 }

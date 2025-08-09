@@ -19,11 +19,14 @@ void main() {
       () async {
         // Arrange
         when(
-          mockTraktApiBase.getJsonList('/shows/played/monthly?extended=images'),
+          mockTraktApiBase.getJsonList('/shows/played/monthly?extended=images&page=1&limit=10'),
         ).thenAnswer((_) async => mostPlayedShowsResponse);
 
         // Act
-        final result = await showsListsApi.getMostPlayedShows();
+        final result = await showsListsApi.getMostPlayedShows(
+          page: 1,
+          limit: 10,
+        );
 
         // Assert
         expect(result, isA<List<dynamic>>());
@@ -31,31 +34,35 @@ void main() {
         expect(result[0]['show']['title'], 'The Big Bang Theory');
         expect(result[0]['play_count'], 23542030);
         verify(
-          mockTraktApiBase.getJsonList('/shows/played/monthly?extended=images'),
+          mockTraktApiBase.getJsonList('/shows/played/monthly?extended=images&page=1&limit=10'),
         ).called(1);
       },
     );
 
-    test('should include correct period parameter in API call', () async {
+    test('should include correct period and pagination parameters in API call', () async {
       // Arrange
       const testPeriod = 'weekly';
       when(
-        mockTraktApiBase.getJsonList('/shows/played/$testPeriod?extended=images'),
+        mockTraktApiBase.getJsonList('/shows/played/$testPeriod?extended=images&page=2&limit=20'),
       ).thenAnswer((_) async => []);
 
       // Act
-      await showsListsApi.getMostPlayedShows(period: testPeriod);
+      await showsListsApi.getMostPlayedShows(
+        period: testPeriod,
+        page: 2,
+        limit: 20,
+      );
 
       // Assert
       verify(
-        mockTraktApiBase.getJsonList('/shows/played/$testPeriod?extended=images'),
-      );
+        mockTraktApiBase.getJsonList('/shows/played/$testPeriod?extended=images&page=2&limit=20'),
+      ).called(1);
     });
 
     test('should throw an exception when the API call fails', () async {
       // Arrange
       when(
-        mockTraktApiBase.getJsonList('/shows/played/monthly?extended=images'),
+        mockTraktApiBase.getJsonList('/shows/played/monthly?extended=images&page=1&limit=10'),
       ).thenThrow(Exception('API Error'));
 
       // Act & Assert

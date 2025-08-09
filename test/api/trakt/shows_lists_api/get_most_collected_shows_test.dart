@@ -20,12 +20,15 @@ void main() {
         // Arrange
         when(
           mockTraktApiBase.getJsonList(
-            '/shows/collected/monthly?extended=images',
+            '/shows/collected/monthly?extended=images&page=1&limit=10',
           ),
         ).thenAnswer((_) async => mostCollectedShowsResponse);
 
         // Act
-        final result = await showsListsApi.getMostCollectedShows();
+        final result = await showsListsApi.getMostCollectedShows(
+          page: 1,
+          limit: 10,
+        );
 
         // Assert
         expect(result, isA<List<dynamic>>());
@@ -34,42 +37,47 @@ void main() {
         expect(result[0]['collected_count'], 7427018);
         verify(
           mockTraktApiBase.getJsonList(
-            '/shows/collected/monthly?extended=images',
+            '/shows/collected/monthly?extended=images&page=1&limit=10',
           ),
         ).called(1);
       },
     );
 
-    test('should include correct period parameter in API call', () async {
+    test('should include correct period and pagination parameters in API call', () async {
       // Arrange
       const testPeriod = 'yearly';
       when(
         mockTraktApiBase.getJsonList(
-          '/shows/collected/$testPeriod?extended=images',
+          '/shows/collected/$testPeriod?extended=images&page=2&limit=20',
         ),
       ).thenAnswer((_) async => []);
 
       // Act
-      await showsListsApi.getMostCollectedShows(period: testPeriod);
+      await showsListsApi.getMostCollectedShows(
+        period: testPeriod,
+        page: 2,
+        limit: 20,
+      );
 
       // Assert
       verify(
         mockTraktApiBase.getJsonList(
-          '/shows/collected/$testPeriod?extended=images',
+          '/shows/collected/$testPeriod?extended=images&page=2&limit=20',
         ),
-      );
+      ).called(1);
     });
 
     test('should throw an exception when the API call fails', () async {
       // Arrange
       when(
-        mockTraktApiBase.getJsonList(
-          '/shows/collected/monthly?extended=images',
-        ),
+        mockTraktApiBase.getJsonList('/shows/collected/monthly?extended=images&page=1&limit=10'),
       ).thenThrow(Exception('API Error'));
 
       // Act & Assert
-      expect(showsListsApi.getMostCollectedShows, throwsA(isA<Exception>()));
+      expect(
+        () => showsListsApi.getMostCollectedShows(),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 }

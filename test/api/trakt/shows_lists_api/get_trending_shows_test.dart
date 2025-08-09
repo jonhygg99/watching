@@ -19,11 +19,11 @@ void main() {
       () async {
         // Arrange
         when(
-          mockTraktApiBase.getJsonList('/shows/trending?extended=images'),
+          mockTraktApiBase.getJsonList('/shows/trending?extended=images&page=1&limit=10'),
         ).thenAnswer((_) async => trendingShowsResponse);
 
         // Act
-        final result = await showsListsApi.getTrendingShows();
+        final result = await showsListsApi.getTrendingShows(page: 1, limit: 10);
 
         // Assert
         expect(result, isA<List<dynamic>>());
@@ -31,7 +31,7 @@ void main() {
         expect(result[0]['show']['title'], 'Breaking Bad');
         expect(result[1]['show']['title'], 'The Walking Dead');
         verify(
-          mockTraktApiBase.getJsonList('/shows/trending?extended=images'),
+          mockTraktApiBase.getJsonList('/shows/trending?extended=images&page=1&limit=10'),
         ).called(1);
       },
     );
@@ -41,12 +41,12 @@ void main() {
       () async {
         // Arrange
         when(
-          mockTraktApiBase.getJsonList('/shows/trending?extended=images'),
+          mockTraktApiBase.getJsonList('/shows/trending?extended=images&page=2&limit=20'),
         ).thenThrow(Exception('Failed to fetch trending shows'));
 
         // Act & Assert
         expect(
-          showsListsApi.getTrendingShows,
+          () => showsListsApi.getTrendingShows(page: 2, limit: 20),
           throwsA(isA<Exception>()),
         );
       },
