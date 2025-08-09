@@ -13,8 +13,11 @@ import 'package:watching/search/search_result_item.dart';
 // Mock implementations
 class MockTraktApi extends Mock implements TraktApi {
   @override
-  Future<List<dynamic>> getTrendingShows() => super.noSuchMethod(
-        Invocation.method(#getTrendingShows, []),
+  Future<List<dynamic>> getTrendingShows({
+    int page = 1,
+    int limit = 10,
+  }) => super.noSuchMethod(
+        Invocation.method(#getTrendingShows, [], {#page: page, #limit: limit}),
         returnValue: Future.value([]),
         returnValueForMissingStub: Future.value([]),
       );

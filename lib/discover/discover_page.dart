@@ -24,12 +24,39 @@ class DiscoverPage extends ConsumerWidget {
     required List<dynamic> shows,
     required dynamic Function(dynamic) extractShow,
   }) {
+    final api = ref.read(traktApiProvider);
+    
+    // Create a function to fetch more shows based on the title
+    Future<List<dynamic>> fetchShows({int page = 1, int limit = 20}) async {
+      switch (title) {
+        case 'Trending Shows':
+          return await api.getTrendingShows(page: page, limit: limit);
+        case 'Popular Shows':
+          return await api.getPopularShows(page: page, limit: limit);
+        case 'Most Favorited (7 days)':
+          return await api.getMostFavoritedShows(period: 'weekly', page: page, limit: limit);
+        case 'Most Favorited (30 days)':
+          return await api.getMostFavoritedShows(period: 'monthly', page: page, limit: limit);
+        case 'Most Collected (7 days)':
+          return await api.getMostCollectedShows(period: 'weekly', page: page, limit: limit);
+        case 'Most Played (7 days)':
+          return await api.getMostPlayedShows(period: 'weekly', page: page, limit: limit);
+        case 'Most Watched (7 days)':
+          return await api.getMostWatchedShows(period: 'weekly', page: page, limit: limit);
+        case 'Most Anticipated':
+          return await api.getMostAnticipatedShows(page: page, limit: limit);
+        default:
+          return [];
+      }
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ShowListPage(
           title: title,
-          shows: shows,
+          initialShows: shows,
           extractShow: extractShow,
+          fetchShows: fetchShows,
         ),
       ),
     );
