@@ -20,12 +20,15 @@ void main() {
         // Arrange
         when(
           mockTraktApiBase.getJsonList(
-            '/shows/watched/monthly?extended=images',
+            '/shows/watched/monthly?extended=images&page=1&limit=10',
           ),
         ).thenAnswer((_) async => mostWatchedShowsResponse);
 
         // Act
-        final result = await showsListsApi.getMostWatchedShows();
+        final result = await showsListsApi.getMostWatchedShows(
+          page: 1,
+          limit: 10,
+        );
 
         // Assert
         expect(result, isA<List<dynamic>>());
@@ -34,40 +37,47 @@ void main() {
         expect(result[0]['watcher_count'], 203742);
         verify(
           mockTraktApiBase.getJsonList(
-            '/shows/watched/monthly?extended=images',
+            '/shows/watched/monthly?extended=images&page=1&limit=10',
           ),
         ).called(1);
       },
     );
 
-    test('should include correct period parameter in API call', () async {
+    test('should include correct period and pagination parameters in API call', () async {
       // Arrange
       const testPeriod = 'yearly';
       when(
         mockTraktApiBase.getJsonList(
-          '/shows/watched/$testPeriod?extended=images',
+          '/shows/watched/$testPeriod?extended=images&page=2&limit=20',
         ),
       ).thenAnswer((_) async => []);
 
       // Act
-      await showsListsApi.getMostWatchedShows(period: testPeriod);
+      await showsListsApi.getMostWatchedShows(
+        period: testPeriod,
+        page: 2,
+        limit: 20,
+      );
 
       // Assert
       verify(
         mockTraktApiBase.getJsonList(
-          '/shows/watched/$testPeriod?extended=images',
+          '/shows/watched/$testPeriod?extended=images&page=2&limit=20',
         ),
-      );
+      ).called(1);
     });
 
     test('should throw an exception when the API call fails', () async {
       // Arrange
       when(
-        mockTraktApiBase.getJsonList('/shows/watched/monthly?extended=images'),
+        mockTraktApiBase.getJsonList('/shows/watched/monthly?extended=images&page=1&limit=10'),
       ).thenThrow(Exception('API Error'));
 
       // Act & Assert
-      expect(showsListsApi.getMostWatchedShows, throwsA(isA<Exception>()));
+      expect(
+        () => showsListsApi.getMostWatchedShows(),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 }

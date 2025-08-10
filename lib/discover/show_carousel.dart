@@ -11,6 +11,7 @@ class ShowCarousel extends ConsumerWidget {
   final List<dynamic> shows;
   final String emptyText;
   final dynamic Function(dynamic) extractShow;
+  final VoidCallback? onViewMore;
 
   const ShowCarousel({
     super.key,
@@ -18,6 +19,7 @@ class ShowCarousel extends ConsumerWidget {
     required this.shows,
     required this.extractShow,
     required this.emptyText,
+    this.onViewMore,
   });
 
   @override
@@ -25,9 +27,37 @@ class ShowCarousel extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (onViewMore != null)
+                TextButton(
+                  onPressed: onViewMore,
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(50, 24),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    'Ver más',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
         LayoutBuilder(
           builder: (context, constraints) {

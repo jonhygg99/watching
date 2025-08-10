@@ -19,11 +19,14 @@ void main() {
       () async {
         // Arrange
         when(
-          mockTraktApiBase.getJsonList('/shows/anticipated?extended=images'),
+          mockTraktApiBase.getJsonList('/shows/anticipated?extended=images&page=1&limit=10'),
         ).thenAnswer((_) async => mostAnticipatedShowsResponse);
 
         // Act
-        final result = await showsListsApi.getMostAnticipatedShows();
+        final result = await showsListsApi.getMostAnticipatedShows(
+          page: 1,
+          limit: 10,
+        );
 
         // Assert
         expect(result, isA<List<dynamic>>());
@@ -31,7 +34,7 @@ void main() {
         expect(result[0]['show']['title'], 'House of the Dragon');
         expect(result[0]['list_count'], 1524);
         verify(
-          mockTraktApiBase.getJsonList('/shows/anticipated?extended=images'),
+          mockTraktApiBase.getJsonList('/shows/anticipated?extended=images&page=1&limit=10'),
         ).called(1);
       },
     );
@@ -39,7 +42,7 @@ void main() {
     test('should call the correct endpoint', () async {
       // Arrange
       when(
-        mockTraktApiBase.getJsonList('/shows/anticipated?extended=images'),
+        mockTraktApiBase.getJsonList('/shows/anticipated?extended=images&page=1&limit=10'),
       ).thenAnswer((_) async => []);
 
       // Act
@@ -47,18 +50,39 @@ void main() {
 
       // Assert
       verify(
-        mockTraktApiBase.getJsonList('/shows/anticipated?extended=images'),
+        mockTraktApiBase.getJsonList('/shows/anticipated?extended=images&page=1&limit=10'),
       );
+    });
+
+    test('should call the correct endpoint with pagination', () async {
+      // Arrange
+      when(
+        mockTraktApiBase.getJsonList('/shows/anticipated?extended=images&page=2&limit=20'),
+      ).thenAnswer((_) async => []);
+
+      // Act
+      await showsListsApi.getMostAnticipatedShows(
+        page: 2,
+        limit: 20,
+      );
+
+      // Assert
+      verify(
+        mockTraktApiBase.getJsonList('/shows/anticipated?extended=images&page=2&limit=20'),
+      ).called(1);
     });
 
     test('should throw an exception when the API call fails', () async {
       // Arrange
       when(
-        mockTraktApiBase.getJsonList('/shows/anticipated?extended=images'),
+        mockTraktApiBase.getJsonList('/shows/anticipated?extended=images&page=1&limit=10'),
       ).thenThrow(Exception('API Error'));
 
       // Act & Assert
-      expect(showsListsApi.getMostAnticipatedShows, throwsA(isA<Exception>()));
+      expect(
+        () => showsListsApi.getMostAnticipatedShows(),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 }

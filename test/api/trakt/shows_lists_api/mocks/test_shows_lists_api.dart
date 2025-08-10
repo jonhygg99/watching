@@ -25,11 +25,14 @@ class MockTraktApiBase extends Mock implements TraktApiBase {
       );
       
   @override
-  Future<List<dynamic>> getJsonList(String endpoint) => 
-      super.noSuchMethod(
-        Invocation.method(#getJsonList, [endpoint]),
-        returnValue: Future<List<dynamic>>.value([]),
-      );
+  Future<List<dynamic>> getJsonList(String endpoint) {
+    // Handle the endpoint with pagination parameters
+    return super.noSuchMethod(
+      Invocation.method(#getJsonList, [endpoint]),
+      returnValue: Future<List<dynamic>>.value([]),
+      returnValueForMissingStub: Future<List<dynamic>>.value([]),
+    );
+  }
 }
 
 // Create a test class that extends Mock and implements the required interfaces
@@ -62,37 +65,56 @@ class TestShowsListsApi extends Mock implements TraktApiBase, ShowsListsApi {
 
   // ShowsListsApi implementation - these will be mocked in tests
   @override
-  Future<List<dynamic>> getTrendingShows() async {
-    return _apiBase.getJsonList('/shows/trending?extended=images');
+  Future<List<dynamic>> getTrendingShows({int page = 1, int limit = 10}) async {
+    return _apiBase.getJsonList('/shows/trending?extended=images&page=$page&limit=$limit');
   }
 
   @override
-  Future<List<dynamic>> getPopularShows() async {
-    return _apiBase.getJsonList('/shows/popular?extended=images');
+  Future<List<dynamic>> getPopularShows({int page = 1, int limit = 10}) async {
+    return _apiBase.getJsonList('/shows/popular?extended=images&page=$page&limit=$limit');
   }
 
   @override
-  Future<List<dynamic>> getMostFavoritedShows({String period = 'monthly'}) async {
-    return _apiBase.getJsonList('/shows/favorited?extended=images');
+  Future<List<dynamic>> getMostFavoritedShows({
+    String period = 'monthly',
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return _apiBase.getJsonList('/shows/favorited/$period?extended=images&page=$page&limit=$limit');
   }
 
   @override
-  Future<List<dynamic>> getMostCollectedShows({String period = 'monthly'}) async {
-    return _apiBase.getJsonList('/shows/collected/$period?extended=images');
+  Future<List<dynamic>> getMostCollectedShows({
+    String period = 'monthly',
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return _apiBase.getJsonList('/shows/collected/$period?extended=images&page=$page&limit=$limit');
   }
 
   @override
-  Future<List<dynamic>> getMostPlayedShows({String period = 'monthly'}) async {
-    return _apiBase.getJsonList('/shows/played/$period?extended=images');
+  Future<List<dynamic>> getMostPlayedShows({
+    String period = 'monthly',
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return _apiBase.getJsonList('/shows/played/$period?extended=images&page=$page&limit=$limit');
   }
 
   @override
-  Future<List<dynamic>> getMostWatchedShows({String period = 'monthly'}) async {
-    return _apiBase.getJsonList('/shows/watched/$period?extended=images');
+  Future<List<dynamic>> getMostWatchedShows({
+    String period = 'monthly',
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return _apiBase.getJsonList('/shows/watched/$period?extended=images&page=$page&limit=$limit');
   }
 
   @override
-  Future<List<dynamic>> getMostAnticipatedShows() async {
-    return _apiBase.getJsonList('/shows/anticipated?extended=images');
+  Future<List<dynamic>> getMostAnticipatedShows({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return _apiBase.getJsonList('/shows/anticipated?extended=images&page=$page&limit=$limit');
   }
 }
