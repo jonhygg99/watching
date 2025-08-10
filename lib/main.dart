@@ -53,20 +53,14 @@ class MyApp extends ConsumerWidget {
     const WatchlistPage(),
     const MyShowsPage(),
   ];
-  
+
   static final List<BottomNavigationBarItem> _navItems = const [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.explore),
-      label: 'Discover',
-    ),
+    BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Discover'),
     BottomNavigationBarItem(
       icon: Icon(Icons.bookmark_border),
       label: 'Watchlist',
     ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.tv), 
-      label: 'My Shows'
-    ),
+    BottomNavigationBarItem(icon: Icon(Icons.tv), label: 'My Shows'),
   ];
 
   @override
@@ -152,32 +146,29 @@ class MyApp extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.search),
                 onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => SearchPage(
-                      initialTrendingShows: trendingShowsState.shows,
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder:
+                          (_) => SearchPage(
+                            initialTrendingShows: trendingShowsState.shows,
+                          ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
               ),
             ],
           ),
           body: Column(
             children: [
               // Main content area with IndexedStack
-              Expanded(
-                child: IndexedStack(
-                  index: navIndex,
-                  children: _pages,
-                ),
-              ),
+              Expanded(child: IndexedStack(index: navIndex, children: _pages)),
               // Bottom Navigation Bar
               BottomNavigationBar(
                 items: _navItems,
                 currentIndex: navIndex,
                 selectedItemColor: Colors.redAccent,
-                onTap: (index) => ref.read(navIndexProvider.notifier).set(index),
+                onTap:
+                    (index) => ref.read(navIndexProvider.notifier).set(index),
               ),
             ],
           ),
