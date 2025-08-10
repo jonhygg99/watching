@@ -117,7 +117,9 @@ mixin CalendarApi on TraktApiBase {
       startDate: startDate,
       days: days,
       endpoint: 'calendars/my/shows/premieres',
-      queryParams: {'extended': 'season_premiere'},
+      queryParams: {
+        'extended': 'mid_season_premiere,season_premiere,series_premiere',
+      },
       maxConcurrent: maxConcurrent,
     );
   }

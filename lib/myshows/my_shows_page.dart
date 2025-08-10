@@ -11,15 +11,24 @@ class MyShowsPage extends StatefulWidget {
   State<MyShowsPage> createState() => _MyShowsPageState();
 }
 
-class _MyShowsPageState extends State<MyShowsPage> {
+class _MyShowsPageState extends State<MyShowsPage> with TickerProviderStateMixin {
   List<dynamic>? _calendarData;
+  List<dynamic>? _premieresData;
   bool _isLoading = false;
   String? _error;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _fetchCalendar();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchCalendar() async {
@@ -53,18 +62,13 @@ class _MyShowsPageState extends State<MyShowsPage> {
 
       setState(() {
         _calendarData = data1;
+        _premieresData = data2;
+        
         if (data2.isNotEmpty) {
-          debugPrint('Total new shows: ${data3.length}');
-          for (var i = 0; i < data3.length; i++) {
-            debugPrint('New show ${i + 1}: ${data3[i]}');
-          }
+          debugPrint('Total premieres: ${data2.length}');
         }
-
         if (data3.isNotEmpty) {
           debugPrint('Total new shows: ${data3.length}');
-          for (var i = 0; i < data3.length; i++) {
-            debugPrint('New show ${i + 1}: ${data3[i]}');
-          }
         }
       });
     } catch (e) {
@@ -82,54 +86,72 @@ class _MyShowsPageState extends State<MyShowsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Shows Calendar')),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _error != null
+      appBar: AppBar(
+        title: const Text('My Shows'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Upcoming'),
+            Tab(text: 'Premieres'),
+          ],
+        ),
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
               ? Center(
-                child: Text(
-                  'Error: $_error',
-                  style: const TextStyle(color: Colors.red),
+                  child: Text(
+                    'Error: $_error',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                )
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Upcoming Episodes Tab
+                    _buildShowList(_calendarData ?? []),
+                    // Premieres Tab
+                    _buildShowList(_premieresData ?? []),
+                  ],
                 ),
-              )
-              : _calendarData == null || _calendarData!.isEmpty
-              ? const Center(child: Text('No shows found'))
-              : ListView.builder(
-                itemCount: _calendarData!.length,
-                itemBuilder: (context, index) {
-                  final item = _calendarData![index];
-                  final show = item['show'];
-                  final episode = item['episode'];
-                  final firstAired = item['first_aired'];
+    );
+  }
 
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    child: ListTile(
-                      title: Text(show['title'] ?? 'Unknown Show'),
-                      subtitle: Text(
-                        'S${episode['season'].toString().padLeft(2, '0')}E${episode['number'].toString().padLeft(2, '0')} - ${episode['title'] ?? 'Untitled'}\n'
-                        'Airs: ${firstAired != null ? DateTime.parse(firstAired).toLocal() : 'Unknown'}',
-                      ),
-                      leading:
-                          show['images']?['poster']?[0] != null
-                              ? CachedNetworkImage(
-                                imageUrl:
-                                    'https://image.tmdb.org/t/p/w92${show['images']['poster'][0]}',
-                                width: 50,
-                                fit: BoxFit.cover,
-                                errorWidget:
-                                    (context, error, stackTrace) =>
-                                        const Icon(Icons.tv, size: 50),
-                              )
-                              : const Icon(Icons.tv, size: 50),
-                    ),
-                  );
-                },
-              ),
+  Widget _buildShowList(List<dynamic> items) {
+    if (items.isEmpty) {
+      return const Center(child: Text('No shows found'));
+    }
+
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        final show = item['show'] ?? {};
+        final episode = item['episode'] ?? {};
+        final firstAired = item['first_aired'];
+
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: ListTile(
+            title: Text(show['title']?.toString() ?? 'Unknown Show'),
+            subtitle: Text(
+              'S${episode['season']?.toString().padLeft(2, '0') ?? '??'}'
+              'E${episode['number']?.toString().padLeft(2, '0') ?? '??'} - '
+              '${episode['title']?.toString() ?? 'Untitled'}\n'
+              'Airs: ${firstAired != null ? DateTime.parse(firstAired).toLocal() : 'TBA'}',
+            ),
+            leading: show['images']?['poster']?[0] != null
+                ? CachedNetworkImage(
+                    imageUrl: 'https://image.tmdb.org/t/p/w200${show['images']['poster'][0]}',
+                    width: 50,
+                    height: 75,
+                    fit: BoxFit.cover,
+                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                  )
+                : const Icon(Icons.tv, size: 50),
+          ),
+        );
+      },
     );
   }
 }
