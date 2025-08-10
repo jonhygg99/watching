@@ -140,6 +140,30 @@ mixin CalendarApi on TraktApiBase {
       startDate: startDate,
       days: days,
       endpoint: 'calendars/my/shows/new',
+      queryParams: {'extended': 'series_premiere'},
+      maxConcurrent: maxConcurrent,
+    );
+  }
+
+  /// Gets show finales (mid_season_finale, season_finale, series_finale) airing during the specified time period.
+  /// Handles pagination for periods longer than 30 days.
+  ///
+  /// [startDate]: The start date in YYYY-MM-DD format (e.g., '2025-08-10')
+  /// [days]: Number of days to include in the calendar (can be more than 30)
+  /// Returns a map containing the combined data and response headers
+  Future<Map<String, dynamic>> getMyShowsFinales({
+    required String startDate,
+    required int days,
+    int maxConcurrent = 3,
+  }) async {
+    await ensureValidToken();
+    return _fetchInBatches(
+      startDate: startDate,
+      days: days,
+      endpoint: 'calendars/my/shows/finales',
+      queryParams: {
+        'extended': 'mid_season_finale,season_finale,series_finale',
+      },
       maxConcurrent: maxConcurrent,
     );
   }

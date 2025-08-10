@@ -11,24 +11,16 @@ class MyShowsPage extends StatefulWidget {
   State<MyShowsPage> createState() => _MyShowsPageState();
 }
 
-class _MyShowsPageState extends State<MyShowsPage> with TickerProviderStateMixin {
+class _MyShowsPageState extends State<MyShowsPage>
+    with TickerProviderStateMixin {
   List<dynamic>? _calendarData;
-  List<dynamic>? _premieresData;
   bool _isLoading = false;
   String? _error;
-  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _fetchCalendar();
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   Future<void> _fetchCalendar() async {
@@ -43,33 +35,45 @@ class _MyShowsPageState extends State<MyShowsPage> with TickerProviderStateMixin
       final startDate =
           '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-      final response1 = await trakt.getMyShowsCalendar(
-        startDate: startDate,
-        days: 365, // Get next 365 days
-      );
-      final response2 = await trakt.getMyShowsPremieres(
-        startDate: startDate,
-        days: 365, // Get next 365 days
-      );
-      final response3 = await trakt.getMyNewShows(
+      final response = await trakt.getMyShowsCalendar(
         startDate: startDate,
         days: 365, // Get next 365 days
       );
 
-      final data1 = response1['data'] as List<dynamic>;
-      final data2 = response2['data'] as List<dynamic>;
-      final data3 = response3['data'] as List<dynamic>;
+      final data = response['data'] as List<dynamic>;
+
+      // Group episodes by show ID
+      final Map<String, Map<String, dynamic>> groupedShows = {};
+
+      for (final episode in data) {
+        final showId = episode['show']['ids']['trakt'].toString();
+
+        if (!groupedShows.containsKey(showId)) {
+          groupedShows[showId] = {
+            'id': showId,
+            'show': episode['show'],
+            'episodes': [],
+          };
+        }
+
+        groupedShows[showId]!['episodes'].add({
+          'season': episode['episode']['season'],
+          'episode': episode['episode']['number'],
+          'first_aired': episode['first_aired'],
+          'title': episode['episode']['title'],
+        });
+      }
+
+      // Convert the map to a list and sort by first_aired
+      final List<dynamic> processedData =
+          groupedShows.values.toList()..sort(
+            (a, b) => (a['episodes'][0]['first_aired'] as String).compareTo(
+              b['episodes'][0]['first_aired'] as String,
+            ),
+          );
 
       setState(() {
-        _calendarData = data1;
-        _premieresData = data2;
-        
-        if (data2.isNotEmpty) {
-          debugPrint('Total premieres: ${data2.length}');
-        }
-        if (data3.isNotEmpty) {
-          debugPrint('Total new shows: ${data3.length}');
-        }
+        _calendarData = processedData;
       });
     } catch (e) {
       setState(() {
@@ -86,34 +90,18 @@ class _MyShowsPageState extends State<MyShowsPage> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Shows'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Upcoming'),
-            Tab(text: 'Premieres'),
-          ],
-        ),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
+      appBar: AppBar(title: const Text('My Shows')),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
               ? Center(
-                  child: Text(
-                    'Error: $_error',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    // Upcoming Episodes Tab
-                    _buildShowList(_calendarData ?? []),
-                    // Premieres Tab
-                    _buildShowList(_premieresData ?? []),
-                  ],
+                child: Text(
+                  'Error: $_error',
+                  style: const TextStyle(color: Colors.red),
                 ),
+              )
+              : _buildShowList(_calendarData ?? []),
     );
   }
 
@@ -125,30 +113,73 @@ class _MyShowsPageState extends State<MyShowsPage> with TickerProviderStateMixin
     return ListView.builder(
       itemCount: items.length,
       itemBuilder: (context, index) {
-        final item = items[index];
-        final show = item['show'] ?? {};
-        final episode = item['episode'] ?? {};
-        final firstAired = item['first_aired'];
+        final showData = items[index];
+        final show = showData['show'] ?? {};
+        final episodes = List<Map<String, dynamic>>.from(
+          showData['episodes'] ?? [],
+        );
+
+        // Sort episodes by season and episode number
+        episodes.sort((a, b) {
+          final seasonCompare = (a['season'] as int).compareTo(
+            b['season'] as int,
+          );
+          if (seasonCompare != 0) return seasonCompare;
+          return (a['episode'] as int).compareTo(b['episode'] as int);
+        });
+
+        // Get the next airing episode (first in the list since we sorted by date)
+        final nextEpisode = episodes.isNotEmpty ? episodes[0] : null;
 
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: ListTile(
+          child: ExpansionTile(
+            leading:
+                show['images']?['poster']?[0] != null
+                    ? CachedNetworkImage(
+                      imageUrl:
+                          'https://image.tmdb.org/t/p/w200${show['images']['poster'][0]}',
+                      width: 50,
+                      height: 75,
+                      fit: BoxFit.cover,
+                      errorWidget:
+                          (context, url, error) => const Icon(Icons.error),
+                    )
+                    : const Icon(Icons.tv, size: 50),
             title: Text(show['title']?.toString() ?? 'Unknown Show'),
-            subtitle: Text(
-              'S${episode['season']?.toString().padLeft(2, '0') ?? '??'}'
-              'E${episode['number']?.toString().padLeft(2, '0') ?? '??'} - '
-              '${episode['title']?.toString() ?? 'Untitled'}\n'
-              'Airs: ${firstAired != null ? DateTime.parse(firstAired).toLocal() : 'TBA'}',
-            ),
-            leading: show['images']?['poster']?[0] != null
-                ? CachedNetworkImage(
-                    imageUrl: 'https://image.tmdb.org/t/p/w200${show['images']['poster'][0]}',
-                    width: 50,
-                    height: 75,
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
-                  )
-                : const Icon(Icons.tv, size: 50),
+            subtitle:
+                nextEpisode != null
+                    ? Text(
+                      'Next: S${nextEpisode['season'].toString().padLeft(2, '0')}E${nextEpisode['episode'].toString().padLeft(2, '0')} - ${nextEpisode['title'] ?? 'Untitled'}\nAirs: ${DateTime.tryParse(nextEpisode['first_aired'])?.toLocal() ?? 'TBA'}',
+                    )
+                    : const Text('No upcoming episodes'),
+            children: [
+              if (episodes.isNotEmpty) ...[
+                const Divider(),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Upcoming Episodes (${episodes.length}):',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                ...episodes
+                    .map(
+                      (episode) => ListTile(
+                        dense: true,
+                        title: Text(
+                          'S${episode['season'].toString().padLeft(2, '0')}'
+                          'E${episode['episode'].toString().padLeft(2, '0')} - '
+                          '${episode['title'] ?? 'Untitled'}',
+                        ),
+                        subtitle: Text(
+                          'Airs: ${DateTime.tryParse(episode['first_aired'])?.toLocal() ?? 'TBA'}',
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ],
+            ],
           ),
         );
       },
