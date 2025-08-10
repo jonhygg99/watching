@@ -4,6 +4,83 @@ import 'trakt_api.dart';
 
 /// Mixin for calendar-related endpoints.
 mixin CalendarApi on TraktApiBase {
+  Future<Map<String, dynamic>> _fetchBatch({
+    required String endpoint,
+    required String startDate,
+    required int days,
+    Map<String, String>? queryParams,
+  }) async {
+    final params = queryParams ?? {};
+    params['extended'] = 'images';
+
+    final url = Uri.parse(
+      '$baseUrl/$endpoint/$startDate/$days',
+    ).replace(queryParameters: params);
+
+    final response = await http.get(url, headers: headers);
+
+    if (response.statusCode == 200) {
+      return {
+        'data': jsonDecode(response.body) as List<dynamic>,
+        'startDate': response.headers['x-start-date'],
+        'endDate': response.headers['x-end-date'],
+      };
+    } else {
+      throw Exception(
+        'Error GET $url\n${response.statusCode}\n${response.body}',
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> _fetchInBatches({
+    required String endpoint,
+    required String startDate,
+    required int days,
+    Map<String, String>? queryParams,
+    int maxConcurrent = 3,
+  }) async {
+    final allData = <dynamic>[];
+    final startDateTime = DateTime.parse(startDate);
+    final batches = <Map<String, dynamic>>[];
+
+    // Create batches of 30 days each
+    for (var i = 0; i < days; i += 30) {
+      final batchStart = startDateTime.add(Duration(days: i));
+      final batchDays = (i + 30 > days) ? days - i : 30;
+
+      batches.add({
+        'start': batchStart,
+        'days': batchDays,
+        'startStr':
+            '${batchStart.year}-${batchStart.month.toString().padLeft(2, '0')}-${batchStart.day.toString().padLeft(2, '0')}',
+      });
+    }
+
+    // Process batches in parallel with limited concurrency
+    final results = await Future.wait(
+      batches.map(
+        (batch) => _fetchBatch(
+          endpoint: endpoint,
+          startDate: batch['startStr'] as String,
+          days: batch['days'] as int,
+          queryParams: queryParams,
+        ),
+      ),
+      eagerError: true,
+    );
+
+    // Combine results
+    for (final result in results) {
+      allData.addAll(result['data'] as List<dynamic>);
+    }
+
+    return {
+      'data': allData,
+      'startDate': results.isNotEmpty ? results.first['startDate'] : null,
+      'endDate': results.isNotEmpty ? results.last['endDate'] : null,
+    };
+  }
+
   /// Gets upcoming episodes for shows in the user's watchlist.
   /// Handles pagination for periods longer than 30 days.
   ///
@@ -13,51 +90,15 @@ mixin CalendarApi on TraktApiBase {
   Future<Map<String, dynamic>> getMyShowsCalendar({
     required String startDate,
     required int days,
+    int maxConcurrent = 3,
   }) async {
     await ensureValidToken();
-    
-    final allData = <dynamic>[];
-    DateTime currentStart = DateTime.parse(startDate);
-    int remainingDays = days;
-    String? firstStartDate;
-    String? lastEndDate;
-
-    while (remainingDays > 0) {
-      final batchDays = remainingDays > 30 ? 30 : remainingDays;
-      final batchEndDate = currentStart.add(Duration(days: batchDays - 1));
-      
-      final batchStartStr = '${currentStart.year}-${currentStart.month.toString().padLeft(2, '0')}-${currentStart.day.toString().padLeft(2, '0')}';
-      
-      final url = Uri.parse(
-        '$baseUrl/calendars/my/shows/$batchStartStr/$batchDays?extended=images',
-      );
-
-      final response = await http.get(url, headers: headers);
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as List<dynamic>;
-        allData.addAll(data);
-        
-        // Track the first start date and last end date
-        firstStartDate ??= response.headers['x-start-date'];
-        lastEndDate = response.headers['x-end-date'];
-        
-        // Move to the next batch
-        currentStart = batchEndDate.add(const Duration(days: 1));
-        remainingDays = days - (currentStart.difference(DateTime.parse(startDate)).inDays);
-      } else {
-        throw Exception(
-          'Error GET /calendars/my/shows/$batchStartStr/$batchDays:\n'
-          '${response.statusCode}\n${response.body}',
-        );
-      }
-    }
-
-    return {
-      'data': allData,
-      'startDate': firstStartDate,
-      'endDate': lastEndDate,
-    };
+    return _fetchInBatches(
+      startDate: startDate,
+      days: days,
+      endpoint: 'calendars/my/shows',
+      maxConcurrent: maxConcurrent,
+    );
   }
 
   /// Gets season premieres for shows in the user's watchlist.
@@ -69,51 +110,16 @@ mixin CalendarApi on TraktApiBase {
   Future<Map<String, dynamic>> getMyShowsPremieres({
     required String startDate,
     required int days,
+    int maxConcurrent = 3,
   }) async {
     await ensureValidToken();
-    
-    final allData = <dynamic>[];
-    DateTime currentStart = DateTime.parse(startDate);
-    int remainingDays = days;
-    String? firstStartDate;
-    String? lastEndDate;
-
-    while (remainingDays > 0) {
-      final batchDays = remainingDays > 30 ? 30 : remainingDays;
-      final batchEndDate = currentStart.add(Duration(days: batchDays - 1));
-      
-      final batchStartStr = '${currentStart.year}-${currentStart.month.toString().padLeft(2, '0')}-${currentStart.day.toString().padLeft(2, '0')}';
-      
-      final url = Uri.parse(
-        '$baseUrl/calendars/my/shows/premieres/$batchStartStr/$batchDays?extended=season_premiere',
-      );
-
-      final response = await http.get(url, headers: headers);
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as List<dynamic>;
-        allData.addAll(data);
-        
-        // Track the first start date and last end date
-        firstStartDate ??= response.headers['x-start-date'];
-        lastEndDate = response.headers['x-end-date'];
-        
-        // Move to the next batch
-        currentStart = batchEndDate.add(const Duration(days: 1));
-        remainingDays = days - (currentStart.difference(DateTime.parse(startDate)).inDays);
-      } else {
-        throw Exception(
-          'Error GET /calendars/my/shows/premieres/$batchStartStr/$batchDays:\n'
-          '${response.statusCode}\n${response.body}',
-        );
-      }
-    }
-
-    return {
-      'data': allData,
-      'startDate': firstStartDate,
-      'endDate': lastEndDate,
-    };
+    return _fetchInBatches(
+      startDate: startDate,
+      days: days,
+      endpoint: 'calendars/my/shows/premieres',
+      queryParams: {'extended': 'season_premiere'},
+      maxConcurrent: maxConcurrent,
+    );
   }
 
   /// Gets new show premieres (series_premiere) airing during the specified time period.
@@ -125,50 +131,14 @@ mixin CalendarApi on TraktApiBase {
   Future<Map<String, dynamic>> getMyNewShows({
     required String startDate,
     required int days,
+    int maxConcurrent = 3,
   }) async {
     await ensureValidToken();
-    
-    final allData = <dynamic>[];
-    DateTime currentStart = DateTime.parse(startDate);
-    int remainingDays = days;
-    String? firstStartDate;
-    String? lastEndDate;
-
-    while (remainingDays > 0) {
-      final batchDays = remainingDays > 30 ? 30 : remainingDays;
-      final batchEndDate = currentStart.add(Duration(days: batchDays - 1));
-      
-      final batchStartStr = '${currentStart.year}-${currentStart.month.toString().padLeft(2, '0')}-${currentStart.day.toString().padLeft(2, '0')}';
-      
-      final url = Uri.parse(
-        '$baseUrl/calendars/my/shows/new/$batchStartStr/$batchDays?extended=images',
-      );
-
-      final response = await http.get(url, headers: headers);
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as List<dynamic>;
-        allData.addAll(data);
-        
-        // Track the first start date and last end date
-        firstStartDate ??= response.headers['x-start-date'];
-        lastEndDate = response.headers['x-end-date'];
-        
-        // Move to the next batch
-        currentStart = batchEndDate.add(const Duration(days: 1));
-        remainingDays = days - (currentStart.difference(DateTime.parse(startDate)).inDays);
-      } else {
-        throw Exception(
-          'Error GET /calendars/my/shows/new/$batchStartStr/$batchDays:\n'
-          '${response.statusCode}\n${response.body}',
-        );
-      }
-    }
-
-    return {
-      'data': allData,
-      'startDate': firstStartDate,
-      'endDate': lastEndDate,
-    };
+    return _fetchInBatches(
+      startDate: startDate,
+      days: days,
+      endpoint: 'calendars/my/shows/new',
+      maxConcurrent: maxConcurrent,
+    );
   }
 }
