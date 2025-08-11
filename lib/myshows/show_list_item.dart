@@ -1,0 +1,133 @@
+import 'package:flutter/material.dart';
+import 'package:watching/myshows/days_bubble.dart';
+import 'package:watching/show_details/details_page.dart';
+import 'package:watching/myshows/widgets/show_info.dart';
+import 'package:watching/myshows/widgets/expanded_episode_item.dart';
+import 'package:watching/myshows/widgets/show_poster.dart';
+
+class ShowListItem extends StatelessWidget {
+  final Map<String, dynamic> show;
+  final List<Map<String, dynamic>> episodes;
+  final bool isExpanded;
+  final VoidCallback onToggleExpand;
+
+  const ShowListItem({
+    super.key,
+    required this.show,
+    required this.episodes,
+    required this.isExpanded,
+    required this.onToggleExpand,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Get the next airing episode
+    final nextEpisode = episodes.isNotEmpty ? episodes[0] : null;
+    final airDate =
+        nextEpisode != null
+            ? DateTime.tryParse(nextEpisode['first_aired'])
+            : null;
+    final daysUntil = airDate?.difference(DateTime.now()).inDays ?? 0;
+    final isSeasonPremiere = nextEpisode != null && nextEpisode['episode'] == 1;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) =>
+                    ShowDetailPage(showId: show['ids']['trakt'].toString()),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildShowPoster(),
+                const SizedBox(width: 16),
+                ShowInfo(
+                  show: show,
+                  isSeasonPremiere: isSeasonPremiere,
+                  nextEpisode: nextEpisode,
+                  airDate: airDate,
+                  episodeCount: episodes.length,
+                  isExpanded: isExpanded,
+                  onToggleExpand: onToggleExpand,
+                  formatDate: formatDate,
+                  formatTime: formatTime,
+                ),
+                if (daysUntil >= 0) DaysBubble(days: daysUntil),
+              ],
+            ),
+            if (isExpanded && episodes.length > 1)
+              ..._buildExpandedEpisodes(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShowPoster() {
+    return ShowPoster(show: show);
+  }
+
+  List<Widget> _buildExpandedEpisodes(BuildContext context) {
+    return episodes.sublist(1).map((episode) {
+      final airDate = DateTime.tryParse(episode['first_aired'] ?? '');
+      return ExpandedEpisodeItem(
+        episode: episode,
+        formatDate: formatDate,
+        formatTime: formatTime,
+        getEpisodeTitle: getEpisodeTitle,
+        airDate: airDate,
+      );
+    }).toList();
+  }
+}
+
+String formatDate(DateTime date) {
+  final months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  return '${months[date.month - 1]} ${date.day} ${date.year}';
+}
+
+String formatTime(DateTime date) {
+  final hour = date.hour.toString().padLeft(2, '0');
+  final minute = date.minute.toString().padLeft(2, '0');
+  return '$hour:$minute';
+}
+
+/// Returns 'TBA' if the episode title is null, empty, 'TBA', or exactly 'Episode X' where X is the episode number.
+/// Otherwise returns the original title.
+String getEpisodeTitle(Map<String, dynamic> episode) {
+  final title = episode['title']?.toString().trim();
+  if (title == null || title.isEmpty || title == 'TBA') {
+    return 'TBA';
+  }
+
+  // Check if title is exactly 'Episode X' where X is the episode number
+  final episodeNumber = episode['episode']?.toString();
+  if (episodeNumber != null && title == 'Episode $episodeNumber') {
+    return 'TBA';
+  }
+
+  return title;
+}
