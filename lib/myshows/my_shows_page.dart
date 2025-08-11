@@ -257,7 +257,7 @@ class _MyShowsPageState extends State<MyShowsPage>
                             Expanded(
                               child: Text(
                                 airDate != null
-                                    ? '${_formatDate(airDate)} • ${_formatTime(airDate)}'
+                                    ? '${_formatDate(airDate)} • ${_formatTime(airDate)} • ${_getDaysUntil(airDate)}'
                                     : 'TBA',
                                 style: const TextStyle(fontSize: 14),
                               ),
@@ -325,9 +325,21 @@ class _MyShowsPageState extends State<MyShowsPage>
 
   String _formatTime(DateTime date) {
     final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
+    final minute = date.minute.toString().padLeft(2, '0');
     final amPm = date.hour < 12 ? 'a.m.' : 'p.m.';
-    return '$hour:${date.minute.toString().padLeft(2, '0')} $amPm';
+    return '$hour:$minute $amPm';
   }
 
-
+  String _getDaysUntil(DateTime airDate) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final airDateStart = DateTime(airDate.year, airDate.month, airDate.day);
+    final difference = airDateStart.difference(today);
+    final days = difference.inDays;
+    
+    if (days < 0) return 'Aired';
+    if (days == 0) return 'Today';
+    if (days == 1) return '1 day left';
+    return '$days days left';
+  }
 }
