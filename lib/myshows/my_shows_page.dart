@@ -294,7 +294,7 @@ class _MyShowsPageState extends State<MyShowsPage>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      episode['title']?.toString() ?? 'TBA',
+                                      _getEpisodeTitle(episode),
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w500,
                                         fontSize: 14,
@@ -423,9 +423,25 @@ class _MyShowsPageState extends State<MyShowsPage>
   }
 
   String _formatTime(DateTime date) {
-    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
+    final hour = date.hour.toString().padLeft(2, '0');
     final minute = date.minute.toString().padLeft(2, '0');
-    final amPm = date.hour < 12 ? 'a.m.' : 'p.m.';
-    return '$hour:$minute $amPm';
+    return '$hour:$minute';
+  }
+
+  /// Returns 'TBA' if the episode title is null, empty, 'TBA', or exactly 'Episode X' where X is the episode number.
+  /// Otherwise returns the original title.
+  String _getEpisodeTitle(Map<String, dynamic> episode) {
+    final title = episode['title']?.toString().trim();
+    if (title == null || title.isEmpty || title == 'TBA') {
+      return 'TBA';
+    }
+    
+    // Check if title is exactly 'Episode X' where X is the episode number
+    final episodeNumber = episode['episode']?.toString();
+    if (episodeNumber != null && title == 'Episode $episodeNumber') {
+      return 'TBA';
+    }
+    
+    return title;
   }
 }
