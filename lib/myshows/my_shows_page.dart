@@ -105,12 +105,16 @@ class _MyShowsPageState extends State<MyShowsPage>
     );
   }
 
+  // Map to track which shows are expanded
+  final Map<int, bool> _expandedShows = {};
+
   Widget _buildShowList(List<dynamic> items) {
     if (items.isEmpty) {
-      return const Center(child: Text('No shows found'));
+      return Center(child: Text('No shows found'));
     }
 
     return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 16),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final showData = items[index];
@@ -119,70 +123,211 @@ class _MyShowsPageState extends State<MyShowsPage>
           showData['episodes'] ?? [],
         );
 
-        // Sort episodes by season and episode number
-        episodes.sort((a, b) {
-          final seasonCompare = (a['season'] as int).compareTo(
-            b['season'] as int,
-          );
-          if (seasonCompare != 0) return seasonCompare;
-          return (a['episode'] as int).compareTo(b['episode'] as int);
-        });
+        // Sort episodes by air date
+        episodes.sort(
+          (a, b) => (a['first_aired'] as String).compareTo(
+            b['first_aired'] as String,
+          ),
+        );
 
-        // Get the next airing episode (first in the list since we sorted by date)
+        // Get the next airing episode
         final nextEpisode = episodes.isNotEmpty ? episodes[0] : null;
+        final airDate =
+            nextEpisode != null
+                ? DateTime.tryParse(nextEpisode['first_aired'])
+                : null;
+        final daysUntil = airDate?.difference(DateTime.now()).inDays ?? 0;
+        final isSeasonPremiere =
+            nextEpisode != null && nextEpisode['episode'] == 1;
 
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: ExpansionTile(
-            leading:
-                show['images']?['poster']?[0] != null
-                    ? CachedNetworkImage(
-                      imageUrl:
-                          'https://image.tmdb.org/t/p/w200${show['images']['poster'][0]}',
-                      width: 50,
-                      height: 75,
-                      fit: BoxFit.cover,
-                      errorWidget:
-                          (context, url, error) => const Icon(Icons.error),
-                    )
-                    : const Icon(Icons.tv, size: 50),
-            title: Text(show['title']?.toString() ?? 'Unknown Show'),
-            subtitle:
-                nextEpisode != null
-                    ? Text(
-                      'Next: S${nextEpisode['season'].toString().padLeft(2, '0')}E${nextEpisode['episode'].toString().padLeft(2, '0')} - ${nextEpisode['title'] ?? 'Untitled'}\nAirs: ${DateTime.tryParse(nextEpisode['first_aired'])?.toLocal() ?? 'TBA'}',
-                    )
-                    : const Text('No upcoming episodes'),
-            children: [
-              if (episodes.isNotEmpty) ...[
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Upcoming Episodes (${episodes.length}):',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                ),
-                ...episodes
-                    .map(
-                      (episode) => ListTile(
-                        dense: true,
-                        title: Text(
-                          'S${episode['season'].toString().padLeft(2, '0')}'
-                          'E${episode['episode'].toString().padLeft(2, '0')} - '
-                          '${episode['title'] ?? 'Untitled'}',
+        // Initialize expanded state if not exists
+        _expandedShows.putIfAbsent(index, () => false);
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Show poster
+                      if (show['images']?['poster']?[0] != null)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: CachedNetworkImage(
+                            imageUrl:
+                                'https://image.tmdb.org/t/p/w200${show['images']['poster'][0]}',
+                            width: 60,
+                            height: 90,
+                            fit: BoxFit.cover,
+                            errorWidget:
+                                (context, url, error) => Container(
+                                  width: 60,
+                                  height: 90,
+                                  color: Colors.grey[800],
+                                  child: const Icon(
+                                    Icons.tv,
+                                    size: 30,
+                                    color: Colors.white30,
+                                  ),
+                                ),
+                          ),
+                        )
+                      else
+                        Container(
+                          width: 60,
+                          height: 90,
+                          color: Colors.grey[800],
+                          child: const Icon(Icons.tv, size: 30, color: Colors.white30),
                         ),
-                        subtitle: Text(
-                          'Airs: ${DateTime.tryParse(episode['first_aired'])?.toLocal() ?? 'TBA'}',
+
+                      const SizedBox(width: 16),
+
+                      // Show and episode info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              show['title']?.toString() ?? 'Unknown Show',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              isSeasonPremiere
+                                  ? 'Season Premiere'
+                                  : 'S${nextEpisode?['season'].toString().padLeft(2, '0')} • E${nextEpisode?['episode'].toString().padLeft(2, '0')}',
+                            ),
+                            const SizedBox(height: 4),
+                            if (airDate != null)
+                              Text('${_formatDate(airDate)} • ${_formatTime(airDate)}'),
+                            if (episodes.length > 1)
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _expandedShows[index] = !_expandedShows[index]!;
+                                  });
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  _expandedShows[index]!
+                                      ? 'Hide episodes' 
+                                      : 'Show ${episodes.length - 1} more episodes',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                    )
-                    .toList(),
-              ],
-            ],
-          ),
+
+                      // Days until bubble
+                      if (daysUntil >= 0) _buildDaysBubble(daysUntil),
+                    ],
+                  ),
+                  if (_expandedShows[index]! && episodes.length > 1)
+                    ...episodes.sublist(1).map((episode) {
+                      final airDate = DateTime.tryParse(episode['first_aired'] ?? '');
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 76, right: 16, top: 8),
+                        child: Row(
+                          children: [
+                            Text(
+                              'S${episode['season'].toString().padLeft(2, '0')}E${episode['episode'].toString().padLeft(2, '0')}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                airDate != null
+                                    ? '${_formatDate(airDate)} • ${_formatTime(airDate)}'
+                                    : 'TBA',
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                ],
+              ),
+            );
+          },
         );
       },
     );
   }
+
+  Widget _buildDaysBubble(int days) {
+    return Container(
+      width: 70,
+      height: 70,
+      margin: const EdgeInsets.only(left: 8, right: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF6A1B9A), // Purple color
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFF9C27B0), width: 2),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            days.toString(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Text(
+            'days',
+            style: TextStyle(color: Colors.white, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day} ${date.year}';
+  }
+
+  String _formatTime(DateTime date) {
+    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
+    final amPm = date.hour < 12 ? 'a.m.' : 'p.m.';
+    return '$hour:${date.minute.toString().padLeft(2, '0')} $amPm';
+  }
+
+
 }
