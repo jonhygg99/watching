@@ -255,34 +255,76 @@ class _MyShowsPageState extends State<MyShowsPage>
                       final airDate = DateTime.tryParse(
                         episode['first_aired'] ?? '',
                       );
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                          left: 76,
-                          right: 16,
-                          top: 8,
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                        child: Row(
-                          children: [
-                            Text(
-                              'S${episode['season'].toString().padLeft(2, '0')}E${episode['episode'].toString().padLeft(2, '0')}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).cardColor.withValues(alpha: 0.5),
+                        ),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Season and episode number
+                              Padding(
+                                padding: const EdgeInsets.only(right: 16),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'S${episode['season'].toString().padLeft(2, '0')}E${episode['episode'].toString().padLeft(2, '0')}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                airDate != null
-                                    ? '${_formatDate(airDate)} • ${_formatTime(airDate)} • ${_getDaysUntil(airDate)}'
-                                    : 'TBA',
-                                style: const TextStyle(fontSize: 14),
+
+                              // Episode details
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      episode['title']?.toString() ?? 'TBA',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    if (airDate != null) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${_formatDate(airDate)} • ${_formatTime(airDate)}',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodySmall?.color,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+
+                              // Days bubble - will take full height
+                              if (airDate != null)
+                                _buildEpisodeDaysBubble(airDate),
+                            ],
+                          ),
                         ),
                       );
-                    }).toList(),
+                    }),
                 ],
               ),
             );
@@ -322,6 +364,46 @@ class _MyShowsPageState extends State<MyShowsPage>
     );
   }
 
+  Widget _buildEpisodeDaysBubble(DateTime airDate) {
+    final days = airDate.difference(DateTime.now()).inDays;
+    final isToday = days == 0;
+    final isPast = days < 0;
+    final text =
+        isPast
+            ? 'Aired'
+            : isToday
+            ? 'Today'
+            : days == 1
+            ? '1 day'
+            : '$days days';
+
+    return Container(
+      width: 70, // Fixed width for better alignment
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color:
+            isPast
+                ? Colors.grey[700]
+                : isToday
+                ? Colors.green[700]
+                : const Color(0xFF6A1B9A),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            height: 1.2,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
   String _formatDate(DateTime date) {
     final months = [
       'Jan',
@@ -345,18 +427,5 @@ class _MyShowsPageState extends State<MyShowsPage>
     final minute = date.minute.toString().padLeft(2, '0');
     final amPm = date.hour < 12 ? 'a.m.' : 'p.m.';
     return '$hour:$minute $amPm';
-  }
-
-  String _getDaysUntil(DateTime airDate) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final airDateStart = DateTime(airDate.year, airDate.month, airDate.day);
-    final difference = airDateStart.difference(today);
-    final days = difference.inDays;
-
-    if (days < 0) return 'Aired';
-    if (days == 0) return 'Today';
-    if (days == 1) return '1 day left';
-    return '$days days left';
   }
 }
