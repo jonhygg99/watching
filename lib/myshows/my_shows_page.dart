@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/shared/constants/measures.dart';
 
 class MyShowsPage extends StatefulWidget {
   const MyShowsPage({super.key});
@@ -145,7 +146,6 @@ class _MyShowsPageState extends State<MyShowsPage>
 
         return StatefulBuilder(
           builder: (context, setState) {
-            
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
@@ -155,19 +155,20 @@ class _MyShowsPageState extends State<MyShowsPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Show poster
-                      if (show['images']?['poster']?[0] != null)
+                      if (show['images']?['poster'] is List &&
+                          (show['images']!['poster'] as List).isNotEmpty)
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: kShowBorderRadius,
                           child: CachedNetworkImage(
                             imageUrl:
-                                'https://image.tmdb.org/t/p/w200${show['images']['poster'][0]}',
-                            width: 60,
-                            height: 90,
+                                'https://${(show['images']!['poster'] as List).first}',
+                            width: kMyShowItemWidth,
+                            height: kMyShowImageHeight,
                             fit: BoxFit.cover,
                             errorWidget:
                                 (context, url, error) => Container(
-                                  width: 60,
-                                  height: 90,
+                                  width: kMyShowItemWidth,
+                                  height: kMyShowImageHeight,
                                   color: Colors.grey[800],
                                   child: const Icon(
                                     Icons.tv,
@@ -179,10 +180,17 @@ class _MyShowsPageState extends State<MyShowsPage>
                         )
                       else
                         Container(
-                          width: 60,
-                          height: 90,
+                          decoration: BoxDecoration(
+                            borderRadius: kShowBorderRadius,
+                          ),
+                          width: kMyShowItemWidth,
+                          height: kMyShowImageHeight,
                           color: Colors.grey[800],
-                          child: const Icon(Icons.tv, size: 30, color: Colors.white30),
+                          child: const Icon(
+                            Icons.tv,
+                            size: 30,
+                            color: Colors.white30,
+                          ),
                         ),
 
                       const SizedBox(width: 16),
@@ -194,9 +202,8 @@ class _MyShowsPageState extends State<MyShowsPage>
                           children: [
                             Text(
                               show['title']?.toString() ?? 'Unknown Show',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -208,22 +215,26 @@ class _MyShowsPageState extends State<MyShowsPage>
                             ),
                             const SizedBox(height: 4),
                             if (airDate != null)
-                              Text('${_formatDate(airDate)} • ${_formatTime(airDate)}'),
+                              Text(
+                                '${_formatDate(airDate)} • ${_formatTime(airDate)}',
+                              ),
                             if (episodes.length > 1)
                               TextButton(
                                 onPressed: () {
                                   setState(() {
-                                    _expandedShows[index] = !_expandedShows[index]!;
+                                    _expandedShows[index] =
+                                        !_expandedShows[index]!;
                                   });
                                 },
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                 ),
                                 child: Text(
                                   _expandedShows[index]!
-                                      ? 'Hide episodes' 
+                                      ? 'Hide episodes'
                                       : 'Show ${episodes.length - 1} more episodes',
                                   style: const TextStyle(
                                     fontSize: 14,
@@ -241,9 +252,15 @@ class _MyShowsPageState extends State<MyShowsPage>
                   ),
                   if (_expandedShows[index]! && episodes.length > 1)
                     ...episodes.sublist(1).map((episode) {
-                      final airDate = DateTime.tryParse(episode['first_aired'] ?? '');
+                      final airDate = DateTime.tryParse(
+                        episode['first_aired'] ?? '',
+                      );
                       return Padding(
-                        padding: const EdgeInsets.only(left: 76, right: 16, top: 8),
+                        padding: const EdgeInsets.only(
+                          left: 76,
+                          right: 16,
+                          top: 8,
+                        ),
                         child: Row(
                           children: [
                             Text(
@@ -336,7 +353,7 @@ class _MyShowsPageState extends State<MyShowsPage>
     final airDateStart = DateTime(airDate.year, airDate.month, airDate.day);
     final difference = airDateStart.difference(today);
     final days = difference.inDays;
-    
+
     if (days < 0) return 'Aired';
     if (days == 0) return 'Today';
     if (days == 1) return '1 day left';

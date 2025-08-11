@@ -15,7 +15,7 @@ class ShowDetailHeader extends StatelessWidget {
         images['fanart'] != null && (images['fanart'] as List).isNotEmpty
             ? 'https://${(images['fanart'] as List).first}'
             : null;
-    final posterUrl =
+    final showImageUrl =
         images['poster'] != null && (images['poster'] as List).isNotEmpty
             ? 'https://${(images['poster'] as List).first}'
             : null;
@@ -27,7 +27,7 @@ class ShowDetailHeader extends StatelessWidget {
         borderRadius: kShowPosterBorderRadius,
         child: SizedBox(
           width: double.infinity,
-          height: 170,
+          height: kMyShowImageHeight,
           child: CachedNetworkImage(
             imageUrl: fanartUrl,
             fit: BoxFit.cover,
@@ -46,11 +46,11 @@ class ShowDetailHeader extends StatelessWidget {
 
     Widget? fanartImage = buildFanartImage(fanartUrl);
 
-    Widget showImage(String? posterUrl) {
-      if (posterUrl == null) {
+    Widget showImage(String? showImageUrl) {
+      if (showImageUrl == null) {
         return Container(
-          height: 170,
-          width: 120,
+          height: kMyShowImageHeight,
+          width: kMyShowItemWidth,
           decoration: BoxDecoration(
             borderRadius: kShowBorderRadius,
             color: Colors.grey[800],
@@ -62,14 +62,14 @@ class ShowDetailHeader extends StatelessWidget {
       return ClipRRect(
         borderRadius: kShowBorderRadius,
         child: CachedNetworkImage(
-          imageUrl: posterUrl,
-          height: 170,
-          width: 120,
+          imageUrl: showImageUrl,
+          height: kMyShowImageHeight,
+          width: kMyShowItemWidth,
           fit: BoxFit.cover,
           placeholder:
               (ctx, url) => const SizedBox(
-                height: 170,
-                width: 120,
+                height: kMyShowImageHeight,
+                width: kMyShowItemWidth,
                 child: Center(child: CircularProgressIndicator()),
               ),
           errorWidget:
@@ -131,7 +131,7 @@ class ShowDetailHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (fanartImage != null && posterUrl != null)
+        if (fanartImage != null && showImageUrl != null)
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -145,7 +145,7 @@ class ShowDetailHeader extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      showImage(posterUrl),
+                      showImage(showImageUrl),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Padding(
