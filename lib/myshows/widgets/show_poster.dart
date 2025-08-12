@@ -28,10 +28,12 @@ class ShowPoster extends StatelessWidget {
 
   Widget _buildPlaceholder() {
     return Container(
-      decoration: BoxDecoration(borderRadius: kShowBorderRadius),
       width: kMyShowItemWidth,
       height: kMyShowImageHeight,
-      color: Colors.grey[800],
+      decoration: BoxDecoration(
+        borderRadius: kShowBorderRadius,
+        color: Colors.grey[800],
+      ),
       child: const Icon(Icons.tv, size: 30, color: Colors.white30),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/myshows/waiting_shows.dart';
 import 'package:watching/myshows/ended_shows.dart';
 import 'package:watching/myshows/show_list_item.dart';
 
@@ -90,19 +92,40 @@ class _MyShowsPageState extends State<MyShowsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('My Shows')),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
               ? Center(
-                  child: Text(
-                    'Error: $_error',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                )
+                child: Text(
+                  'Error: $_error',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              )
               : SingleChildScrollView(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildShowList(_calendarData ?? []),
+                      if (_calendarData?.isNotEmpty ?? false) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          child: Text(
+                            'Upcoming Episodes',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                        _buildShowList(_calendarData ?? []),
+                        const Divider(height: 32),
+                      ],
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Text(
+                          'My Shows',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const WaitingShows(),
+                      const SizedBox(height: 24),
                       const EndedShows(),
                     ],
                   ),
@@ -119,39 +142,40 @@ class _MyShowsPageState extends State<MyShowsPage>
     }
 
     return Column(
-      children: items.asMap().entries.map((entry) {
-        final index = entry.key;
-        final showData = entry.value;
-        final show = showData['show'] ?? {};
-        final episodes = List<Map<String, dynamic>>.from(
-          showData['episodes'] ?? [],
-        );
+      children:
+          items.asMap().entries.map((entry) {
+            final index = entry.key;
+            final showData = entry.value;
+            final show = showData['show'] ?? {};
+            final episodes = List<Map<String, dynamic>>.from(
+              showData['episodes'] ?? [],
+            );
 
-        // Sort episodes by air date
-        episodes.sort(
-          (a, b) => (a['first_aired'] as String).compareTo(
-            b['first_aired'] as String,
-          ),
-        );
+            // Sort episodes by air date
+            episodes.sort(
+              (a, b) => (a['first_aired'] as String).compareTo(
+                b['first_aired'] as String,
+              ),
+            );
 
-        // Initialize expanded state if not exists
-        _expandedShows.putIfAbsent(index, () => false);
+            // Initialize expanded state if not exists
+            _expandedShows.putIfAbsent(index, () => false);
 
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return ShowListItem(
-              show: show,
-              episodes: episodes,
-              isExpanded: _expandedShows[index]!,
-              onToggleExpand: () {
-                setState(() {
-                  _expandedShows[index] = !_expandedShows[index]!;
-                });
+            return StatefulBuilder(
+              builder: (context, setState) {
+                return ShowListItem(
+                  show: show,
+                  episodes: episodes,
+                  isExpanded: _expandedShows[index]!,
+                  onToggleExpand: () {
+                    setState(() {
+                      _expandedShows[index] = !_expandedShows[index]!;
+                    });
+                  },
+                );
               },
             );
-          },
-        );
-      }).toList(),
+          }).toList(),
     );
   }
 }
