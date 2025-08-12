@@ -37,10 +37,11 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
       final now = DateTime.now();
       final startDate =
           '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-      
+
       // Get user's country code for translations
       final countryCode = ref.read(countryCodeProvider);
-      final language = countryCode.isNotEmpty ? countryCode.toLowerCase() : null;
+      final language =
+          countryCode.isNotEmpty ? countryCode.toLowerCase() : null;
 
       final response = await trakt.getMyShowsCalendar(
         startDate: startDate,
@@ -49,10 +50,10 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
       );
 
       final data = response['data'] as List<dynamic>;
-      
+
       // Track show IDs with upcoming episodes
       final Set<int> showsWithUpcomingEpisodes = {};
-      
+
       // Group episodes by show ID
       final Map<String, Map<String, dynamic>> groupedShows = {};
 
@@ -66,9 +67,9 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
 
       // Update the provider with the complete set of shows with upcoming episodes
       if (mounted) {
-        ref.read(upcomingEpisodesProvider.notifier).setShowsWithUpcomingEpisodes(
-              showsWithUpcomingEpisodes,
-            );
+        ref
+            .read(upcomingEpisodesProvider.notifier)
+            .setShowsWithUpcomingEpisodes(showsWithUpcomingEpisodes);
       }
 
       // Second pass: group episodes by show ID
@@ -117,56 +118,42 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('My Shows')),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _error != null
-              ? Center(
-                child: Text(
-                  'Error: $_error',
-                  style: const TextStyle(color: Colors.red),
-                ),
-              )
-              : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_calendarData?.isNotEmpty ?? false) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 8.0,
-                        ),
-                        child: Text(
-                          'Upcoming Episodes',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ),
-                      _buildShowList(_calendarData ?? []),
-                      const Divider(height: 32),
-                    ],
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
-                      child: Text(
-                        'My Shows',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const WaitingShows(),
-                    const SizedBox(height: 24),
-                    const EndedShows(),
-                    const SizedBox(height: 16),
-                  ],
-                ),
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Text(
+          'Error: $_error',
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_calendarData?.isNotEmpty ?? false) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
               ),
+              child: Text(
+                'Upcoming Episodes',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            _buildShowList(_calendarData ?? []),
+          ],
+          const WaitingShows(),
+          const SizedBox(height: 24),
+          const EndedShows(),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 

@@ -59,23 +59,30 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
         .stream
         .distinct((prev, next) {
           if (prev.items.length != next.items.length) {
-            debugPrint('Watchlist size changed from ${prev.items.length} to ${next.items.length}');
             return false;
           }
-          
+
           // Compare show IDs to detect actual changes
-          final prevIds = prev.items.map((i) => (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])?.toString()).toSet();
-          final nextIds = next.items.map((i) => (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])?.toString()).toSet();
-          
-          final hasChanges = !setEquals(prevIds, nextIds);
-          if (hasChanges) {
-            debugPrint('Watchlist content changed. Before: $prevIds, After: $nextIds');
-          }
-          
-          return !hasChanges;
+          final prevIds =
+              prev.items
+                  .map(
+                    (i) =>
+                        (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])
+                            ?.toString(),
+                  )
+                  .toSet();
+          final nextIds =
+              next.items
+                  .map(
+                    (i) =>
+                        (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])
+                            ?.toString(),
+                  )
+                  .toSet();
+
+          return setEquals(prevIds, nextIds);
         })
-        .listen((state) {
-          debugPrint('Watchlist updated with ${state.items.length} items');
+        .listen((_) {
           _loadShows();
         });
   }
@@ -88,16 +95,15 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
 
   /// Tracks the current load operation to prevent duplicates
   Future<void>? _currentLoadOperation;
-  
+
   /// Loads shows from watchlist and enriches them with status information
   /// Processes shows in chunks to prevent UI freezing and provide better feedback
   Future<void> _loadShows() async {
     // If a load operation is already in progress, return that instead of starting a new one
     if (_currentLoadOperation != null) {
-      debugPrint('Load operation already in progress, returning existing future');
       return _currentLoadOperation;
     }
-    
+
     // Add a small delay to debounce rapid updates
     await Future.delayed(const Duration(milliseconds: 100));
 
@@ -106,8 +112,6 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
     _currentLoadOperation = completer.future;
 
     try {
-      debugPrint('Starting load operation with ${_itemsMap.length} cached items');
-      
       // Always set loading state at the start of loading
       state = state.copyWith(
         isLoading: true,
@@ -119,9 +123,6 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
       final watchlistState = _ref.read(watchlistProvider);
       final items = watchlistState.items;
 
-      // First, log the raw watchlist items for debugging
-      debugPrint('Raw watchlist items: ${items.map((i) => (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])?.toString()).toList()}');
-      
       // Deduplicate items by trakt ID
       final seenIds = <String>{};
       final deduplicatedItems = <Map<String, dynamic>>[];
@@ -131,24 +132,19 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
           final show = item['show'] ?? item;
           final ids = show['ids'] ?? {};
           final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
-          
+
           if (traktId == null) {
-            debugPrint('Skipping item with null traktId: $item');
             continue;
           }
-          
+
           if (!seenIds.contains(traktId)) {
             seenIds.add(traktId);
             deduplicatedItems.add(item);
-          } else {
-            debugPrint('Duplicate traktId found: $traktId');
           }
         } catch (e) {
           debugPrint('Error processing watchlist item: $e');
         }
       }
-
-      debugPrint('Processing ${deduplicatedItems.length} deduplicated shows from watchlist (was ${items.length})');
 
       // If we have no items, update state immediately
       if (deduplicatedItems.isEmpty) {
@@ -166,20 +162,18 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
       const chunkSize = 3;
       int processedCount = 0;
       bool hasNewItems = false;
-      
-      // Only process new items that we haven't seen before
-      final itemsToProcess = deduplicatedItems.where((item) {
-        final show = item['show'] ?? item;
-        final ids = show['ids'] ?? {};
-        final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
-        return traktId != null && !_itemsMap.containsKey(traktId);
-      }).toList();
 
-      debugPrint('Found ${itemsToProcess.length} new shows to process');
+      // Only process new items that we haven't seen before
+      final itemsToProcess =
+          deduplicatedItems.where((item) {
+            final show = item['show'] ?? item;
+            final ids = show['ids'] ?? {};
+            final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
+            return traktId != null && !_itemsMap.containsKey(traktId);
+          }).toList();
 
       // If we already have all items, just update the list order
       if (itemsToProcess.isEmpty) {
-        debugPrint('No new shows to process, updating list order');
         final orderedItems = _orderItems(items);
         state = state.copyWith(
           items: orderedItems,
@@ -193,17 +187,15 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
       for (var i = 0; i < itemsToProcess.length; i += chunkSize) {
         // Check if we've been cancelled
         if (completer.isCompleted) {
-          debugPrint('Load operation was cancelled');
           return;
         }
-        
+
         final chunk = itemsToProcess.sublist(
           i,
-          i + chunkSize > itemsToProcess.length ? itemsToProcess.length : i + chunkSize,
+          i + chunkSize > itemsToProcess.length
+              ? itemsToProcess.length
+              : i + chunkSize,
         );
-
-        debugPrint('Processing chunk ${i ~/ chunkSize + 1}/'
-            '${(itemsToProcess.length / chunkSize).ceil()} (${chunk.length} items)');
 
         try {
           // Process current chunk in parallel
@@ -230,9 +222,8 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
               }
             }
           }
-          
+
           processedCount += addedInChunk;
-          debugPrint('Processed $addedInChunk new items in this chunk');
 
           // Only update state periodically to reduce rebuilds
           if (i % (chunkSize * 2) == 0 && hasNewItems) {
@@ -249,8 +240,6 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
         }
       }
 
-      debugPrint('Successfully processed $processedCount/${itemsToProcess.length} new shows');
-      
       // Final state update with all items in the correct order
       final orderedItems = _orderItems(items);
       state = state.copyWith(
@@ -259,7 +248,6 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
         hasData: orderedItems.isNotEmpty,
         isRefreshing: false,
       );
-      
     } catch (e) {
       debugPrint('Error in _loadShows: $e');
       state = state.copyWith(
@@ -279,12 +267,12 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
     _itemsMap.clear();
     await _loadShows();
   }
-  
+
   /// Orders items according to the original list order
   List<Map<String, dynamic>> _orderItems(List<dynamic> items) {
     final orderedItems = <Map<String, dynamic>>[];
     final itemMap = Map<String, Map<String, dynamic>>.from(_itemsMap);
-    
+
     for (final item in items) {
       final show = item['show'] ?? item;
       final ids = show['ids'] ?? {};
@@ -293,7 +281,7 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
         orderedItems.add(itemMap[traktId]!);
       }
     }
-    
+
     return orderedItems;
   }
 
