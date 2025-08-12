@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/features/watchlist/providers/watchlist_providers.dart';
@@ -41,7 +42,6 @@ class MyShowsState {
 
 class MyShowsNotifier extends StateNotifier<MyShowsState> {
   final Ref _ref;
-  bool _isLoading = false;
   StreamSubscription? _watchlistSubscription;
   final Map<String, Map<String, dynamic>> _itemsMap = {};
 
@@ -52,11 +52,14 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
   void _init() {
     // Initial load
     _loadShows();
-    
+
     // Subscribe to watchlist changes
-    _watchlistSubscription = _ref.read(watchlistProvider.notifier).stream.listen((_) {
-      _loadShows();
-    });
+    _watchlistSubscription = _ref
+        .read(watchlistProvider.notifier)
+        .stream
+        .listen((_) {
+          _loadShows();
+        });
   }
 
   @override
@@ -65,26 +68,41 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
     super.dispose();
   }
 
+  /// Tracks the current load operation to prevent duplicates
+  Future<void>? _currentLoadOperation;
+  
   /// Loads shows from watchlist and enriches them with status information
-  /// Handles pagination, error states, and updates the UI accordingly
+  /// Processes shows in chunks to prevent UI freezing and provide better feedback
   Future<void> _loadShows() async {
-    if (_isLoading) {
-      log('Load already in progress, skipping duplicate call');
-      return;
+    // If a load operation is already in progress, return that instead of starting a new one
+    if (_currentLoadOperation != null) {
+      debugPrint('Load operation already in progress, returning existing future');
+      return _currentLoadOperation;
     }
-    
+
+    // Create a new future for this load operation
+    final completer = Completer<void>();
+    _currentLoadOperation = completer.future;
+
     try {
-      _isLoading = true;
-      state = state.copyWith(
-        isLoading: true,
-        error: null,
-        isRefreshing: state.hasData, // Only set to true if we already have data
-      );
+      debugPrint('Starting load operation with ${_itemsMap.length} cached items');
+      
+      // Only show loading state if we don't have any data yet
+      if (!state.hasData || state.isRefreshing) {
+        state = state.copyWith(
+          isLoading: true,
+          error: null,
+          isRefreshing: state.hasData,
+        );
+      }
 
       final trakt = _ref.read(traktApiProvider);
       final watchlistState = _ref.read(watchlistProvider);
       final items = watchlistState.items;
 
+      debugPrint('Processing ${items.length} shows from watchlist');
+
+      // If we have no items, update state immediately
       if (items.isEmpty) {
         _itemsMap.clear();
         state = state.copyWith(
@@ -96,77 +114,145 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
         return;
       }
 
-      // Create a local map to track processed items
-      final Map<String, Map<String, dynamic>> processedItemsMap = {};
+      // Process shows in chunks of 3
+      const chunkSize = 3;
+      int processedCount = 0;
+      bool hasNewItems = false;
       
-      // Process items in chunks for parallel processing
-      const chunkSize = 3; // Reduced chunk size for better reliability
-      final chunks = <List<Map<String, dynamic>>>[];
-      for (var i = 0; i < items.length; i += chunkSize) {
-        final end = (i + chunkSize < items.length) ? i + chunkSize : items.length;
-        chunks.add(items.sublist(i, end));
+      // Only process new items that we haven't seen before
+      final itemsToProcess = items.where((item) {
+        final show = item['show'] ?? item;
+        final ids = show['ids'] ?? {};
+        final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
+        return traktId != null && !_itemsMap.containsKey(traktId);
+      }).toList();
+
+      debugPrint('Found ${itemsToProcess.length} new shows to process');
+
+      // If we already have all items, just update the list order
+      if (itemsToProcess.isEmpty) {
+        debugPrint('No new shows to process, updating list order');
+        final orderedItems = _orderItems(items);
+        state = state.copyWith(
+          items: orderedItems,
+          isLoading: false,
+          hasData: orderedItems.isNotEmpty,
+          isRefreshing: false,
+        );
+        return;
       }
 
-      // Process each chunk in sequence
-      for (final chunk in chunks) {
-        // Process items in parallel within the chunk with error handling
-        final results = await Future.wait(
-          chunk.map((item) => _processShowItem(item, trakt)),
-          eagerError: false, // Don't stop on first error
-        );
+      for (var i = 0; i < itemsToProcess.length; i += chunkSize) {
+        // Check if we've been cancelled
+        if (completer.isCompleted) {
+          debugPrint('Load operation was cancelled');
+          return;
+        }
         
-        // Add successfully processed items to our local map
-        for (final result in results) {
-          if (result != null) {
-            final show = result['show'] ?? result;
-            final ids = show['ids'] ?? {};
-            final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
-            if (traktId != null) {
-              processedItemsMap[traktId] = result;
+        final chunk = itemsToProcess.sublist(
+          i,
+          i + chunkSize > itemsToProcess.length ? itemsToProcess.length : i + chunkSize,
+        );
+
+        debugPrint('Processing chunk ${i ~/ chunkSize + 1}/'
+            '${(itemsToProcess.length / chunkSize).ceil()} (${chunk.length} items)');
+
+        try {
+          // Process current chunk in parallel
+          final processedChunk = await Future.wait(
+            chunk.map(
+              (item) => _processShowItem(item, trakt).catchError((e) {
+                debugPrint('Error processing show: $e');
+                return null; // Return null for failed items
+              }),
+            ),
+          );
+
+          // Add valid items to the map
+          int addedInChunk = 0;
+          for (final item in processedChunk) {
+            if (item != null) {
+              final show = item['show'] ?? item;
+              final ids = show['ids'] ?? {};
+              final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
+              if (traktId != null) {
+                _itemsMap[traktId] = item;
+                addedInChunk++;
+                hasNewItems = true;
+              }
             }
           }
-        }
-        
-        // Update the main items map with the new items
-        _itemsMap.addAll(processedItemsMap);
-        
-        // Update state with current items
-        if (_itemsMap.isNotEmpty) {
-          state = state.copyWith(
-            items: _itemsMap.values.toList(),
-            hasData: true,
-          );
+          
+          processedCount += addedInChunk;
+          debugPrint('Processed $addedInChunk new items in this chunk');
+
+          // Only update state periodically to reduce rebuilds
+          if (i % (chunkSize * 2) == 0 && hasNewItems) {
+            final orderedItems = _orderItems(items);
+            state = state.copyWith(
+              items: orderedItems,
+              hasData: orderedItems.isNotEmpty,
+            );
+            hasNewItems = false;
+          }
+        } catch (e) {
+          debugPrint('Error processing chunk: $e');
+          // Continue with next chunk even if one fails
         }
       }
 
-      // Final state update
+      debugPrint('Successfully processed $processedCount/${itemsToProcess.length} new shows');
+      
+      // Final state update with all items in the correct order
+      final orderedItems = _orderItems(items);
       state = state.copyWith(
-        items: _itemsMap.values.toList(),
+        items: orderedItems,
         isLoading: false,
-        hasData: _itemsMap.isNotEmpty,
+        hasData: orderedItems.isNotEmpty,
         isRefreshing: false,
       );
+      
     } catch (e) {
-      log('Error loading shows: $e');
+      debugPrint('Error in _loadShows: $e');
       state = state.copyWith(
         error: 'Failed to load shows: $e',
         isLoading: false,
         isRefreshing: false,
       );
     } finally {
-      _isLoading = false;
+      _currentLoadOperation = null;
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
     }
   }
-  
+
   Future<void> refresh() async {
     _itemsMap.clear();
     await _loadShows();
   }
   
+  /// Orders items according to the original list order
+  List<Map<String, dynamic>> _orderItems(List<dynamic> items) {
+    final orderedItems = <Map<String, dynamic>>[];
+    final itemMap = Map<String, Map<String, dynamic>>.from(_itemsMap);
+    
+    for (final item in items) {
+      final show = item['show'] ?? item;
+      final ids = show['ids'] ?? {};
+      final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
+      if (traktId != null && itemMap.containsKey(traktId)) {
+        orderedItems.add(itemMap[traktId]!);
+      }
+    }
+    
+    return orderedItems;
+  }
+
   /// Helper method to process a single show item and fetch its status
   /// Returns null if the item is invalid or could not be processed
   Future<Map<String, dynamic>?> _processShowItem(
-    Map<String, dynamic> item, 
+    Map<String, dynamic> item,
     TraktApi trakt,
   ) async {
     try {
@@ -174,9 +260,9 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
       final show = item['show'] ?? item;
       final ids = show['ids'] ?? {};
       final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
-      
+
       if (traktId == null || traktId.isEmpty) return null;
-      
+
       // Try to get the existing item first to avoid unnecessary API calls
       if (!state.isRefreshing) {
         final existingItem = _itemsMap[traktId];
@@ -184,22 +270,22 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
           return existingItem;
         }
       }
-      
+
       // Get show details with status
       final showDetails = await trakt.getShowById(id: traktId).catchError((e) {
         log('Error fetching show details for $traktId: $e');
         return {'status': 'unknown'};
       });
-      
+
       // Create a new map to avoid modifying the original
       final newItem = Map<String, dynamic>.from(item);
       newItem['status'] = showDetails['status'] ?? 'unknown';
-      
+
       if (newItem['show'] != null) {
         newItem['show'] = Map<String, dynamic>.from(newItem['show']);
         newItem['show']['status'] = showDetails['status'] ?? 'unknown';
       }
-      
+
       return newItem;
     } catch (e) {
       log('Error processing show: $e');
@@ -211,9 +297,10 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
   }
 }
 
-final myShowsWithStatusProvider = StateNotifierProvider<MyShowsNotifier, MyShowsState>((ref) {
-  return MyShowsNotifier(ref);
-});
+final myShowsWithStatusProvider =
+    StateNotifierProvider<MyShowsNotifier, MyShowsState>((ref) {
+      return MyShowsNotifier(ref);
+    });
 
 // A separate provider to expose the items as a simple list for easier consumption
 final myShowsListProvider = Provider<List<Map<String, dynamic>>>((ref) {

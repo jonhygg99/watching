@@ -108,16 +108,12 @@ abstract class BaseShowsListState<T extends BaseShowsList>
     // Process shows whenever the state changes
     processShows(state);
 
-    if (state.isLoading && state.items.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     if (state.error != null) {
       return Center(child: Text('Error: ${state.error}'));
     }
 
-    // Don't show anything if we don't have any shows
-    if (_cachedShows.isEmpty) {
+    // Don't show anything if we don't have any shows and not loading
+    if (_cachedShows.isEmpty && !state.isLoading) {
       return const SizedBox.shrink();
     }
 
@@ -127,9 +123,16 @@ abstract class BaseShowsListState<T extends BaseShowsList>
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            '${widget.title} (${_cachedShows.length})',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${widget.title} (${_cachedShows.length})',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              if (state.isLoading) const SizedBox(height: 8),
+              if (state.isLoading) const LinearProgressIndicator(),
+            ],
           ),
         ),
         LayoutBuilder(
