@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/myshows/days_bubble.dart';
 import 'package:watching/show_details/details_page.dart';
 import 'package:watching/myshows/widgets/show_info.dart';
 import 'package:watching/myshows/widgets/expanded_episode_item.dart';
 import 'package:watching/myshows/widgets/show_poster.dart';
+import 'package:watching/api/trakt/show_translation.dart';
+import 'package:watching/providers/app_providers.dart';
 
 class ShowListItem extends StatelessWidget {
   final Map<String, dynamic> show;
@@ -51,16 +54,35 @@ class ShowListItem extends StatelessWidget {
               children: [
                 _buildShowPoster(),
                 const SizedBox(width: 16),
-                ShowInfo(
-                  show: show,
-                  isSeasonPremiere: isSeasonPremiere,
-                  nextEpisode: nextEpisode,
-                  airDate: airDate,
-                  episodeCount: episodes.length,
-                  isExpanded: isExpanded,
-                  onToggleExpand: onToggleExpand,
-                  formatDate: formatDate,
-                  formatTime: formatTime,
+                Consumer(
+                  builder: (context, ref, _) {
+                    final traktApi = ref.watch(traktApiProvider);
+                    final translationService = ref.watch(showTranslationServiceProvider);
+                    
+                    return FutureBuilder<String>(
+                      future: translationService.getTranslatedTitle(
+                        show: show,
+                        traktApi: traktApi,
+                      ),
+                      builder: (context, snapshot) {
+                        final translatedShow = Map<String, dynamic>.from(show);
+                        if (snapshot.hasData) {
+                          translatedShow['title'] = snapshot.data!;
+                        }
+                        return ShowInfo(
+                          show: translatedShow,
+                          isSeasonPremiere: isSeasonPremiere,
+                          nextEpisode: nextEpisode,
+                          airDate: airDate,
+                          episodeCount: episodes.length,
+                          isExpanded: isExpanded,
+                          onToggleExpand: onToggleExpand,
+                          formatDate: formatDate,
+                          formatTime: formatTime,
+                        );
+                      },
+                    );
+                  },
                 ),
                 if (daysUntil >= 0) DaysBubble(days: daysUntil),
               ],

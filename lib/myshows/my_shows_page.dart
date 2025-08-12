@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/features/myshows/providers/upcoming_episodes_provider.dart';
+import 'package:watching/providers/app_providers.dart';
 import 'package:watching/myshows/waiting_shows.dart';
 import 'package:watching/myshows/ended_shows.dart';
 import 'package:watching/myshows/show_list_item.dart';
@@ -36,10 +37,15 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
       final now = DateTime.now();
       final startDate =
           '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      
+      // Get user's country code for translations
+      final countryCode = ref.read(countryCodeProvider);
+      final language = countryCode.isNotEmpty ? countryCode.toLowerCase() : null;
 
       final response = await trakt.getMyShowsCalendar(
         startDate: startDate,
         days: 365, // Get next 365 days
+        language: language,
       );
 
       final data = response['data'] as List<dynamic>;

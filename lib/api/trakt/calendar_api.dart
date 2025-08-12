@@ -12,16 +12,62 @@ mixin CalendarApi on TraktApiBase {
   }) async {
     final params = queryParams ?? {};
     params['extended'] = 'images';
+    
+    // Extract language for translations if provided
+    final language = params['translations'];
+    final bool shouldTranslate = language != null && language != 'all';
+    
+    // Remove translations from params to avoid API errors
+    final requestParams = Map<String, String>.from(params)..remove('translations');
 
     final url = Uri.parse(
       '$baseUrl/$endpoint/$startDate/$days',
-    ).replace(queryParameters: params);
+    ).replace(queryParameters: requestParams);
 
     final response = await http.get(url, headers: headers);
 
     if (response.statusCode == 200) {
+      var data = jsonDecode(response.body) as List<dynamic>;
+      
+      // Process translations if needed
+      if (shouldTranslate) {
+        data = data.map((item) {
+          if (item is Map<String, dynamic> && 
+              item.containsKey('episode') && 
+              item['episode'] is Map<String, dynamic> &&
+              item['episode'].containsKey('translations') &&
+              item['episode']['translations'] is List) {
+            
+            final translations = List<Map<String, dynamic>>.from(
+              item['episode']['translations'],
+            );
+            
+            if (translations.isNotEmpty) {
+              // Find the translation for the requested language
+              final translation = translations.firstWhere(
+                (t) => t['language'] == language,
+                orElse: () => {},
+              );
+              
+              // Create a new episode map with translated fields if available
+              if (translation.isNotEmpty) {
+                return {
+                  ...item,
+                  'episode': {
+                    ...item['episode'],
+                    'title': translation['title'] ?? item['episode']['title'],
+                    'overview': translation['overview'] ?? item['episode']['overview'],
+                  },
+                };
+              }
+            }
+          }
+          return item;
+        }).toList();
+      }
+      
       return {
-        'data': jsonDecode(response.body) as List<dynamic>,
+        'data': data,
         'startDate': response.headers['x-start-date'],
         'endDate': response.headers['x-end-date'],
       };
@@ -90,13 +136,21 @@ mixin CalendarApi on TraktApiBase {
   Future<Map<String, dynamic>> getMyShowsCalendar({
     required String startDate,
     required int days,
+    String? language,
     int maxConcurrent = 3,
   }) async {
     await ensureValidToken();
+    
+    final queryParams = <String, String>{};
+    if (language != null) {
+      queryParams['translations'] = language;
+    }
+    
     return _fetchInBatches(
       startDate: startDate,
       days: days,
       endpoint: 'calendars/my/shows',
+      queryParams: queryParams,
       maxConcurrent: maxConcurrent,
     );
   }
