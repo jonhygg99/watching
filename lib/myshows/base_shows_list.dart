@@ -121,11 +121,6 @@ abstract class BaseShowsListState<T extends BaseShowsList>
       return const SizedBox.shrink();
     }
 
-    // Calculate height based on number of rows needed (3 items per row)
-    final rowCount = (_cachedShows.length / 3).ceil();
-    final itemHeight = 200.0; // Approximate height of each item
-    final gridHeight = (rowCount * itemHeight) + 60.0; // Add some padding
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -137,41 +132,50 @@ abstract class BaseShowsListState<T extends BaseShowsList>
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
-        SizedBox(
-          height: gridHeight,
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 0.6,
-              crossAxisSpacing: 8.0,
-              mainAxisSpacing: 8.0,
-            ),
-            itemCount: _cachedShows.length,
-            itemBuilder: (context, index) {
-              final showData = _cachedShows[index];
-              final show = _convertToTypedMap(showData['show'] ?? showData);
-              final traktId =
-                  show['ids']?['trakt']?.toString() ??
-                  show['ids']?['slug']?.toString();
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate the available width for the grid
+            final width = constraints.maxWidth;
+            // Calculate item width (3 items per row with spacing)
+            const crossAxisCount = 3;
+            const spacing = 8.0;
+            final itemWidth = (width - (spacing * (crossAxisCount - 1)) - 16.0) / crossAxisCount;
+            
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: 0.6,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: spacing,
+                mainAxisExtent: itemWidth * 1.67, // Keep aspect ratio
+              ),
+              itemCount: _cachedShows.length,
+              itemBuilder: (context, index) {
+                final showData = _cachedShows[index];
+                final show = _convertToTypedMap(showData['show'] ?? showData);
+                final traktId =
+                    show['ids']?['trakt']?.toString() ??
+                    show['ids']?['slug']?.toString();
 
-              return GestureDetector(
-                onTap: () {
-                  if (traktId != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ShowDetailPage(showId: traktId),
-                      ),
-                    );
-                  }
-                },
-                child: ShowPoster(show: show),
-              );
-            },
-          ),
+                return GestureDetector(
+                  onTap: () {
+                    if (traktId != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ShowDetailPage(showId: traktId),
+                        ),
+                      );
+                    }
+                  },
+                  child: ShowPoster(show: show),
+                );
+              },
+            );
+          },
         ),
       ],
     );

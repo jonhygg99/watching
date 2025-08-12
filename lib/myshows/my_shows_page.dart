@@ -103,33 +103,43 @@ class _MyShowsPageState extends State<MyShowsPage>
                 ),
               )
               : SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (_calendarData?.isNotEmpty ?? false) ...[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                          child: Text(
-                            'Upcoming Episodes',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_calendarData?.isNotEmpty ?? false) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
                         ),
-                        _buildShowList(_calendarData ?? []),
-                        const Divider(height: 32),
-                      ],
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: Text(
-                          'My Shows',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          'Upcoming Episodes',
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ),
-                      const WaitingShows(),
-                      const SizedBox(height: 24),
-                      const EndedShows(),
+                      _buildShowList(_calendarData ?? []),
+                      const Divider(height: 32),
                     ],
-                  ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      child: Text(
+                        'My Shows',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const WaitingShows(),
+                    const SizedBox(height: 24),
+                    const EndedShows(),
+                    const SizedBox(height: 16),
+                  ],
                 ),
+              ),
     );
   }
 
