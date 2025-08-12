@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/myshows/providers/my_shows_provider.dart';
 import 'package:watching/myshows/widgets/show_poster.dart';
+import 'package:watching/show_details/details_page.dart';
 
 // A helper function to safely convert dynamic maps to Map<String, dynamic>
 Map<String, dynamic> _convertToTypedMap(dynamic data) {
@@ -25,7 +26,7 @@ class EndedShows extends ConsumerStatefulWidget {
 class _EndedShowsState extends ConsumerState<EndedShows> {
   // Cache for ended shows to prevent unnecessary rebuilds
   List<Map<String, dynamic>> _cachedEndedShows = [];
-  
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +48,7 @@ class _EndedShowsState extends ConsumerState<EndedShows> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(myShowsWithStatusProvider);
-    
+
     // Only process shows if we have data and we're not refreshing
     if (!state.isRefreshing && state.hasData) {
       // Convert and filter shows that have ended
@@ -57,11 +58,11 @@ class _EndedShowsState extends ConsumerState<EndedShows> {
         try {
           // Safely convert the item to a typed map
           final typedItem = _convertToTypedMap(item);
-          
+
           // Get the show data, which might be nested under 'show' key or the item itself
           final showData = typedItem['show'] ?? typedItem;
           final typedShow = _convertToTypedMap(showData);
-          
+
           // Check if the show has ended
           final status = (typedShow['status'] ?? '').toString().toLowerCase();
           if (status == 'ended') {
@@ -74,7 +75,7 @@ class _EndedShowsState extends ConsumerState<EndedShows> {
           debugPrint('Error processing show: $e');
         }
       }
-      
+
       // Only update cache if we have shows to prevent unnecessary rebuilds
       if (endedShows.isNotEmpty) {
         _cachedEndedShows = endedShows;
@@ -85,7 +86,7 @@ class _EndedShowsState extends ConsumerState<EndedShows> {
     if (state.isLoading && !state.hasData) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     // Show error message if there was an error
     if (state.error != null) {
       return Center(
@@ -136,7 +137,21 @@ class _EndedShowsState extends ConsumerState<EndedShows> {
             itemBuilder: (context, index) {
               final showData = _cachedEndedShows[index];
               final show = _convertToTypedMap(showData['show'] ?? showData);
-              return ShowPoster(show: show);
+              final traktId = show['ids']?['trakt']?.toString() ?? show['ids']?['slug']?.toString();
+              
+              return GestureDetector(
+                onTap: () {
+                  if (traktId != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ShowDetailPage(showId: traktId),
+                      ),
+                    );
+                  }
+                },
+                child: ShowPoster(show: show),
+              );
             },
           ),
         ),
