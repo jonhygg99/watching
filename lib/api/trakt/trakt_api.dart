@@ -8,6 +8,7 @@ import 'shows_lists_api.dart';
 import 'history_api.dart';
 import 'user_api.dart';
 import 'search_api.dart';
+import 'calendar_api.dart';
 
 /// The main entry point for all Trakt API operations.
 ///
@@ -28,7 +29,7 @@ abstract class TraktApiBase {
 }
 
 class TraktApi extends TraktApiBase
-    with ShowsApi, ShowsListsApi, HistoryApi, UserApi, SearchApi {
+    with ShowsApi, ShowsListsApi, HistoryApi, UserApi, SearchApi, CalendarApi {
   TraktApi({String? clientId, String? clientSecret, String? redirectUri})
     : _clientId = clientId,
       _clientSecret = clientSecret,
