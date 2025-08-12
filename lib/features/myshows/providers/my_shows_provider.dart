@@ -57,7 +57,25 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
     _watchlistSubscription = _ref
         .read(watchlistProvider.notifier)
         .stream
-        .listen((_) {
+        .distinct((prev, next) {
+          if (prev.items.length != next.items.length) {
+            debugPrint('Watchlist size changed from ${prev.items.length} to ${next.items.length}');
+            return false;
+          }
+          
+          // Compare show IDs to detect actual changes
+          final prevIds = prev.items.map((i) => (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])?.toString()).toSet();
+          final nextIds = next.items.map((i) => (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])?.toString()).toSet();
+          
+          final hasChanges = !setEquals(prevIds, nextIds);
+          if (hasChanges) {
+            debugPrint('Watchlist content changed. Before: $prevIds, After: $nextIds');
+          }
+          
+          return !hasChanges;
+        })
+        .listen((state) {
+          debugPrint('Watchlist updated with ${state.items.length} items');
           _loadShows();
         });
   }
@@ -79,6 +97,9 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
       debugPrint('Load operation already in progress, returning existing future');
       return _currentLoadOperation;
     }
+    
+    // Add a small delay to debounce rapid updates
+    await Future.delayed(const Duration(milliseconds: 100));
 
     // Create a new future for this load operation
     final completer = Completer<void>();
@@ -87,23 +108,50 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
     try {
       debugPrint('Starting load operation with ${_itemsMap.length} cached items');
       
-      // Only show loading state if we don't have any data yet
-      if (!state.hasData || state.isRefreshing) {
-        state = state.copyWith(
-          isLoading: true,
-          error: null,
-          isRefreshing: state.hasData,
-        );
-      }
+      // Always set loading state at the start of loading
+      state = state.copyWith(
+        isLoading: true,
+        error: null,
+        isRefreshing: state.hasData,
+      );
 
       final trakt = _ref.read(traktApiProvider);
       final watchlistState = _ref.read(watchlistProvider);
       final items = watchlistState.items;
 
-      debugPrint('Processing ${items.length} shows from watchlist');
+      // First, log the raw watchlist items for debugging
+      debugPrint('Raw watchlist items: ${items.map((i) => (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])?.toString()).toList()}');
+      
+      // Deduplicate items by trakt ID
+      final seenIds = <String>{};
+      final deduplicatedItems = <Map<String, dynamic>>[];
+
+      for (final item in items) {
+        try {
+          final show = item['show'] ?? item;
+          final ids = show['ids'] ?? {};
+          final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
+          
+          if (traktId == null) {
+            debugPrint('Skipping item with null traktId: $item');
+            continue;
+          }
+          
+          if (!seenIds.contains(traktId)) {
+            seenIds.add(traktId);
+            deduplicatedItems.add(item);
+          } else {
+            debugPrint('Duplicate traktId found: $traktId');
+          }
+        } catch (e) {
+          debugPrint('Error processing watchlist item: $e');
+        }
+      }
+
+      debugPrint('Processing ${deduplicatedItems.length} deduplicated shows from watchlist (was ${items.length})');
 
       // If we have no items, update state immediately
-      if (items.isEmpty) {
+      if (deduplicatedItems.isEmpty) {
         _itemsMap.clear();
         state = state.copyWith(
           items: [],
@@ -120,7 +168,7 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
       bool hasNewItems = false;
       
       // Only process new items that we haven't seen before
-      final itemsToProcess = items.where((item) {
+      final itemsToProcess = deduplicatedItems.where((item) {
         final show = item['show'] ?? item;
         final ids = show['ids'] ?? {};
         final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
