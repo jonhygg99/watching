@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/myshows/ended_shows.dart';
 import 'package:watching/myshows/show_list_item.dart';
 
 class MyShowsPage extends StatefulWidget {
@@ -89,17 +90,23 @@ class _MyShowsPageState extends State<MyShowsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('My Shows')),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _error != null
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
               ? Center(
-                child: Text(
-                  'Error: $_error',
-                  style: const TextStyle(color: Colors.red),
+                  child: Text(
+                    'Error: $_error',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildShowList(_calendarData ?? []),
+                      const EndedShows(),
+                    ],
+                  ),
                 ),
-              )
-              : _buildShowList(_calendarData ?? []),
     );
   }
 
@@ -111,11 +118,10 @@ class _MyShowsPageState extends State<MyShowsPage>
       return const Center(child: Text('No shows found'));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final showData = items[index];
+    return Column(
+      children: items.asMap().entries.map((entry) {
+        final index = entry.key;
+        final showData = entry.value;
         final show = showData['show'] ?? {};
         final episodes = List<Map<String, dynamic>>.from(
           showData['episodes'] ?? [],
@@ -145,7 +151,7 @@ class _MyShowsPageState extends State<MyShowsPage>
             );
           },
         );
-      },
+      }).toList(),
     );
   }
 }
