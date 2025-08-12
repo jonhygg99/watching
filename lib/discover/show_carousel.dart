@@ -12,15 +12,16 @@ class ShowCarousel extends ConsumerWidget {
   final String emptyText;
   final dynamic Function(dynamic) extractShow;
   final VoidCallback? onViewMore;
+  final PageStorageKey _pageStorageKey;
 
-  const ShowCarousel({
+  ShowCarousel({
     super.key,
     required this.title,
     required this.shows,
     required this.extractShow,
     required this.emptyText,
     this.onViewMore,
-  });
+  }) : _pageStorageKey = PageStorageKey<String>('carousel_$title');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,19 +72,21 @@ class ShowCarousel extends ConsumerWidget {
             return SizedBox(
               height: carouselHeight,
               child: ListView.separated(
+                key: _pageStorageKey,
                 scrollDirection: Axis.horizontal,
                 itemCount: shows.length,
+                cacheExtent: 1000, // Cache more items offscreen for smoother scrolling
+                addAutomaticKeepAlives: true, // Preserve scroll position
                 separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder:
-                    (context, index) => _buildShowItem(
-                      ref: ref,
-                      context: context,
-                      show: extractShow(shows[index]),
-                      itemWidth: kDiscoverShowItemWidth,
-                      imageHeight: kDiscoverShowImageHeight,
-                      shows: shows,
-                      index: index,
-                    ),
+                itemBuilder: (context, index) => _buildShowItem(
+                  ref: ref,
+                  context: context,
+                  show: extractShow(shows[index]),
+                  itemWidth: kDiscoverShowItemWidth,
+                  imageHeight: kDiscoverShowImageHeight,
+                  shows: shows,
+                  index: index,
+                ),
               ),
             );
           },
