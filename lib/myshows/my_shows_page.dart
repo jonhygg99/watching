@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/features/myshows/providers/upcoming_episodes_provider.dart';
 import 'package:watching/myshows/waiting_shows.dart';
 import 'package:watching/myshows/ended_shows.dart';
 import 'package:watching/myshows/show_list_item.dart';
 
-class MyShowsPage extends StatefulWidget {
+class MyShowsPage extends ConsumerStatefulWidget {
   const MyShowsPage({super.key});
 
   @override
-  State<MyShowsPage> createState() => _MyShowsPageState();
+  ConsumerState<MyShowsPage> createState() => _MyShowsPageState();
 }
 
-class _MyShowsPageState extends State<MyShowsPage>
+class _MyShowsPageState extends ConsumerState<MyShowsPage>
     with TickerProviderStateMixin {
   List<dynamic>? _calendarData;
   bool _isLoading = false;
@@ -42,12 +43,32 @@ class _MyShowsPageState extends State<MyShowsPage>
       );
 
       final data = response['data'] as List<dynamic>;
-
+      
+      // Track show IDs with upcoming episodes
+      final Set<int> showsWithUpcomingEpisodes = {};
+      
       // Group episodes by show ID
       final Map<String, Map<String, dynamic>> groupedShows = {};
 
+      // First pass: collect all show IDs with upcoming episodes
       for (final episode in data) {
-        final showId = episode['show']['ids']['trakt'].toString();
+        final traktId = episode['show']?['ids']?['trakt'] as int?;
+        if (traktId != null) {
+          showsWithUpcomingEpisodes.add(traktId);
+        }
+      }
+
+      // Update the provider with the complete set of shows with upcoming episodes
+      if (mounted) {
+        ref.read(upcomingEpisodesProvider.notifier).setShowsWithUpcomingEpisodes(
+              showsWithUpcomingEpisodes,
+            );
+      }
+
+      // Second pass: group episodes by show ID
+      for (final episode in data) {
+        final showId = episode['show']?['ids']?['trakt']?.toString();
+        if (showId == null) continue;
 
         if (!groupedShows.containsKey(showId)) {
           groupedShows[showId] = {
