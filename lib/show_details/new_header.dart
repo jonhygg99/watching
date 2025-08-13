@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/constants/sort_options.dart';
+import 'package:watching/theme/theme_provider.dart';
 
 class NewHeader extends StatelessWidget {
   final Map<String, dynamic> show;
@@ -175,23 +180,37 @@ class NewHeader extends StatelessWidget {
 
   Widget _getGradientOverlay(double fanartHeight) {
     return Positioned.fill(
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            // stops: const [0.0, 0.1, 0.3, 0.6, 0.9, 1.0],
-            colors: [
-              Colors.transparent,
-              // Colors.black.withValues(alpha: 0.1),
-              // Colors.black.withValues(alpha: 0.6),
-              // const Color(0xFF201E1A),
-              Colors.white.withValues(alpha: 0.1),
-              Colors.white.withValues(alpha: 0.6),
-              const Color(0xFFF5F5F5),
-            ],
-          ),
-        ),
+      child: Consumer(
+        builder: (context, ref, _) {
+          final themeMode = ref.watch(themeProvider);
+          final isDarkMode =
+              themeMode == AppThemeMode.dark ||
+              (themeMode == AppThemeMode.system &&
+                  MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors:
+                    isDarkMode
+                        ? [
+                          Colors.transparent,
+                          Colors.black.withValues(alpha: 0.1),
+                          Colors.black.withValues(alpha: 0.6),
+                          scaffoldDarkBackgroundColor,
+                        ]
+                        : [
+                          Colors.transparent,
+                          Colors.white.withValues(alpha: 0.1),
+                          Colors.white.withValues(alpha: 0.6),
+                          const Color(0xFFF5F5F5),
+                        ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

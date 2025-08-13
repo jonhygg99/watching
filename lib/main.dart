@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/providers/auth_provider.dart';
 import 'package:watching/discover/discover_page.dart';
 
-import 'providers/app_providers.dart';
+import 'package:watching/providers/app_providers.dart';
+import 'package:watching/theme/theme_provider.dart';
 import 'country_list.dart';
 import 'splash_wrapper.dart';
 import 'settings/settings.dart';
@@ -33,13 +34,24 @@ Future<void> main() async {
   }
 }
 
-class AppRoot extends StatelessWidget {
+class AppRoot extends ConsumerWidget {
   const AppRoot({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'API Variables Viewer',
-      home: SplashWrapper(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appThemeMode = ref.watch(themeProvider);
+    
+    // Map AppThemeMode to Flutter's ThemeMode
+    final themeMode = appThemeMode == AppThemeMode.dark 
+        ? ThemeMode.dark 
+        : (appThemeMode == AppThemeMode.light ? ThemeMode.light : ThemeMode.system);
+    
+    return MaterialApp(
+      title: 'Watching',
+      theme: getLightTheme(),
+      darkTheme: getDarkTheme(),
+      themeMode: themeMode,
+      home: const SplashWrapper(),
       debugShowCheckedModeBanner: false,
     );
   }

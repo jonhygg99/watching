@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/providers/watchlist_providers.dart';
 import 'package:watching/show_details/new_header.dart';
+import 'package:watching/show_details/related.dart';
 
 import 'package:watching/show_details/seasons_progress_widget.dart';
 import 'package:watching/show_details/show_info_chips.dart';
@@ -64,6 +65,7 @@ class ShowDetailPage extends HookConsumerWidget {
             apiService.getShowVideos(id: showId),
             apiService.getShowPeople(id: showId),
             apiService.getRelatedShows(id: showId),
+            apiService.getRelatedShows(id: showId),
           ]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -86,8 +88,8 @@ class ShowDetailPage extends HookConsumerWidget {
             final translations = results[1] as List<dynamic>?;
             final videos = results[2] as List<dynamic>?;
             final people = results[3] as Map<String, dynamic>?;
-            // Related shows feature temporarily disabled
-            // final relatedShows = results[4] as List<dynamic>?;
+            final relatedShows = results[4] as List<dynamic>?;
+
             final certifications =
                 show?['certifications'] as List<dynamic>? ?? [];
             if (show == null) {
@@ -119,93 +121,96 @@ class ShowDetailPage extends HookConsumerWidget {
             final originalTagline =
                 translation?['tagline'] ?? show['tagline'] ?? '';
 
-            return Container(
-              decoration: const BoxDecoration(
-                // color: Color(0xFF201E1A), // Match the exact color from header gradient
-                color: Color(0xFFF5F5F5),
-                // gradient: LinearGradient(
-                //   begin: Alignment.topCenter,
-                //   end: Alignment.bottomCenter,
-                //   colors: [Colors.white, Color(0xFFF5F5F5)],
-                // ),
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    NewHeader(show: show, title: originalTitle),
-                    ShowDescription(
-                      tagline: originalTagline,
-                      overview: originalOverview,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 8.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Lo que otros dicen',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.bold),
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  NewHeader(show: show, title: originalTitle),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ShowDescription(
+                          tagline: originalTagline,
+                          overview: originalOverview,
+                        ),
+                        const SizedBox(height: 16.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Lo que otros dicen',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            TextButton.icon(
+                              onPressed: () {
+                                final sortNotifier = ValueNotifier<String>(
+                                  'likes',
+                                );
+                                showAllComments(
+                                  context,
+                                  showId,
+                                  sortNotifier,
+                                  commentSortOptions,
+                                  ref,
+                                );
+                              },
+                              icon: const Icon(Icons.comment_outlined),
+                              label: const Text('Comentarios'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8.0),
+                        ShowInfoChips(
+                          show: show,
+                          certifications: certifications,
+                          countryCode: countryCode,
+                        ),
+                        const SizedBox(height: 16.0),
+                        SeasonsProgressWidget(
+                          showId: showId,
+                          showData: show,
+                          onProgressChanged: () async {
+                            final api = ref.read(traktApiProvider);
+                            final progress = await api.getShowWatchedProgress(
+                              id: showId,
+                            );
+                            final total = progress['aired'] ?? 0;
+                            final completed = progress['completed'] ?? 0;
+                            if (total > 0 && completed == total) {
+                              fullyWatched.value = true;
+                            }
+                          },
+                          languageCode: countryCode.toLowerCase(),
+                          onEpisodeWatched: () {
+                            refreshShowData();
+                            refreshWatchlist();
+                          },
+                          onWatchlistUpdate: refreshWatchlist,
+                        ),
+                        const SizedBox(height: 24.0),
+                        if (videos != null && videos.isNotEmpty)
+                          ShowDetailVideos(videos: videos),
+                        if (videos != null && videos.isNotEmpty)
+                          const SizedBox(height: 24.0),
+                        if (people != null && people.isNotEmpty)
+                          ShowDetailCast(
+                            people: people,
+                            showId: showId,
+                            apiService: apiService,
                           ),
-                          TextButton.icon(
-                            onPressed: () {
-                              final sortNotifier = ValueNotifier<String>(
-                                'likes',
-                              );
-                              showAllComments(
-                                context,
-                                showId,
-                                sortNotifier,
-                                commentSortOptions,
-                                ref,
-                              );
-                            },
-                            icon: const Icon(Icons.comment_outlined),
-                            label: const Text('Comentarios'),
+                        if (relatedShows != null && relatedShows.isNotEmpty)
+                          ShowDetailRelated(
+                            relatedShows: relatedShows,
+                            apiService: apiService,
+                            countryCode: countryCode,
                           ),
-                        ],
-                      ),
+                      ],
                     ),
-                    ShowInfoChips(
-                      show: show,
-                      certifications: certifications,
-                      countryCode: countryCode,
-                    ),
-                    SeasonsProgressWidget(
-                      showId: showId,
-                      showData: show,
-                      onProgressChanged: () async {
-                        // Check if all seasons are now watched
-                        final api = ref.read(traktApiProvider);
-                        final progress = await api.getShowWatchedProgress(
-                          id: showId,
-                        );
-                        final total = progress['aired'] ?? 0;
-                        final completed = progress['completed'] ?? 0;
-                        if (total > 0 && completed == total) {
-                          fullyWatched.value = true;
-                        }
-                      },
-                      languageCode: countryCode.toLowerCase(),
-                      onEpisodeWatched: () {
-                        // Refresh the UI and watchlist data
-                        refreshShowData();
-                        refreshWatchlist();
-                      },
-                      onWatchlistUpdate: refreshWatchlist,
-                    ),
-                    ShowDetailVideos(videos: videos),
-                    ShowDetailCast(
-                      people: people,
-                      showId: showId,
-                      apiService: apiService,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
