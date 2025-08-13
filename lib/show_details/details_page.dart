@@ -121,7 +121,13 @@ class ShowDetailPage extends HookConsumerWidget {
 
             return Container(
               decoration: const BoxDecoration(
-                color: Color(0xFF201E1A), // Match the exact color from header gradient
+                // color: Color(0xFF201E1A), // Match the exact color from header gradient
+                color: Color(0xFFF5F5F5),
+                // gradient: LinearGradient(
+                //   begin: Alignment.topCenter,
+                //   end: Alignment.bottomCenter,
+                //   colors: [Colors.white, Color(0xFFF5F5F5)],
+                // ),
               ),
               child: SingleChildScrollView(
                 child: Column(
