@@ -1,15 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/providers/app_providers.dart';
 import 'package:watching/watchlist/progress_bar.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Displays the current episode information including season, episode number,
 /// translated name, and watch progress.
 class CurrentEpisode extends HookWidget {
   final String traktId;
   final String? title;
+  final String? languageCode;
 
-  const CurrentEpisode({super.key, required this.traktId, this.title});
+  const CurrentEpisode({
+    super.key,
+    required this.traktId,
+    this.title,
+    this.languageCode,
+  });
 
   /// Find the next episode to watch based on the show's progress
   /// Returns the next episode or null if all episodes are watched
@@ -48,6 +58,33 @@ class CurrentEpisode extends HookWidget {
     }
   }
 
+  /// Fetches the translated episode name
+  Future<String?> _getTranslatedEpisodeName(
+    TraktApi trakt,
+    int seasonNumber,
+    int episodeNumber,
+    String? languageCode,
+  ) async {
+    if (languageCode == null) return null;
+
+    try {
+      final episodes = await trakt.getSeasonEpisodes(
+        id: traktId,
+        season: seasonNumber,
+        translations: languageCode,
+      );
+
+      final episode = episodes.firstWhere(
+        (e) => e['number'] == episodeNumber,
+        orElse: () => null,
+      );
+      return episode?['title'] as String?;
+    } catch (e) {
+      debugPrint('Error fetching translated episode name: $e');
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -55,30 +92,64 @@ class CurrentEpisode extends HookWidget {
     final progress = useState<Map<String, dynamic>?>(null);
     final isLoading = useState(true);
     final error = useState<String?>(null);
+    final translatedEpisodeName = useState<Map<String, String>>({});
+    final locale = Localizations.localeOf(context);
+    final effectiveLanguageCode = languageCode ?? locale.languageCode;
 
     useEffect(() {
       bool isMounted = true;
-
       final trakt = TraktApi();
-      trakt
-          .getShowWatchedProgress(id: traktId)
-          .then((value) {
-            if (isMounted) {
-              progress.value = value;
-              isLoading.value = false;
+
+      Future<void> loadData() async {
+        try {
+          // First load the progress
+          final progressData = await trakt.getShowWatchedProgress(id: traktId);
+          if (!isMounted) return;
+
+          progress.value = progressData;
+
+          // Find the next episode to get translated name
+          final nextEpisode = _findNextEpisode(progressData);
+          if (nextEpisode != null) {
+            final seasonNumber = nextEpisode['season'] as int;
+            final episodeNumber = nextEpisode['number'] as int;
+            final episodeKey = 'S${seasonNumber}E$episodeNumber';
+
+            // Only fetch translation if not already loaded
+            if (!translatedEpisodeName.value.containsKey(episodeKey)) {
+              final translatedName = await _getTranslatedEpisodeName(
+                trakt,
+                seasonNumber,
+                episodeNumber,
+                effectiveLanguageCode,
+              );
+
+              if (translatedName != null && isMounted) {
+                translatedEpisodeName.value = {
+                  ...translatedEpisodeName.value,
+                  episodeKey: translatedName,
+                };
+              }
             }
-          })
-          .catchError((e) {
-            if (isMounted) {
-              error.value = e.toString();
-              isLoading.value = false;
-            }
-          });
+          }
+
+          if (isMounted) {
+            isLoading.value = false;
+          }
+        } catch (e) {
+          if (isMounted) {
+            error.value = e.toString();
+            isLoading.value = false;
+          }
+        }
+      }
+
+      loadData();
 
       return () {
         isMounted = false;
       };
-    }, [traktId]);
+    }, [traktId, effectiveLanguageCode]);
 
     if (isLoading.value) {
       return const Center(child: CircularProgressIndicator());
@@ -93,12 +164,21 @@ class CurrentEpisode extends HookWidget {
     final total = progress.value?['aired'] ?? 0;
 
     if (nextEpisode != null) {
+      final seasonNumber = nextEpisode['season'] as int;
+      final episodeNumber = nextEpisode['number'] as int;
+      final episodeKey = 'S${seasonNumber}E$episodeNumber';
+
+      // Use translated name if available, fallback to original
+      final episodeName =
+          translatedEpisodeName.value[episodeKey] ??
+          nextEpisode['title'] ??
+          'Episodio $episodeNumber';
+
       return _buildEpisodeInfo(
         context: context,
-        seasonNumber: nextEpisode['season'],
-        episodeNumber: nextEpisode['number'],
-        episodeName:
-            nextEpisode['title'] ?? 'Episodio ${nextEpisode['number']}',
+        seasonNumber: seasonNumber,
+        episodeNumber: episodeNumber,
+        episodeName: episodeName,
         watchedEpisodes: watched,
         totalEpisodes: total,
         progressPercent: total > 0 ? (watched / total).clamp(0.0, 1.0) : 0.0,
@@ -140,16 +220,17 @@ class CurrentEpisode extends HookWidget {
           children: [
             // Season and episode info
             Expanded(
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (seasonNumber != null && episodeNumber != null)
                     Text(
-                      'Temporada $seasonNumber • Episodio $episodeNumber',
+                      'T$seasonNumber:E$episodeNumber',
                       style: textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
+                  const SizedBox(width: 8),
                   if (episodeName != null && episodeName.isNotEmpty)
                     Text(
                       episodeName,

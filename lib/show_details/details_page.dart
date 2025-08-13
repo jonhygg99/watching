@@ -137,6 +137,7 @@ class ShowDetailPage extends HookConsumerWidget {
                           CurrentEpisode(
                             traktId: show['ids']['trakt'].toString(),
                             title: show['title']?.toString(),
+                            languageCode: countryCode.substring(0, 2).toLowerCase(),
                           ),
                         ShowDescription(
                           tagline: originalTagline,
