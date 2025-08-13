@@ -41,15 +41,16 @@ class ShowDetailPage extends HookConsumerWidget {
     }
 
     // Intercept back navigation to pass result if fully watched
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: true, // Always allow popping
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        // Always refresh watchlist when leaving the page
         await refreshWatchlist();
 
-        if (fullyWatched.value) {
+        // Only do custom navigation if the show is fully watched and widget is still mounted
+        if (didPop && fullyWatched.value && context.mounted) {
           Navigator.of(context).pop({'traktId': showId, 'fullyWatched': true});
-          return false;
         }
-        return true;
       },
       child: Scaffold(
         appBar: AppBar(title: const Text('Detalle del Show')),
