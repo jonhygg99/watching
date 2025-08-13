@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/shared/constants/colors.dart';
-import 'package:watching/shared/constants/sort_options.dart';
 import 'package:watching/theme/theme_provider.dart';
 
 class NewHeader extends StatelessWidget {
@@ -48,8 +46,8 @@ class NewHeader extends StatelessWidget {
               ),
             ),
             _getGradientOverlay(fanartHeight),
-            // Back button
             _getBackButton(context),
+            _getRatingWidget(context),
             Positioned(
               left: 16,
               right: 16,
@@ -172,6 +170,59 @@ class NewHeader extends StatelessWidget {
           child: const Padding(
             padding: EdgeInsets.only(left: 6),
             child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _getRatingWidget(BuildContext context) {
+    final rating = show['rating']?.toDouble() ?? 0.0;
+    if (rating <= 0) return const SizedBox.shrink();
+    
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 16,
+      right: 16,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.1),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 6, right: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.star, color: Colors.amber, size: 20),
+              const SizedBox(width: 4),
+              Text(
+                rating.toStringAsFixed(1),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(1, 1),
+                      blurRadius: 4.0,
+                      color: Colors.black87,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

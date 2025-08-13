@@ -3,8 +3,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/providers/watchlist_providers.dart';
+import 'package:watching/show_details/current_episode.dart';
 import 'package:watching/show_details/new_header.dart';
 import 'package:watching/show_details/related.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 
 import 'package:watching/show_details/seasons_progress_widget.dart';
 import 'package:watching/show_details/show_info_chips.dart';
@@ -131,6 +133,11 @@ class ShowDetailPage extends HookConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (show['ids']?['trakt'] != null)
+                          CurrentEpisode(
+                            traktId: show['ids']['trakt'].toString(),
+                            title: show['title']?.toString(),
+                          ),
                         ShowDescription(
                           tagline: originalTagline,
                           overview: originalOverview,
@@ -161,12 +168,6 @@ class ShowDetailPage extends HookConsumerWidget {
                               label: const Text('Comentarios'),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 8.0),
-                        ShowInfoChips(
-                          show: show,
-                          certifications: certifications,
-                          countryCode: countryCode,
                         ),
                         const SizedBox(height: 16.0),
                         SeasonsProgressWidget(
@@ -217,5 +218,42 @@ class ShowDetailPage extends HookConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// Find the next episode to watch based on the show's progress
+  /// Returns the next episode or null if all episodes are watched
+  Map<String, dynamic>? _findNextEpisode(Map<String, dynamic>? progress) {
+    try {
+      if (progress == null) return null;
+      
+      // First check if we have a next_episode from the API
+      final nextEpisode = progress['next_episode'];
+      if (nextEpisode != null) return nextEpisode;
+      
+      // If no next_episode, try to find the first unwatched episode
+      final seasons = progress['seasons'] as List<dynamic>?;
+      if (seasons == null) return null;
+      
+      for (final season in seasons) {
+        final episodes = season['episodes'] as List<dynamic>?;
+        if (episodes == null) continue;
+        
+        for (final episode in episodes) {
+          final completed = episode['completed'] as bool? ?? false;
+          if (!completed) {
+            return {
+              'season': season['number'],
+              'number': episode['number'],
+              'title': episode['title'],
+            };
+          }
+        }
+      }
+      
+      return null; // All episodes watched
+    } catch (e) {
+      debugPrint('Error finding next episode: $e');
+      return null;
+    }
   }
 }
