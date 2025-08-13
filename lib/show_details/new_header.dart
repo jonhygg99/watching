@@ -1,0 +1,249 @@
+import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+class NewHeader extends StatelessWidget {
+  final Map<String, dynamic> show;
+  final String title;
+
+  const NewHeader({super.key, required this.show, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final images = show['images'] as Map<String, dynamic>? ?? {};
+    final fanartUrl =
+        images['fanart'] != null && (images['fanart'] as List).isNotEmpty
+            ? 'https://${(images['fanart'] as List).first}'
+            : null;
+
+    Widget? buildFanartImage(String? fanartUrl, BuildContext context) {
+      if (fanartUrl == null) return null;
+
+      // Calculate 40% of screen height
+      final screenHeight = MediaQuery.of(context).size.height;
+      final fanartHeight = screenHeight * 0.65;
+      return SizedBox(
+        width: double.infinity,
+        height: fanartHeight,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ClipRRect(
+              child: CachedNetworkImage(
+                imageUrl: fanartUrl,
+                fit: BoxFit.cover,
+                placeholder:
+                    (ctx, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                errorWidget:
+                    (ctx, url, error) => const Icon(
+                      Icons.broken_image,
+                      size: 80,
+                      color: Colors.grey,
+                    ),
+              ),
+            ),
+            _getGradientOverlay(fanartHeight),
+            // Back button
+            _getBackButton(context),
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: fanartHeight * 0.05, // Positioned above the bottom 20%
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _getTitle(context, title),
+                  const SizedBox(height: 8),
+                  _getGenresChips(show),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget? fanartImage = buildFanartImage(fanartUrl, context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [if (fanartImage != null) fanartImage],
+    );
+  }
+
+  Widget _getTitle(BuildContext context, String title) {
+    final year = show['year']?.toString() ?? '';
+    final runtime = show['runtime']?.toString() ?? '';
+    final status = show['status']?.toString() ?? '';
+
+    final List<String> infoItems = [
+      if (year.isNotEmpty) year,
+      if (runtime.isNotEmpty) '$runtime min',
+      if (status.isNotEmpty) status,
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (infoItems.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 0.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                for (var i = 0; i < infoItems.length; i++) ...[
+                  if (i > 0)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        '•',
+                        style: TextStyle(color: Colors.white70, fontSize: 24),
+                      ),
+                    ),
+                  Text(
+                    infoItems[i],
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      shadows: [
+                        Shadow(
+                          offset: Offset(1, 1),
+                          blurRadius: 4.0,
+                          color: Colors.black87,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            color: Colors.white,
+            fontSize: 48,
+            fontWeight: FontWeight.w600,
+            shadows: const [
+              Shadow(
+                offset: Offset(1, 2),
+                blurRadius: 4.0,
+                color: Colors.black,
+              ),
+            ],
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  Widget _getBackButton(BuildContext context) {
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 16,
+      left: 16,
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.1),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Padding(
+            padding: EdgeInsets.only(left: 6),
+            child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _getGradientOverlay(double fanartHeight) {
+    return Positioned.fill(
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              Colors.transparent,
+              Colors.black.withValues(alpha: 0.1),
+              Colors.black.withValues(alpha: 0.6),
+              const Color(0xFF201E1A),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _getGenresChips(Map<String, dynamic> show) {
+    if (show['genres'] == null || (show['genres'] as List).isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children:
+          (show['genres'] as List).map<Widget>((genre) {
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  (genre as String).toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                    height: 1.2,
+                  ),
+                  strutStyle: const StrutStyle(
+                    fontSize: 12,
+                    height: 1.2,
+                    leading: 0,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+    );
+  }
+}
