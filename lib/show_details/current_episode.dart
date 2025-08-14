@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
-import 'package:watching/watchlist/progress_bar.dart';
+import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/widgets/progress_bar.dart';
+import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
 
 /// A widget that displays the current episode information and progress for a show.
@@ -283,7 +285,7 @@ class CurrentEpisode extends HookWidget {
         const SizedBox(height: 12),
 
         // Progress bar
-        ProgressBar(
+        TinyProgressBar(
           percent: progressPercent,
           watched: watchedEpisodes,
           total: totalEpisodes,
@@ -298,15 +300,38 @@ class CurrentEpisode extends HookWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(right: 4.0),
-                child: FilledButton.icon(
-                  onPressed: () {
-                    // TODO: Implement navigation to all episodes
-                  },
-                  label: const Text('Check Out All Episodes'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [gradientLightColor, gradientDarkColor],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      // TODO: Implement navigation to all episodes
+                    },
+                    label: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        'Check Out All Episodes',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -317,43 +342,66 @@ class CurrentEpisode extends HookWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(left: 4.0),
-                child: FilledButton.icon(
-                  onPressed: () {
-                    if (seasonNumber != null &&
-                        episodeNumber != null &&
-                        showData != null) {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        useSafeArea: true,
-                        builder:
-                            (context) => EpisodeInfoModal(
-                              episodeFuture: trakt.getEpisodeInfo(
-                                id: traktId,
-                                season: seasonNumber,
-                                episode: episodeNumber,
-                                language: languageCode,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFD6C498), Color(0xFF966D39)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      if (seasonNumber != null &&
+                          episodeNumber != null &&
+                          showData != null) {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          builder:
+                              (context) => EpisodeInfoModal(
+                                episodeFuture: trakt.getEpisodeInfo(
+                                  id: traktId,
+                                  season: seasonNumber,
+                                  episode: episodeNumber,
+                                  language: languageCode,
+                                ),
+                                showData: showData!,
+                                seasonNumber: seasonNumber,
+                                episodeNumber: episodeNumber,
+                                onWatchedStatusChanged: () {
+                                  // Call the refresh progress callback
+                                  onRefreshProgress();
+                                  // Notify parent if needed
+                                  if (context.mounted) {
+                                    onWatchedStatusChanged?.call();
+                                  }
+                                },
                               ),
-                              showData: showData!,
-                              seasonNumber: seasonNumber,
-                              episodeNumber: episodeNumber,
-                              onWatchedStatusChanged: () {
-                                // Call the refresh progress callback
-                                onRefreshProgress();
-                                // Notify parent if needed
-                                if (context.mounted) {
-                                  onWatchedStatusChanged?.call();
-                                }
-                              },
-                            ),
-                      );
-                    }
-                  },
-                  label: const Text('Episode Info'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                        );
+                      }
+                    },
+                    label: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        'Episode Info',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),

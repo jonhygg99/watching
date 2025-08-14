@@ -6,14 +6,10 @@ import 'package:watching/providers/watchlist_providers.dart';
 import 'package:watching/show_details/current_episode.dart';
 import 'package:watching/show_details/new_header.dart';
 import 'package:watching/show_details/related.dart';
-import 'package:watching/api/trakt/trakt_api.dart';
-
 import 'package:watching/show_details/seasons_progress_widget.dart';
-import 'package:watching/show_details/show_info_chips.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'show_description.dart';
-import 'header.dart';
 import 'videos.dart';
 import 'cast.dart';
 // Related shows section removed

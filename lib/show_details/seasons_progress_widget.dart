@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
-import 'package:watching/watchlist/progress_bar.dart';
+import 'package:watching/shared/widgets/progress_bar.dart';
 import 'seasons_page/season_detail_page.dart';
 import 'season_mark_button.dart';
 

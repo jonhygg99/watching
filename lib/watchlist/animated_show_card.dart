@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:watching/watchlist/progress_bar.dart';
+import 'package:watching/shared/widgets/progress_bar.dart';
 
 /// AnimatedShowCard animates the progress bar to full, then animates the card out (slide up and fade out) when fully watched.
 class AnimatedShowCard extends StatefulWidget {
