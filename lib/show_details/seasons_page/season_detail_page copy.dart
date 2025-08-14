@@ -13,7 +13,7 @@ import 'controllers/season_actions.dart';
 /// Se apoya en widgets hijos para acciones bulk y renderizado de episodios.
 
 /// Page to display details and episodes of a season, with actions to mark all or individual episodes as watched.
-class SeasonDetailPage extends HookConsumerWidget {
+class NewSeasonDetailPage extends HookConsumerWidget {
   final int seasonNumber;
   final String showId;
   final Map<String, dynamic> showData;
@@ -21,7 +21,7 @@ class SeasonDetailPage extends HookConsumerWidget {
   final Function()? onEpisodeWatched;
   final Function()? onWatchlistUpdate;
 
-  const SeasonDetailPage({
+  const NewSeasonDetailPage({
     super.key,
     required this.seasonNumber,
     required this.showId,

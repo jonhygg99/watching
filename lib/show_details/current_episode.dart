@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/shared/constants/colors.dart';
-import 'package:watching/shared/widgets/progress_bar.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
+import 'package:watching/show_details/seasons_page/season_detail_page copy.dart';
 
 /// A widget that displays the current episode information and progress for a show.
 
@@ -27,6 +27,29 @@ class CurrentEpisode extends HookWidget {
     this.showData,
     this.onWatchedStatusChanged,
   });
+
+  /// Find the last season number from progress data
+  int _findLastSeason(Map<String, dynamic>? progress) {
+    try {
+      if (progress == null) return 1;
+      
+      final seasons = progress['seasons'] as List<dynamic>?;
+      if (seasons == null || seasons.isEmpty) return 1;
+      
+      // Find the maximum season number
+      int maxSeason = 1;
+      for (final season in seasons) {
+        final seasonNumber = (season['number'] as int?) ?? 0;
+        if (seasonNumber > maxSeason) {
+          maxSeason = seasonNumber;
+        }
+      }
+      return maxSeason;
+    } catch (e) {
+      debugPrint('Error finding last season: $e');
+      return 1;
+    }
+  }
 
   /// Find the next episode to watch based on the show's progress
   /// Returns the next episode or null if all episodes are watched
@@ -199,18 +222,22 @@ class CurrentEpisode extends HookWidget {
         totalEpisodes: total,
         progressPercent: total > 0 ? (watched / total).clamp(0.0, 1.0) : 0.0,
         onRefreshProgress: refreshProgress,
+        progressData: progressData,
+        nextEpisode: nextEpisode,
       );
     } else if (total > 0) {
       // Show progress for completed shows
       return _buildEpisodeInfo(
         context: context,
-        seasonNumber: null,
-        episodeNumber: null,
-        episodeName: 'Serie completada',
+        seasonNumber: 1,
+        episodeNumber: 1,
+        episodeName: 'All episodes watched',
         watchedEpisodes: watched,
         totalEpisodes: total,
         progressPercent: 1.0,
         onRefreshProgress: refreshProgress,
+        progressData: progressData,
+        nextEpisode: null,
       );
     }
 
@@ -226,6 +253,8 @@ class CurrentEpisode extends HookWidget {
     required int totalEpisodes,
     required double progressPercent,
     required VoidCallback onRefreshProgress,
+    required Map<String, dynamic>? progressData,
+    Map<String, dynamic>? nextEpisode,
   }) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
@@ -243,14 +272,15 @@ class CurrentEpisode extends HookWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (seasonNumber != null && episodeNumber != null)
+                  if (seasonNumber != null && episodeNumber != null && watchedEpisodes < totalEpisodes)
                     Text(
                       'T$seasonNumber:E$episodeNumber',
                       style: textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                  const SizedBox(width: 8),
+                  if (seasonNumber != null && episodeNumber != null && watchedEpisodes < totalEpisodes)
+                    const SizedBox(width: 8),
                   if (episodeName != null && episodeName.isNotEmpty)
                     Text(
                       episodeName,
@@ -311,7 +341,25 @@ class CurrentEpisode extends HookWidget {
                   ),
                   child: FilledButton.icon(
                     onPressed: () {
-                      // TODO: Implement navigation to all episodes
+                      if (showData != null) {
+                        // If we have a next episode, use its season
+                        // Otherwise, find the last available season
+                        final currentSeason = nextEpisode != null 
+                            ? nextEpisode['season'] as int? ?? 1
+                            : _findLastSeason(progressData);
+                        
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => NewSeasonDetailPage(
+                              seasonNumber: currentSeason,
+                              showId: traktId,
+                              showData: showData!,
+                              languageCode: languageCode,
+                              onEpisodeWatched: onWatchedStatusChanged,
+                            ),
+                          ),
+                        );
+                      }
                     },
                     label: const Padding(
                       padding: EdgeInsets.symmetric(vertical: 4),
