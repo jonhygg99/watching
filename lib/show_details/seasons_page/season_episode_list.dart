@@ -74,73 +74,154 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       itemCount: widget.episodes.length,
       itemBuilder: (BuildContext context, int idx) {
         final Map<String, dynamic> ep = widget.episodes[idx];
         final int epNumber = ep['number'] as int;
         final String epTitle = ep['title'] ?? '';
         final bool watched = _epWatched(epNumber);
-        return ListTile(
-          leading: CircleAvatar(child: Text('$epNumber')),
-          title: Text(epTitle),
-          trailing: IconButton(
-            onLongPress: () {
-              final newWatchedState = !watched;
-              widget.onToggleEpisode(epNumber, newWatchedState);
-              widget.setMarkingColor(
-                epNumber,
-                newWatchedState ? Colors.green : Colors.red,
-                delayMs: 500,
+        final String? imageUrl =
+            ep['screenshot']?['full'] ??
+            ep['screenshot']?['medium'] ??
+            ep['screenshot']?['thumb'];
+
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () async {
+              // Existing tap handler code
+              final epInfo = await _fetchEpisodeInfo(epNumber);
+              if (!mounted) return;
+
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                builder: (_) {
+                  if (epInfo == null) {
+                    return const Center(
+                      child: Text('No hay información del episodio.'),
+                    );
+                  }
+                  return EpisodeInfoModal(
+                    episodeFuture: Future.value(epInfo),
+                    showData: widget.showData,
+                    seasonNumber: widget.seasonNumber,
+                    episodeNumber: epNumber,
+                    onWatchedStatusChanged: () {
+                      final currentWatchedState = _epWatched(epNumber);
+                      widget.onToggleEpisode(epNumber, !currentWatchedState);
+                    },
+                  );
+                },
               );
             },
-            icon: Icon(
-              Icons.check_circle,
-              color:
-                  watched
-                      ? (widget.markingColors[epNumber] ?? Colors.green)
-                      : (widget.markingColors[epNumber] ?? Colors.grey),
-            ),
-            tooltip:
-                watched
-                    ? 'Eliminar episodio del historial'
-                    : 'Marcar como visto',
-            onPressed:
-                widget.loading
-                    ? null
-                    : () => widget.onToggleEpisode(epNumber, !watched),
-          ),
-          onTap: () async {
-            // Espera a que la info esté lista antes de mostrar el modal
-            final epInfo = await _fetchEpisodeInfo(epNumber);
-            if (!mounted) return;
+            child: SizedBox(
+              height: 100,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Episode image on the left
+                  if (imageUrl != null)
+                    Image.network(
+                      imageUrl,
+                      width: 150,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (context, error, stackTrace) => Container(
+                            width: 150,
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.tv,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
+                          ),
+                    )
+                  else
+                    Container(
+                      width: 150,
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: Icon(Icons.tv, size: 40, color: Colors.grey),
+                      ),
+                    ),
 
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  // Episode info in the middle
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'T${widget.seasonNumber}E${epNumber.toString().padLeft(2, '0')}',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            epTitle,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Watch status button on the right
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: IconButton(
+                      onLongPress: () {
+                        final newWatchedState = !watched;
+                        widget.onToggleEpisode(epNumber, newWatchedState);
+                        widget.setMarkingColor(
+                          epNumber,
+                          newWatchedState ? Colors.green : Colors.red,
+                          delayMs: 500,
+                        );
+                      },
+                      icon: Icon(
+                        Icons.check_circle,
+                        size: 28,
+                        color:
+                            watched
+                                ? (widget.markingColors[epNumber] ??
+                                    Colors.green)
+                                : (widget.markingColors[epNumber] ??
+                                    Colors.grey[400]),
+                      ),
+                      tooltip:
+                          watched
+                              ? 'Eliminar episodio del historial'
+                              : 'Marcar como visto',
+                      onPressed:
+                          widget.loading
+                              ? null
+                              : () =>
+                                  widget.onToggleEpisode(epNumber, !watched),
+                    ),
+                  ),
+                ],
               ),
-              builder: (_) {
-                if (epInfo == null) {
-                  return const Center(
-                    child: Text('No hay información del episodio.'),
-                  );
-                }
-                return EpisodeInfoModal(
-                  episodeFuture: Future.value(epInfo),
-                  showData: widget.showData,
-                  seasonNumber: widget.seasonNumber,
-                  episodeNumber: epNumber,
-                  onWatchedStatusChanged: () {
-                    // Trigger a refresh of the parent component with the new watched state
-                    final currentWatchedState = _epWatched(epNumber);
-                    widget.onToggleEpisode(epNumber, !currentWatchedState);
-                  },
-                );
-              },
-            );
-          },
+            ),
+          ),
         );
       },
     );
