@@ -138,6 +138,7 @@ class ShowDetailPage extends HookConsumerWidget {
                             traktId: show['ids']['trakt'].toString(),
                             title: show['title']?.toString(),
                             languageCode: countryCode.substring(0, 2).toLowerCase(),
+                            showData: show,
                           ),
                         ShowDescription(
                           tagline: originalTagline,
