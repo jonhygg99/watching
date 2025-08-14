@@ -45,6 +45,9 @@ class ShowDetailPage extends HookConsumerWidget {
     }
 
     // Intercept back navigation to pass result if fully watched
+    // Create a scroll controller for the page
+    final scrollController = useScrollController();
+
     return PopScope(
       canPop: true, // Always allow popping
       onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -92,8 +95,6 @@ class ShowDetailPage extends HookConsumerWidget {
             final people = results[3] as Map<String, dynamic>?;
             final relatedShows = results[4] as List<dynamic>?;
 
-            final certifications =
-                show?['certifications'] as List<dynamic>? ?? [];
             if (show == null) {
               return const Center(child: Text('No se encontraron datos.'));
             }
@@ -123,12 +124,18 @@ class ShowDetailPage extends HookConsumerWidget {
             final originalTagline =
                 translation?['tagline'] ?? show['tagline'] ?? '';
 
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  NewHeader(show: show, title: originalTitle),
-                  Padding(
+            return CustomScrollView(
+              controller: scrollController,
+              slivers: [
+                SliverToBoxAdapter(
+                  child: NewHeader(
+                    show: show,
+                    title: originalTitle,
+                    scrollController: scrollController,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +144,8 @@ class ShowDetailPage extends HookConsumerWidget {
                           CurrentEpisode(
                             traktId: show['ids']['trakt'].toString(),
                             title: show['title']?.toString(),
-                            languageCode: countryCode.substring(0, 2).toLowerCase(),
+                            languageCode:
+                                countryCode.substring(0, 2).toLowerCase(),
                             showData: show,
                           ),
                         ShowDescription(
@@ -213,49 +221,12 @@ class ShowDetailPage extends HookConsumerWidget {
                       ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),
       ),
     );
-  }
-
-  /// Find the next episode to watch based on the show's progress
-  /// Returns the next episode or null if all episodes are watched
-  Map<String, dynamic>? _findNextEpisode(Map<String, dynamic>? progress) {
-    try {
-      if (progress == null) return null;
-      
-      // First check if we have a next_episode from the API
-      final nextEpisode = progress['next_episode'];
-      if (nextEpisode != null) return nextEpisode;
-      
-      // If no next_episode, try to find the first unwatched episode
-      final seasons = progress['seasons'] as List<dynamic>?;
-      if (seasons == null) return null;
-      
-      for (final season in seasons) {
-        final episodes = season['episodes'] as List<dynamic>?;
-        if (episodes == null) continue;
-        
-        for (final episode in episodes) {
-          final completed = episode['completed'] as bool? ?? false;
-          if (!completed) {
-            return {
-              'season': season['number'],
-              'number': episode['number'],
-              'title': episode['title'],
-            };
-          }
-        }
-      }
-      
-      return null; // All episodes watched
-    } catch (e) {
-      debugPrint('Error finding next episode: $e');
-      return null;
-    }
   }
 }

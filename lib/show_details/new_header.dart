@@ -1,76 +1,127 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/theme/theme_provider.dart';
 
-class NewHeader extends StatelessWidget {
+class NewHeader extends HookWidget {
   final Map<String, dynamic> show;
   final String title;
+  final ScrollController? scrollController;
 
-  const NewHeader({super.key, required this.show, required this.title});
+  const NewHeader({
+    super.key, 
+    required this.show, 
+    required this.title,
+    this.scrollController,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Track scroll offset for zoom effect
+    final scrollController = this.scrollController ?? PrimaryScrollController.of(context);
+    final scrollOffset = useState(0.0);
+    
+    // Update scroll offset when scrolling
+    useEffect(() {
+      if (scrollController.hasClients) {
+        void onScroll() {
+          final offset = scrollController.offset;
+          // Only update if the value changes significantly to avoid unnecessary rebuilds
+          if ((offset - scrollOffset.value).abs() > 0.5) {
+            scrollOffset.value = offset;
+          }
+        }
+        
+        scrollController.addListener(onScroll);
+        return () => scrollController.removeListener(onScroll);
+      }
+      return null;
+    }, [scrollController]);
+    
+    // Calculate scale factor based on scroll position (1.0 to 1.2)
+    final scale = 1.0 + (scrollOffset.value * 0.0005).clamp(0.0, 0.2);
+    
     final images = show['images'] as Map<String, dynamic>? ?? {};
     final fanartUrl =
         images['fanart'] != null && (images['fanart'] as List).isNotEmpty
             ? 'https://${(images['fanart'] as List).first}'
             : null;
 
-    Widget? buildFanartImage(String? fanartUrl, BuildContext context) {
-      if (fanartUrl == null) return null;
-
-      // Calculate 40% of screen height
-      final screenHeight = MediaQuery.of(context).size.height;
-      final fanartHeight = screenHeight * 0.65;
-      return SizedBox(
-        width: double.infinity,
-        height: fanartHeight,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            ClipRRect(
-              child: CachedNetworkImage(
-                imageUrl: fanartUrl,
-                fit: BoxFit.cover,
-                placeholder:
-                    (ctx, url) =>
-                        const Center(child: CircularProgressIndicator()),
-                errorWidget:
-                    (ctx, url, error) => const Icon(
-                      Icons.broken_image,
-                      size: 80,
-                      color: Colors.grey,
-                    ),
-              ),
-            ),
-            _getGradientOverlay(fanartHeight),
-            _getBackButton(context),
-            _getRatingWidget(context),
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: fanartHeight * 0.05, // Positioned above the bottom 20%
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _getTitle(context, title),
-                  const SizedBox(height: 8),
-                  _getGenresChips(show),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
+    if (fanartUrl == null) {
+      return const SizedBox.shrink();
     }
 
-    Widget? fanartImage = buildFanartImage(fanartUrl, context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [if (fanartImage != null) fanartImage],
+    // Calculate 40% of screen height
+    final screenHeight = MediaQuery.of(context).size.height;
+    final fanartHeight = screenHeight * 0.65;
+    final topPadding = MediaQuery.of(context).padding.top + 16;
+    
+    return SizedBox(
+      width: double.infinity,
+      height: fanartHeight,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image with zoom effect
+          ClipRect(
+            child: OverflowBox(
+              maxHeight: fanartHeight * 1.2, // Allow for 20% overflow
+              alignment: Alignment.topCenter,
+              child: Transform.scale(
+                scale: scale,
+                alignment: Alignment.topCenter,
+                child: CachedNetworkImage(
+                  imageUrl: fanartUrl,
+                  width: double.infinity,
+                  height: fanartHeight,
+                  fit: BoxFit.cover,
+                  placeholder: (ctx, url) => const Center(child: CircularProgressIndicator()),
+                  errorWidget: (ctx, url, error) => const Icon(
+                    Icons.broken_image,
+                    size: 80,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          
+          // Gradient overlay
+          _getGradientOverlay(fanartHeight),
+          
+          // Back button
+          Positioned(
+            top: topPadding,
+            left: 16,
+            child: _getBackButton(context),
+          ),
+          
+          // Rating widget (conditionally rendered)
+          if (show['rating'] != null)
+            Positioned(
+              top: topPadding,
+              right: 16,
+              child: _getRatingWidget(context),
+            ),
+          
+          // Title and genres at the bottom
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: fanartHeight * 0.05, // Positioned above the bottom 20%
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _getTitle(context, title),
+                const SizedBox(height: 8),
+                _getGenresChips(show),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -145,44 +196,8 @@ class NewHeader extends StatelessWidget {
   }
 
   Widget _getBackButton(BuildContext context) {
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + 16,
-      left: 16,
-      child: GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.1),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const Padding(
-            padding: EdgeInsets.only(left: 6),
-            child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _getRatingWidget(BuildContext context) {
-    final rating = show['rating']?.toDouble() ?? 0.0;
-    if (rating <= 0) return const SizedBox.shrink();
-    
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + 16,
-      right: 16,
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pop(),
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -200,30 +215,58 @@ class NewHeader extends StatelessWidget {
             ),
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 6, right: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.star, color: Colors.amber, size: 20),
-              const SizedBox(width: 4),
-              Text(
-                rating.toStringAsFixed(1),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(1, 1),
-                      blurRadius: 4.0,
-                      color: Colors.black87,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        child: const Padding(
+          padding: EdgeInsets.only(left: 6),
+          child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
+        ),
+      ),
+    );
+  }
+
+  Widget _getRatingWidget(BuildContext context) {
+    final rating = show['rating']?.toDouble() ?? 0.0;
+    if (rating <= 0) return const SizedBox.shrink();
+    
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 6, right: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.star, color: Colors.amber, size: 20),
+            const SizedBox(width: 4),
+            Text(
+              rating.toStringAsFixed(1),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    offset: Offset(1, 1),
+                    blurRadius: 4.0,
+                    color: Colors.black87,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
