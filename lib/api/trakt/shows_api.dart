@@ -31,7 +31,7 @@ mixin ShowsApi on TraktApiBase {
     }
   }
 
-  /// Gets all episodes for a single season of a show.
+  /// Gets all episodes for a single season of a show.\n  ///\n  /// [id]: Trakt ID, slug, or IMDB ID of the show\n  /// [season]: Season number (e.g., 1)\n  /// [translations]: Optional 2-letter language code (e.g., 'es'), or 'all' for all translations\n  /// Returns a List of episode objects for the season.\n  Future<List<dynamic>> getSeasonEpisodes({\n    required String id,\n    required int season,\n    String? translations,\n  }) async {\n    await ensureValidToken();\n    final translationParam =\n        translations != null ? '&translations=$translations' : '';\n    final url = Uri.parse(\n      '$baseUrl/shows/$id/seasons/$season?extended=images$translationParam',\n    );\n    final response = await http.get(url, headers: headers);\n    if (response.statusCode == 200) {\n      final episodes = jsonDecode(response.body) as List<dynamic>;\n\n      // If translations were requested, extract the translated episode data\n      if (translations != null && translations != 'all') {\n        return episodes.map((episode) {\n          if (episode is Map<String, dynamic> &&\n              episode.containsKey('translations') &&\n              episode['translations'] is List) {\n            final translations = List<Map<String, dynamic>>.from(\n              episode['translations'],\n            );\n            if (translations.isNotEmpty) {\n              // Create a new map with the original episode data and override with translation\n              return {\n                ...episode,\n                'title': translations.first['title'] ?? episode['title'],\n                'overview':\n                    translations.first['overview'] ?? episode['overview'],\n              };\n            }\n          }\n          return episode;\n        }).toList();\n      }\n\n      return episodes;\n    } else {\n      throw Exception(\n        'Error GET /shows/$id/seasons/$season: ${response.statusCode}\\n${response.body}',\n      );\n    }\n  }
   ///
   /// [id]: Trakt ID, slug, or IMDB ID of the show
   /// [season]: Season number (e.g., 1)
@@ -44,9 +44,9 @@ mixin ShowsApi on TraktApiBase {
   }) async {
     await ensureValidToken();
     final translationParam =
-        translations != null ? '?translations=$translations' : '';
+        translations != null ? '&translations=$translations' : '';
     final url = Uri.parse(
-      '$baseUrl/shows/$id/seasons/$season$translationParam',
+      '$baseUrl/shows/$id/seasons/$season?extended=images$translationParam',
     );
     final response = await http.get(url, headers: headers);
     if (response.statusCode == 200) {

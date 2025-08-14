@@ -46,9 +46,9 @@ class TestShowsApi implements ShowsApi {
     String? translations,
   }) async {
     final translationParam =
-        translations != null ? '?translations=$translations' : '';
+        translations != null ? '&translations=$translations' : '';
     return await getJsonList(
-      '/shows/$id/seasons/$season/episodes$translationParam',
+      '/shows/$id/seasons/$season/episodes?extended=images$translationParam',
     );
   }
 

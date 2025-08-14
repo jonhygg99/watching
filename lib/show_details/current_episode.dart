@@ -6,7 +6,7 @@ import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
-import 'package:watching/show_details/seasons_page/season_detail_page copy.dart';
+import 'package:watching/show_details/seasons_page/season_detail_page.dart';
 
 /// A widget that displays the current episode information and progress for a show.
 
@@ -350,7 +350,7 @@ class CurrentEpisode extends HookWidget {
                         
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => NewSeasonDetailPage(
+                            builder: (context) => SeasonDetailPage(
                               seasonNumber: currentSeason,
                               showId: traktId,
                               showData: showData!,

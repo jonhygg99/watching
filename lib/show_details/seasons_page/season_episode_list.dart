@@ -71,6 +71,32 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
     return false;
   }
 
+  /// Extract screenshot URL from episode data
+  String? _getScreenshotUrl(Map<String, dynamic> episode) {
+    // Try the new format first (images object with screenshot array)
+    if (episode['images']?['screenshot'] is List &&
+        (episode['images']?['screenshot'] as List).isNotEmpty) {
+      final screenshot = episode['images']['screenshot'][0];
+      if (screenshot is String) {
+        return screenshot.startsWith('http') ? screenshot : 'https://$screenshot';
+      } else if (screenshot is Map<String, dynamic>) {
+        // If it's a map, try to get the full image URL
+        return screenshot['full'] ??
+            screenshot['medium'] ??
+            screenshot['thumb'] ??
+            (screenshot.values.isNotEmpty ? screenshot.values.first : null);
+      }
+    }
+    
+    // Fall back to the old format if present
+    if (episode['screenshot'] is Map<String, dynamic>) {
+      final screenshot = episode['screenshot'] as Map<String, dynamic>;
+      return screenshot['full'] ?? screenshot['medium'] ?? screenshot['thumb'];
+    }
+    
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -81,10 +107,7 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
         final int epNumber = ep['number'] as int;
         final String epTitle = ep['title'] ?? '';
         final bool watched = _epWatched(epNumber);
-        final String? imageUrl =
-            ep['screenshot']?['full'] ??
-            ep['screenshot']?['medium'] ??
-            ep['screenshot']?['thumb'];
+        final String? imageUrl = _getScreenshotUrl(ep);
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
@@ -104,7 +127,7 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
-                builder: (_) {
+                builder: (sheetContext) {
                   if (epInfo == null) {
                     return const Center(
                       child: Text('No hay información del episodio.'),
@@ -116,6 +139,8 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                     seasonNumber: widget.seasonNumber,
                     episodeNumber: epNumber,
                     onWatchedStatusChanged: () {
+                      // Check if the parent widget is still mounted
+                      if (!mounted) return;
                       final currentWatchedState = _epWatched(epNumber);
                       widget.onToggleEpisode(epNumber, !currentWatchedState);
                     },

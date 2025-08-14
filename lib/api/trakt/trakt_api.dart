@@ -47,7 +47,6 @@ class TraktApi extends TraktApiBase
   String? get clientSecret =>
       _clientSecret ?? dotenv.env['TRAKT_CLIENT_SECRET'];
   String? get redirectUri => _redirectUri ?? dotenv.env['TRAKT_REDIRECT_URI'];
-
   String? _accessToken;
 
   /// Loads the access token from SharedPreferences.
