@@ -83,13 +83,23 @@ class SeasonDetailPage extends HookConsumerWidget {
         useState<List<Map<String, dynamic>>>(showData['seasons'] ?? []);
     final ValueNotifier<bool> isLoadingSeasons = useState<bool>(false);
 
-    // Fetch seasons if not already available
+    // Fetch seasons if not already available and filter out season 0 if it has no episodes
     Future<void> fetchSeasonsIfNeeded() async {
       if (seasonsList.value.isEmpty) {
         try {
           isLoadingSeasons.value = true;
           final seasons = await traktApi.getSeasons(showId);
-          seasonsList.value = List<Map<String, dynamic>>.from(seasons);
+          
+          // Filter out season 0 (specials) if it has 0 episodes
+          final filteredSeasons = List<Map<String, dynamic>>.from(seasons)
+            ..removeWhere((season) {
+              final number = season['number'];
+              final episodeCount = season['episode_count'] ?? 0;
+              // Hide only specials (season 0) if empty
+              return number == 0 && episodeCount == 0;
+            });
+            
+          seasonsList.value = filteredSeasons;
         } catch (e) {
           debugPrint('Error fetching seasons: $e');
         } finally {
