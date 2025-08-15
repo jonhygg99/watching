@@ -56,7 +56,9 @@ class ShowDetailPage extends HookConsumerWidget {
         }
       },
       child: Scaffold(
-        body: FutureBuilder<List<dynamic>>(
+        body: Stack(
+          children: [
+            FutureBuilder<List<dynamic>>(
           future: Future.wait([
             apiService.getShowById(id: showId),
             apiService.getShowTranslations(
@@ -200,6 +202,38 @@ class ShowDetailPage extends HookConsumerWidget {
               ],
             );
           },
+            ),
+            // Back button
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              left: 16,
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.only(left: 6),
+                    child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

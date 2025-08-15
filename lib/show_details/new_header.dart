@@ -91,13 +91,6 @@ class NewHeader extends HookWidget {
           // Gradient overlay
           _getGradientOverlay(fanartHeight),
           
-          // Back button
-          Positioned(
-            top: topPadding,
-            left: 16,
-            child: _getBackButton(context),
-          ),
-          
           // Rating widget (conditionally rendered)
           if (show['rating'] != null)
             Positioned(
@@ -192,34 +185,6 @@ class NewHeader extends HookWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ],
-    );
-  }
-
-  Widget _getBackButton(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: const Padding(
-          padding: EdgeInsets.only(left: 6),
-          child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
-        ),
-      ),
     );
   }
 
