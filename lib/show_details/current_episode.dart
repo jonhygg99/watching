@@ -333,10 +333,12 @@ class CurrentEpisode extends HookWidget {
         // Action buttons
         Row(
           children: [
-            // Check Out All Episodes button
+            // Check Out All Episodes button - full width when all episodes are watched
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(right: 4.0),
+                padding: nextEpisode == null 
+                    ? EdgeInsets.zero 
+                    : const EdgeInsets.only(right: 4.0),
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
@@ -393,75 +395,75 @@ class CurrentEpisode extends HookWidget {
               ),
             ),
 
-            // Episode Info button
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 4.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFD6C498), Color(0xFF966D39)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+            // Episode Info button - only show if there are unwatched episodes
+            if (nextEpisode != null) ...[
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFD6C498), Color(0xFF966D39)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      if (seasonNumber != null &&
-                          episodeNumber != null &&
-                          showData != null) {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          builder:
-                              (context) => EpisodeInfoModal(
-                                episodeFuture: trakt.getEpisodeInfo(
-                                  id: traktId,
-                                  season: seasonNumber,
-                                  episode: episodeNumber,
-                                  language: languageCode,
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        if (seasonNumber != null &&
+                            episodeNumber != null &&
+                            showData != null) {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
+                            builder:
+                                (context) => EpisodeInfoModal(
+                                  episodeFuture: trakt.getEpisodeInfo(
+                                    id: traktId,
+                                    season: seasonNumber,
+                                    episode: episodeNumber,
+                                    language: languageCode,
+                                  ),
+                                  showData: showData!,
+                                  seasonNumber: seasonNumber,
+                                  episodeNumber: episodeNumber,
+                                  onWatchedStatusChanged: () {
+                                    onRefreshProgress();
+                                    if (context.mounted) {
+                                      onWatchedStatusChanged?.call();
+                                    }
+                                  },
                                 ),
-                                showData: showData!,
-                                seasonNumber: seasonNumber,
-                                episodeNumber: episodeNumber,
-                                onWatchedStatusChanged: () {
-                                  // Call the refresh progress callback
-                                  onRefreshProgress();
-                                  // Notify parent if needed
-                                  if (context.mounted) {
-                                    onWatchedStatusChanged?.call();
-                                  }
-                                },
-                              ),
-                        );
-                      }
-                    },
-                    label: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4),
-                      child: Text(
-                        'Episode Info',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          );
+                        }
+                      },
+                      label: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          'Episode Info',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                    ),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ],
