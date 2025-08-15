@@ -8,6 +8,7 @@ import 'package:watching/show_details/new_header.dart';
 import 'package:watching/show_details/related.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
+import 'package:watching/show_details/skeleton/show_detail_skeleton.dart';
 import 'show_description.dart';
 import 'videos.dart';
 import 'cast.dart';
@@ -64,7 +65,7 @@ class ShowDetailPage extends HookConsumerWidget {
               ]),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const ShowDetailSkeleton();
                 }
                 if (snapshot.hasError) {
                   return Center(

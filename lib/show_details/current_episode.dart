@@ -5,8 +5,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
+import 'package:watching/show_details/skeleton/components/skeleton_episode.dart';
 import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
 import 'package:watching/show_details/seasons_page/season_detail_page.dart';
+import 'package:watching/show_details/skeleton/current_episode_skeleton.dart';
 
 /// A widget that displays the current episode information and progress for a show.
 
@@ -32,10 +34,10 @@ class CurrentEpisode extends HookWidget {
   int _findLastSeason(Map<String, dynamic>? progress) {
     try {
       if (progress == null) return 1;
-      
+
       final seasons = progress['seasons'] as List<dynamic>?;
       if (seasons == null || seasons.isEmpty) return 1;
-      
+
       // Find the maximum season number
       int maxSeason = 1;
       for (final season in seasons) {
@@ -181,7 +183,7 @@ class CurrentEpisode extends HookWidget {
     }, [refreshProgress]);
 
     if (isLoading.value) {
-      return const Center(child: CircularProgressIndicator());
+      return const SkeletonEpisode();
     }
 
     if (error.value != null) {
@@ -276,7 +278,9 @@ class CurrentEpisode extends HookWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (seasonNumber != null && episodeNumber != null && watchedEpisodes < totalEpisodes)
+                        if (seasonNumber != null &&
+                            episodeNumber != null &&
+                            watchedEpisodes < totalEpisodes)
                           Text(
                             'T$seasonNumber:E$episodeNumber ',
                             style: textTheme.bodyMedium?.copyWith(
@@ -336,9 +340,10 @@ class CurrentEpisode extends HookWidget {
             // Check Out All Episodes button - full width when all episodes are watched
             Expanded(
               child: Padding(
-                padding: nextEpisode == null 
-                    ? EdgeInsets.zero 
-                    : const EdgeInsets.only(right: 4.0),
+                padding:
+                    nextEpisode == null
+                        ? EdgeInsets.zero
+                        : const EdgeInsets.only(right: 4.0),
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
@@ -353,19 +358,21 @@ class CurrentEpisode extends HookWidget {
                       if (showData != null) {
                         // If we have a next episode, use its season
                         // Otherwise, find the last available season
-                        final currentSeason = nextEpisode != null 
-                            ? nextEpisode['season'] as int? ?? 1
-                            : _findLastSeason(progressData);
-                        
+                        final currentSeason =
+                            nextEpisode != null
+                                ? nextEpisode['season'] as int? ?? 1
+                                : _findLastSeason(progressData);
+
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => SeasonDetailPage(
-                              seasonNumber: currentSeason,
-                              showId: traktId,
-                              showData: showData!,
-                              languageCode: languageCode,
-                              onEpisodeWatched: onWatchedStatusChanged,
-                            ),
+                            builder:
+                                (context) => SeasonDetailPage(
+                                  seasonNumber: currentSeason,
+                                  showId: traktId,
+                                  showData: showData!,
+                                  languageCode: languageCode,
+                                  onEpisodeWatched: onWatchedStatusChanged,
+                                ),
                           ),
                         );
                       }
