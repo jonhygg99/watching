@@ -6,7 +6,6 @@ import 'package:watching/providers/watchlist_providers.dart';
 import 'package:watching/show_details/current_episode.dart';
 import 'package:watching/show_details/new_header.dart';
 import 'package:watching/show_details/related.dart';
-import 'package:watching/show_details/seasons_progress_widget.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'show_description.dart';
@@ -25,19 +24,12 @@ class ShowDetailPage extends HookConsumerWidget {
     // State hooks
     final fullyWatched = useState(false);
 
-    final refreshKey = useState(0); // Used to force refresh of data
     final apiService = ref.watch(traktApiProvider);
     final countryCode = ref.watch(countryCodeProvider);
 
     // Function to refresh watchlist data
     Future<void> refreshWatchlist() async {
       await ref.read(watchlistProvider.notifier).updateShowProgress(showId);
-    }
-
-    // Function to refresh show data
-    Future<void> refreshShowData() async {
-      await refreshWatchlist();
-      refreshKey.value++;
     }
 
     // Intercept back navigation to pass result if fully watched
@@ -59,149 +51,150 @@ class ShowDetailPage extends HookConsumerWidget {
         body: Stack(
           children: [
             FutureBuilder<List<dynamic>>(
-          future: Future.wait([
-            apiService.getShowById(id: showId),
-            apiService.getShowTranslations(
-              id: showId,
-              language: countryCode.substring(0, 2).toLowerCase(),
-            ),
-            apiService.getShowVideos(id: showId),
-            apiService.getShowPeople(id: showId),
-            apiService.getRelatedShows(id: showId),
-            apiService.getRelatedShows(id: showId),
-          ]),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  'Error: \\${snapshot.error}',
-                  style: const TextStyle(color: Colors.red),
+              future: Future.wait([
+                apiService.getShowById(id: showId),
+                apiService.getShowTranslations(
+                  id: showId,
+                  language: countryCode.substring(0, 2).toLowerCase(),
                 ),
-              );
-            }
-            final results = snapshot.data;
+                apiService.getShowVideos(id: showId),
+                apiService.getShowPeople(id: showId),
+                apiService.getRelatedShows(id: showId),
+                apiService.getRelatedShows(id: showId),
+              ]),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Error: \\${snapshot.error}',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
+                final results = snapshot.data;
 
-            if (results == null || results.length < 5) {
-              return const Center(child: Text('No se encontraron datos.'));
-            }
-            final show = results[0] as Map<String, dynamic>?;
-            final translations = results[1] as List<dynamic>?;
-            final videos = results[2] as List<dynamic>?;
-            final people = results[3] as Map<String, dynamic>?;
-            final relatedShows = results[4] as List<dynamic>?;
+                if (results == null || results.length < 5) {
+                  return const Center(child: Text('No se encontraron datos.'));
+                }
+                final show = results[0] as Map<String, dynamic>?;
+                final translations = results[1] as List<dynamic>?;
+                final videos = results[2] as List<dynamic>?;
+                final people = results[3] as Map<String, dynamic>?;
+                final relatedShows = results[4] as List<dynamic>?;
 
-            if (show == null) {
-              return const Center(child: Text('No se encontraron datos.'));
-            }
+                if (show == null) {
+                  return const Center(child: Text('No se encontraron datos.'));
+                }
 
-            // Filter out null values and find the best translation
-            Map<String, dynamic>? translation;
-            if (translations != null && translations.isNotEmpty) {
-              // Filter out translations with null title
-              final validTranslations =
-                  translations.where((t) => t['title'] != null).toList();
+                // Filter out null values and find the best translation
+                Map<String, dynamic>? translation;
+                if (translations != null && translations.isNotEmpty) {
+                  // Filter out translations with null title
+                  final validTranslations =
+                      translations.where((t) => t['title'] != null).toList();
 
-              if (validTranslations.isNotEmpty) {
-                // Try to find exact match for user's country
-                translation = validTranslations.firstWhere(
-                  (t) =>
-                      t['language']?.toString().toLowerCase() ==
-                      countryCode.substring(0, 2).toLowerCase(),
-                  orElse: () => validTranslations.first,
-                );
-              }
-            }
+                  if (validTranslations.isNotEmpty) {
+                    // Try to find exact match for user's country
+                    translation = validTranslations.firstWhere(
+                      (t) =>
+                          t['language']?.toString().toLowerCase() ==
+                          countryCode.substring(0, 2).toLowerCase(),
+                      orElse: () => validTranslations.first,
+                    );
+                  }
+                }
 
-            // Get title, overview, and tagline from translation if available, otherwise use original
-            final originalTitle = translation?['title'] ?? show['title'] ?? '';
-            final originalOverview =
-                translation?['overview'] ?? show['overview'] ?? '';
-            final originalTagline =
-                translation?['tagline'] ?? show['tagline'] ?? '';
+                // Get title, overview, and tagline from translation if available, otherwise use original
+                final originalTitle =
+                    translation?['title'] ?? show['title'] ?? '';
+                final originalOverview =
+                    translation?['overview'] ?? show['overview'] ?? '';
+                final originalTagline =
+                    translation?['tagline'] ?? show['tagline'] ?? '';
 
-            return CustomScrollView(
-              controller: scrollController,
-              slivers: [
-                SliverToBoxAdapter(
-                  child: NewHeader(
-                    show: show,
-                    title: originalTitle,
-                    scrollController: scrollController,
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (show['ids']?['trakt'] != null)
-                          CurrentEpisode(
-                            traktId: show['ids']['trakt'].toString(),
-                            title: show['title']?.toString(),
-                            languageCode:
-                                countryCode.substring(0, 2).toLowerCase(),
-                            showData: show,
-                          ),
-                        ShowDescription(
-                          tagline: originalTagline,
-                          overview: originalOverview,
-                        ),
-                        const SizedBox(height: 16.0),
-                        if (people != null && people.isNotEmpty)
-                          ShowDetailCast(
-                            people: people,
-                            showId: showId,
-                            apiService: apiService,
-                          ),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                return CustomScrollView(
+                  controller: scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: NewHeader(
+                        show: show,
+                        title: originalTitle,
+                        scrollController: scrollController,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Lo que otros dicen',
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            if (show['ids']?['trakt'] != null)
+                              CurrentEpisode(
+                                traktId: show['ids']['trakt'].toString(),
+                                title: show['title']?.toString(),
+                                languageCode:
+                                    countryCode.substring(0, 2).toLowerCase(),
+                                showData: show,
+                              ),
+                            ShowDescription(
+                              tagline: originalTagline,
+                              overview: originalOverview,
                             ),
-                            TextButton.icon(
-                              onPressed: () {
-                                final sortNotifier = ValueNotifier<String>(
-                                  'likes',
-                                );
-                                showAllComments(
-                                  context,
-                                  showId,
-                                  sortNotifier,
-                                  commentSortOptions,
-                                  ref,
-                                );
-                              },
-                              icon: const Icon(Icons.comment_outlined),
-                              label: const Text('Comentarios'),
+                            const SizedBox(height: 16.0),
+                            if (people != null && people.isNotEmpty)
+                              ShowDetailCast(
+                                people: people,
+                                showId: showId,
+                                apiService: apiService,
+                              ),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Lo que otros dicen',
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    final sortNotifier = ValueNotifier<String>(
+                                      'likes',
+                                    );
+                                    showAllComments(
+                                      context,
+                                      showId,
+                                      sortNotifier,
+                                      commentSortOptions,
+                                      ref,
+                                    );
+                                  },
+                                  icon: const Icon(Icons.comment_outlined),
+                                  label: const Text('Comentarios'),
+                                ),
+                              ],
                             ),
+                            const SizedBox(height: 24.0),
+                            if (videos != null && videos.isNotEmpty)
+                              ShowDetailVideos(videos: videos),
+                            if (videos != null && videos.isNotEmpty)
+                              const SizedBox(height: 24.0),
+                            if (relatedShows != null && relatedShows.isNotEmpty)
+                              ShowDetailRelated(
+                                relatedShows: relatedShows,
+                                apiService: apiService,
+                                countryCode: countryCode,
+                              ),
                           ],
                         ),
-                        const SizedBox(height: 24.0),
-                        if (videos != null && videos.isNotEmpty)
-                          ShowDetailVideos(videos: videos),
-                        if (videos != null && videos.isNotEmpty)
-                          const SizedBox(height: 24.0),
-                        if (relatedShows != null && relatedShows.isNotEmpty)
-                          ShowDetailRelated(
-                            relatedShows: relatedShows,
-                            apiService: apiService,
-                            countryCode: countryCode,
-                          ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            );
-          },
+                  ],
+                );
+              },
             ),
             // Back button
             Positioned(
@@ -228,7 +221,11 @@ class ShowDetailPage extends HookConsumerWidget {
                   ),
                   child: const Padding(
                     padding: EdgeInsets.only(left: 6),
-                    child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
+                    child: Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
                 ),
               ),
