@@ -31,7 +31,13 @@ class SkeletonEpisode extends StatelessWidget {
                       SkeletonContainer(height: 20, width: 50, radius: 4),
                       const SizedBox(width: 8),
                       // Episode title
-                      SkeletonContainer(height: 20, width: 200, radius: 4),
+                      Expanded(
+                        child: SkeletonContainer(
+                          height: 20,
+                          width: 200,
+                          radius: 4,
+                        ),
+                      ),
                     ],
                   ),
                 ),
