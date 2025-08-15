@@ -149,6 +149,13 @@ class ShowDetailPage extends HookConsumerWidget {
                           overview: originalOverview,
                         ),
                         const SizedBox(height: 16.0),
+                        if (people != null && people.isNotEmpty)
+                          ShowDetailCast(
+                            people: people,
+                            showId: showId,
+                            apiService: apiService,
+                          ),
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -175,39 +182,11 @@ class ShowDetailPage extends HookConsumerWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16.0),
-                        SeasonsProgressWidget(
-                          showId: showId,
-                          showData: show,
-                          onProgressChanged: () async {
-                            final api = ref.read(traktApiProvider);
-                            final progress = await api.getShowWatchedProgress(
-                              id: showId,
-                            );
-                            final total = progress['aired'] ?? 0;
-                            final completed = progress['completed'] ?? 0;
-                            if (total > 0 && completed == total) {
-                              fullyWatched.value = true;
-                            }
-                          },
-                          languageCode: countryCode.toLowerCase(),
-                          onEpisodeWatched: () {
-                            refreshShowData();
-                            refreshWatchlist();
-                          },
-                          onWatchlistUpdate: refreshWatchlist,
-                        ),
                         const SizedBox(height: 24.0),
                         if (videos != null && videos.isNotEmpty)
                           ShowDetailVideos(videos: videos),
                         if (videos != null && videos.isNotEmpty)
                           const SizedBox(height: 24.0),
-                        if (people != null && people.isNotEmpty)
-                          ShowDetailCast(
-                            people: people,
-                            showId: showId,
-                            apiService: apiService,
-                          ),
                         if (relatedShows != null && relatedShows.isNotEmpty)
                           ShowDetailRelated(
                             relatedShows: relatedShows,
