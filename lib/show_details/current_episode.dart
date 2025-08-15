@@ -8,7 +8,6 @@ import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'package:watching/show_details/skeleton/components/skeleton_episode.dart';
 import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
 import 'package:watching/show_details/seasons_page/season_detail_page.dart';
-import 'package:watching/show_details/skeleton/current_episode_skeleton.dart';
 
 /// A widget that displays the current episode information and progress for a show.
 

@@ -13,7 +13,7 @@ class SkeletonEpisode extends StatelessWidget {
       baseColor: theme.colorScheme.surfaceContainerHighest,
       highlightColor: theme.colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -31,34 +31,20 @@ class SkeletonEpisode extends StatelessWidget {
                       SkeletonContainer(height: 20, width: 50, radius: 4),
                       const SizedBox(width: 8),
                       // Episode title
-                      Expanded(
-                        child: SkeletonContainer(
-                          height: 20,
-                          width: double.infinity,
-                          radius: 4,
-                        ),
-                      ),
+                      SkeletonContainer(height: 20, width: 200, radius: 4),
                     ],
                   ),
                 ),
 
                 // Watched counter (e.g., 5/10)
-                SkeletonContainer(
-                  height: 24,
-                  width: 50,
-                  radius: 12,
-                ),
+                SkeletonContainer(height: 24, width: 50, radius: 12),
               ],
             ),
 
             const SizedBox(height: 12),
 
             // Progress bar
-            SkeletonContainer(
-              height: 6,
-              width: double.infinity,
-              radius: 3,
-            ),
+            SkeletonContainer(height: 6, width: double.infinity, radius: 3),
 
             const SizedBox(height: 16),
 
