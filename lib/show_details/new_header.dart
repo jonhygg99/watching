@@ -11,8 +11,8 @@ class NewHeader extends HookWidget {
   final ScrollController? scrollController;
 
   const NewHeader({
-    super.key, 
-    required this.show, 
+    super.key,
+    required this.show,
     required this.title,
     this.scrollController,
   });
@@ -20,9 +20,10 @@ class NewHeader extends HookWidget {
   @override
   Widget build(BuildContext context) {
     // Track scroll offset for zoom effect
-    final scrollController = this.scrollController ?? PrimaryScrollController.of(context);
+    final scrollController =
+        this.scrollController ?? PrimaryScrollController.of(context);
     final scrollOffset = useState(0.0);
-    
+
     // Update scroll offset when scrolling
     useEffect(() {
       if (scrollController.hasClients) {
@@ -33,16 +34,16 @@ class NewHeader extends HookWidget {
             scrollOffset.value = offset;
           }
         }
-        
+
         scrollController.addListener(onScroll);
         return () => scrollController.removeListener(onScroll);
       }
       return null;
     }, [scrollController]);
-    
+
     // Calculate scale factor based on scroll position (1.0 to 1.2)
     final scale = 1.0 + (scrollOffset.value * 0.0005).clamp(0.0, 0.2);
-    
+
     final images = show['images'] as Map<String, dynamic>? ?? {};
     final fanartUrl =
         images['fanart'] != null && (images['fanart'] as List).isNotEmpty
@@ -57,7 +58,7 @@ class NewHeader extends HookWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final fanartHeight = screenHeight * 0.65;
     final topPadding = MediaQuery.of(context).padding.top + 16;
-    
+
     return SizedBox(
       width: double.infinity,
       height: fanartHeight,
@@ -77,20 +78,23 @@ class NewHeader extends HookWidget {
                   width: double.infinity,
                   height: fanartHeight,
                   fit: BoxFit.cover,
-                  placeholder: (ctx, url) => const Center(child: CircularProgressIndicator()),
-                  errorWidget: (ctx, url, error) => const Icon(
-                    Icons.broken_image,
-                    size: 80,
-                    color: Colors.grey,
-                  ),
+                  placeholder:
+                      (ctx, url) =>
+                          const Center(child: CircularProgressIndicator()),
+                  errorWidget:
+                      (ctx, url, error) => const Icon(
+                        Icons.broken_image,
+                        size: 80,
+                        color: Colors.grey,
+                      ),
                 ),
               ),
             ),
           ),
-          
+
           // Gradient overlay
           _getGradientOverlay(fanartHeight),
-          
+
           // Rating widget (conditionally rendered)
           if (show['rating'] != null)
             Positioned(
@@ -98,7 +102,7 @@ class NewHeader extends HookWidget {
               right: 16,
               child: _getRatingWidget(context),
             ),
-          
+
           // Title and genres at the bottom
           Positioned(
             left: 16,
@@ -166,23 +170,39 @@ class NewHeader extends HookWidget {
               ],
             ),
           ),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color: Colors.white,
-            fontSize: 48,
-            fontWeight: FontWeight.w600,
-            shadows: const [
-              Shadow(
-                offset: Offset(1, 2),
-                blurRadius: 4.0,
-                color: Colors.black,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate text scale factor based on title length
+            final titleLength = title.length;
+            double fontSize = 48.0;
+
+            // Adjust font size based on title length
+            if (titleLength > 30) {
+              fontSize = 36.0;
+            } else if (titleLength > 25) {
+              fontSize = 42.0;
+            }
+
+            return Text(
+              title,
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                color: Colors.white,
+                fontSize: fontSize,
+                fontWeight: FontWeight.w600,
+                height: 1.1, // Tighter line height for better appearance
+                shadows: const [
+                  Shadow(
+                    offset: Offset(1, 2),
+                    blurRadius: 4.0,
+                    color: Colors.black,
+                  ),
+                ],
               ),
-            ],
-          ),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            );
+          },
         ),
       ],
     );
@@ -191,7 +211,7 @@ class NewHeader extends HookWidget {
   Widget _getRatingWidget(BuildContext context) {
     final rating = show['rating']?.toDouble() ?? 0.0;
     if (rating <= 0) return const SizedBox.shrink();
-    
+
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
