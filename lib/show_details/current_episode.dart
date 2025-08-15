@@ -272,24 +272,31 @@ class CurrentEpisode extends HookWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (seasonNumber != null && episodeNumber != null && watchedEpisodes < totalEpisodes)
-                    Text(
-                      'T$seasonNumber:E$episodeNumber',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (seasonNumber != null && episodeNumber != null && watchedEpisodes < totalEpisodes)
+                          Text(
+                            'T$seasonNumber:E$episodeNumber ',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        if (episodeName != null && episodeName.isNotEmpty)
+                          Expanded(
+                            child: Text(
+                              episodeName,
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
                     ),
-                  if (seasonNumber != null && episodeNumber != null && watchedEpisodes < totalEpisodes)
-                    const SizedBox(width: 8),
-                  if (episodeName != null && episodeName.isNotEmpty)
-                    Text(
-                      episodeName,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  ),
                 ],
               ),
             ),
