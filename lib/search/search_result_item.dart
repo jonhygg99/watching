@@ -20,13 +20,22 @@ class SearchResultGridTile extends StatelessWidget {
 
   const SearchResultGridTile({super.key, required this.item, this.onTap});
 
-  String? getPosterUrl(dynamic posterList) {
-    if (posterList is List &&
-        posterList.isNotEmpty &&
-        posterList.first is String) {
-      final url = posterList.first as String;
+  String? _getImageUrl(dynamic imageList) {
+    if (imageList is List && imageList.isNotEmpty && imageList.first is String) {
+      final url = imageList.first as String;
       if (url.startsWith('http')) return url;
       return 'https://$url';
+    }
+    return null;
+  }
+
+  String? getFirstAvailableImage(Map<String, dynamic>? images) {
+    if (images == null) return null;
+    
+    // Try different image types in order of preference
+    for (final type in ['poster', 'thumb', 'fanart', 'banner']) {
+      final url = _getImageUrl(images[type]);
+      if (url != null) return url;
     }
     return null;
   }
@@ -34,7 +43,7 @@ class SearchResultGridTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final show = item.data;
-    final poster = getPosterUrl(show['images']?['poster']);
+    final imageUrl = getFirstAvailableImage(show['images']);
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -43,11 +52,11 @@ class SearchResultGridTile extends StatelessWidget {
             child: AspectRatio(
               aspectRatio: 0.7,
               child:
-                  poster != null
+                  imageUrl != null
                       ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: CachedNetworkImage(
-                          imageUrl: poster,
+                          imageUrl: imageUrl,
                           fit: BoxFit.cover,
                           placeholder:
                               (context, url) => const Center(

@@ -80,34 +80,34 @@ void main() {
     });
 
     testWidgets('should handle missing poster URL', (tester) async {
-      // Test the getPosterUrl method directly
-      final widget = const SearchResultGridTile(
-        item: SearchResultItem(
+      // Test with a widget that has no images
+      final widget = SearchResultGridTile(
+        item: const SearchResultItem(
           data: {'title': 'Test'},
           type: 'show',
         ),
       );
 
-      // Test with null
-      expect(widget.getPosterUrl(null), isNull);
-
-      // Test with empty list
-      expect(widget.getPosterUrl([]), isNull);
-
-      // Test with invalid URL (no http)
-      expect(widget.getPosterUrl(['example.com/image.jpg']), 'https://example.com/image.jpg');
-
-      // Test with valid URL (http)
+      // Test with null images
+      expect(widget.getFirstAvailableImage(null), isNull);
+      
+      // Test with empty images object
+      expect(widget.getFirstAvailableImage({}), isNull);
+      
+      // Test with empty image lists
       expect(
-        widget.getPosterUrl(['http://example.com/image.jpg']),
-        'http://example.com/image.jpg',
+        widget.getFirstAvailableImage({
+          'poster': [],
+          'thumb': []
+        }), 
+        isNull
       );
-
-      // Test with valid URL (https)
-      expect(
-        widget.getPosterUrl(['https://example.com/image.jpg']),
-        'https://example.com/image.jpg',
-      );
+      
+      // Test with a valid image URL (no http)
+      final result = widget.getFirstAvailableImage({
+        'poster': ['example.com/image.jpg']
+      });
+      expect(result, 'https://example.com/image.jpg');
     });
 
     testWidgets('should handle missing title', (tester) async {
@@ -156,53 +156,85 @@ void main() {
     });
   });
 
-  group('getPosterUrl', () {
-    test('should return null for empty poster list', () {
+  group('getFirstAvailableImage', () {
+    test('should return null for null images', () {
       // Arrange
-      final widget = const SearchResultGridTile(
-        item: SearchResultItem(
+      final widget = SearchResultGridTile(
+        item: const SearchResultItem(
           data: {},
           type: 'show',
         ),
       );
 
       // Act
-      final result = widget.getPosterUrl(null);
+      final result = widget.getFirstAvailableImage(null);
 
       // Assert
       expect(result, isNull);
     });
 
-    test('should format URL without http prefix', () {
+    test('should return first available image URL', () {
       // Arrange
-      final widget = const SearchResultGridTile(
-        item: SearchResultItem(
+      final widget = SearchResultGridTile(
+        item: const SearchResultItem(
           data: {},
           type: 'show',
         ),
       );
 
-      // Act
-      final result = widget.getPosterUrl(['example.com/poster.jpg']);
+      final images = {
+        'fanart': ['example.com/fanart.jpg'],
+        'poster': ['example.com/poster.jpg'],
+        'thumb': ['example.com/thumb.jpg'],
+      };
 
-      // Assert
+      // Act
+      final result = widget.getFirstAvailableImage(images);
+
+      // Assert - should return poster first (as per priority)
       expect(result, 'https://example.com/poster.jpg');
     });
 
-    test('should keep URL with http prefix', () {
+    test('should fall back to next available image type', () {
       // Arrange
-      final widget = const SearchResultGridTile(
-        item: SearchResultItem(
+      final widget = SearchResultGridTile(
+        item: const SearchResultItem(
           data: {},
           type: 'show',
         ),
       );
 
+      final images = {
+        'fanart': ['example.com/fanart.jpg'],
+        'thumb': ['example.com/thumb.jpg'],
+      };
+
       // Act
-      final result = widget.getPosterUrl(['https://example.com/poster.jpg']);
+      final result = widget.getFirstAvailableImage(images);
+
+      // Assert - should return thumb (next in priority after poster)
+      expect(result, 'https://example.com/thumb.jpg');
+    });
+
+    test('should handle empty image lists', () {
+      // Arrange
+      final widget = SearchResultGridTile(
+        item: const SearchResultItem(
+          data: {},
+          type: 'show',
+        ),
+      );
+
+      final images = {
+        'poster': [],
+        'thumb': [],
+      };
+
+      // Act
+      final result = widget.getFirstAvailableImage(images);
 
       // Assert
-      expect(result, 'https://example.com/poster.jpg');
+      expect(result, isNull);
     });
   });
 }

@@ -117,7 +117,7 @@ class ShowCarousel extends ConsumerWidget {
       builder: (context, snapshot) {
         final title = snapshot.data ?? show['title'] ?? '';
         // Helper function to get first available image from a list of image types
-        String? _getFirstAvailableImage(List<String> imageTypes) {
+        String? getFirstAvailableImage(List<String> imageTypes) {
           for (final type in imageTypes) {
             final images = show['images']?[type] as List?;
             if (images != null && images.isNotEmpty) {
@@ -128,11 +128,11 @@ class ShowCarousel extends ConsumerWidget {
         }
 
         // Try to get an image, checking multiple image types in order of preference
-        final imageUrl = _getFirstAvailableImage([
-          'poster',  // First choice
-          'thumb',   // Second choice (usually good quality thumbnails)
-          'fanart',  // Third choice (background images)
-          'banner',  // Fourth choice (banner images)
+        final imageUrl = getFirstAvailableImage([
+          'poster', // First choice
+          'thumb', // Second choice (usually good quality thumbnails)
+          'fanart', // Third choice (background images)
+          'banner', // Fourth choice (banner images)
         ]);
         return SizedBox(
           width: itemWidth,
@@ -177,41 +177,45 @@ class ShowCarousel extends ConsumerWidget {
                     ),
                   )
                   : GestureDetector(
-                      onTap: () {
-                        final showId = _getShowId(show);
-                        if (showId.isNotEmpty) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ShowDetailPage(showId: showId),
+                    onTap: () {
+                      final showId = _getShowId(show);
+                      if (showId.isNotEmpty) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ShowDetailPage(showId: showId),
+                          ),
+                        );
+                      }
+                    },
+                    child: Container(
+                      width: itemWidth,
+                      height: imageHeight,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: kShowBorderRadius,
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.tv,
+                            size: itemWidth / 3,
+                            color: Colors.grey[600],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Sin imagen',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
                             ),
-                          );
-                        }
-                      },
-                      child: Container(
-                        width: itemWidth,
-                        height: imageHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: kShowBorderRadius,
-                          border: Border.all(color: Colors.grey[300]!),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.tv, size: itemWidth / 3, color: Colors.grey[600]),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Sin imagen',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
+                  ),
               const SizedBox(height: 4),
               SizedBox(
                 width:
