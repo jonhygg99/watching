@@ -1,112 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
-import 'details_page.dart';
+import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/show_details/related_show_card.dart';
+import 'package:watching/show_details/related_shows_page.dart';
 
 class ShowDetailRelated extends StatelessWidget {
   final List<dynamic>? relatedShows;
   final TraktApi apiService;
   final String countryCode;
+  final String showId;
+  final String showTitle;
+  
   const ShowDetailRelated({
     super.key,
     required this.relatedShows,
     required this.apiService,
     required this.countryCode,
+    required this.showId,
+    required this.showTitle,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (relatedShows == null || relatedShows!.isEmpty)
+    if (relatedShows == null || relatedShows!.isEmpty) {
       return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(),
-        const Text(
-          'Relacionados',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        SizedBox(
-          height: 170,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.zero,
-            itemCount: relatedShows!.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, i) {
-              final r = relatedShows![i];
-              final img =
-                  (r['images']?['poster'] as List?)?.isNotEmpty == true
-                      ? r['images']['poster'][0]
-                      : null;
-              return GestureDetector(
-                onTap: () {
-                  final relatedId =
-                      r['ids']?['slug'] ??
-                      r['ids']?['trakt']?.toString() ??
-                      r['ids']?['imdb'] ??
-                      '';
-                  if (relatedId.isNotEmpty) {
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Relacionados',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+              if (relatedShows!.length >= 5)
+                TextButton(
+                  onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ShowDetailPage(showId: relatedId),
+                        builder: (context) => RelatedShowsPage(
+                          showId: showId,
+                          showTitle: showTitle,
+                          apiService: apiService,
+                          initialShows: relatedShows,
+                        ),
                       ),
                     );
-                  }
-                },
-                child: SizedBox(
-                  width: 110,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      if (img != null)
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            'https://$img',
-                            height: 150,
-                            width: 110,
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (_, __, ___) => Container(
-                                  height: 150,
-                                  width: 110,
-                                  color: Colors.grey.shade300,
-                                  child: const Icon(
-                                    Icons.image_not_supported,
-                                    size: 40,
-                                  ),
-                                ),
-                          ),
-                        )
-                      else
-                        Container(
-                          height: 150,
-                          width: 110,
-                          color: Colors.grey.shade300,
-                          child: const Icon(
-                            Icons.image_not_supported,
-                            size: 40,
-                          ),
-                        ),
-                      const SizedBox(height: 4),
-                      Flexible(
-                        fit: FlexFit.tight,
-                        child: Text(
-                          r['title'] ?? '',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            height: 1.1,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  },
+                  child: const Text('Ver más'),
                 ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 260,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            itemCount: relatedShows!.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            itemBuilder: (context, i) {
+              return RelatedShowCard(
+                showData: relatedShows![i],
+                width: kRelatedShowItemWidth,
+                height: kRelatedShowImageHeight,
+                imageHeight: 200,
+                borderRadius: 12,
+                spacing: 8,
               );
             },
           ),

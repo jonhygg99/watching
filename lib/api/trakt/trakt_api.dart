@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,7 +49,6 @@ class TraktApi extends TraktApiBase
   String? get clientSecret =>
       _clientSecret ?? dotenv.env['TRAKT_CLIENT_SECRET'];
   String? get redirectUri => _redirectUri ?? dotenv.env['TRAKT_REDIRECT_URI'];
-
   String? _accessToken;
 
   /// Loads the access token from SharedPreferences.
@@ -112,34 +113,102 @@ class TraktApi extends TraktApiBase
   // --- UTILITY METHODS ---
 
   /// Performs a GET request and returns a JSON-decoded list.
+  /// Returns an empty list if the request fails with a 401 or 404 status code.
   @override
   Future<List<dynamic>> getJsonList(String endpoint) async {
-    await ensureValidToken();
-    final url = Uri.parse('$baseUrl$endpoint');
-    final usedHeaders = headers;
-    final response = await http.get(url, headers: usedHeaders);
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as List<dynamic>;
-    } else {
-      throw Exception(
-        'Error GET $endpoint: ${response.statusCode}\n${response.body}',
-      );
+    try {
+      await ensureValidToken();
+      final url = Uri.parse('$baseUrl$endpoint');
+      final usedHeaders = headers;
+      final response = await http.get(url, headers: usedHeaders);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      } else if (response.statusCode == 401) {
+        if (kDebugMode) {
+          debugPrint(
+            'Unauthorized access to $endpoint - token may be invalid or expired',
+          );
+        }
+        return [];
+      } else if (response.statusCode == 404) {
+        if (kDebugMode) {
+          debugPrint('Resource not found: $endpoint');
+        }
+        return [];
+      } else {
+        if (kDebugMode) {
+          debugPrint(
+            'Error ${response.statusCode} GET $endpoint: ${response.body}',
+          );
+        }
+        return [];
+      }
+    } on http.ClientException catch (e) {
+      if (kDebugMode) {
+        debugPrint('Network error in getJsonList: $e');
+      }
+      return [];
+    } on TimeoutException catch (_) {
+      if (kDebugMode) {
+        debugPrint('Timeout while fetching $endpoint');
+      }
+      return [];
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Unexpected error in getJsonList: $e');
+      }
+      return [];
     }
   }
 
   /// Performs a GET request and returns a JSON-decoded map.
+  /// Returns an empty map if the request fails with a 401 or 404 status code.
   @override
   Future<Map<String, dynamic>> getJsonMap(String endpoint) async {
-    await ensureValidToken();
-    final url = Uri.parse('$baseUrl$endpoint');
-    final usedHeaders = headers;
-    final response = await http.get(url, headers: usedHeaders);
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
-    } else {
-      throw Exception(
-        'Error GET $endpoint: ${response.statusCode}\n${response.body}',
-      );
+    try {
+      await ensureValidToken();
+      final url = Uri.parse('$baseUrl$endpoint');
+      final usedHeaders = headers;
+      final response = await http.get(url, headers: usedHeaders);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      } else if (response.statusCode == 401) {
+        if (kDebugMode) {
+          debugPrint(
+            'Unauthorized access to $endpoint - token may be invalid or expired',
+          );
+        }
+        return {};
+      } else if (response.statusCode == 404) {
+        if (kDebugMode) {
+          debugPrint('Resource not found: $endpoint');
+        }
+        return {};
+      } else {
+        if (kDebugMode) {
+          debugPrint(
+            'Error ${response.statusCode} GET $endpoint: ${response.body}',
+          );
+        }
+        return {};
+      }
+    } on http.ClientException catch (e) {
+      if (kDebugMode) {
+        debugPrint('Network error in getJsonMap: $e');
+      }
+      return {};
+    } on TimeoutException catch (_) {
+      if (kDebugMode) {
+        debugPrint('Timeout while fetching $endpoint');
+      }
+      return {};
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Unexpected error in getJsonMap: $e');
+      }
+      return {};
     }
   }
 

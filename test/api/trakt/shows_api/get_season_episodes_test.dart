@@ -27,7 +27,7 @@ void main() {
 
         when(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes',
+            '/shows/game-of-thrones/seasons/1/episodes?extended=images',
           ),
         ).thenAnswer((_) async => episodes);
 
@@ -45,7 +45,7 @@ void main() {
         expect(result.isNotEmpty, true);
         verify(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes',
+            '/shows/game-of-thrones/seasons/1/episodes?extended=images',
           ),
         ).called(1);
       },
@@ -63,7 +63,7 @@ void main() {
 
         when(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes?translations=es',
+            '/shows/game-of-thrones/seasons/1/episodes?extended=images&translations=es',
           ),
         ).thenAnswer((_) async => episodes);
 
@@ -79,7 +79,7 @@ void main() {
         expect(result.isNotEmpty, true);
         verify(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes?translations=es',
+            '/shows/game-of-thrones/seasons/1/episodes?extended=images&translations=es',
           ),
         ).called(1);
       },
@@ -97,7 +97,7 @@ void main() {
 
         when(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes?translations=',
+            '/shows/game-of-thrones/seasons/1/episodes?extended=images&translations=',
           ),
         ).thenAnswer((_) async => episodes);
 
@@ -113,7 +113,7 @@ void main() {
         expect(result.isNotEmpty, true);
         verify(
           mockTraktApiBase.getJsonList(
-            '/shows/game-of-thrones/seasons/1/episodes?translations=',
+            '/shows/game-of-thrones/seasons/1/episodes?extended=images&translations=',
           ),
         ).called(1);
       },
@@ -123,7 +123,7 @@ void main() {
       // Arrange
       when(
         mockTraktApiBase.getJsonList(
-          '/shows/game-of-thrones/seasons/1/episodes',
+          '/shows/game-of-thrones/seasons/1/episodes?extended=images',
         ),
       ).thenThrow(Exception('API Error'));
 

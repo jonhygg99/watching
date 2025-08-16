@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'trakt_api.dart';
 
@@ -44,9 +45,9 @@ mixin ShowsApi on TraktApiBase {
   }) async {
     await ensureValidToken();
     final translationParam =
-        translations != null ? '?translations=$translations' : '';
+        translations != null ? '&translations=$translations' : '';
     final url = Uri.parse(
-      '$baseUrl/shows/$id/seasons/$season$translationParam',
+      '$baseUrl/shows/$id/seasons/$season?extended=images$translationParam',
     );
     final response = await http.get(url, headers: headers);
     if (response.statusCode == 200) {
@@ -247,20 +248,10 @@ mixin ShowsApi on TraktApiBase {
   Future<Map<String, dynamic>> getShowWatchedProgress({
     required String id,
   }) async {
-    try {
-      final progress = await getJsonMap(
-        '/shows/$id/progress/watched?hidden=false&specials=false&count_specials=false',
-      );
-
-      // Ensure we always return a valid map with required fields
-      return progress ?? {};
-    } catch (e) {
-      log('Error getting show watched progress', error: e);
-      return {}; // Return empty progress on error
-    }
+    return await getJsonMap('/shows/$id/progress/watched');
   }
 
-  /// Gets people (cast/crew) for a show.
+  /// Gets people for a show.
   Future<Map<String, dynamic>> getShowPeople({
     required String id,
     bool extended = false,
@@ -280,12 +271,119 @@ mixin ShowsApi on TraktApiBase {
   }
 
   /// Gets videos (trailers, teasers) for a show.
+  /// Returns an empty list if there's an error or no videos are available.
   Future<List<dynamic>> getShowVideos({required String id}) async {
-    return await getJsonList('/shows/$id/videos');
+    try {
+      await ensureValidToken();
+
+      // Make the request with a timeout
+      final response = await http
+          .get(Uri.parse('$baseUrl/shows/$id/videos'), headers: headers)
+          .timeout(const Duration(seconds: 10));
+
+      // Handle different status codes
+      if (response.statusCode == 200) {
+        final videos = jsonDecode(response.body) as List<dynamic>;
+        return videos
+            .where(
+              (v) =>
+                  v is Map<String, dynamic> &&
+                  v['site'] == 'youtube' &&
+                  v['type'] == 'trailer',
+            )
+            .toList();
+      } else if (response.statusCode == 401) {
+        if (kDebugMode) {
+          debugPrint('Unauthorized access to videos - token may be invalid');
+        }
+        return [];
+      } else if (response.statusCode == 404) {
+        if (kDebugMode) {
+          debugPrint('No videos found for show $id');
+        }
+        return [];
+      } else {
+        if (kDebugMode) {
+          debugPrint(
+            'Error ${response.statusCode} fetching videos for show $id',
+          );
+        }
+        return [];
+      }
+    } on http.ClientException catch (e) {
+      if (kDebugMode) {
+        debugPrint('Network error fetching videos: $e');
+      }
+      return [];
+    } on TimeoutException catch (_) {
+      if (kDebugMode) {
+        debugPrint('Timeout while fetching videos');
+      }
+      return [];
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Unexpected error fetching videos: $e');
+      }
+      return [];
+    }
   }
 
-  /// Gets related shows for a show.
-  Future<List<dynamic>> getRelatedShows({required String id}) async {
-    return await getJsonList('/shows/$id/related?extended=images');
+  /// Gets related shows for a show with pagination support.
+  ///
+  /// Returns a map containing:
+  /// - 'shows': List of show objects
+  /// - 'totalPages': Total number of pages available
+  /// - 'totalItems': Total number of items available
+  /// - 'currentPage': Current page number
+  Future<Map<String, dynamic>> getRelatedShows({
+    required String id,
+    int page = 1,
+  }) async {
+    int limit = 10;
+
+    try {
+      final uri = Uri.https('api.trakt.tv', '/shows/$id/related', {
+        'extended': 'images',
+        'page': page.toString(),
+        'limit': limit.toString(),
+      });
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'trakt-api-version': '2',
+          'trakt-api-key': headers['trakt-api-key'] ?? '',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final shows = jsonDecode(response.body) as List;
+
+        // Extract pagination info from headers
+        final totalPages =
+            int.tryParse(response.headers['x-pagination-page-count'] ?? '1') ??
+            1;
+        final totalItems =
+            int.tryParse(response.headers['x-pagination-item-count'] ?? '0') ??
+            0;
+        final currentPage =
+            int.tryParse(response.headers['x-pagination-page'] ?? '1') ?? 1;
+
+        return {
+          'shows': shows,
+          'totalPages': totalPages,
+          'totalItems': totalItems,
+          'currentPage': currentPage,
+        };
+      } else {
+        throw Exception('Failed to load related shows: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in getRelatedShows: $e');
+      }
+      rethrow;
+    }
   }
 }

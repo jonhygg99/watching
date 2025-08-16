@@ -3,11 +3,46 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/providers/watchlist_providers.dart';
-import 'package:watching/watchlist/progress_bar.dart';
+import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'season_bulk_actions.dart';
 import 'season_episode_list.dart';
-import 'helpers/season_helpers.dart';
 import 'controllers/season_actions.dart';
+
+/// Helper function to check if all episodes in a season are watched
+bool allEpisodesWatched(
+  List<Map<String, dynamic>> episodes,
+  Map<String, dynamic>? progress,
+  int seasonNumber,
+) {
+  if (progress == null || !progress.containsKey('seasons')) return false;
+
+  final season = (progress['seasons'] as List).firstWhere(
+    (s) => s['number'] == seasonNumber,
+    orElse: () => {'episodes': []},
+  );
+
+  final watchedEpisodes =
+      (season['episodes'] as List)
+          .where((ep) => ep['completed'] == true)
+          .length;
+
+  return watchedEpisodes == episodes.length;
+}
+
+/// Helper function to get the progress percentage of a season
+double getSeasonProgress(Map<String, dynamic>? progress, int seasonNumber) {
+  if (progress == null || !progress.containsKey('seasons')) return 0.0;
+
+  final season = (progress['seasons'] as List).firstWhere(
+    (s) => s['number'] == seasonNumber,
+    orElse: () => {'completed': 0, 'aired': 1},
+  );
+
+  final completed = season['completed'] ?? 0;
+  final total = season['aired'] ?? 1;
+
+  return total > 0 ? completed / total : 0.0;
+}
 
 /// Página de detalle de temporada modularizada según Windsurf Guidelines.
 /// Se apoya en widgets hijos para acciones bulk y renderizado de episodios.
@@ -41,12 +76,78 @@ class SeasonDetailPage extends HookConsumerWidget {
         useState<Map<String, dynamic>?>(null);
     final ValueNotifier<Map<int, Color>> markingColors =
         useState<Map<int, Color>>({});
+    final ValueNotifier<List<Map<String, dynamic>>> seasonsList =
+        useState<List<Map<String, dynamic>>>(showData['seasons'] ?? []);
+    final ValueNotifier<bool> isLoadingSeasons = useState<bool>(false);
+
+    // Fetch seasons if not already available and filter out season 0 if it has no episodes
+    Future<void> fetchSeasonsIfNeeded() async {
+      if (seasonsList.value.isEmpty) {
+        try {
+          isLoadingSeasons.value = true;
+          final seasons = await traktApi.getSeasons(showId);
+
+          // Filter out season 0 (specials) if it has 0 episodes
+          final filteredSeasons = List<Map<String, dynamic>>.from(seasons)
+            ..removeWhere((season) {
+              final number = season['number'];
+              final episodeCount = season['episode_count'] ?? 0;
+              // Hide only specials (season 0) if empty
+              return number == 0 && episodeCount == 0;
+            });
+
+          seasonsList.value = filteredSeasons;
+        } catch (e) {
+          debugPrint('Error fetching seasons: $e');
+        } finally {
+          isLoadingSeasons.value = false;
+        }
+      }
+    }
+
+    // Find the current season index and check for previous/next seasons
+    final (hasPreviousSeason, hasNextSeason) = useMemoized(() {
+      if (seasonsList.value.isEmpty) return (false, false);
+
+      final currentIndex = seasonsList.value.indexWhere(
+        (s) => s['number'] == seasonNumber,
+      );
+
+      return (
+        currentIndex > 0, // has previous
+        currentIndex < seasonsList.value.length - 1, // has next
+      );
+    }, [seasonsList.value, seasonNumber]);
+
+    // Navigate to a different season
+    void navigateToSeason(int newSeasonNumber) {
+      if (newSeasonNumber == seasonNumber) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => SeasonDetailPage(
+                seasonNumber: newSeasonNumber,
+                showId: showId,
+                showData: showData,
+                languageCode: languageCode,
+                onEpisodeWatched: onEpisodeWatched,
+                onWatchlistUpdate: onWatchlistUpdate,
+              ),
+        ),
+      );
+    }
 
     // Fetch episodes and progress for the season
     useEffect(() {
       Future<void> fetchData() async {
         loading.value = true;
         try {
+          // Fetch seasons first if needed
+          await fetchSeasonsIfNeeded();
+
+          // Then fetch episodes and progress
           final List<Map<String, dynamic>> eps =
               List<Map<String, dynamic>>.from(
                 await traktApi.getSeasonEpisodes(
@@ -149,12 +250,93 @@ class SeasonDetailPage extends HookConsumerWidget {
               : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Season Navigation Row
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       vertical: 8.0,
                       horizontal: 16.0,
                     ),
-                    child: ProgressBar(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Previous Season Button
+                        TextButton(
+                          onPressed:
+                              hasPreviousSeason
+                                  ? () {
+                                    final currentIndex = seasonsList.value
+                                        .indexWhere(
+                                          (s) => s['number'] == seasonNumber,
+                                        );
+                                    if (currentIndex > 0) {
+                                      final prevSeason =
+                                          seasonsList.value[currentIndex - 1];
+                                      navigateToSeason(prevSeason['number']);
+                                    }
+                                  }
+                                  : null,
+                          child: const Text('Previous Season'),
+                        ),
+
+                        // Season Dropdown
+                        if (isLoadingSeasons.value)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16.0),
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        else if (seasonsList.value.isNotEmpty)
+                          DropdownButton<int>(
+                            value: seasonNumber,
+                            items:
+                                seasonsList.value.map<DropdownMenuItem<int>>((
+                                  season,
+                                ) {
+                                  return DropdownMenuItem<int>(
+                                    value: season['number'],
+                                    child: Text('Season ${season['number']}'),
+                                  );
+                                }).toList(),
+                            onChanged: (int? newValue) {
+                              if (newValue != null) {
+                                navigateToSeason(newValue);
+                              }
+                            },
+                          ),
+
+                        // Next Season Button
+                        TextButton(
+                          onPressed:
+                              hasNextSeason
+                                  ? () {
+                                    final currentIndex = seasonsList.value
+                                        .indexWhere(
+                                          (s) => s['number'] == seasonNumber,
+                                        );
+                                    if (currentIndex <
+                                        seasonsList.value.length - 1) {
+                                      final nextSeason =
+                                          seasonsList.value[currentIndex + 1];
+                                      navigateToSeason(nextSeason['number']);
+                                    }
+                                  }
+                                  : null,
+                          child: const Text('Next Season'),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Progress Bar
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 16.0,
+                    ),
+                    child: TinyProgressBar(
                       percent: getSeasonProgress(progress.value, seasonNumber),
                       watched:
                           (progress.value != null)
@@ -176,6 +358,8 @@ class SeasonDetailPage extends HookConsumerWidget {
                               : 1,
                     ),
                   ),
+
+                  // Episodes List
                   Expanded(
                     child: SeasonEpisodeList(
                       episodes: episodes.value,

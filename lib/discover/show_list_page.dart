@@ -55,8 +55,18 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+    if (!_scrollController.hasClients || _isLoadingMore || !_hasMore) {
+      return;
+    }
+
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+
+    // Load more when we're within 80% of the bottom of the list
+    final double threshold = maxScroll * 0.8;
+    final bool shouldLoadMore = currentScroll >= threshold;
+
+    if (shouldLoadMore) {
       _loadMoreShows();
     }
   }
@@ -71,20 +81,30 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
 
     try {
       final nextPage = _currentPage + 1;
-      final newShows = await _fetchShows(page: nextPage, limit: _showsPerPage);
+
+      final response = await _fetchShows(page: nextPage, limit: _showsPerPage);
+
+      // The API returns a List<dynamic> directly, so we can safely cast it
+      final List<dynamic> newShows = List<dynamic>.from(response);
+
+      // Determine if there are more shows to load
+      final bool hasMoreShows = newShows.length >= _showsPerPage;
 
       if (mounted) {
         setState(() {
           _allShows.addAll(newShows);
           _currentPage = nextPage;
+          _hasMore = hasMoreShows;
           _isLoadingMore = false;
-          _checkForMoreShows();
         });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('Error loading more shows: $e');
+      debugPrint('Stack trace: $stackTrace');
+
       if (mounted) {
         setState(() {
-          _errorMessage = 'Error al cargar más shows';
+          _errorMessage = 'Error al cargar más shows: ${e.toString()}';
           _isLoadingMore = false;
         });
       }
@@ -132,12 +152,12 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
   Widget _buildShowsGrid() {
     return GridView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 2 / 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 16,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 12,  // Reduced from 16
+        childAspectRatio: 0.65,
       ),
       itemCount: _allShows.length + (_hasMore ? 1 : 0),
       itemBuilder: (context, index) {
@@ -229,60 +249,63 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
           onTap: () {
             final showId = _getShowId(show);
             if (showId.isNotEmpty) {
-                Navigator.of(context).push(
+              Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ShowDetailPage(showId: showId),
                 ),
               );
             }
           },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child:
-                      posterUrl != null
-                          ? CachedNetworkImage(
+          child: Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Image container with fixed aspect ratio
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: posterUrl != null
+                        ? CachedNetworkImage(
                             imageUrl: posterUrl,
                             fit: BoxFit.cover,
                             width: double.infinity,
-                            placeholder:
-                                (context, url) => Container(
-                                  color: Colors.grey[300],
-                                  child: const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                ),
-                            errorWidget:
-                                (context, url, error) => Container(
-                                  color: Colors.grey[300],
-                                  child: const Icon(Icons.error),
-                                ),
+                            height: double.infinity,
+                            placeholder: (context, url) => Container(
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.error),
+                            ),
                           )
-                          : Container(
+                        : Container(
                             color: Colors.grey[300],
                             child: const Center(child: Icon(Icons.tv)),
                           ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                // Title with fixed height for 2 lines
+                SizedBox(
+                  height: 36,
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

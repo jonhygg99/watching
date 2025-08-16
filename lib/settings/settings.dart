@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:watching/theme/theme_provider.dart';
 
 class SettingsPage extends StatefulWidget {
   final String countryCode;
@@ -98,6 +100,42 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
             const SizedBox(height: 12),
+            
+            // Theme Toggle
+            const Text(
+              'Theme:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Consumer(
+              builder: (context, ref, _) {
+                final themeMode = ref.watch(themeProvider);
+                return SegmentedButton<AppThemeMode>(
+                  segments: const [
+                    ButtonSegment<AppThemeMode>(
+                      value: AppThemeMode.light,
+                      icon: Icon(Icons.light_mode),
+                      label: Text('Light'),
+                    ),
+                    ButtonSegment<AppThemeMode>(
+                      value: AppThemeMode.dark,
+                      icon: Icon(Icons.dark_mode),
+                      label: Text('Dark'),
+                    ),
+                    ButtonSegment<AppThemeMode>(
+                      value: AppThemeMode.system,
+                      icon: Icon(Icons.phone_android),
+                      label: Text('System'),
+                    ),
+                  ],
+                  selected: {themeMode},
+                  onSelectionChanged: (Set<AppThemeMode> selection) {
+                    ref.read(themeProvider.notifier).setTheme(selection.first);
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 20),
             Row(
               children: [
                 const Text(

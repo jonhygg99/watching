@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:watching/shared/constants/colors.dart';
 
 /// A widget that displays a text that can be expanded to show more text.
 ///
@@ -70,7 +71,7 @@ class _ExpandableTextState extends State<ExpandableText> {
   void _checkTextOverflow() {
     // Get the render box of the text widget to measure its dimensions
     final renderBox = _textKey.currentContext?.findRenderObject() as RenderBox?;
-    
+
     if (renderBox != null) {
       // Create a TextPainter to measure text dimensions
       final textPainter = TextPainter(
@@ -80,11 +81,13 @@ class _ExpandableTextState extends State<ExpandableText> {
         ),
         maxLines: widget.maxLines,
         textDirection: TextDirection.ltr,
-      )..layout(maxWidth: renderBox.size.width); // Set the max width to the available width
+      )..layout(
+        maxWidth: renderBox.size.width,
+      ); // Set the max width to the available width
 
       // Check if the text overflows the specified number of lines
       final isTextOverflowing = textPainter.didExceedMaxLines;
-      
+
       // Only update state if the widget is still mounted
       if (mounted) {
         setState(() {
@@ -113,7 +116,7 @@ class _ExpandableTextState extends State<ExpandableText> {
             final textStyle = widget.style ?? const TextStyle(fontSize: 15);
             // Create a TextSpan for text measurement
             final textSpan = TextSpan(text: widget.text, style: textStyle);
-            
+
             // Measure text to determine if it overflows
             final textPainter = TextPainter(
               text: textSpan,
@@ -140,35 +143,40 @@ class _ExpandableTextState extends State<ExpandableText> {
                     // Show either expanded or collapsed text
                     _isExpanded
                         // Expanded state - show all text
-                        ? Text(widget.text, 
-                            style: textStyle, 
-                            key: _textKey,
-                          )
+                        ? Text(widget.text, style: textStyle, key: _textKey)
                         // Collapsed state - apply fade effect if needed
                         : ShaderMask(
-                            // Creates a gradient mask for the fade effect
-                            shaderCallback: (Rect bounds) {
-                              return LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.black, // Opaque at the top
-                                  Colors.black.withValues(
-                                    alpha: needsFade ? 0.0 : 1.0, // Transparent at bottom if needed
-                                  ),
-                                ],
-                                // Position the gradient (70% opaque, 100% transparent)
-                                stops: needsFade ? const [0.7, 1.0] : null,
-                              ).createShader(bounds);
-                            },
-                            child: Text(
-                              widget.text,
-                              style: textStyle,
-                              maxLines: widget.maxLines,
-                              overflow: TextOverflow.fade, // Fade the overflow text
-                              key: _textKey, // Key for measuring text dimensions
-                            ),
+                          // Creates a gradient mask for the fade effect
+                          shaderCallback: (Rect bounds) {
+                            final theme = Theme.of(context);
+                            final color =
+                                theme.brightness == Brightness.dark
+                                    ? scaffoldLightBackgroundColor
+                                    : scaffoldDarkBackgroundColor;
+                            return LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                color.withValues(
+                                  alpha: 1.0,
+                                ), // Opaque at the top
+                                color.withValues(
+                                  alpha: needsFade ? 0.0 : 1.0,
+                                ), // Transparent at bottom if needed
+                              ],
+                              // Position the gradient (70% opaque, 100% transparent)
+                              stops: needsFade ? const [0.7, 1.0] : null,
+                            ).createShader(bounds);
+                          },
+                          child: Text(
+                            widget.text,
+                            style: textStyle,
+                            maxLines: widget.maxLines,
+                            overflow:
+                                TextOverflow.fade, // Fade the overflow text
+                            key: _textKey, // Key for measuring text dimensions
                           ),
+                        ),
                   ],
                 ),
               ),
@@ -183,7 +191,8 @@ class _ExpandableTextState extends State<ExpandableText> {
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero, // Remove default padding
               minimumSize: Size.zero, // Make button as small as its content
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Minimize tap target
+              tapTargetSize:
+                  MaterialTapTargetSize.shrinkWrap, // Minimize tap target
             ),
             child: Text(
               // Toggle between 'Read more' and 'Read less' text
