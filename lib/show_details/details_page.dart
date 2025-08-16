@@ -180,7 +180,10 @@ class ShowDetailPage extends HookConsumerWidget {
                             ),
                             const SizedBox(height: 24.0),
                             if (videos != null && videos.isNotEmpty)
-                              ShowDetailVideos(videos: videos),
+                              ShowDetailVideos(
+                                videos: videos,
+                                title: originalTitle,
+                              ),
                             if (videos != null && videos.isNotEmpty)
                               const SizedBox(height: 24.0),
                             if (relatedShows != null && relatedShows.isNotEmpty)

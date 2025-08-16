@@ -187,7 +187,10 @@ class ShowDetailPageCopy extends HookConsumerWidget {
                     },
                     onWatchlistUpdate: refreshWatchlist,
                   ),
-                  ShowDetailVideos(videos: videos),
+                  ShowDetailVideos(
+                    videos: videos,
+                    title: originalTitle,
+                  ),
                   ShowDetailCast(
                     people: people,
                     showId: showId,

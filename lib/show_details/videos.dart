@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import '../youtube_player_dialog.dart';
+import 'all_videos_page.dart';
 
 class ShowDetailVideos extends StatelessWidget {
   final List<dynamic>? videos;
-  const ShowDetailVideos({super.key, this.videos});
+  final String title;
+  
+  const ShowDetailVideos({
+    super.key, 
+    required this.videos, 
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +20,29 @@ class ShowDetailVideos extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Vídeos',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Vídeos',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              if (videos != null && videos!.length > 1)
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AllVideosPage(
+                          videos: videos!,
+                          showTitle: title,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Ver todos'),
+                ),
+            ],
           ),
           const SizedBox(height: 10),
           SizedBox(
