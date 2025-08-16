@@ -122,55 +122,63 @@ class ShowCarousel extends ConsumerWidget {
           width: itemWidth,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              posterUrl != null
-                  ? GestureDetector(
-                      onTap: () async {
-                        final showId = _getShowId(show);
-                        if (showId.isNotEmpty) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => ShowDetailPage(showId: showId),
-                            ),
-                          );
-                        }
-                      },
-                      child: ClipRRect(
-                        borderRadius: kShowBorderRadius,
-                        child: CachedNetworkImage(
-                          imageUrl: posterUrl,
-                          width: itemWidth,
-                          height: imageHeight,
-                          fit: BoxFit.cover,
-                          placeholder:
-                              (context, url) => SizedBox(
-                                    width: itemWidth,
-                                    height: imageHeight,
-                                    child: const Center(
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    ),
-                                  ),
-                          errorWidget:
-                              (context, url, error) =>
-                                  const Icon(Icons.broken_image, size: 48),
-                        ),
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        Icon(Icons.tv, size: itemWidth / 2, color: Colors.grey),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Sin imagen',
-                          style: TextStyle(fontSize: 10, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-              const SizedBox(height: 4),
+              // Fixed height container for the image
               SizedBox(
-                width: itemWidth - 8, // Slightly less than full width for padding
+                height: imageHeight,
+                child: posterUrl != null
+                    ? GestureDetector(
+                        onTap: () async {
+                          final showId = _getShowId(show);
+                          if (showId.isNotEmpty) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ShowDetailPage(showId: showId),
+                              ),
+                            );
+                          }
+                        },
+                        child: ClipRRect(
+                          borderRadius: kShowBorderRadius,
+                          child: CachedNetworkImage(
+                            imageUrl: posterUrl,
+                            width: itemWidth,
+                            height: imageHeight,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => SizedBox(
+                              width: itemWidth,
+                              height: imageHeight,
+                              child: const Center(
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.broken_image, size: 48),
+                          ),
+                        ),
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.tv,
+                            size: itemWidth / 2,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Sin imagen',
+                            style: TextStyle(fontSize: 10, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+              ),
+              const SizedBox(height: 4),
+              // Title with fixed height to accommodate two lines
+              SizedBox(
+                width: itemWidth - 8,
+                height: 32, // Fixed height for two lines of text
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
