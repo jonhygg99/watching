@@ -21,10 +21,7 @@ class ShowDescription extends StatelessWidget {
             padding: const EdgeInsets.only(top: 6, bottom: 8),
             child: Text(
               tagline,
-              style: const TextStyle(
-                fontSize: 16,
-                fontStyle: FontStyle.italic,
-              ),
+              style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
             ),
           ),
         if (overview.isNotEmpty)

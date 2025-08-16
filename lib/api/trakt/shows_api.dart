@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'trakt_api.dart';
 
@@ -31,7 +32,7 @@ mixin ShowsApi on TraktApiBase {
     }
   }
 
-  /// Gets all episodes for a single season of a show.\n  ///\n  /// [id]: Trakt ID, slug, or IMDB ID of the show\n  /// [season]: Season number (e.g., 1)\n  /// [translations]: Optional 2-letter language code (e.g., 'es'), or 'all' for all translations\n  /// Returns a List of episode objects for the season.\n  Future<List<dynamic>> getSeasonEpisodes({\n    required String id,\n    required int season,\n    String? translations,\n  }) async {\n    await ensureValidToken();\n    final translationParam =\n        translations != null ? '&translations=$translations' : '';\n    final url = Uri.parse(\n      '$baseUrl/shows/$id/seasons/$season?extended=images$translationParam',\n    );\n    final response = await http.get(url, headers: headers);\n    if (response.statusCode == 200) {\n      final episodes = jsonDecode(response.body) as List<dynamic>;\n\n      // If translations were requested, extract the translated episode data\n      if (translations != null && translations != 'all') {\n        return episodes.map((episode) {\n          if (episode is Map<String, dynamic> &&\n              episode.containsKey('translations') &&\n              episode['translations'] is List) {\n            final translations = List<Map<String, dynamic>>.from(\n              episode['translations'],\n            );\n            if (translations.isNotEmpty) {\n              // Create a new map with the original episode data and override with translation\n              return {\n                ...episode,\n                'title': translations.first['title'] ?? episode['title'],\n                'overview':\n                    translations.first['overview'] ?? episode['overview'],\n              };\n            }\n          }\n          return episode;\n        }).toList();\n      }\n\n      return episodes;\n    } else {\n      throw Exception(\n        'Error GET /shows/$id/seasons/$season: ${response.statusCode}\\n${response.body}',\n      );\n    }\n  }
+  /// Gets all episodes for a single season of a show.
   ///
   /// [id]: Trakt ID, slug, or IMDB ID of the show
   /// [season]: Season number (e.g., 1)
@@ -247,20 +248,10 @@ mixin ShowsApi on TraktApiBase {
   Future<Map<String, dynamic>> getShowWatchedProgress({
     required String id,
   }) async {
-    try {
-      final progress = await getJsonMap(
-        '/shows/$id/progress/watched?hidden=false&specials=false&count_specials=false',
-      );
-
-      // Ensure we always return a valid map with required fields
-      return progress ?? {};
-    } catch (e) {
-      log('Error getting show watched progress', error: e);
-      return {}; // Return empty progress on error
-    }
+    return await getJsonMap('/shows/$id/progress/watched');
   }
 
-  /// Gets people (cast/crew) for a show.
+  /// Gets people for a show.
   Future<Map<String, dynamic>> getShowPeople({
     required String id,
     bool extended = false,
@@ -280,8 +271,61 @@ mixin ShowsApi on TraktApiBase {
   }
 
   /// Gets videos (trailers, teasers) for a show.
+  /// Returns an empty list if there's an error or no videos are available.
   Future<List<dynamic>> getShowVideos({required String id}) async {
-    return await getJsonList('/shows/$id/videos');
+    try {
+      await ensureValidToken();
+
+      // Make the request with a timeout
+      final response = await http
+          .get(Uri.parse('$baseUrl/shows/$id/videos'), headers: headers)
+          .timeout(const Duration(seconds: 10));
+
+      // Handle different status codes
+      if (response.statusCode == 200) {
+        final videos = jsonDecode(response.body) as List<dynamic>;
+        return videos
+            .where(
+              (v) =>
+                  v is Map<String, dynamic> &&
+                  v['site'] == 'youtube' &&
+                  v['type'] == 'trailer',
+            )
+            .toList();
+      } else if (response.statusCode == 401) {
+        if (kDebugMode) {
+          debugPrint('Unauthorized access to videos - token may be invalid');
+        }
+        return [];
+      } else if (response.statusCode == 404) {
+        if (kDebugMode) {
+          debugPrint('No videos found for show $id');
+        }
+        return [];
+      } else {
+        if (kDebugMode) {
+          debugPrint(
+            'Error ${response.statusCode} fetching videos for show $id',
+          );
+        }
+        return [];
+      }
+    } on http.ClientException catch (e) {
+      if (kDebugMode) {
+        debugPrint('Network error fetching videos: $e');
+      }
+      return [];
+    } on TimeoutException catch (_) {
+      if (kDebugMode) {
+        debugPrint('Timeout while fetching videos');
+      }
+      return [];
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Unexpected error fetching videos: $e');
+      }
+      return [];
+    }
   }
 
   /// Gets related shows for a show with pagination support.
@@ -336,7 +380,9 @@ mixin ShowsApi on TraktApiBase {
         throw Exception('Failed to load related shows: ${response.statusCode}');
       }
     } catch (e) {
-      log('Error in getRelatedShows: $e');
+      if (kDebugMode) {
+        print('Error in getRelatedShows: $e');
+      }
       rethrow;
     }
   }

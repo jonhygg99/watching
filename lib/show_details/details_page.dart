@@ -53,13 +53,21 @@ class ShowDetailPage extends HookConsumerWidget {
           children: [
             FutureBuilder<List<dynamic>>(
               future: Future.wait([
+                // Main show data
                 apiService.getShowById(id: showId),
+                // Translations
                 apiService.getShowTranslations(
                   id: showId,
                   language: countryCode.substring(0, 2).toLowerCase(),
                 ),
-                apiService.getShowVideos(id: showId),
+                // Videos - wrapped in try-catch to prevent the whole page from failing
+                apiService.getShowVideos(id: showId).catchError((e) {
+                  debugPrint('Error loading videos: $e');
+                  return <dynamic>[]; // Return empty list on error
+                }),
+                // People
                 apiService.getShowPeople(id: showId),
+                // Related shows
                 apiService.getRelatedShows(id: showId),
               ]),
               builder: (context, snapshot) {
@@ -139,7 +147,8 @@ class ShowDetailPage extends HookConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (show['ids']?['trakt'] != null)
+                            if (show['ids']?['trakt'] != null) ...[
+                              const SizedBox(height: 16.0),
                               CurrentEpisode(
                                 traktId: show['ids']['trakt'].toString(),
                                 title: show['title']?.toString(),
@@ -147,7 +156,7 @@ class ShowDetailPage extends HookConsumerWidget {
                                     countryCode.substring(0, 2).toLowerCase(),
                                 showData: show,
                               ),
-                            const SizedBox(height: 16.0),
+                            ],
                             ShowDescription(
                               tagline: originalTagline,
                               overview: originalOverview,

@@ -51,7 +51,7 @@ class NewHeader extends HookWidget {
             : null;
 
     if (fanartUrl == null) {
-      return const SizedBox.shrink();
+      return _buildFallbackHeader(context);
     }
 
     // Calculate 40% of screen height
@@ -345,6 +345,49 @@ class NewHeader extends HookWidget {
               ),
             );
           }).toList(),
+    );
+  }
+
+  Widget _buildFallbackHeader(BuildContext context) {
+    // Use a smaller height for the fallback header
+    final screenHeight = MediaQuery.of(context).size.height;
+    final headerHeight = screenHeight * 0.4;
+    final topPadding = MediaQuery.of(context).padding.top + 16;
+
+    return Container(
+      width: double.infinity,
+      height: headerHeight,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Stack(
+        children: [
+          // Gradient overlay
+          _getGradientOverlay(headerHeight),
+
+          // Rating widget (conditionally rendered)
+          if (show['rating'] != null)
+            Positioned(
+              top: topPadding,
+              right: 16,
+              child: _getRatingWidget(context),
+            ),
+
+          // Title and genres positioned at the bottom
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _getTitle(context, title),
+                const SizedBox(height: 8),
+                _getGenresChips(show),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
