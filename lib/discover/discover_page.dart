@@ -123,9 +123,14 @@ class DiscoverPage extends ConsumerWidget {
 
     // Section: Main ListView with all carousels
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: ListView(
         key: const PageStorageKey('discover-list'), // preserves scroll position
+        padding: const EdgeInsets.only(
+          bottom: 8.0,
+        ), // Add bottom padding to account for navigation bar
+        physics:
+            const AlwaysScrollableScrollPhysics(), // Ensure the list is always scrollable
         children: [
           // Trending Shows
           SizedBox(height: 16),
