@@ -61,7 +61,6 @@ class ShowDetailPage extends HookConsumerWidget {
                 apiService.getShowVideos(id: showId),
                 apiService.getShowPeople(id: showId),
                 apiService.getRelatedShows(id: showId),
-                apiService.getRelatedShows(id: showId),
               ]),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -84,7 +83,10 @@ class ShowDetailPage extends HookConsumerWidget {
                 final translations = results[1] as List<dynamic>?;
                 final videos = results[2] as List<dynamic>?;
                 final people = results[3] as Map<String, dynamic>?;
-                final relatedShows = results[4] as List<dynamic>?;
+                final relatedShowsResponse =
+                    results[4] as Map<String, dynamic>?;
+                final relatedShows =
+                    relatedShowsResponse?['shows'] as List<dynamic>?;
 
                 if (show == null) {
                   return const Center(child: Text('No se encontraron datos.'));
@@ -172,6 +174,8 @@ class ShowDetailPage extends HookConsumerWidget {
                                 relatedShows: relatedShows,
                                 apiService: apiService,
                                 countryCode: countryCode,
+                                showId: showId,
+                                showTitle: originalTitle,
                               ),
                             ],
                             Row(

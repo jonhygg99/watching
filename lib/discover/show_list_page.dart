@@ -55,8 +55,18 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
+    if (!_scrollController.hasClients || _isLoadingMore || !_hasMore) {
+      return;
+    }
+
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+
+    // Load more when we're within 80% of the bottom of the list
+    final double threshold = maxScroll * 0.8;
+    final bool shouldLoadMore = currentScroll >= threshold;
+
+    if (shouldLoadMore) {
       _loadMoreShows();
     }
   }
@@ -71,20 +81,30 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
 
     try {
       final nextPage = _currentPage + 1;
-      final newShows = await _fetchShows(page: nextPage, limit: _showsPerPage);
+
+      final response = await _fetchShows(page: nextPage, limit: _showsPerPage);
+
+      // The API returns a List<dynamic> directly, so we can safely cast it
+      final List<dynamic> newShows = List<dynamic>.from(response);
+
+      // Determine if there are more shows to load
+      final bool hasMoreShows = newShows.length >= _showsPerPage;
 
       if (mounted) {
         setState(() {
           _allShows.addAll(newShows);
           _currentPage = nextPage;
+          _hasMore = hasMoreShows;
           _isLoadingMore = false;
-          _checkForMoreShows();
         });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('Error loading more shows: $e');
+      debugPrint('Stack trace: $stackTrace');
+
       if (mounted) {
         setState(() {
-          _errorMessage = 'Error al cargar más shows';
+          _errorMessage = 'Error al cargar más shows: ${e.toString()}';
           _isLoadingMore = false;
         });
       }
@@ -229,7 +249,7 @@ class _ShowListPageState extends ConsumerState<ShowListPage> {
           onTap: () {
             final showId = _getShowId(show);
             if (showId.isNotEmpty) {
-                Navigator.of(context).push(
+              Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ShowDetailPage(showId: showId),
                 ),

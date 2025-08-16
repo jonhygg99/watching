@@ -200,6 +200,8 @@ class ShowDetailPageCopy extends HookConsumerWidget {
                     relatedShows: relatedShows,
                     apiService: apiService,
                     countryCode: countryCode,
+                    showId: showId,
+                    showTitle: originalTitle,
                   ),
                 ],
               ),

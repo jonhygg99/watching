@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/show_details/related_show_card.dart';
+import 'package:watching/show_details/related_shows_page.dart';
 
 class ShowDetailRelated extends StatelessWidget {
   final List<dynamic>? relatedShows;
   final TraktApi apiService;
   final String countryCode;
+  final String showId;
+  final String showTitle;
+  
   const ShowDetailRelated({
     super.key,
     required this.relatedShows,
     required this.apiService,
     required this.countryCode,
+    required this.showId,
+    required this.showTitle,
   });
 
   @override
@@ -21,14 +28,33 @@ class ShowDetailRelated extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            'Relacionados',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Relacionados',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+              if (relatedShows!.length >= 5)
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RelatedShowsPage(
+                          showId: showId,
+                          showTitle: showTitle,
+                          apiService: apiService,
+                          initialShows: relatedShows,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('Ver más'),
+                ),
+            ],
           ),
         ),
         SizedBox(
@@ -41,8 +67,8 @@ class ShowDetailRelated extends StatelessWidget {
             itemBuilder: (context, i) {
               return RelatedShowCard(
                 showData: relatedShows![i],
-                width: 160,
-                height: 240,
+                width: kRelatedShowItemWidth,
+                height: kRelatedShowImageHeight,
                 imageHeight: 200,
                 borderRadius: 12,
                 spacing: 8,
