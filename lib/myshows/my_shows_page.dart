@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/myshows/widgets/my_shows_skeleton.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/features/myshows/providers/upcoming_episodes_provider.dart';
 import 'package:watching/providers/app_providers.dart';
@@ -119,7 +120,7 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const MyShowsSkeleton();
     }
 
     if (_error != null) {
