@@ -128,7 +128,12 @@ class ShowDetailPage extends HookConsumerWidget {
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: 50,
+                          top: 16,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -140,18 +145,35 @@ class ShowDetailPage extends HookConsumerWidget {
                                     countryCode.substring(0, 2).toLowerCase(),
                                 showData: show,
                               ),
+                            const SizedBox(height: 16.0),
                             ShowDescription(
                               tagline: originalTagline,
                               overview: originalOverview,
                             ),
-                            const SizedBox(height: 16.0),
-                            if (people != null && people.isNotEmpty)
+                            if (people != null && people.isNotEmpty) ...[
+                              const SizedBox(height: 16.0),
                               ShowDetailCast(
                                 people: people,
                                 showId: showId,
                                 apiService: apiService,
                               ),
-
+                            ],
+                            if (videos != null && videos.isNotEmpty) ...[
+                              const SizedBox(height: 16.0),
+                              ShowDetailVideos(
+                                videos: videos,
+                                title: originalTitle,
+                              ),
+                            ],
+                            if (relatedShows != null &&
+                                relatedShows.isNotEmpty) ...[
+                              const SizedBox(height: 16.0),
+                              ShowDetailRelated(
+                                relatedShows: relatedShows,
+                                apiService: apiService,
+                                countryCode: countryCode,
+                              ),
+                            ],
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -178,20 +200,6 @@ class ShowDetailPage extends HookConsumerWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 24.0),
-                            if (videos != null && videos.isNotEmpty)
-                              ShowDetailVideos(
-                                videos: videos,
-                                title: originalTitle,
-                              ),
-                            if (videos != null && videos.isNotEmpty)
-                              const SizedBox(height: 24.0),
-                            if (relatedShows != null && relatedShows.isNotEmpty)
-                              ShowDetailRelated(
-                                relatedShows: relatedShows,
-                                apiService: apiService,
-                                countryCode: countryCode,
-                              ),
                           ],
                         ),
                       ),
