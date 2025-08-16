@@ -160,7 +160,6 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
 
       // Process shows in chunks of 3
       const chunkSize = 3;
-      int processedCount = 0;
       bool hasNewItems = false;
 
       // Only process new items that we haven't seen before
@@ -209,7 +208,6 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
           );
 
           // Add valid items to the map
-          int addedInChunk = 0;
           for (final item in processedChunk) {
             if (item != null) {
               final show = item['show'] ?? item;
@@ -217,13 +215,10 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
               final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
               if (traktId != null) {
                 _itemsMap[traktId] = item;
-                addedInChunk++;
                 hasNewItems = true;
               }
             }
           }
-
-          processedCount += addedInChunk;
 
           // Only update state periodically to reduce rebuilds
           if (i % (chunkSize * 2) == 0 && hasNewItems) {

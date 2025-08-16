@@ -156,6 +156,7 @@ class ShowDetailPage extends HookConsumerWidget {
                                     countryCode.substring(0, 2).toLowerCase(),
                                 showData: show,
                               ),
+                              const SizedBox(height: 16.0),
                             ],
                             ShowDescription(
                               tagline: originalTagline,

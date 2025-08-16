@@ -98,10 +98,6 @@ class WatchlistPage extends HookConsumerWidget {
             ),
           ),
 
-          // Loading indicator (shown only on initial load)
-          if (isLoading && !watchlistState.hasData)
-            const LinearProgressIndicator(minHeight: 2),
-
           // Main content
           Expanded(
             child: Builder(
