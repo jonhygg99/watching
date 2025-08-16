@@ -8,17 +8,18 @@ class DiscoverSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate carousel height to fit the image and text
-    final carouselHeight = kDiscoverShowImageHeight + 40;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate carousel height to fit the image and text
+        final carouselHeight = kDiscoverShowImageHeight + 40;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final baseColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
+        final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
 
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      period: const Duration(milliseconds: 1500),
-      enabled: true,
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          period: const Duration(milliseconds: 1500),
           child: SizedBox(
             width: double.infinity,
             height: carouselHeight + 40, // Extra space for the title
@@ -87,6 +88,8 @@ class DiscoverSkeleton extends StatelessWidget {
               ],
             ),
           ),
+        );
+      },
     );
   }
 }
