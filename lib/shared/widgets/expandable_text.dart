@@ -151,8 +151,8 @@ class _ExpandableTextState extends State<ExpandableText> {
                             final theme = Theme.of(context);
                             final color =
                                 theme.brightness == Brightness.dark
-                                    ? scaffoldLightBackgroundColor
-                                    : scaffoldDarkBackgroundColor;
+                                    ? kScaffoldLightBackgroundColor
+                                    : kScaffoldDarkBackgroundColor;
                             return LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,

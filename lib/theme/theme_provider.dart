@@ -39,7 +39,7 @@ ThemeData getLightTheme() {
   return ThemeData(
     brightness: Brightness.light,
     primarySwatch: Colors.blue,
-    scaffoldBackgroundColor: scaffoldLightBackgroundColor,
+    scaffoldBackgroundColor: kScaffoldLightBackgroundColor,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.blue,
       foregroundColor: Colors.white,
@@ -51,7 +51,7 @@ ThemeData getDarkTheme() {
   return ThemeData(
     brightness: Brightness.dark,
     primarySwatch: Colors.blueGrey,
-    scaffoldBackgroundColor: scaffoldDarkBackgroundColor,
+    scaffoldBackgroundColor: kScaffoldDarkBackgroundColor,
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.grey[850],
       foregroundColor: Colors.white,

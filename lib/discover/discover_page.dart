@@ -4,10 +4,10 @@ import 'package:watching/providers/app_providers.dart';
 import 'package:watching/discover/discover_skeleton.dart';
 import 'package:watching/discover/show_carousel.dart';
 import 'package:watching/discover/show_list_page.dart';
+import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/constants/measures.dart';
 
 /// DiscoverPage displays curated carousels of TV shows using data from ApiService.
-/// - Follows Windsurf Development Guidelines for Riverpod usage and code structure.
-/// - Uses generated provider for ApiService for optimal DI and testability.
 class DiscoverPage extends ConsumerWidget {
   const DiscoverPage({super.key});
 
@@ -100,11 +100,11 @@ class DiscoverPage extends ConsumerWidget {
           if (snapshot.hasError) {
             // Use user-friendly, i18n-ready error message
             return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
+              padding: kVerticalPaddingPhone,
               child: Center(
                 child: Text(
                   'Error loading data: ${snapshot.error}',
-                  style: const TextStyle(color: Colors.red),
+                  style: const TextStyle(color: kErrorColorMessage),
                 ),
               ),
             );
@@ -123,7 +123,7 @@ class DiscoverPage extends ConsumerWidget {
 
     // Section: Main ListView with all carousels
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: kHorizontalPaddingPhone,
       child: ListView(
         key: const PageStorageKey('discover-list'), // preserves scroll position
         padding: const EdgeInsets.only(
@@ -133,7 +133,7 @@ class DiscoverPage extends ConsumerWidget {
             const AlwaysScrollableScrollPhysics(), // Ensure the list is always scrollable
         children: [
           // Trending Shows
-          SizedBox(height: 16),
+          const SizedBox(height: 8),
           buildCarousel(
             title: 'Trending Shows',
             future: api.getTrendingShows(),
@@ -148,7 +148,6 @@ class DiscoverPage extends ConsumerWidget {
                 ),
           ),
           // Popular Shows
-          SizedBox(height: 16),
           buildCarousel(
             title: 'Popular Shows',
             future: api.getPopularShows(),
@@ -163,7 +162,6 @@ class DiscoverPage extends ConsumerWidget {
                 ),
           ),
           // Most Favorited (7d)
-          SizedBox(height: 16),
           buildCarousel(
             title: 'Most Favorited (7 days)',
             future: api.getMostFavoritedShows(period: 'weekly'),
@@ -178,7 +176,6 @@ class DiscoverPage extends ConsumerWidget {
                 ),
           ),
           // Most Favorited (30d)
-          SizedBox(height: 16),
           buildCarousel(
             title: 'Most Favorited (30 days)',
             future: api.getMostFavoritedShows(period: 'monthly'),
@@ -193,7 +190,6 @@ class DiscoverPage extends ConsumerWidget {
                 ),
           ),
           // Most Collected (7d)
-          SizedBox(height: 16),
           buildCarousel(
             title: 'Most Collected (7 days)',
             future: api.getMostCollectedShows(period: 'weekly'),
@@ -208,7 +204,6 @@ class DiscoverPage extends ConsumerWidget {
                 ),
           ),
           // Most Played (7d)
-          SizedBox(height: 16),
           buildCarousel(
             title: 'Most Played (7 days)',
             future: api.getMostPlayedShows(period: 'weekly'),
@@ -223,7 +218,6 @@ class DiscoverPage extends ConsumerWidget {
                 ),
           ),
           // Most Watched (7d)
-          SizedBox(height: 16),
           buildCarousel(
             title: 'Most Watched (7 days)',
             future: api.getMostWatchedShows(period: 'weekly'),
@@ -238,7 +232,6 @@ class DiscoverPage extends ConsumerWidget {
                 ),
           ),
           // Most Anticipated
-          SizedBox(height: 16),
           buildCarousel(
             title: 'Most Anticipated',
             future: api.getMostAnticipatedShows(),
@@ -260,7 +253,7 @@ class DiscoverPage extends ConsumerWidget {
                       },
                 ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 8),
         ],
       ),
     );

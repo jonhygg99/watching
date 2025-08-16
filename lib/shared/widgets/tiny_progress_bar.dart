@@ -33,7 +33,7 @@ class TinyProgressBar extends StatelessWidget {
                   height: 5,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [gradientLightColor, gradientDarkColor],
+                      colors: [kGradientLightColor, kGradientDarkColor],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),

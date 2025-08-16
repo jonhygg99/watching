@@ -278,7 +278,7 @@ class NewHeader extends HookWidget {
                           Colors.transparent,
                           Colors.black.withValues(alpha: 0.1),
                           Colors.black.withValues(alpha: 0.6),
-                          scaffoldDarkBackgroundColor,
+                          kScaffoldDarkBackgroundColor,
                         ]
                         : [
                           Colors.transparent,

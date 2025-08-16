@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/constants/fonts.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/api/trakt/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
@@ -51,8 +53,8 @@ class ShowCarousel extends ConsumerWidget {
                   child: const Text(
                     'Ver más',
                     style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.blue,
+                      fontSize: kFontSizeButtonTextViewMore,
+                      color: kButtonTextViewMoreColor,
                       fontWeight: FontWeight.normal,
                     ),
                   ),
@@ -62,7 +64,7 @@ class ShowCarousel extends ConsumerWidget {
         ),
         LayoutBuilder(
           builder: (context, constraints) {
-            final carouselHeight = kDiscoverShowImageHeight + 50;
+            final carouselHeight = kDiscoverShowImageHeight + 40;
             if (shows.isEmpty) {
               return SizedBox(
                 height: carouselHeight,
@@ -75,18 +77,20 @@ class ShowCarousel extends ConsumerWidget {
                 key: _pageStorageKey,
                 scrollDirection: Axis.horizontal,
                 itemCount: shows.length,
-                cacheExtent: 1000, // Cache more items offscreen for smoother scrolling
+                cacheExtent:
+                    1000, // Cache more items offscreen for smoother scrolling
                 addAutomaticKeepAlives: true, // Preserve scroll position
                 separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) => _buildShowItem(
-                  ref: ref,
-                  context: context,
-                  show: extractShow(shows[index]),
-                  itemWidth: kDiscoverShowItemWidth,
-                  imageHeight: kDiscoverShowImageHeight,
-                  shows: shows,
-                  index: index,
-                ),
+                itemBuilder:
+                    (context, index) => _buildShowItem(
+                      ref: ref,
+                      context: context,
+                      show: extractShow(shows[index]),
+                      itemWidth: kDiscoverShowItemWidth,
+                      imageHeight: kDiscoverShowImageHeight,
+                      shows: shows,
+                      index: index,
+                    ),
               ),
             );
           },
@@ -107,10 +111,9 @@ class ShowCarousel extends ConsumerWidget {
   }) {
     // Use a FutureBuilder to handle the async translation
     return FutureBuilder<String>(
-      future: ref.read(showTranslationServiceProvider).getTranslatedTitle(
-            show: show,
-            traktApi: ref.read(traktApiProvider),
-          ),
+      future: ref
+          .read(showTranslationServiceProvider)
+          .getTranslatedTitle(show: show, traktApi: ref.read(traktApiProvider)),
       builder: (context, snapshot) {
         final title = snapshot.data ?? show['title'] ?? '';
         final posterArr = show['images']?['poster'] as List?;
@@ -122,63 +125,58 @@ class ShowCarousel extends ConsumerWidget {
           width: itemWidth,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Fixed height container for the image
-              SizedBox(
-                height: imageHeight,
-                child: posterUrl != null
-                    ? GestureDetector(
-                        onTap: () async {
-                          final showId = _getShowId(show);
-                          if (showId.isNotEmpty) {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ShowDetailPage(showId: showId),
-                              ),
-                            );
-                          }
-                        },
-                        child: ClipRRect(
-                          borderRadius: kShowBorderRadius,
-                          child: CachedNetworkImage(
-                            imageUrl: posterUrl,
-                            width: itemWidth,
-                            height: imageHeight,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => SizedBox(
+              posterUrl != null
+                  ? GestureDetector(
+                    onTap: () async {
+                      final showId = _getShowId(show);
+                      if (showId.isNotEmpty) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ShowDetailPage(showId: showId),
+                          ),
+                        );
+                      }
+                    },
+                    child: ClipRRect(
+                      borderRadius: kShowBorderRadius,
+                      child: CachedNetworkImage(
+                        imageUrl: posterUrl,
+                        width: itemWidth,
+                        height: imageHeight,
+                        fit: BoxFit.cover,
+                        placeholder:
+                            (context, url) => SizedBox(
                               width: itemWidth,
                               height: imageHeight,
                               child: const Center(
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                             ),
-                            errorWidget: (context, url, error) =>
+                        errorWidget:
+                            (context, url, error) =>
                                 const Icon(Icons.broken_image, size: 48),
-                          ),
-                        ),
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.tv,
-                            size: itemWidth / 2,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Sin imagen',
-                            style: TextStyle(fontSize: 10, color: Colors.grey),
-                          ),
-                        ],
                       ),
-              ),
+                    ),
+                  )
+                  : Column(
+                    children: [
+                      Icon(Icons.tv, size: itemWidth / 2, color: Colors.grey),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Sin imagen',
+                        style: TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    ],
+                  ),
               const SizedBox(height: 4),
-              // Title with fixed height to accommodate two lines
               SizedBox(
-                width: itemWidth - 8,
-                height: 32, // Fixed height for two lines of text
+                width:
+                    itemWidth - 8, // Slightly less than full width for padding
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
@@ -186,8 +184,7 @@ class ShowCarousel extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    height: 1.2,
+                    fontSize: kFontSizeShowTitle,
                   ),
                 ),
               ),
