@@ -8,6 +8,7 @@ import 'widgets/episode_details.dart';
 import 'widgets/episode_actions.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
+import 'skeleton/episode_info_modal_skeleton.dart';
 
 class EpisodeInfoModal extends StatefulWidget {
   final Future<Map<String, dynamic>> episodeFuture;
@@ -173,7 +174,7 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
         Widget content;
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          content = const Center(child: CircularProgressIndicator());
+          content = const EpisodeInfoModalSkeleton();
         } else if (snapshot.hasError) {
           content = Center(child: Text('Error: ${snapshot.error}'));
         } else {

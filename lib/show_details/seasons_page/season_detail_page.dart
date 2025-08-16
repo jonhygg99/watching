@@ -6,7 +6,6 @@ import 'package:watching/providers/watchlist_providers.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'season_bulk_actions.dart';
 import 'season_episode_list.dart';
-import 'helpers/season_helpers.dart';
 import 'controllers/season_actions.dart';
 
 /// Helper function to check if all episodes in a season are watched
@@ -16,34 +15,32 @@ bool allEpisodesWatched(
   int seasonNumber,
 ) {
   if (progress == null || !progress.containsKey('seasons')) return false;
-  
+
   final season = (progress['seasons'] as List).firstWhere(
     (s) => s['number'] == seasonNumber,
     orElse: () => {'episodes': []},
   );
-  
-  final watchedEpisodes = (season['episodes'] as List).where(
-    (ep) => ep['completed'] == true,
-  ).length;
-  
+
+  final watchedEpisodes =
+      (season['episodes'] as List)
+          .where((ep) => ep['completed'] == true)
+          .length;
+
   return watchedEpisodes == episodes.length;
 }
 
 /// Helper function to get the progress percentage of a season
-double getSeasonProgress(
-  Map<String, dynamic>? progress,
-  int seasonNumber,
-) {
+double getSeasonProgress(Map<String, dynamic>? progress, int seasonNumber) {
   if (progress == null || !progress.containsKey('seasons')) return 0.0;
-  
+
   final season = (progress['seasons'] as List).firstWhere(
     (s) => s['number'] == seasonNumber,
     orElse: () => {'completed': 0, 'aired': 1},
   );
-  
+
   final completed = season['completed'] ?? 0;
   final total = season['aired'] ?? 1;
-  
+
   return total > 0 ? completed / total : 0.0;
 }
 
@@ -89,7 +86,7 @@ class SeasonDetailPage extends HookConsumerWidget {
         try {
           isLoadingSeasons.value = true;
           final seasons = await traktApi.getSeasons(showId);
-          
+
           // Filter out season 0 (specials) if it has 0 episodes
           final filteredSeasons = List<Map<String, dynamic>>.from(seasons)
             ..removeWhere((season) {
@@ -98,7 +95,7 @@ class SeasonDetailPage extends HookConsumerWidget {
               // Hide only specials (season 0) if empty
               return number == 0 && episodeCount == 0;
             });
-            
+
           seasonsList.value = filteredSeasons;
         } catch (e) {
           debugPrint('Error fetching seasons: $e');
@@ -129,14 +126,15 @@ class SeasonDetailPage extends HookConsumerWidget {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => SeasonDetailPage(
-            seasonNumber: newSeasonNumber,
-            showId: showId,
-            showData: showData,
-            languageCode: languageCode,
-            onEpisodeWatched: onEpisodeWatched,
-            onWatchlistUpdate: onWatchlistUpdate,
-          ),
+          builder:
+              (context) => SeasonDetailPage(
+                seasonNumber: newSeasonNumber,
+                showId: showId,
+                showData: showData,
+                languageCode: languageCode,
+                onEpisodeWatched: onEpisodeWatched,
+                onWatchlistUpdate: onWatchlistUpdate,
+              ),
         ),
       );
     }
@@ -148,7 +146,7 @@ class SeasonDetailPage extends HookConsumerWidget {
         try {
           // Fetch seasons first if needed
           await fetchSeasonsIfNeeded();
-          
+
           // Then fetch episodes and progress
           final List<Map<String, dynamic>> eps =
               List<Map<String, dynamic>>.from(
@@ -246,126 +244,136 @@ class SeasonDetailPage extends HookConsumerWidget {
           ),
         ],
       ),
-      body: loading.value
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Season Navigation Row
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 16.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Previous Season Button
-                      TextButton(
-                        onPressed: hasPreviousSeason
-                            ? () {
-                                final currentIndex = seasonsList.value.indexWhere(
-                                  (s) => s['number'] == seasonNumber,
-                                );
-                                if (currentIndex > 0) {
-                                  final prevSeason =
-                                      seasonsList.value[currentIndex - 1];
-                                  navigateToSeason(prevSeason['number']);
-                                }
-                              }
-                            : null,
-                        child: const Text('Previous Season'),
-                      ),
-
-                      // Season Dropdown
-                      if (isLoadingSeasons.value)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        )
-                      else if (seasonsList.value.isNotEmpty)
-                        DropdownButton<int>(
-                          value: seasonNumber,
-                          items: seasonsList.value
-                              .map<DropdownMenuItem<int>>((season) {
-                            return DropdownMenuItem<int>(
-                              value: season['number'],
-                              child: Text('Season ${season['number']}'),
-                            );
-                          }).toList(),
-                          onChanged: (int? newValue) {
-                            if (newValue != null) {
-                              navigateToSeason(newValue);
-                            }
-                          },
+      body:
+          loading.value
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Season Navigation Row
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 16.0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Previous Season Button
+                        TextButton(
+                          onPressed:
+                              hasPreviousSeason
+                                  ? () {
+                                    final currentIndex = seasonsList.value
+                                        .indexWhere(
+                                          (s) => s['number'] == seasonNumber,
+                                        );
+                                    if (currentIndex > 0) {
+                                      final prevSeason =
+                                          seasonsList.value[currentIndex - 1];
+                                      navigateToSeason(prevSeason['number']);
+                                    }
+                                  }
+                                  : null,
+                          child: const Text('Previous Season'),
                         ),
 
-                      // Next Season Button
-                      TextButton(
-                        onPressed: hasNextSeason
-                            ? () {
-                                final currentIndex = seasonsList.value.indexWhere(
-                                  (s) => s['number'] == seasonNumber,
-                                );
-                                if (currentIndex < seasonsList.value.length - 1) {
-                                  final nextSeason =
-                                      seasonsList.value[currentIndex + 1];
-                                  navigateToSeason(nextSeason['number']);
-                                }
+                        // Season Dropdown
+                        if (isLoadingSeasons.value)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16.0),
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        else if (seasonsList.value.isNotEmpty)
+                          DropdownButton<int>(
+                            value: seasonNumber,
+                            items:
+                                seasonsList.value.map<DropdownMenuItem<int>>((
+                                  season,
+                                ) {
+                                  return DropdownMenuItem<int>(
+                                    value: season['number'],
+                                    child: Text('Season ${season['number']}'),
+                                  );
+                                }).toList(),
+                            onChanged: (int? newValue) {
+                              if (newValue != null) {
+                                navigateToSeason(newValue);
                               }
-                            : null,
-                        child: const Text('Next Season'),
-                      ),
-                    ],
+                            },
+                          ),
+
+                        // Next Season Button
+                        TextButton(
+                          onPressed:
+                              hasNextSeason
+                                  ? () {
+                                    final currentIndex = seasonsList.value
+                                        .indexWhere(
+                                          (s) => s['number'] == seasonNumber,
+                                        );
+                                    if (currentIndex <
+                                        seasonsList.value.length - 1) {
+                                      final nextSeason =
+                                          seasonsList.value[currentIndex + 1];
+                                      navigateToSeason(nextSeason['number']);
+                                    }
+                                  }
+                                  : null,
+                          child: const Text('Next Season'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                
-                // Progress Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 16.0,
+
+                  // Progress Bar
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 16.0,
+                    ),
+                    child: TinyProgressBar(
+                      percent: getSeasonProgress(progress.value, seasonNumber),
+                      watched:
+                          (progress.value != null)
+                              ? (progress.value!["seasons"] as List)
+                                  .firstWhere(
+                                    (s) => s["number"] == seasonNumber,
+                                    orElse: () => {},
+                                  )
+                                  .putIfAbsent("completed", () => 0)
+                              : 0,
+                      total:
+                          (progress.value != null)
+                              ? (progress.value!["seasons"] as List)
+                                  .firstWhere(
+                                    (s) => s["number"] == seasonNumber,
+                                    orElse: () => {},
+                                  )
+                                  .putIfAbsent("aired", () => 1)
+                              : 1,
+                    ),
                   ),
-                  child: TinyProgressBar(
-                    percent: getSeasonProgress(progress.value, seasonNumber),
-                    watched: (progress.value != null)
-                        ? (progress.value!["seasons"] as List)
-                            .firstWhere(
-                              (s) => s["number"] == seasonNumber,
-                              orElse: () => {},
-                            )
-                            .putIfAbsent("completed", () => 0)
-                        : 0,
-                    total: (progress.value != null)
-                        ? (progress.value!["seasons"] as List)
-                            .firstWhere(
-                              (s) => s["number"] == seasonNumber,
-                              orElse: () => {},
-                            )
-                            .putIfAbsent("aired", () => 1)
-                        : 1,
+
+                  // Episodes List
+                  Expanded(
+                    child: SeasonEpisodeList(
+                      episodes: episodes.value,
+                      progress: progress.value,
+                      markingColors: markingColors.value,
+                      loading: loading.value,
+                      seasonNumber: seasonNumber,
+                      showId: showId,
+                      showData: showData,
+                      languageCode: languageCode,
+                      setMarkingColor: setMarkingColor,
+                      onToggleEpisode: handleToggleEpisode,
+                    ),
                   ),
-                ),
-                
-                // Episodes List
-                Expanded(
-                  child: SeasonEpisodeList(
-                    episodes: episodes.value,
-                    progress: progress.value,
-                    markingColors: markingColors.value,
-                    loading: loading.value,
-                    seasonNumber: seasonNumber,
-                    showId: showId,
-                    showData: showData,
-                    languageCode: languageCode,
-                    setMarkingColor: setMarkingColor,
-                    onToggleEpisode: handleToggleEpisode,
-                  ),
-                )
                 ],
               ),
     );
