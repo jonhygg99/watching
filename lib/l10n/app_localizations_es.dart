@@ -21,6 +21,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get discover => 'Descubrir';
 
   @override
+  String get viewMore => 'Ver más';
+
+  @override
   String get watchlist => 'Mi lista';
 
   @override
@@ -30,10 +33,37 @@ class AppLocalizationsEs extends AppLocalizations {
   String get search => 'Buscar';
 
   @override
+  String get trendingShows => 'Series en tendencia';
+
+  @override
+  String get popularShows => 'Series populares';
+
+  @override
+  String get mostFavoritedWeekly => 'Más favoritas (7 días)';
+
+  @override
+  String get mostFavoritedMonthly => 'Más favoritas (30 días)';
+
+  @override
+  String get mostCollectedWeekly => 'Más añadidas (7 días)';
+
+  @override
+  String get mostPlayedWeekly => 'Más reproducidas (7 días)';
+
+  @override
+  String get mostWatchedWeekly => 'Más vistas (7 días)';
+
+  @override
+  String get mostAnticipated => 'Más esperadas';
+
+  @override
   String get english => 'Inglés';
 
   @override
   String get spanish => 'Español';
+
+  @override
+  String get noResults => 'No se encontraron resultados';
 
   @override
   String get selectLanguage => 'Seleccionar idioma';
@@ -49,33 +79,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get system => 'Sistema';
-
-  @override
-  String get trendingShows => 'Series en tendencia';
-
-  @override
-  String get popularShows => 'Series populares';
-
-  @override
-  String get mostFavoritedWeekly => 'Más favoritas esta semana';
-
-  @override
-  String get mostFavoritedMonthly => 'Más favoritas este mes';
-
-  @override
-  String get mostCollectedWeekly => 'Más añadidas a colecciones esta semana';
-
-  @override
-  String get mostPlayedWeekly => 'Más reproducidas esta semana';
-
-  @override
-  String get mostWatchedWeekly => 'Más vistas esta semana';
-
-  @override
-  String get mostAnticipated => 'Más anticipadas';
-
-  @override
-  String get noResults => 'No se encontraron resultados';
 
   @override
   String get revokeToken => 'Revocar token de Trakt.tv';

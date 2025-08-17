@@ -16,6 +16,10 @@
   "@@discover": {
     "description": "Etiqueta de la pestaña de descubrimiento"
   },
+  "viewMore": "Ver más",
+  "@@viewMore": {
+    "description": "Texto para el botón de ver más"
+  },
   "watchlist": "Mi lista",
   "@@watchlist": {
     "description": "Etiqueta de la pestaña de la lista de seguimiento"
@@ -26,7 +30,7 @@
   },
   "search": "Buscar",
   "@@search": {
-    "description": "Etiqueta para la funcionalidad de búsqueda"
+    "description": "Etiqueta para la pestaña de búsqueda"
   },
   "trendingShows": "Series en tendencia",
   "@@trendingShows": {

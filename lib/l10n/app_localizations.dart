@@ -62,8 +62,7 @@ import 'app_localizations_es.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,18 +82,17 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('es'),
+    Locale('es')
   ];
 
   /// No description provided for @appTitle.
@@ -122,6 +119,12 @@ abstract class AppLocalizations {
   /// **'Discover'**
   String get discover;
 
+  /// No description provided for @viewMore.
+  ///
+  /// In en, this message translates to:
+  /// **'View More'**
+  String get viewMore;
+
   /// No description provided for @watchlist.
   ///
   /// In en, this message translates to:
@@ -140,6 +143,54 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get search;
 
+  /// No description provided for @trendingShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Trending Shows'**
+  String get trendingShows;
+
+  /// No description provided for @popularShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Shows'**
+  String get popularShows;
+
+  /// No description provided for @mostFavoritedWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Favorited (7 days)'**
+  String get mostFavoritedWeekly;
+
+  /// No description provided for @mostFavoritedMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Favorited (30 days)'**
+  String get mostFavoritedMonthly;
+
+  /// No description provided for @mostCollectedWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Collected (7 days)'**
+  String get mostCollectedWeekly;
+
+  /// No description provided for @mostPlayedWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played (7 days)'**
+  String get mostPlayedWeekly;
+
+  /// No description provided for @mostWatchedWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Watched (7 days)'**
+  String get mostWatchedWeekly;
+
+  /// No description provided for @mostAnticipated.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Anticipated'**
+  String get mostAnticipated;
+
   /// No description provided for @english.
   ///
   /// In en, this message translates to:
@@ -151,6 +202,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Spanish'**
   String get spanish;
+
+  /// No description provided for @noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResults;
 
   /// No description provided for @selectLanguage.
   ///
@@ -205,64 +262,9 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User'**
   String get user;
-
-  /// No description provided for @trendingShows.
-  ///
-  /// In en, this message translates to:
-  /// **'Trending Shows'**
-  String get trendingShows;
-
-  /// No description provided for @popularShows.
-  ///
-  /// In en, this message translates to:
-  /// **'Popular Shows'**
-  String get popularShows;
-
-  /// No description provided for @mostFavoritedWeekly.
-  ///
-  /// In en, this message translates to:
-  /// **'Most Favorited This Week'**
-  String get mostFavoritedWeekly;
-
-  /// No description provided for @mostFavoritedMonthly.
-  ///
-  /// In en, this message translates to:
-  /// **'Most Favorited This Month'**
-  String get mostFavoritedMonthly;
-
-  /// No description provided for @mostCollectedWeekly.
-  ///
-  /// In en, this message translates to:
-  /// **'Most Collected This Week'**
-  String get mostCollectedWeekly;
-
-  /// No description provided for @mostPlayedWeekly.
-  ///
-  /// In en, this message translates to:
-  /// **'Most Played This Week'**
-  String get mostPlayedWeekly;
-
-  /// No description provided for @mostWatchedWeekly.
-  ///
-  /// In en, this message translates to:
-  /// **'Most Watched This Week'**
-  String get mostWatchedWeekly;
-
-  /// No description provided for @mostAnticipated.
-  ///
-  /// In en, this message translates to:
-  /// **'Most Anticipated'**
-  String get mostAnticipated;
-
-  /// No description provided for @noResults.
-  ///
-  /// In en, this message translates to:
-  /// **'No results found'**
-  String get noResults;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -271,26 +273,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'es'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'es'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'es':
-      return AppLocalizationsEs();
+    case 'en': return AppLocalizationsEn();
+    case 'es': return AppLocalizationsEs();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

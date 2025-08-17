@@ -16,6 +16,10 @@
   "@@discover": {
     "description": "Tab label for the discover section"
   },
+  "viewMore": "View More",
+  "@@viewMore": {
+    "description": "Text for view more button"
+  },
   "watchlist": "Watchlist",
   "@@watchlist": {
     "description": "Tab label for the user's watchlist"
@@ -26,7 +30,7 @@
   },
   "search": "Search",
   "@@search": {
-    "description": "Label for search functionality"
+    "description": "Label for the search tab"
   },
   "trendingShows": "Trending Shows",
   "@@trendingShows": {
