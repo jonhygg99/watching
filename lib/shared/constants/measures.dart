@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 
-const double kHorizontalSpacePhone = 16.0;
+// Phone Padding
+const kSpacePhone = 24.0;
+const EdgeInsets kPaddingPhone = EdgeInsets.all(kSpacePhone);
+const double kHorizontalSpacePhone = kSpacePhone;
 const EdgeInsets kHorizontalPaddingPhone = EdgeInsets.symmetric(
   horizontal: kHorizontalSpacePhone,
 );
-const double kBottomSpacePhone = 24.0;
+const double kBottomSpacePhone = kSpacePhone;
 const EdgeInsets kVerticalPaddingPhone = EdgeInsets.symmetric(
   vertical: kBottomSpacePhone,
 );
 
+const double kSpaceBtwWidgets = 20.0;
+const double kSpaceBtwTitleWidget = 10.0;
+
+// Discover Show Item
 const double kDiscoverShowItemWidth = 145.0;
 const double kDiscoverShowImageHeight = 206.0;
 
+// My Show Item
 const double kMyShowItemWidth = 120.0;
 const double kMyShowImageHeight = 170.0;
 
