@@ -1,0 +1,75 @@
+{
+  "@@locale": "en",
+  "appTitle": "Watching",
+  "@@appTitle": {
+    "description": "The title of the application"
+  },
+  "language": "Language",
+  "@@language": {
+    "description": "Label for language selection"
+  },
+  "settings": "Settings",
+  "@@settings": {
+    "description": "Title for the settings screen"
+  },
+  "discover": "Discover",
+  "@@discover": {
+    "description": "Tab label for the discover section"
+  },
+  "watchlist": "Watchlist",
+  "@@watchlist": {
+    "description": "Tab label for the user's watchlist"
+  },
+  "myShows": "My Shows",
+  "@@myShows": {
+    "description": "Tab label for the user's shows collection"
+  },
+  "search": "Search",
+  "@@search": {
+    "description": "Label for search functionality"
+  },
+  "english": "English",
+  "@@english": {
+    "description": "English language option"
+  },
+  "spanish": "Spanish",
+  "@@spanish": {
+    "description": "Spanish language option"
+  },
+  "selectLanguage": "Select Language",
+  "@@selectLanguage": {
+    "description": "Title for language selection dialog"
+  },
+  "theme": "Theme",
+  "@@theme": {
+    "description": "Label for theme selection section"
+  },
+  "light": "Light",
+  "@@light": {
+    "description": "Light theme option"
+  },
+  "dark": "Dark",
+  "@@dark": {
+    "description": "Dark theme option"
+  },
+  "system": "System",
+  "@@system": {
+    "description": "System default theme option"
+  },
+  "revokeToken": "Revoke Trakt.tv Token",
+  "@@revokeToken": {
+    "description": "Button label to revoke Trakt.tv authentication"
+  },
+  "country": "Country",
+  "@@country": {
+    "description": "Label for country selection"
+  },
+  "changeCountry": "Change Country",
+  "@@changeCountry": {
+    "description": "Button label to change the country setting"
+  },
+  "user": "User",
+  "@@user": {
+    "description": "Label for user account section"
+  }
+}

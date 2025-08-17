@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:watching/providers/locale_provider.dart';
 import 'package:watching/theme/theme_provider.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -30,43 +32,20 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajustes')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: ListView(
           children: [
-            Row(
-              children: [
-                const Text(
-                  'Tu país:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  String.fromCharCodes(
-                    widget.countryCode.toUpperCase().codeUnits.map(
-                      (c) => 0x1F1E6 - 65 + c,
-                    ),
-                  ),
-                  style: const TextStyle(fontSize: 22),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    widget.countryNames[widget.countryCode] ??
-                        widget.countryCode,
-                    style: const TextStyle(fontSize: 16),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 10),
             Row(
               children: [
-                const Text(
-                  'Cambiar país:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  '${AppLocalizations.of(context)!.country}:',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 DropdownButton<String>(
@@ -99,33 +78,91 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            
-            // Theme Toggle
-            const Text(
-              'Theme:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            const SizedBox(height: 20),
+
+            // Language Selection
+            Row(
+              children: [
+                Text(
+                  '${AppLocalizations.of(context)!.language}:',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final currentLocale = ref.watch(localeProvider);
+                    return DropdownButton<Locale>(
+                      value: currentLocale,
+                      items: [
+                        DropdownMenuItem(
+                          value: const Locale('en'),
+                          child: Row(
+                            children: [
+                              const Text(
+                                '🇬🇧',
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.english),
+                            ],
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: const Locale('es'),
+                          child: Row(
+                            children: [
+                              const Text(
+                                '🇪🇸',
+                                style: TextStyle(fontSize: 18),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.spanish),
+                            ],
+                          ),
+                        ),
+                      ],
+                      onChanged: (Locale? newLocale) {
+                        if (newLocale != null) {
+                          ref
+                              .read(localeProvider.notifier)
+                              .setLocale(newLocale);
+                        }
+                      },
+                    );
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 20),
+            // Theme Toggle
+            Text(
+              AppLocalizations.of(context)!.theme,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+
             Consumer(
               builder: (context, ref, _) {
                 final themeMode = ref.watch(themeProvider);
                 return SegmentedButton<AppThemeMode>(
-                  segments: const [
+                  segments: [
                     ButtonSegment<AppThemeMode>(
                       value: AppThemeMode.light,
-                      icon: Icon(Icons.light_mode),
-                      label: Text('Light'),
+                      icon: const Icon(Icons.light_mode),
+                      label: Text(AppLocalizations.of(context)!.light),
                     ),
                     ButtonSegment<AppThemeMode>(
                       value: AppThemeMode.dark,
-                      icon: Icon(Icons.dark_mode),
-                      label: Text('Dark'),
+                      icon: const Icon(Icons.dark_mode),
+                      label: Text(AppLocalizations.of(context)!.dark),
                     ),
                     ButtonSegment<AppThemeMode>(
                       value: AppThemeMode.system,
-                      icon: Icon(Icons.phone_android),
-                      label: Text('System'),
+                      icon: const Icon(Icons.phone_android),
+                      label: Text(AppLocalizations.of(context)!.system),
                     ),
                   ],
                   selected: {themeMode},
@@ -153,7 +190,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.red,
               ),
-              child: const Text('Revocar token Trakt.tv'),
+              child: Text(AppLocalizations.of(context)!.revokeToken),
             ),
           ],
         ),

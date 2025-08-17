@@ -1,0 +1,75 @@
+{
+  "@@locale": "es",
+  "appTitle": "Watching",
+  "@@appTitle": {
+    "description": "El título de la aplicación"
+  },
+  "language": "Idioma",
+  "@@language": {
+    "description": "Etiqueta para la selección de idioma"
+  },
+  "settings": "Ajustes",
+  "@@settings": {
+    "description": "Título de la pantalla de configuración"
+  },
+  "discover": "Descubrir",
+  "@@discover": {
+    "description": "Etiqueta de la pestaña de descubrimiento"
+  },
+  "watchlist": "Mi lista",
+  "@@watchlist": {
+    "description": "Etiqueta de la pestaña de la lista de seguimiento"
+  },
+  "myShows": "Mis series",
+  "@@myShows": {
+    "description": "Etiqueta de la pestaña de series del usuario"
+  },
+  "search": "Buscar",
+  "@@search": {
+    "description": "Etiqueta para la funcionalidad de búsqueda"
+  },
+  "english": "Inglés",
+  "@@english": {
+    "description": "Opción de idioma inglés"
+  },
+  "spanish": "Español",
+  "@@spanish": {
+    "description": "Opción de idioma español"
+  },
+  "selectLanguage": "Seleccionar idioma",
+  "@@selectLanguage": {
+    "description": "Título del diálogo de selección de idioma"
+  },
+  "theme": "Tema",
+  "@@theme": {
+    "description": "Etiqueta para la sección de selección de tema"
+  },
+  "light": "Claro",
+  "@@light": {
+    "description": "Opción de tema claro"
+  },
+  "dark": "Oscuro",
+  "@@dark": {
+    "description": "Opción de tema oscuro"
+  },
+  "system": "Sistema",
+  "@@system": {
+    "description": "Opción de tema del sistema"
+  },
+  "revokeToken": "Revocar token de Trakt.tv",
+  "@@revokeToken": {
+    "description": "Botón para revocar la autenticación de Trakt.tv"
+  },
+  "country": "País",
+  "@@country": {
+    "description": "Etiqueta para la selección de país"
+  },
+  "changeCountry": "Cambiar país",
+  "@@changeCountry": {
+    "description": "Botón para cambiar la configuración de país"
+  },
+  "user": "Usuario",
+  "@@user": {
+    "description": "Etiqueta para la sección de cuenta de usuario"
+  }
+}
