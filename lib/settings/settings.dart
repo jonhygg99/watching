@@ -29,6 +29,23 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  late String _currentCountryCode = widget.countryCode;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentCountryCode = widget.countryCode;
+  }
+
+  @override
+  void didUpdateWidget(SettingsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.countryCode != widget.countryCode) {
+      setState(() {
+        _currentCountryCode = widget.countryCode;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,33 +65,43 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                DropdownButton<String>(
-                  value: widget.countryCode,
-                  items:
-                      widget.countryCodes
-                          .map(
-                            (code) => DropdownMenuItem(
-                              value: code,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    String.fromCharCodes(
-                                      code.toUpperCase().codeUnits.map(
-                                        (c) => 0x1F1E6 - 65 + c,
-                                      ),
-                                    ),
-                                    style: const TextStyle(fontSize: 20),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(widget.countryNames[code] ?? code),
-                                ],
+                Expanded(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: _currentCountryCode,
+                    items: widget.countryCodes.map(
+                      (code) => DropdownMenuItem(
+                        value: code,
+                        child: Row(
+                          children: [
+                            Text(
+                              String.fromCharCodes(
+                                code.toUpperCase().codeUnits.map(
+                                  (c) => 0x1F1E6 - 65 + c,
+                                ),
+                              ),
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                widget.countryNames[code] ?? code,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                          )
-                          .toList(),
-                  onChanged: (code) {
-                    if (code != null) widget.onCountryChanged(code);
-                  },
+                          ],
+                        ),
+                      ),
+                    ).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null && newValue != _currentCountryCode) {
+                        setState(() {
+                          _currentCountryCode = newValue;
+                        });
+                        widget.onCountryChanged(newValue);
+                      }
+                    },
+                  ),
                 ),
               ],
             ),
@@ -106,7 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 style: TextStyle(fontSize: 18),
                               ),
                               const SizedBox(width: 8),
-                              Text(AppLocalizations.of(context)!.english),
+                              const Text('English'),
                             ],
                           ),
                         ),
@@ -119,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 style: TextStyle(fontSize: 18),
                               ),
                               const SizedBox(width: 8),
-                              Text(AppLocalizations.of(context)!.spanish),
+                              const Text('Español'),
                             ],
                           ),
                         ),
