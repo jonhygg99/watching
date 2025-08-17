@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/discover/discover_skeleton.dart';
 import 'package:watching/discover/show_carousel.dart';
 import 'package:watching/discover/show_list_page.dart';
@@ -122,140 +123,140 @@ class DiscoverPage extends ConsumerWidget {
     }
 
     // Section: Main ListView with all carousels
-    return Padding(
-      padding: kHorizontalPaddingPhone,
-      child: ListView(
-        key: const PageStorageKey('discover-list'), // preserves scroll position
-        padding: const EdgeInsets.only(
-          bottom: 8.0,
-        ), // Add bottom padding to account for navigation bar
-        physics:
-            const AlwaysScrollableScrollPhysics(), // Ensure the list is always scrollable
-        children: [
-          // Trending Shows
-          const SizedBox(height: 8),
-          buildCarousel(
-            title: 'Trending Shows',
-            future: api.getTrendingShows(),
-            extractShow: (item) => item['show'],
-            emptyText: 'No trending shows.',
-            onViewMore:
-                (shows) => navigateToShowList(
-                  context: context,
-                  title: 'Trending Shows',
-                  shows: shows,
-                  extractShow: (item) => item['show'],
-                ),
-          ),
-          // Popular Shows
-          buildCarousel(
-            title: 'Popular Shows',
-            future: api.getPopularShows(),
-            extractShow: (item) => Map<String, dynamic>.from(item),
-            emptyText: 'No popular shows.',
-            onViewMore:
-                (shows) => navigateToShowList(
-                  context: context,
-                  title: 'Popular Shows',
-                  shows: shows,
-                  extractShow: (item) => Map<String, dynamic>.from(item),
-                ),
-          ),
-          // Most Favorited (7d)
-          buildCarousel(
-            title: 'Most Favorited (7 days)',
-            future: api.getMostFavoritedShows(period: 'weekly'),
-            extractShow: (item) => item['show'],
-            emptyText: 'No most favorited shows this week.',
-            onViewMore:
-                (shows) => navigateToShowList(
-                  context: context,
-                  title: 'Most Favorited (7 days)',
-                  shows: shows,
-                  extractShow: (item) => item['show'],
-                ),
-          ),
-          // Most Favorited (30d)
-          buildCarousel(
-            title: 'Most Favorited (30 days)',
-            future: api.getMostFavoritedShows(period: 'monthly'),
-            extractShow: (item) => item['show'],
-            emptyText: 'No most favorited shows this month.',
-            onViewMore:
-                (shows) => navigateToShowList(
-                  context: context,
-                  title: 'Most Favorited (30 days)',
-                  shows: shows,
-                  extractShow: (item) => item['show'],
-                ),
-          ),
-          // Most Collected (7d)
-          buildCarousel(
-            title: 'Most Collected (7 days)',
-            future: api.getMostCollectedShows(period: 'weekly'),
-            extractShow: (item) => item['show'],
-            emptyText: 'No most collected shows this week.',
-            onViewMore:
-                (shows) => navigateToShowList(
-                  context: context,
-                  title: 'Most Collected (7 days)',
-                  shows: shows,
-                  extractShow: (item) => item['show'],
-                ),
-          ),
-          // Most Played (7d)
-          buildCarousel(
-            title: 'Most Played (7 days)',
-            future: api.getMostPlayedShows(period: 'weekly'),
-            extractShow: (item) => item['show'],
-            emptyText: 'No most played shows this week.',
-            onViewMore:
-                (shows) => navigateToShowList(
-                  context: context,
-                  title: 'Most Played (7 days)',
-                  shows: shows,
-                  extractShow: (item) => item['show'],
-                ),
-          ),
-          // Most Watched (7d)
-          buildCarousel(
-            title: 'Most Watched (7 days)',
-            future: api.getMostWatchedShows(period: 'weekly'),
-            extractShow: (item) => item['show'],
-            emptyText: 'No most watched shows this week.',
-            onViewMore:
-                (shows) => navigateToShowList(
-                  context: context,
-                  title: 'Most Watched (7 days)',
-                  shows: shows,
-                  extractShow: (item) => item['show'],
-                ),
-          ),
-          // Most Anticipated
-          buildCarousel(
-            title: 'Most Anticipated',
-            future: api.getMostAnticipatedShows(),
-            extractShow:
-                (item) => {
-                  ...Map<String, dynamic>.from(item['show']),
-                  'list_count': item['list_count'],
-                },
-            emptyText: 'No anticipated shows.',
-            onViewMore:
-                (shows) => navigateToShowList(
-                  context: context,
-                  title: 'Most Anticipated',
-                  shows: shows,
-                  extractShow:
-                      (item) => {
-                        ...Map<String, dynamic>.from(item['show']),
-                        'list_count': item['list_count'],
-                      },
-                ),
-          ),
-          SizedBox(height: 8),
-        ],
-      ),
+    final l10n =
+        AppLocalizations.of(
+          context,
+        )!; // Using ! because we know it won't be null
+
+    return ListView(
+      key: const PageStorageKey('discover-list'), // preserves scroll position
+      padding: const EdgeInsets.symmetric(
+        vertical: kSpacePhone,
+      ), // Add bottom padding to account for navigation bar
+      physics:
+          const AlwaysScrollableScrollPhysics(), // Ensure the list is always scrollable
+      children: [
+        // Trending Shows
+        buildCarousel(
+          title: l10n.trendingShows,
+          future: api.getTrendingShows(),
+          extractShow: (item) => item['show'],
+          emptyText: '${l10n.trendingShows} - ${l10n.noResults}',
+          onViewMore:
+              (shows) => navigateToShowList(
+                context: context,
+                title: l10n.trendingShows,
+                shows: shows,
+                extractShow: (item) => item['show'],
+              ),
+        ),
+        // Popular Shows
+        buildCarousel(
+          title: l10n.popularShows,
+          future: api.getPopularShows(),
+          extractShow: (item) => Map<String, dynamic>.from(item),
+          emptyText: '${l10n.popularShows} - ${l10n.noResults}',
+          onViewMore:
+              (shows) => navigateToShowList(
+                context: context,
+                title: l10n.popularShows,
+                shows: shows,
+                extractShow: (item) => Map<String, dynamic>.from(item),
+              ),
+        ),
+        // Most Favorited (7d)
+        buildCarousel(
+          title: l10n.mostFavoritedWeekly,
+          future: api.getMostFavoritedShows(period: 'weekly'),
+          extractShow: (item) => item['show'],
+          emptyText: '${l10n.mostFavoritedWeekly} - ${l10n.noResults}',
+          onViewMore:
+              (shows) => navigateToShowList(
+                context: context,
+                title: l10n.mostFavoritedWeekly,
+                shows: shows,
+                extractShow: (item) => item['show'],
+              ),
+        ),
+        // Most Favorited (30d)
+        buildCarousel(
+          title: l10n.mostFavoritedMonthly,
+          future: api.getMostFavoritedShows(period: 'monthly'),
+          extractShow: (item) => item['show'],
+          emptyText: '${l10n.mostFavoritedMonthly} - ${l10n.noResults}',
+          onViewMore:
+              (shows) => navigateToShowList(
+                context: context,
+                title: l10n.mostFavoritedMonthly,
+                shows: shows,
+                extractShow: (item) => item['show'],
+              ),
+        ),
+        // Most Collected (7d)
+        buildCarousel(
+          title: l10n.mostCollectedWeekly,
+          future: api.getMostCollectedShows(period: 'weekly'),
+          extractShow: (item) => item['show'],
+          emptyText: '${l10n.mostCollectedWeekly} - ${l10n.noResults}',
+          onViewMore:
+              (shows) => navigateToShowList(
+                context: context,
+                title: l10n.mostCollectedWeekly,
+                shows: shows,
+                extractShow: (item) => item['show'],
+              ),
+        ),
+        // Most Played (7d)
+        buildCarousel(
+          title: l10n.mostPlayedWeekly,
+          future: api.getMostPlayedShows(period: 'weekly'),
+          extractShow: (item) => item['show'],
+          emptyText: '${l10n.mostPlayedWeekly} - ${l10n.noResults}',
+          onViewMore:
+              (shows) => navigateToShowList(
+                context: context,
+                title: l10n.mostPlayedWeekly,
+                shows: shows,
+                extractShow: (item) => item['show'],
+              ),
+        ),
+        // Most Watched (7d)
+        buildCarousel(
+          title: l10n.mostWatchedWeekly,
+          future: api.getMostWatchedShows(period: 'weekly'),
+          extractShow: (item) => item['show'],
+          emptyText: '${l10n.mostWatchedWeekly} - ${l10n.noResults}',
+          onViewMore:
+              (shows) => navigateToShowList(
+                context: context,
+                title: l10n.mostWatchedWeekly,
+                shows: shows,
+                extractShow: (item) => item['show'],
+              ),
+        ),
+        // Most Anticipated
+        buildCarousel(
+          title: l10n.mostAnticipated,
+          future: api.getMostAnticipatedShows(),
+          extractShow:
+              (item) => {
+                ...Map<String, dynamic>.from(item['show']),
+                'list_count': item['list_count'],
+              },
+          emptyText: '${l10n.mostAnticipated} - ${l10n.noResults}',
+          onViewMore:
+              (shows) => navigateToShowList(
+                context: context,
+                title: l10n.mostAnticipated,
+                shows: shows,
+                extractShow:
+                    (item) => ({
+                      ...Map<String, dynamic>.from(item['show']),
+                      'list_count': item['list_count'],
+                    }),
+              ),
+        ),
+      ],
     );
   }
 }

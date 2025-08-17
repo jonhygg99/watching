@@ -28,6 +28,38 @@
   "@@search": {
     "description": "Label for search functionality"
   },
+  "trendingShows": "Trending Shows",
+  "@@trendingShows": {
+    "description": "Title for trending shows carousel"
+  },
+  "popularShows": "Popular Shows",
+  "@@popularShows": {
+    "description": "Title for popular shows carousel"
+  },
+  "mostFavoritedWeekly": "Most Favorited (7 days)",
+  "@@mostFavoritedWeekly": {
+    "description": "Title for most favorited shows weekly carousel"
+  },
+  "mostFavoritedMonthly": "Most Favorited (30 days)",
+  "@@mostFavoritedMonthly": {
+    "description": "Title for most favorited shows monthly carousel"
+  },
+  "mostCollectedWeekly": "Most Collected (7 days)",
+  "@@mostCollectedWeekly": {
+    "description": "Title for most collected shows weekly carousel"
+  },
+  "mostPlayedWeekly": "Most Played (7 days)",
+  "@@mostPlayedWeekly": {
+    "description": "Title for most played shows weekly carousel"
+  },
+  "mostWatchedWeekly": "Most Watched (7 days)",
+  "@@mostWatchedWeekly": {
+    "description": "Title for most watched shows weekly carousel"
+  },
+  "mostAnticipated": "Most Anticipated",
+  "@@mostAnticipated": {
+    "description": "Title for most anticipated shows carousel"
+  },
   "english": "English",
   "@@english": {
     "description": "English language option"
@@ -35,6 +67,10 @@
   "spanish": "Spanish",
   "@@spanish": {
     "description": "Spanish language option"
+  },
+  "noResults": "No results found",
+  "@@noResults": {
+    "description": "Message shown when no results are available"
   },
   "selectLanguage": "Select Language",
   "@@selectLanguage": {

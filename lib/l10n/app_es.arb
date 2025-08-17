@@ -28,6 +28,38 @@
   "@@search": {
     "description": "Etiqueta para la funcionalidad de búsqueda"
   },
+  "trendingShows": "Series en tendencia",
+  "@@trendingShows": {
+    "description": "Título del carrusel de series en tendencia"
+  },
+  "popularShows": "Series populares",
+  "@@popularShows": {
+    "description": "Título del carrusel de series populares"
+  },
+  "mostFavoritedWeekly": "Más favoritas (7 días)",
+  "@@mostFavoritedWeekly": {
+    "description": "Título del carrusel de series más favoritas semanal"
+  },
+  "mostFavoritedMonthly": "Más favoritas (30 días)",
+  "@@mostFavoritedMonthly": {
+    "description": "Título del carrusel de series más favoritas mensual"
+  },
+  "mostCollectedWeekly": "Más añadidas (7 días)",
+  "@@mostCollectedWeekly": {
+    "description": "Título del carrusel de series más añadidas semanal"
+  },
+  "mostPlayedWeekly": "Más reproducidas (7 días)",
+  "@@mostPlayedWeekly": {
+    "description": "Título del carrusel de series más reproducidas semanal"
+  },
+  "mostWatchedWeekly": "Más vistas (7 días)",
+  "@@mostWatchedWeekly": {
+    "description": "Título del carrusel de series más vistas semanal"
+  },
+  "mostAnticipated": "Más esperadas",
+  "@@mostAnticipated": {
+    "description": "Título del carrusel de series más esperadas"
+  },
   "english": "Inglés",
   "@@english": {
     "description": "Opción de idioma inglés"
@@ -35,6 +67,10 @@
   "spanish": "Español",
   "@@spanish": {
     "description": "Opción de idioma español"
+  },
+  "noResults": "No se encontraron resultados",
+  "@@noResults": {
+    "description": "Mensaje que se muestra cuando no hay resultados disponibles"
   },
   "selectLanguage": "Seleccionar idioma",
   "@@selectLanguage": {

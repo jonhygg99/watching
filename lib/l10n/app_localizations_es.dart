@@ -51,6 +51,33 @@ class AppLocalizationsEs extends AppLocalizations {
   String get system => 'Sistema';
 
   @override
+  String get trendingShows => 'Series en tendencia';
+
+  @override
+  String get popularShows => 'Series populares';
+
+  @override
+  String get mostFavoritedWeekly => 'Más favoritas esta semana';
+
+  @override
+  String get mostFavoritedMonthly => 'Más favoritas este mes';
+
+  @override
+  String get mostCollectedWeekly => 'Más añadidas a colecciones esta semana';
+
+  @override
+  String get mostPlayedWeekly => 'Más reproducidas esta semana';
+
+  @override
+  String get mostWatchedWeekly => 'Más vistas esta semana';
+
+  @override
+  String get mostAnticipated => 'Más anticipadas';
+
+  @override
+  String get noResults => 'No se encontraron resultados';
+
+  @override
   String get revokeToken => 'Revocar token de Trakt.tv';
 
   @override

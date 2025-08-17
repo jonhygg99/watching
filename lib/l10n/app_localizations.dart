@@ -205,6 +205,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'User'**
   String get user;
+
+  /// No description provided for @trendingShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Trending Shows'**
+  String get trendingShows;
+
+  /// No description provided for @popularShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Shows'**
+  String get popularShows;
+
+  /// No description provided for @mostFavoritedWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Favorited This Week'**
+  String get mostFavoritedWeekly;
+
+  /// No description provided for @mostFavoritedMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Favorited This Month'**
+  String get mostFavoritedMonthly;
+
+  /// No description provided for @mostCollectedWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Collected This Week'**
+  String get mostCollectedWeekly;
+
+  /// No description provided for @mostPlayedWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Played This Week'**
+  String get mostPlayedWeekly;
+
+  /// No description provided for @mostWatchedWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Watched This Week'**
+  String get mostWatchedWeekly;
+
+  /// No description provided for @mostAnticipated.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Anticipated'**
+  String get mostAnticipated;
+
+  /// No description provided for @noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResults;
 }
 
 class _AppLocalizationsDelegate

@@ -29,60 +29,73 @@ class DiscoverSkeleton extends StatelessWidget {
               children: [
                 // Title placeholder - matches the actual title style
                 Padding(
-                  padding: const EdgeInsets.only(
-                    left: 16,
-                    top: 8,
-                    bottom: 8,
-                    right: 16,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: kSpacePhone,
+                    vertical: kSpaceBtwTitleWidget,
                   ),
-                  child: Container(
-                    width: 150,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: baseColor,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 150,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: baseColor,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      Container(
+                        width: 50,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: baseColor,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 // Carousel items
                 Expanded(
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(
-                      left: 12,
-                      right: 12,
-                      bottom: 8,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: kSpacePhone,
                     ),
+                    clipBehavior: Clip.none,
                     itemCount: 5,
                     separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) => SizedBox(
-                      width: kDiscoverShowItemWidth,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Image placeholder - matches the actual image container
-                          ClipRRect(
-                            borderRadius: kShowBorderRadius,
-                            child: Container(
-                              width: kDiscoverShowItemWidth,
-                              height: kDiscoverShowImageHeight,
-                              color: baseColor,
-                            ),
+                    itemBuilder:
+                        (context, index) => SizedBox(
+                          width: kDiscoverShowItemWidth,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Image placeholder - matches the actual image container
+                              ClipRRect(
+                                borderRadius: kShowBorderRadius,
+                                child: Container(
+                                  width: kDiscoverShowItemWidth,
+                                  height: kDiscoverShowImageHeight,
+                                  color: baseColor,
+                                ),
+                              ),
+                              // Title placeholder - matches the actual title style
+                              Center(
+                                child: Container(
+                                  margin: const EdgeInsets.only(top: 8),
+                                  height: 16,
+                                  width: kDiscoverShowItemWidth * 0.7,
+                                  decoration: BoxDecoration(
+                                    color: baseColor,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          // Title placeholder - matches the actual title style
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            height: 16,
-                            width: kDiscoverShowItemWidth * 0.7,
-                            decoration: BoxDecoration(
-                              color: baseColor,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
                   ),
                 ),
               ],

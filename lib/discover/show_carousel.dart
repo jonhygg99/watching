@@ -32,34 +32,41 @@ class ShowCarousel extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (onViewMore != null)
-                TextButton(
-                  onPressed: onViewMore,
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(50, 24),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: kSpacePhone),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: const Text(
-                    'Ver más',
-                    style: TextStyle(
-                      fontSize: kFontSizeButtonTextViewMore,
-                      color: kButtonTextViewMoreColor,
-                      fontWeight: FontWeight.normal,
+                ),
+                if (onViewMore != null)
+                  TextButton(
+                    onPressed: onViewMore,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 24),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      'Ver más',
+                      style: TextStyle(
+                        fontSize: kFontSizeButtonTextViewMore,
+                        color: kButtonTextViewMoreColor,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
         LayoutBuilder(
@@ -74,6 +81,8 @@ class ShowCarousel extends ConsumerWidget {
             return SizedBox(
               height: carouselHeight,
               child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: kSpacePhone),
+                clipBehavior: Clip.none,
                 key: _pageStorageKey,
                 scrollDirection: Axis.horizontal,
                 itemCount: shows.length,

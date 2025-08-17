@@ -51,6 +51,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get system => 'System';
 
   @override
+  String get trendingShows => 'Trending Shows';
+
+  @override
+  String get popularShows => 'Popular Shows';
+
+  @override
+  String get mostFavoritedWeekly => 'Most Favorited This Week';
+
+  @override
+  String get mostFavoritedMonthly => 'Most Favorited This Month';
+
+  @override
+  String get mostCollectedWeekly => 'Most Collected This Week';
+
+  @override
+  String get mostPlayedWeekly => 'Most Played This Week';
+
+  @override
+  String get mostWatchedWeekly => 'Most Watched This Week';
+
+  @override
+  String get mostAnticipated => 'Most Anticipated';
+
+  @override
+  String get noResults => 'No results found';
+
+  @override
   String get revokeToken => 'Revoke Trakt.tv Token';
 
   @override
