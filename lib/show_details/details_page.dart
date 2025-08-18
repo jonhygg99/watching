@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/providers/app_providers.dart';
-import 'package:watching/providers/watchlist_providers.dart';
 import 'package:watching/show_details/current_episode.dart';
 import 'package:watching/show_details/new_header.dart';
 import 'package:watching/show_details/related.dart';

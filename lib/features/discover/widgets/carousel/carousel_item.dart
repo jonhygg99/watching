@@ -37,16 +37,8 @@ class CarouselItem extends ConsumerWidget {
     return null;
   }
 
-  // Extracts the show ID in a robust way
-  String _getShowId() {
-    if (show['ids'] is Map) {
-      return show['ids']['trakt']?.toString() ?? '';
-    }
-    return '';
-  }
-
   void _navigateToDetail() {
-    final showId = _getShowId();
+    final showId = show['ids']['trakt']?.toString() ?? '';
     if (showId.isNotEmpty) {
       Navigator.of(
         context,

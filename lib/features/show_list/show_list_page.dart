@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watching/api/trakt/show_translation.dart';
-import 'package:watching/providers/app_providers.dart';
-import 'package:watching/show_details/details_page.dart' show ShowDetailPage;
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/features/show_list/widgets/error_indicator.dart';
+import 'package:watching/features/show_list/widgets/loading_indicator.dart';
+import 'package:watching/features/show_list/widgets/shows_grid.dart';
+import 'package:watching/l10n/app_localizations.dart';
 
-class ShowListPage extends ConsumerStatefulWidget {
-  final String title;
-  final List<dynamic> initialShows;
-  final dynamic Function(dynamic) extractShow;
-  final Future<List<dynamic>> Function({int page, int limit}) fetchShows;
-  final String? period;
-
+class ShowListPage extends HookConsumerWidget {
   const ShowListPage({
     super.key,
     required this.title,
@@ -21,309 +16,117 @@ class ShowListPage extends ConsumerStatefulWidget {
     this.period,
   });
 
-  @override
-  ConsumerState<ShowListPage> createState() => _ShowListPageState();
-}
+  final String title;
+  final List<dynamic> initialShows;
+  final dynamic Function(dynamic) extractShow;
+  final Future<List<dynamic>> Function({int page, int limit}) fetchShows;
+  final String? period;
 
-class _ShowListPageState extends ConsumerState<ShowListPage> {
-  final ScrollController _scrollController = ScrollController();
-  final int _showsPerPage = 20;
-  int _currentPage = 1;
-  bool _hasMore = true;
-  bool _isLoadingMore = false;
-  bool isInitialLoading = false;
-  String? _errorMessage;
-  late List<dynamic> _allShows = [];
-  late dynamic Function(dynamic) _extractShow;
-  late Future<List<dynamic>> Function({int page, int limit}) _fetchShows;
+  static const int _showsPerPage = 20;
 
   @override
-  void initState() {
-    super.initState();
-    _extractShow = widget.extractShow;
-    _fetchShows = widget.fetchShows;
-    _allShows = widget.initialShows.toList();
-    _scrollController.addListener(_onScroll);
-    _checkForMoreShows();
-  }
+  Widget build(BuildContext context, WidgetRef ref) {
+    // State management with hooks
+    final scrollController = useScrollController();
+    final currentPage = useState(1);
+    final hasMore = useState(true);
+    final isLoadingMore = useState(false);
+    final isInitialLoading = useState(false);
+    final errorMessage = useState<String?>(null);
+    final allShows = useState<List<dynamic>>([...initialShows]);
 
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
+    // Load more shows function
+    final loadMoreShows = useCallback(() async {
+      if (isLoadingMore.value || !hasMore.value) return;
 
-  void _onScroll() {
-    if (!_scrollController.hasClients || _isLoadingMore || !_hasMore) {
-      return;
-    }
+      isLoadingMore.value = true;
+      errorMessage.value = null;
 
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
+      try {
+        final nextPage = currentPage.value + 1;
+        final response = await fetchShows(page: nextPage, limit: _showsPerPage);
+        final List<dynamic> newShows = List<dynamic>.from(response);
+        final bool hasMoreShows = newShows.length >= _showsPerPage;
 
-    // Load more when we're within 80% of the bottom of the list
-    final double threshold = maxScroll * 0.8;
-    final bool shouldLoadMore = currentScroll >= threshold;
-
-    if (shouldLoadMore) {
-      _loadMoreShows();
-    }
-  }
-
-  Future<void> _loadMoreShows() async {
-    if (_isLoadingMore || !_hasMore) return;
-
-    setState(() {
-      _isLoadingMore = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final nextPage = _currentPage + 1;
-
-      final response = await _fetchShows(page: nextPage, limit: _showsPerPage);
-
-      // The API returns a List<dynamic> directly, so we can safely cast it
-      final List<dynamic> newShows = List<dynamic>.from(response);
-
-      // Determine if there are more shows to load
-      final bool hasMoreShows = newShows.length >= _showsPerPage;
-
-      if (mounted) {
-        setState(() {
-          _allShows.addAll(newShows);
-          _currentPage = nextPage;
-          _hasMore = hasMoreShows;
-          _isLoadingMore = false;
-        });
+        allShows.value = [...allShows.value, ...newShows];
+        currentPage.value = nextPage;
+        hasMore.value = hasMoreShows;
+      } catch (e, stackTrace) {
+        debugPrint('Error loading more shows: $e');
+        debugPrint('Stack trace: $stackTrace');
+        errorMessage.value = "Error";
+      } finally {
+        isLoadingMore.value = false;
       }
-    } catch (e, stackTrace) {
-      debugPrint('Error loading more shows: $e');
-      debugPrint('Stack trace: $stackTrace');
+    }, [fetchShows]);
 
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Error al cargar más shows: ${e.toString()}';
-          _isLoadingMore = false;
-        });
+    // Check for more shows
+    final checkForMoreShows = useCallback(() async {
+      if (isLoadingMore.value) return;
+
+      try {
+        final nextPageShows = await fetchShows(
+          page: currentPage.value + 1,
+          limit: 1,
+        );
+        hasMore.value = nextPageShows.isNotEmpty;
+      } catch (e) {
+        hasMore.value = true;
       }
-    }
-  }
+    }, [fetchShows]);
 
-  void _checkForMoreShows() async {
-    if (_isLoadingMore) return;
+    // Setup scroll listener
+    useEffect(() {
+      void onScroll() {
+        if (!scrollController.hasClients ||
+            isLoadingMore.value ||
+            !hasMore.value) {
+          return;
+        }
 
-    try {
-      final nextPageShows = await _fetchShows(page: _currentPage + 1, limit: 1);
+        final maxScroll = scrollController.position.maxScrollExtent;
+        final currentScroll = scrollController.position.pixels;
+        final double threshold = maxScroll * 0.8;
 
-      if (mounted) {
-        setState(() {
-          _hasMore = nextPageShows.isNotEmpty;
-        });
+        if (currentScroll >= threshold) {
+          loadMoreShows();
+        }
       }
-    } catch (e) {
-      // If there's an error, assume there might be more shows
-      if (mounted) {
-        setState(() {
-          _hasMore = true;
-        });
-      }
-    }
-  }
 
-  @override
-  Widget build(BuildContext context) {
+      scrollController.addListener(onScroll);
+      return () => scrollController.removeListener(onScroll);
+    }, [loadMoreShows, hasMore.value, isLoadingMore.value]);
+
+    // Initial check for more shows
+    useEffect(() {
+      checkForMoreShows();
+      return null;
+    }, []);
+
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(title: Text(title)),
       body:
-          _allShows.isEmpty && !isInitialLoading
-              ? const Center(child: Text('No hay shows disponibles'))
+          allShows.value.isEmpty && !isInitialLoading.value
+              ? Center(
+                child: Text(AppLocalizations.of(context)!.noShowsAvailable),
+              )
               : Stack(
                 children: [
-                  _buildShowsGrid(),
-                  if (_isLoadingMore) _buildLoadingIndicator(),
-                  if (_errorMessage != null) _buildErrorIndicator(),
+                  ShowsGrid(
+                    scrollController: scrollController,
+                    allShows: allShows.value,
+                    hasMore: hasMore.value,
+                    extractShow: extractShow,
+                    ref: ref,
+                  ),
+                  if (isLoadingMore.value) const LoadingIndicator(),
+                  if (errorMessage.value != null)
+                    ErrorIndicator(
+                      errorMessage: errorMessage.value!,
+                      onRetry: loadMoreShows,
+                    ),
                 ],
               ),
     );
-  }
-
-  Widget _buildShowsGrid() {
-    return GridView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 12,  // Reduced from 16
-        childAspectRatio: 0.65,
-      ),
-      itemCount: _allShows.length + (_hasMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index >= _allShows.length) {
-          return const SizedBox.shrink();
-        }
-
-        final show = _extractShow(_allShows[index]);
-        return _buildShowItem(
-          ref: ref,
-          context: context,
-          show: show,
-          shows: _allShows,
-          index: index,
-        );
-      },
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: Container(
-        height: 60,
-        color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.8),
-        child: const Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorIndicator() {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        color: Colors.red[50],
-        child: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            TextButton(
-              onPressed: _loadMoreShows,
-              child: const Text('Reintentar'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShowItem({
-    required WidgetRef ref,
-    required BuildContext context,
-    required Map<String, dynamic> show,
-    required List<dynamic> shows,
-    required int index,
-  }) {
-    return FutureBuilder<String>(
-      future: ref
-          .read(showTranslationServiceProvider)
-          .getTranslatedTitle(show: show, traktApi: ref.read(traktApiProvider)),
-      builder: (context, snapshot) {
-        final title = snapshot.data ?? show['title'] ?? '';
-        final posterArr = show['images']?['poster'] as List?;
-        final posterUrl =
-            (posterArr != null && posterArr.isNotEmpty)
-                ? 'https://${posterArr.first}'
-                : null;
-
-        return GestureDetector(
-          onTap: () {
-            final showId = _getShowId(show);
-            if (showId.isNotEmpty) {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ShowDetailPage(showId: showId),
-                ),
-              );
-            }
-          },
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Image container with fixed aspect ratio
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: posterUrl != null
-                        ? CachedNetworkImage(
-                            imageUrl: posterUrl,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey[300],
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.error),
-                            ),
-                          )
-                        : Container(
-                            color: Colors.grey[300],
-                            child: const Center(child: Icon(Icons.tv)),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                // Title with fixed height for 2 lines
-                SizedBox(
-                  height: 36,
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      height: 1.1,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  String _getShowId(Map<String, dynamic> show) {
-    if (show['ids']?['trakt'] != null) {
-      return show['ids']['trakt'].toString();
-    } else if (show['ids']?['slug'] != null) {
-      return show['ids']['slug'].toString();
-    } else if (show['ids']?['imdb'] != null) {
-      return show['ids']['imdb'].toString();
-    } else if (show['ids']?['tmdb'] != null) {
-      return show['ids']['tmdb'].toString();
-    } else if (show['ids']?['tvdb'] != null) {
-      return show['ids']['tvdb'].toString();
-    }
-    return '';
   }
 }

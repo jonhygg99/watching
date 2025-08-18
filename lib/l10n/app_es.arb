@@ -48,6 +48,14 @@
   "@@mostFavoritedMonthly": {
     "description": "Título del carrusel de series más favoritas mensual"
   },
+  "errorLoadingMoreShows": "Error al cargar más series",
+  "@@errorLoadingMoreShows": {
+    "description": "Mensaje de error que se muestra cuando falla la carga de más series"
+  },
+  "noShowsAvailable": "No hay series disponibles",
+  "@@noShowsAvailable": {
+    "description": "Mensaje que se muestra cuando no hay series disponibles para mostrar"
+  },
   "mostCollectedWeekly": "Más añadidas (7 días)",
   "@@mostCollectedWeekly": {
     "description": "Título del carrusel de series más añadidas semanal"

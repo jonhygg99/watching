@@ -45,6 +45,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mostFavoritedMonthly => 'Más favoritas (30 días)';
 
   @override
+  String get errorLoadingMoreShows => 'Error al cargar más series';
+
+  @override
+  String get noShowsAvailable => 'No hay series disponibles';
+
+  @override
   String get mostCollectedWeekly => 'Más añadidas (7 días)';
 
   @override

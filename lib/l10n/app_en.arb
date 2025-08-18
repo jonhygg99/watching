@@ -48,6 +48,14 @@
   "@@mostFavoritedMonthly": {
     "description": "Title for most favorited shows monthly carousel"
   },
+  "errorLoadingMoreShows": "Error loading more shows",
+  "@@errorLoadingMoreShows": {
+    "description": "Error message shown when more shows fail to load"
+  },
+  "noShowsAvailable": "No shows available",
+  "@@noShowsAvailable": {
+    "description": "Message shown when no shows are available to display"
+  },
   "mostCollectedWeekly": "Most Collected (7 days)",
   "@@mostCollectedWeekly": {
     "description": "Title for most collected shows weekly carousel"
