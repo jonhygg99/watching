@@ -91,4 +91,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get user => 'Usuario';
+
+  @override
+  String get noImage => 'Sin imagen';
 }

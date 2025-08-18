@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/discover/show_list_page.dart';
-import 'package:watching/discover/widgets/discover_carousel.dart';
+import 'package:watching/discover/widgets/carousel.dart';
 import 'package:watching/shared/constants/measures.dart';
 
 /// DiscoverPage displays curated carousels of TV shows using data from Trakt API.
@@ -17,7 +17,7 @@ class DiscoverPage extends ConsumerWidget {
 
     return ListView(
       key: const PageStorageKey('discover-list'),
-      padding: const EdgeInsets.symmetric(vertical: kSpacePhone),
+      padding: const EdgeInsets.symmetric(vertical: kPhoneSpaceVertical),
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
         _buildCarousel(
@@ -28,6 +28,7 @@ class DiscoverPage extends ConsumerWidget {
           emptyText: '${l10n.trendingShows} - ${l10n.noResults}',
           l10n: l10n,
         ),
+        const SizedBox(height: kSpaceBtwWidgets),
         _buildCarousel(
           context: context,
           title: l10n.popularShows,
@@ -36,6 +37,7 @@ class DiscoverPage extends ConsumerWidget {
           emptyText: '${l10n.popularShows} - ${l10n.noResults}',
           l10n: l10n,
         ),
+        const SizedBox(height: kSpaceBtwWidgets),
         _buildCarousel(
           context: context,
           title: l10n.mostFavoritedWeekly,
@@ -44,6 +46,7 @@ class DiscoverPage extends ConsumerWidget {
           emptyText: '${l10n.mostFavoritedWeekly} - ${l10n.noResults}',
           l10n: l10n,
         ),
+        const SizedBox(height: kSpaceBtwWidgets),
         _buildCarousel(
           context: context,
           title: l10n.mostFavoritedMonthly,
@@ -52,6 +55,7 @@ class DiscoverPage extends ConsumerWidget {
           emptyText: '${l10n.mostFavoritedMonthly} - ${l10n.noResults}',
           l10n: l10n,
         ),
+        const SizedBox(height: kSpaceBtwWidgets),
         _buildCarousel(
           context: context,
           title: l10n.mostCollectedWeekly,
@@ -60,6 +64,7 @@ class DiscoverPage extends ConsumerWidget {
           emptyText: '${l10n.mostCollectedWeekly} - ${l10n.noResults}',
           l10n: l10n,
         ),
+        const SizedBox(height: kSpaceBtwWidgets),
         _buildCarousel(
           context: context,
           title: l10n.mostPlayedWeekly,
@@ -68,6 +73,7 @@ class DiscoverPage extends ConsumerWidget {
           emptyText: '${l10n.mostPlayedWeekly} - ${l10n.noResults}',
           l10n: l10n,
         ),
+        const SizedBox(height: kSpaceBtwWidgets),
         _buildCarousel(
           context: context,
           title: l10n.mostWatchedWeekly,
@@ -76,6 +82,7 @@ class DiscoverPage extends ConsumerWidget {
           emptyText: '${l10n.mostWatchedWeekly} - ${l10n.noResults}',
           l10n: l10n,
         ),
+        const SizedBox(height: kSpaceBtwWidgets),
         _buildCarousel(
           context: context,
           title: l10n.mostAnticipated,
@@ -104,18 +111,19 @@ class DiscoverPage extends ConsumerWidget {
       future: future,
       builder: (context, snapshot) {
         final shows = snapshot.data ?? [];
-        return DiscoverCarousel(
+        return Carousel(
           title: title,
           future: future,
           extractShow: extractShow,
           emptyText: emptyText,
-          onViewMore: () => _navigateToShowList(
-            context: context,
-            title: title,
-            shows: shows,
-            extractShow: extractShow,
-            l10n: l10n,
-          ),
+          onViewMore:
+              () => _navigateToShowList(
+                context: context,
+                title: title,
+                shows: shows,
+                extractShow: extractShow,
+                l10n: l10n,
+              ),
         );
       },
     );

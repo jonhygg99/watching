@@ -111,5 +111,9 @@
   "user": "Usuario",
   "@@user": {
     "description": "Etiqueta para la sección de cuenta de usuario"
+  },
+  "noImage": "Sin imagen",
+  "@@noImage": {
+    "description": "Texto de marcador de posición cuando no hay imagen disponible"
   }
 }

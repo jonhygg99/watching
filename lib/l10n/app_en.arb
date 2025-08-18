@@ -111,5 +111,9 @@
   "user": "User",
   "@@user": {
     "description": "Label for user account section"
+  },
+  "noImage": "No image",
+  "@@noImage": {
+    "description": "Placeholder text when no image is available"
   }
 }
