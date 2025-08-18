@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../skeleton_utils.dart';
+import 'skeleton_utils.dart';
 
 class SkeletonCommentsHeader extends StatelessWidget {
   const SkeletonCommentsHeader({super.key});

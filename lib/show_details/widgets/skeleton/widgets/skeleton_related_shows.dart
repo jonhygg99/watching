@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../skeleton_utils.dart';
+import 'skeleton_utils.dart';
 
 class SkeletonRelatedShows extends StatelessWidget {
   const SkeletonRelatedShows({super.key});
@@ -19,14 +19,11 @@ class SkeletonRelatedShows extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: 3,
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: SkeletonContainer(
-                height: 220,
-                width: 140,
-                radius: 12,
-              ),
-            ),
+            itemBuilder:
+                (context, index) => Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: SkeletonContainer(height: 220, width: 140, radius: 12),
+                ),
           ),
         ),
       ],

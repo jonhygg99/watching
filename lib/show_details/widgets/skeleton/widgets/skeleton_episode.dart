@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../skeleton_utils.dart';
+import 'skeleton_utils.dart';
 
 class SkeletonEpisode extends StatelessWidget {
   const SkeletonEpisode({super.key});
@@ -31,13 +31,7 @@ class SkeletonEpisode extends StatelessWidget {
                       SkeletonContainer(height: 20, width: 50, radius: 4),
                       const SizedBox(width: 8),
                       // Episode title
-                      Expanded(
-                        child: SkeletonContainer(
-                          height: 20,
-                          width: 200,
-                          radius: 4,
-                        ),
-                      ),
+                      SkeletonContainer(height: 20, width: 200, radius: 4),
                     ],
                   ),
                 ),
@@ -46,14 +40,10 @@ class SkeletonEpisode extends StatelessWidget {
                 SkeletonContainer(height: 24, width: 50, radius: 12),
               ],
             ),
-
             const SizedBox(height: 12),
-
             // Progress bar
             SkeletonContainer(height: 6, width: double.infinity, radius: 3),
-
             const SizedBox(height: 16),
-
             // Buttons row
             Row(
               children: [

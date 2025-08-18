@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/shared/widgets/progress_bar.dart';
-import 'seasons_page/season_detail_page.dart';
+import 'package:watching/show_details/pages/seasons/season_detail_page.dart';
 import 'season_mark_button.dart';
 
 /// Widget que muestra el progreso por temporada de una serie.

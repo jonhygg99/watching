@@ -22,7 +22,6 @@ class SkeletonHeader extends StatelessWidget {
             children: [
               // Dark overlay for better text visibility
               Container(color: Colors.black.withValues(alpha: 0.4)),
-
               // Rating skeleton
               Positioned(
                 top: topPadding,

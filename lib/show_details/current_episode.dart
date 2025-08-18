@@ -5,9 +5,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
-import 'package:watching/show_details/skeleton/components/skeleton_episode.dart';
+import 'package:watching/show_details/pages/seasons/season_detail_page.dart';
+import 'package:watching/show_details/widgets/skeleton/widgets/skeleton_episode.dart';
 import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
-import 'package:watching/show_details/seasons_page/season_detail_page.dart';
 
 /// A widget that displays the current episode information and progress for a show.
 

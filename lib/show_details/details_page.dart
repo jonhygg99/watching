@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/show_details/current_episode.dart';
 import 'package:watching/show_details/new_header.dart';
 import 'package:watching/show_details/related.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
-import 'package:watching/show_details/skeleton/show_detail_skeleton.dart';
+import 'package:watching/show_details/widgets/skeleton/show_detail_skeleton.dart';
 import 'show_description.dart';
 import 'videos.dart';
 import 'cast.dart';
@@ -53,21 +55,16 @@ class ShowDetailPage extends HookConsumerWidget {
           children: [
             FutureBuilder<List<dynamic>>(
               future: Future.wait([
-                // Main show data
                 apiService.getShowById(id: showId),
-                // Translations
                 apiService.getShowTranslations(
                   id: showId,
                   language: countryCode.substring(0, 2).toLowerCase(),
                 ),
-                // Videos - wrapped in try-catch to prevent the whole page from failing
+                apiService.getShowPeople(id: showId),
                 apiService.getShowVideos(id: showId).catchError((e) {
                   debugPrint('Error loading videos: $e');
                   return <dynamic>[]; // Return empty list on error
                 }),
-                // People
-                apiService.getShowPeople(id: showId),
-                // Related shows
                 apiService.getRelatedShows(id: showId),
               ]),
               builder: (context, snapshot) {
@@ -85,19 +82,23 @@ class ShowDetailPage extends HookConsumerWidget {
                 final results = snapshot.data;
 
                 if (results == null || results.length < 5) {
-                  return const Center(child: Text('No se encontraron datos.'));
+                  return Center(
+                    child: Text(AppLocalizations.of(context)!.noResults),
+                  );
                 }
                 final show = results[0] as Map<String, dynamic>?;
                 final translations = results[1] as List<dynamic>?;
-                final videos = results[2] as List<dynamic>?;
-                final people = results[3] as Map<String, dynamic>?;
+                final people = results[2] as Map<String, dynamic>?;
+                final videos = results[3] as List<dynamic>?;
                 final relatedShowsResponse =
                     results[4] as Map<String, dynamic>?;
                 final relatedShows =
                     relatedShowsResponse?['shows'] as List<dynamic>?;
 
                 if (show == null) {
-                  return const Center(child: Text('No se encontraron datos.'));
+                  return Center(
+                    child: Text(AppLocalizations.of(context)!.noResults),
+                  );
                 }
 
                 // Filter out null values and find the best translation
@@ -139,16 +140,15 @@ class ShowDetailPage extends HookConsumerWidget {
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
+                          left: kSpacePhoneHorizontal,
+                          right: kSpacePhoneHorizontal,
                           bottom: 50,
-                          top: 16,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const SizedBox(height: kSpaceBtwWidgets),
                             if (show['ids']?['trakt'] != null) ...[
-                              const SizedBox(height: 16.0),
                               CurrentEpisode(
                                 traktId: show['ids']['trakt'].toString(),
                                 title: show['title']?.toString(),
@@ -156,14 +156,14 @@ class ShowDetailPage extends HookConsumerWidget {
                                     countryCode.substring(0, 2).toLowerCase(),
                                 showData: show,
                               ),
-                              const SizedBox(height: 16.0),
+                              const SizedBox(height: kSpaceBtwWidgets),
                             ],
                             ShowDescription(
                               tagline: originalTagline,
                               overview: originalOverview,
                             ),
                             if (people != null && people.isNotEmpty) ...[
-                              const SizedBox(height: 16.0),
+                              const SizedBox(height: kSpaceBtwWidgets),
                               ShowDetailCast(
                                 people: people,
                                 showId: showId,
@@ -171,7 +171,7 @@ class ShowDetailPage extends HookConsumerWidget {
                               ),
                             ],
                             if (videos != null && videos.isNotEmpty) ...[
-                              const SizedBox(height: 16.0),
+                              const SizedBox(height: kSpaceBtwWidgets),
                               ShowDetailVideos(
                                 videos: videos,
                                 title: originalTitle,
@@ -179,7 +179,7 @@ class ShowDetailPage extends HookConsumerWidget {
                             ],
                             if (relatedShows != null &&
                                 relatedShows.isNotEmpty) ...[
-                              const SizedBox(height: 16.0),
+                              const SizedBox(height: kSpaceBtwWidgets),
                               ShowDetailRelated(
                                 relatedShows: relatedShows,
                                 apiService: apiService,
@@ -225,7 +225,7 @@ class ShowDetailPage extends HookConsumerWidget {
             // Back button
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,
-              left: 16,
+              left: kSpacePhoneHorizontal,
               child: GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(

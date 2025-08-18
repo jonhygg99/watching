@@ -100,6 +100,10 @@
   "@@dark": {
     "description": "Dark theme option"
   },
+  "noDataFound": "No data found",
+  "@@noDataFound": {
+    "description": "Message shown when no data is available to display"
+  },
   "system": "System",
   "@@system": {
     "description": "System default theme option"

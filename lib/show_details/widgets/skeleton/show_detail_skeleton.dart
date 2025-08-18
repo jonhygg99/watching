@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import 'components/skeleton_header.dart';
-import 'components/skeleton_episode.dart';
-import 'components/skeleton_description.dart';
-import 'components/skeleton_cast.dart';
-import 'components/skeleton_comments_header.dart';
-import 'components/skeleton_videos.dart';
-import 'components/skeleton_related_shows.dart';
-import 'skeleton_utils.dart';
+import 'widgets/skeleton_header.dart';
+import 'widgets/skeleton_episode.dart';
+import 'widgets/skeleton_description.dart';
+import 'widgets/skeleton_cast.dart';
+import 'widgets/skeleton_comments_header.dart';
+import 'widgets/skeleton_videos.dart';
+import 'widgets/skeleton_related_shows.dart';
+import 'widgets/skeleton_utils.dart';
 
 /// A skeleton loading widget that displays a shimmering placeholder for the show detail page.
 /// This matches the layout of the actual ShowDetailPage but with loading placeholders.

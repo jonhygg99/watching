@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../youtube_player_dialog.dart';
-import 'all_videos_page.dart';
+import 'pages/all_videos_page.dart';
 
 class ShowDetailVideos extends StatelessWidget {
   final List<dynamic>? videos;
