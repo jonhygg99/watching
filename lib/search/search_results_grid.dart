@@ -9,7 +9,7 @@ import 'search_result_item.dart';
 class SearchResultsGrid extends ConsumerWidget {
   final String query;
   final List<String> types;
-  
+
   const SearchResultsGrid({
     super.key,
     required this.query,
@@ -29,11 +29,12 @@ class SearchResultsGrid extends ConsumerWidget {
     final translationService = ref.watch(showTranslationServiceProvider);
     final countryCode = ref.watch(countryCodeProvider);
     final searchType = types.join(',');
-    
-    return FutureBuilder<List<dynamic>>(
-      future: query.isNotEmpty 
-          ? api.searchMoviesAndShows(query: query, type: searchType)
-          : Future.value([]),
+
+    return FutureBuilder<Map<String, dynamic>>(
+      future:
+          query.isNotEmpty
+              ? api.searchMoviesAndShows(query: query, type: searchType)
+              : Future.value({'items': []}),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -41,47 +42,58 @@ class SearchResultsGrid extends ConsumerWidget {
         if (snapshot.hasError) {
           return const Center(child: Text('Error al buscar.'));
         }
-        final results = snapshot.data ?? [];
-        final filtered = results
-            .where((item) => item['type'] == 'show' || item['type'] == 'movie')
-            .toList();
-            
+
+        final results = snapshot.data?['items'] ?? [];
+        final filtered =
+            (results as List<dynamic>)
+                .where(
+                  (item) => item['type'] == 'show' || item['type'] == 'movie',
+                )
+                .toList();
+
         if (filtered.isEmpty) {
           return Center(
-            child: Text('No se encontraron resultados para "$query".'),
+            child: Text(
+              query.isEmpty
+                  ? 'Ingresa un término de búsqueda'
+                  : 'No se encontraron resultados para "$query".',
+            ),
           );
         }
-        
+
         // Process items to get translated titles for shows
         return FutureBuilder<List<Map<String, dynamic>>>(
-          future: Future.wait(filtered.map((item) async {
-            final type = item['type'] as String;
-            var itemData = Map<String, dynamic>.from(item[type] as Map);
-            
-            // Only translate if it's a show and we have a country code
-            if (type == 'show' && countryCode.isNotEmpty) {
-              final title = await translationService.getTranslatedTitle(
-                show: itemData,
-                traktApi: api,
-              );
-              if (title != itemData['title']) {
-                itemData = Map<String, dynamic>.from(itemData)..['title'] = title;
+          future: Future.wait(
+            filtered.map((item) async {
+              final type = item['type'] as String;
+              var itemData = Map<String, dynamic>.from(item[type] as Map);
+
+              // Only translate if it's a show and we have a country code
+              if (type == 'show' && countryCode.isNotEmpty) {
+                final title = await translationService.getTranslatedTitle(
+                  show: itemData,
+                  traktApi: api,
+                );
+                if (title != itemData['title']) {
+                  itemData = Map<String, dynamic>.from(itemData)
+                    ..['title'] = title;
+                }
               }
-            }
-            
-            return {
-              'type': type,
-              'data': itemData,
-              'originalData': item[type],
-            };
-          })),
+
+              return {
+                'type': type,
+                'data': itemData,
+                'originalData': item[type],
+              };
+            }),
+          ),
           builder: (context, processedSnapshot) {
             if (processedSnapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             final processedItems = processedSnapshot.data ?? [];
-            
+
             return GridView.count(
               padding: const EdgeInsets.all(12),
               crossAxisCount: 3,
