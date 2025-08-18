@@ -1,41 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:watching/features/discover/widgets/skeleton/skeleton_carousel_header.dart';
-import 'package:watching/features/discover/widgets/skeleton/skeleton_carousel_list.dart';
+import 'package:watching/features/discover/widgets/skeleton/skeleton_carousel_item.dart';
 import 'package:watching/shared/constants/measures.dart';
 
 /// A skeleton loading widget for discover page carousels that matches the actual UI
 class DiscoverSkeleton extends StatelessWidget {
-  const DiscoverSkeleton({super.key});
+  /// Creates a skeleton that matches the [Carousel] widget's structure
+  const DiscoverSkeleton({
+    super.key,
+    this.title = '',
+    this.itemCount = 5,
+  });
+
+  /// Title to display in the skeleton header
+  final String title;
+  
+  /// Number of skeleton items to show in the carousel
+  final int itemCount;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate carousel height to fit the image and text
-        final carouselHeight = kDiscoverShowImageHeight + 40;
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final baseColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
-        final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
 
-        return Shimmer.fromColors(
-          baseColor: baseColor,
-          highlightColor: highlightColor,
-          period: const Duration(milliseconds: 1500),
-          child: SizedBox(
-            width: double.infinity,
-            height: carouselHeight + 40, // Extra space for the title
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SkeletonCarouselHeader(baseColor: baseColor),
-                SkeletonCarouselList(baseColor: baseColor),
-              ],
-            ),
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      period: const Duration(milliseconds: 1500),
+      child: _buildSkeletonCarousel(context),
+    );
+  }
+
+  Widget _buildSkeletonCarousel(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SkeletonCarouselHeader(
+          baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        ),
+        SizedBox(
+          height: kDiscoverShowImageHeight + 40,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(left: kSpacePhoneHorizontal),
+            itemCount: 1,
+            itemBuilder: (context, _) {
+              return Row(
+                children: List.generate(
+                  itemCount,
+                  (index) => Padding(
+                    padding: const EdgeInsets.only(right: kSpaceCarousel),
+                    child: SkeletonCarouselItem(
+                      baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }

@@ -17,6 +17,9 @@ class SkeletonCarouselItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor =
+        Theme.of(context).colorScheme.surfaceContainerHighest;
+
     return SizedBox(
       width: width,
       child: Column(
@@ -29,18 +32,35 @@ class SkeletonCarouselItem extends StatelessWidget {
             child: Container(
               width: width,
               height: imageHeight,
-              color: baseColor,
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: kShowBorderRadius,
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
             ),
           ),
           // Title placeholder - matches the actual title style
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 8),
-              height: 16,
-              width: width * titleWidthFactor,
-              decoration: BoxDecoration(
-                color: baseColor,
-                borderRadius: BorderRadius.circular(4),
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Center(
+              child: Container(
+                height: 20,
+                width: width * titleWidthFactor,
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
             ),
           ),
