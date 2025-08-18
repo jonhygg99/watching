@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:watching/discover/widgets/skeleton/skeleton_carousel_header.dart';
-import 'package:watching/discover/widgets/skeleton/skeleton_carousel_list.dart';
+import 'package:watching/features/discover/widgets/skeleton/skeleton_carousel_header.dart';
+import 'package:watching/features/discover/widgets/skeleton/skeleton_carousel_list.dart';
 import 'package:watching/shared/constants/measures.dart';
 
 /// A skeleton loading widget for discover page carousels that matches the actual UI

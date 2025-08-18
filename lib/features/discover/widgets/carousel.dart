@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watching/discover/widgets/skeleton.dart';
+import 'package:watching/features/discover/widgets/skeleton.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/shared/constants/measures.dart';
 

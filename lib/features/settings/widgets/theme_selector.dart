@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/fonts.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/theme/theme_provider.dart';
+import 'package:watching/shared/theme/theme_provider.dart';
 
 class ThemeSelector extends ConsumerWidget {
   const ThemeSelector({super.key});

@@ -3,7 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/shared/constants/colors.dart';
-import 'package:watching/theme/theme_provider.dart';
+import 'package:watching/shared/theme/theme_provider.dart';
 
 class NewHeader extends HookWidget {
   final Map<String, dynamic> show;

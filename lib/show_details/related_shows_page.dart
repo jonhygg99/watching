@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
-import 'package:watching/discover/show_list_page.dart';
+import 'package:watching/features/show_list/show_list_page.dart';
 
 class RelatedShowsPage extends StatelessWidget {
   final String showId;

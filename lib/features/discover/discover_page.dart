@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/l10n/app_localizations.dart';
-import 'package:watching/discover/show_list_page.dart';
-import 'package:watching/discover/widgets/carousel.dart';
+import 'package:watching/features/show_list/show_list_page.dart';
+import 'package:watching/features/discover/widgets/carousel.dart';
 import 'package:watching/shared/constants/measures.dart';
 
 /// DiscoverPage displays curated carousels of TV shows using data from Trakt API.

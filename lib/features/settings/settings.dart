@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/l10n/app_localizations.dart';
-import 'package:watching/settings/widgets/country_dropdown.dart';
-import 'package:watching/settings/widgets/language_dropdown.dart';
-import 'package:watching/settings/widgets/revoke_token_button.dart';
-import 'package:watching/settings/widgets/theme_selector.dart';
-import 'package:watching/settings/widgets/user_info.dart';
+import 'package:watching/features/settings/widgets/country_dropdown.dart';
+import 'package:watching/features/settings/widgets/language_dropdown.dart';
+import 'package:watching/features/settings/widgets/revoke_token_button.dart';
+import 'package:watching/features/settings/widgets/theme_selector.dart';
+import 'package:watching/features/settings/widgets/user_info.dart';
 import 'package:watching/shared/constants/measures.dart';
 
 class SettingsPage extends HookWidget {
