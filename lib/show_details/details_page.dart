@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:watching/shared/widgets/carousel/carousel.dart';
-import 'package:watching/show_details/related_shows_page.dart';
 import 'widgets/back_button.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -10,7 +8,7 @@ import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/show_details/current_episode.dart';
 import 'package:watching/show_details/widgets/header/header.dart';
-import 'package:watching/show_details/related.dart';
+import 'package:watching/show_details/widgets/related.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'package:watching/show_details/widgets/skeleton/show_detail_skeleton.dart';
@@ -27,7 +25,6 @@ class ShowDetailPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     // State hooks
     final fullyWatched = useState(false);
 
@@ -65,10 +62,7 @@ class ShowDetailPage extends HookConsumerWidget {
                   language: countryCode.substring(0, 2).toLowerCase(),
                 ),
                 apiService.getShowPeople(id: showId),
-                apiService.getShowVideos(id: showId).catchError((e) {
-                  debugPrint('Error loading videos: $e');
-                  return <dynamic>[]; // Return empty list on error
-                }),
+                apiService.getShowVideos(id: showId),
                 apiService.getRelatedShows(id: showId),
               ]),
               builder: (context, snapshot) {
@@ -146,7 +140,6 @@ class ShowDetailPage extends HookConsumerWidget {
                         padding: const EdgeInsets.only(
                           left: kSpacePhoneHorizontal,
                           right: kSpacePhoneHorizontal,
-                          bottom: 50,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,94 +167,54 @@ class ShowDetailPage extends HookConsumerWidget {
                                 apiService: apiService,
                               ),
                             ],
-                            if (videos != null && videos.isNotEmpty) ...[
-                              const SizedBox(height: kSpaceBtwWidgets),
-                              ShowDetailVideos(
-                                videos: videos,
-                                title: originalTitle,
-                              ),
-                            ],
-                            if (relatedShows != null &&
-                                relatedShows.isNotEmpty) ...[
-                              const SizedBox(height: kSpaceBtwWidgets),
-                              FutureBuilder<Map<String, dynamic>>(
-                                future: apiService.getRelatedShows(
-                                  id: showId,
-                                  page: 1,
-                                ),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(),
-                                    );
-                                  }
-
-                                  if (snapshot.hasError) {
-                                    return Text('Error: ${snapshot.error}');
-                                  }
-
-                                  final shows =
-                                      (snapshot.data?['shows']
-                                          as List<dynamic>?) ??
-                                      [];
-
-                                  return Carousel(
-                                    title: 'Relacionados',
-                                    future: Future.value(shows),
-                                    extractShow: (item) => item,
-                                    emptyText:
-                                        'Relacionados - ${l10n.noResults}',
-                                    onViewMore: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) => RelatedShowsPage(
-                                                showId: showId,
-                                                showTitle: originalTitle,
-                                                apiService: apiService,
-                                                initialShows: shows,
-                                              ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                              ShowDetailRelated(
-                                relatedShows: relatedShows,
-                                apiService: apiService,
-                                countryCode: countryCode,
-                                showId: showId,
-                                showTitle: originalTitle,
-                              ),
-                            ],
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Lo que otros dicen',
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                TextButton.icon(
-                                  onPressed: () {
-                                    final sortNotifier = ValueNotifier<String>(
-                                      'likes',
-                                    );
-                                    showAllComments(
-                                      context,
-                                      showId,
-                                      sortNotifier,
-                                      commentSortOptions,
-                                      ref,
-                                    );
-                                  },
-                                  icon: const Icon(Icons.comment_outlined),
-                                  label: const Text('Comentarios'),
-                                ),
-                              ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (videos != null && videos.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: ShowDetailVideos(
+                          videos: videos,
+                          title: originalTitle,
+                        ),
+                      ),
+                    SliverToBoxAdapter(
+                      child: ShowDetailRelated(
+                        relatedShows: relatedShows,
+                        apiService: apiService,
+                        showId: showId,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: kSpacePhoneHorizontal,
+                          right: kSpacePhoneHorizontal,
+                          bottom: 50,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Lo que otros dicen',
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            TextButton.icon(
+                              onPressed: () {
+                                final sortNotifier = ValueNotifier<String>(
+                                  'likes',
+                                );
+                                showAllComments(
+                                  context,
+                                  showId,
+                                  sortNotifier,
+                                  commentSortOptions,
+                                  ref,
+                                );
+                              },
+                              icon: const Icon(Icons.comment_outlined),
+                              label: const Text('Comentarios'),
                             ),
                           ],
                         ),

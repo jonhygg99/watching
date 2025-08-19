@@ -21,9 +21,10 @@ class CarouselImageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark 
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : Theme.of(context).colorScheme.surfaceVariant;
+    final backgroundColor =
+        isDark
+            ? Theme.of(context).colorScheme.surfaceContainerHighest
+            : Theme.of(context).colorScheme.surfaceContainerHighest;
 
     return GestureDetector(
       onTap: onTap,
@@ -37,26 +38,32 @@ class CarouselImageItem extends StatelessWidget {
             width: width,
             height: height,
             fit: BoxFit.cover,
-            placeholder: (context, url) => Center(
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+            placeholder:
+                (context, url) => Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            errorWidget: (context, url, error) => Container(
-              color: backgroundColor,
-              child: Center(
-                child: Icon(
-                  Icons.broken_image,
-                  size: 32,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+            errorWidget:
+                (context, url, error) => Container(
+                  color: backgroundColor,
+                  child: Center(
+                    child: Icon(
+                      Icons.broken_image,
+                      size: 32,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
                 ),
-              ),
-            ),
           ),
         ),
       ),

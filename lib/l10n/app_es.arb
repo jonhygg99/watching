@@ -16,6 +16,14 @@
   "@@discover": {
     "description": "Etiqueta de la pestaña de descubrimiento"
   },
+  "relatedShows": "Series relacionadas",
+  "@@relatedShows": {
+    "description": "Título para la sección de series relacionadas"
+  },
+  "videos": "Vídeos",
+  "@@videos": {
+    "description": "Título para la sección de vídeos"
+  },
   "viewMore": "Ver más",
   "@@viewMore": {
     "description": "Texto para el botón de ver más"

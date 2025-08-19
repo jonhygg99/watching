@@ -122,6 +122,18 @@ abstract class AppLocalizations {
   /// **'Discover'**
   String get discover;
 
+  /// No description provided for @relatedShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Related Shows'**
+  String get relatedShows;
+
+  /// No description provided for @videos.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos'**
+  String get videos;
+
   /// No description provided for @viewMore.
   ///
   /// In en, this message translates to:

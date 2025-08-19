@@ -21,6 +21,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get discover => 'Descubrir';
 
   @override
+  String get relatedShows => 'Series relacionadas';
+
+  @override
+  String get videos => 'Vídeos';
+
+  @override
   String get viewMore => 'Ver más';
 
   @override

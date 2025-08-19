@@ -4,17 +4,25 @@ import 'package:watching/shared/constants/fonts.dart';
 import 'package:watching/shared/constants/measures.dart';
 
 class CarouselHeader extends StatelessWidget {
-  const CarouselHeader({super.key, required this.title, this.onViewMore});
+  const CarouselHeader({
+    super.key,
+    required this.title,
+    this.onViewMore,
+    this.paddingLeft = kSpacePhoneHorizontal,
+    this.paddingRight = kSpacePhoneHorizontal,
+  });
 
   final String title;
   final VoidCallback? onViewMore;
+  final double? paddingLeft;
+  final double? paddingRight;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
-        left: kSpacePhoneHorizontal,
-        right: kSpacePhoneHorizontal,
+      padding: EdgeInsets.only(
+        left: paddingLeft ?? 0.00,
+        right: paddingRight ?? 0.00,
         bottom: kSpaceBtwTitleWidget,
       ),
       child: Row(
@@ -36,11 +44,7 @@ class CarouselHeader extends StatelessWidget {
               onPressed: onViewMore,
               child: Text(
                 AppLocalizations.of(context)!.viewMore,
-                style: TextStyle(
-                  fontSize: 14.0, // kFontSizeButtonTextViewMore
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.normal,
-                ),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ),
         ],

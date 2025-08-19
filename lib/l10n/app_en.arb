@@ -16,6 +16,14 @@
   "@@discover": {
     "description": "Tab label for the discover section"
   },
+  "relatedShows": "Related Shows",
+  "@@relatedShows": {
+    "description": "Title for the related shows section"
+  },
+  "videos": "Videos",
+  "@@videos": {
+    "description": "Title for the videos section"
+  },
   "viewMore": "View More",
   "@@viewMore": {
     "description": "Text for view more button"
