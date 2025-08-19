@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 /// Data class for a search result (show/movie) using Freezed for immutability and pattern matching.
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:watching/shared/utils/get_image.dart';
 part 'search_result_item.freezed.dart';
 
 @freezed
@@ -19,26 +20,6 @@ class SearchResultGridTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   const SearchResultGridTile({super.key, required this.item, this.onTap});
-
-  String? _getImageUrl(dynamic imageList) {
-    if (imageList is List && imageList.isNotEmpty && imageList.first is String) {
-      final url = imageList.first as String;
-      if (url.startsWith('http')) return url;
-      return 'https://$url';
-    }
-    return null;
-  }
-
-  String? getFirstAvailableImage(Map<String, dynamic>? images) {
-    if (images == null) return null;
-    
-    // Try different image types in order of preference
-    for (final type in ['poster', 'thumb', 'fanart', 'banner']) {
-      final url = _getImageUrl(images[type]);
-      if (url != null) return url;
-    }
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {

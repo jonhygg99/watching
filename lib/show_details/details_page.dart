@@ -6,7 +6,7 @@ import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/show_details/current_episode.dart';
-import 'package:watching/show_details/new_header.dart';
+import 'package:watching/show_details/widgets/header/header.dart';
 import 'package:watching/show_details/related.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
@@ -131,7 +131,7 @@ class ShowDetailPage extends HookConsumerWidget {
                   controller: scrollController,
                   slivers: [
                     SliverToBoxAdapter(
-                      child: NewHeader(
+                      child: Header(
                         show: show,
                         title: originalTitle,
                         scrollController: scrollController,

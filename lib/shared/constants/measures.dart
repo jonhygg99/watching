@@ -30,5 +30,6 @@ const double kRelatedShowItemWidth = 145.0;
 const double kRelatedShowImageHeight = 206.0;
 
 const double kItemRadius = 10.0;
+const double kRadiusChip = 20.0;
 final BorderRadius kShowBorderRadius = BorderRadius.circular(kItemRadius);
 final BorderRadius kShowPosterBorderRadius = BorderRadius.circular(kItemRadius);

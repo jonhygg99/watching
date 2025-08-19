@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:watching/api/trakt/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/utils/get_image.dart';
 import 'package:watching/show_details/details_page.dart' show ShowDetailPage;
 
 class ShowsGrid extends StatelessWidget {
@@ -69,11 +70,7 @@ class ShowsGrid extends StatelessWidget {
           .getTranslatedTitle(show: show, traktApi: ref.read(traktApiProvider)),
       builder: (context, snapshot) {
         final title = snapshot.data ?? show['title'] ?? '';
-        final posterArr = show['images']?['poster'] as List?;
-        final posterUrl =
-            (posterArr != null && posterArr.isNotEmpty)
-                ? 'https://${posterArr.first}'
-                : null;
+        final posterUrl = getFirstAvailableImage(show['images']);
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
 
