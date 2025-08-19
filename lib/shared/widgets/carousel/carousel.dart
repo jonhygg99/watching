@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watching/features/discover/widgets/skeleton.dart';
+import 'package:watching/shared/widgets/carousel/skeleton/skeleton.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/shared/constants/measures.dart';
 
-import 'carousel/carousel_item.dart';
-import 'carousel/carousel_header.dart';
+import 'widgets/carousel_item.dart';
+import 'widgets/carousel_header.dart';
 
 /// A widget that displays a carousel of shows with a title and view more option.
 class Carousel extends ConsumerWidget {

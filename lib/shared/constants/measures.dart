@@ -19,8 +19,8 @@ const double kSpaceBtwTitleWidget = 10.0;
 const double kSpaceCarousel = 12.0;
 
 // Discover Show Item
-const double kDiscoverShowItemWidth = 145.0;
-const double kDiscoverShowImageHeight = 206.0;
+const double kDiscoverShowItemWidth = 160.0;
+const double kDiscoverShowImageHeight = 240.0;
 
 // My Show Item
 const double kMyShowItemWidth = 120.0;

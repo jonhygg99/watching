@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/api/trakt/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/utils/get_image.dart';
 import 'package:watching/show_details/details_page.dart';
 
 import 'carousel_placeholder_item.dart';
@@ -26,17 +27,6 @@ class CarouselItem extends ConsumerWidget {
   final List<dynamic> shows;
   final int index;
 
-  // Helper function to get first available image from a list of image types
-  String? getFirstAvailableImage(List<String> imageTypes) {
-    for (final type in imageTypes) {
-      final images = show['images']?[type] as List?;
-      if (images != null && images.isNotEmpty) {
-        return 'https://${images.first}';
-      }
-    }
-    return null;
-  }
-
   void _navigateToDetail() {
     final showId = show['ids']['trakt']?.toString() ?? '';
     if (showId.isNotEmpty) {
@@ -55,13 +45,7 @@ class CarouselItem extends ConsumerWidget {
       builder: (context, snapshot) {
         final title = snapshot.data ?? show['title'] ?? '';
 
-        // Try to get an image, checking multiple image types in order of preference
-        final imageUrl = getFirstAvailableImage([
-          'poster', // First choice
-          'thumb', // Second choice (usually good quality thumbnails)
-          'fanart', // Third choice (background images)
-          'banner', // Fourth choice (banner images)
-        ]);
+        final imageUrl = getFirstAvailableImage(show['images']);
 
         return Container(
           width: itemWidth,

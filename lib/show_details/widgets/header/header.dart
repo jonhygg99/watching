@@ -23,7 +23,7 @@ class Header extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final rating = show['rating']?.toDouble() ?? 0.0;
-    final fanartUrl = getFirstAvailableImage(show['images']);
+    final fanartUrl = getFirstAvailableImage(show['images'], preferredType: 'fanart');
 
     if (fanartUrl == null) {
       return _buildFallbackHeader(context);

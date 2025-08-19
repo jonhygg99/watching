@@ -10,7 +10,7 @@ class ShowDetailRelated extends StatelessWidget {
   final String countryCode;
   final String showId;
   final String showTitle;
-  
+
   const ShowDetailRelated({
     super.key,
     required this.relatedShows,
@@ -28,34 +28,32 @@ class ShowDetailRelated extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Relacionados',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Relacionados',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            if (relatedShows!.length >= 5)
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => RelatedShowsPage(
+                            showId: showId,
+                            showTitle: showTitle,
+                            apiService: apiService,
+                            initialShows: relatedShows,
+                          ),
+                    ),
+                  );
+                },
+                child: const Text('Ver más'),
               ),
-              if (relatedShows!.length >= 5)
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RelatedShowsPage(
-                          showId: showId,
-                          showTitle: showTitle,
-                          apiService: apiService,
-                          initialShows: relatedShows,
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('Ver más'),
-                ),
-            ],
-          ),
+          ],
         ),
         SizedBox(
           height: 260,

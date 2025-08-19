@@ -15,11 +15,6 @@ class ShowDetailCast extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (people == null ||
-        people!['cast'] == null ||
-        (people!['cast'] as List).isEmpty) {
-      return const SizedBox.shrink();
-    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

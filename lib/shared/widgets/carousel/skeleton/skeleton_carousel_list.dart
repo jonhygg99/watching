@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:watching/features/discover/widgets/skeleton/skeleton_carousel_item.dart';
+import 'package:watching/shared/widgets/carousel/skeleton/skeleton_carousel_item.dart';
 import 'package:watching/shared/constants/measures.dart';
 
 class SkeletonCarouselList extends StatelessWidget {

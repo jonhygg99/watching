@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/features/show_list/widgets/error_indicator.dart';
-import 'package:watching/features/show_list/widgets/loading_indicator.dart';
-import 'package:watching/features/show_list/widgets/shows_grid.dart';
+import 'package:watching/shared/pages/show_list/widgets/error_indicator.dart';
+import 'package:watching/shared/pages/show_list/widgets/loading_indicator.dart';
+import 'package:watching/shared/pages/show_list/widgets/shows_grid.dart';
 import 'package:watching/l10n/app_localizations.dart';
 
 class ShowListPage extends HookConsumerWidget {

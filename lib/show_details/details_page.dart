@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:watching/shared/widgets/carousel/carousel.dart';
+import 'package:watching/show_details/related_shows_page.dart';
+import 'widgets/back_button.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/l10n/app_localizations.dart';
@@ -11,7 +14,7 @@ import 'package:watching/show_details/related.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'package:watching/show_details/widgets/skeleton/show_detail_skeleton.dart';
-import 'show_description.dart';
+import 'widgets/show_description.dart';
 import 'videos.dart';
 import 'cast.dart';
 // Related shows section removed
@@ -24,6 +27,7 @@ class ShowDetailPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     // State hooks
     final fullyWatched = useState(false);
 
@@ -180,6 +184,51 @@ class ShowDetailPage extends HookConsumerWidget {
                             if (relatedShows != null &&
                                 relatedShows.isNotEmpty) ...[
                               const SizedBox(height: kSpaceBtwWidgets),
+                              FutureBuilder<Map<String, dynamic>>(
+                                future: apiService.getRelatedShows(
+                                  id: showId,
+                                  page: 1,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+
+                                  if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  }
+
+                                  final shows =
+                                      (snapshot.data?['shows']
+                                          as List<dynamic>?) ??
+                                      [];
+
+                                  return Carousel(
+                                    title: 'Relacionados',
+                                    future: Future.value(shows),
+                                    extractShow: (item) => item,
+                                    emptyText:
+                                        'Relacionados - ${l10n.noResults}',
+                                    onViewMore: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => RelatedShowsPage(
+                                                showId: showId,
+                                                showTitle: originalTitle,
+                                                apiService: apiService,
+                                                initialShows: shows,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
                               ShowDetailRelated(
                                 relatedShows: relatedShows,
                                 apiService: apiService,
@@ -223,39 +272,7 @@ class ShowDetailPage extends HookConsumerWidget {
               },
             ),
             // Back button
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 16,
-              left: kSpacePhoneHorizontal,
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.only(left: 6),
-                    child: Icon(
-                      Icons.arrow_back_ios,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            const BackButtonWidget(),
           ],
         ),
       ),

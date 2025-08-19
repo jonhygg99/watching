@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:watching/features/discover/widgets/skeleton/skeleton_carousel_header.dart';
-import 'package:watching/features/discover/widgets/skeleton/skeleton_carousel_item.dart';
+import 'package:watching/shared/widgets/carousel/skeleton/skeleton_carousel_header.dart';
+import 'package:watching/shared/widgets/carousel/skeleton/skeleton_carousel_item.dart';
 import 'package:watching/shared/constants/measures.dart';
 
 /// A skeleton loading widget for discover page carousels that matches the actual UI
 class DiscoverSkeleton extends StatelessWidget {
   /// Creates a skeleton that matches the [Carousel] widget's structure
-  const DiscoverSkeleton({
-    super.key,
-    this.title = '',
-    this.itemCount = 5,
-  });
+  const DiscoverSkeleton({super.key, this.title = '', this.itemCount = 5});
 
   /// Title to display in the skeleton header
   final String title;
-  
+
   /// Number of skeleton items to show in the carousel
   final int itemCount;
 
@@ -53,7 +49,8 @@ class DiscoverSkeleton extends StatelessWidget {
                   (index) => Padding(
                     padding: const EdgeInsets.only(right: kSpaceCarousel),
                     child: SkeletonCarouselItem(
-                      baseColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      baseColor:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                     ),
                   ),
                 ),

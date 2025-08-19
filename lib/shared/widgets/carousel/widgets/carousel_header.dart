@@ -35,7 +35,7 @@ class CarouselHeader extends StatelessWidget {
             TextButton(
               onPressed: onViewMore,
               child: Text(
-                AppLocalizations.of(context)?.viewMore ?? 'View More',
+                AppLocalizations.of(context)!.viewMore,
                 style: TextStyle(
                   fontSize: 14.0, // kFontSizeButtonTextViewMore
                   color: Theme.of(context).colorScheme.primary,

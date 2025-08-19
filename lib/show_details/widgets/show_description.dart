@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/widgets/expandable_text.dart';
 
 class ShowDescription extends StatelessWidget {
@@ -18,7 +19,10 @@ class ShowDescription extends StatelessWidget {
       children: [
         if (tagline.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(top: 6, bottom: 8),
+            padding: const EdgeInsets.only(
+              top: 6,
+              bottom: kSpaceBtwTitleWidget,
+            ),
             child: Text(
               tagline,
               style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
