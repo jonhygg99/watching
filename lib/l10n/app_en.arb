@@ -48,6 +48,180 @@
   "@@popularShows": {
     "description": "Title for popular shows carousel"
   },
+  "showStatusReturningSeries": "Returning Series",
+  "@@showStatusReturningSeries": {
+    "description": "Show status: The show is currently airing new episodes"
+  },
+  "showStatusInProduction": "In Production",
+  "@@showStatusInProduction": {
+    "description": "Show status: The show is still in production"
+  },
+  "showStatusPlanned": "Planned",
+  "@@showStatusPlanned": {
+    "description": "Show status: The show is planned for future release"
+  },
+  "showStatusUpcoming": "Upcoming",
+  "@@showStatusUpcoming": {
+    "description": "Show status: The show is upcoming"
+  },
+  "showStatusPilot": "Pilot",
+  "@@showStatusPilot": {
+    "description": "Show status: The show is a pilot episode"
+  },
+  "showStatusCanceled": "Canceled",
+  "@@showStatusCanceled": {
+    "description": "Show status: The show has been canceled"
+  },
+  "showStatusEnded": "Ended",
+  "@@showStatusEnded": {
+    "description": "Show status: The show has ended"
+  },
+  "genreAction": "Action",
+  "@@genreAction": {
+    "description": "Genre: Action"
+  },
+  "genreAdventure": "Adventure",
+  "@@genreAdventure": {
+    "description": "Genre: Adventure"
+  },
+  "genreAnimation": "Animation",
+  "@@genreAnimation": {
+    "description": "Genre: Animation"
+  },
+  "genreAnime": "Anime",
+  "@@genreAnime": {
+    "description": "Genre: Anime"
+  },
+  "genreComedy": "Comedy",
+  "@@genreComedy": {
+    "description": "Genre: Comedy"
+  },
+  "genreCrime": "Crime",
+  "@@genreCrime": {
+    "description": "Genre: Crime"
+  },
+  "genreDisaster": "Disaster",
+  "@@genreDisaster": {
+    "description": "Genre: Disaster"
+  },
+  "genreDocumentary": "Documentary",
+  "@@genreDocumentary": {
+    "description": "Genre: Documentary"
+  },
+  "genreDonghua": "Donghua",
+  "@@genreDonghua": {
+    "description": "Genre: Donghua"
+  },
+  "genreDrama": "Drama",
+  "@@genreDrama": {
+    "description": "Genre: Drama"
+  },
+  "genreEastern": "Eastern",
+  "@@genreEastern": {
+    "description": "Genre: Eastern"
+  },
+  "genreFamily": "Family",
+  "@@genreFamily": {
+    "description": "Genre: Family"
+  },
+  "genreFanFilm": "Fan Film",
+  "@@genreFanFilm": {
+    "description": "Genre: Fan Film"
+  },
+  "genreFantasy": "Fantasy",
+  "@@genreFantasy": {
+    "description": "Genre: Fantasy"
+  },
+  "genreFilmNoir": "Film Noir",
+  "@@genreFilmNoir": {
+    "description": "Genre: Film Noir"
+  },
+  "genreHistory": "History",
+  "@@genreHistory": {
+    "description": "Genre: History"
+  },
+  "genreHoliday": "Holiday",
+  "@@genreHoliday": {
+    "description": "Genre: Holiday"
+  },
+  "genreHorror": "Horror",
+  "@@genreHorror": {
+    "description": "Genre: Horror"
+  },
+  "genreIndie": "Indie",
+  "@@genreIndie": {
+    "description": "Genre: Indie"
+  },
+  "genreMusic": "Music",
+  "@@genreMusic": {
+    "description": "Genre: Music"
+  },
+  "genreMusical": "Musical",
+  "@@genreMusical": {
+    "description": "Genre: Musical"
+  },
+  "genreMystery": "Mystery",
+  "@@genreMystery": {
+    "description": "Genre: Mystery"
+  },
+  "genreNone": "None",
+  "@@genreNone": {
+    "description": "Genre: None"
+  },
+  "genreRoad": "Road",
+  "@@genreRoad": {
+    "description": "Genre: Road"
+  },
+  "genreRomance": "Romance",
+  "@@genreRomance": {
+    "description": "Genre: Romance"
+  },
+  "genreScienceFiction": "Science Fiction",
+  "@@genreScienceFiction": {
+    "description": "Genre: Science Fiction"
+  },
+  "genreShort": "Short",
+  "@@genreShort": {
+    "description": "Genre: Short"
+  },
+  "genreSports": "Sports",
+  "@@genreSports": {
+    "description": "Genre: Sports"
+  },
+  "genreSportingEvent": "Sporting Event",
+  "@@genreSportingEvent": {
+    "description": "Genre: Sporting Event"
+  },
+  "genreSuspense": "Suspense",
+  "@@genreSuspense": {
+    "description": "Genre: Suspense"
+  },
+  "genreThriller": "Thriller",
+  "@@genreThriller": {
+    "description": "Genre: Thriller"
+  },
+  "genreTvMovie": "TV Movie",
+  "@@genreTvMovie": {
+    "description": "Genre: TV Movie"
+  },
+  "genreWar": "War",
+  "@@genreWar": {
+    "description": "Genre: War"
+  },
+  "genreWestern": "Western",
+  "@@genreWestern": {
+    "description": "Genre: Western"
+  },
+  "runtimeMinutes": "{minutes} min",
+  "@@runtimeMinutes": {
+    "description": "Runtime duration in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "compactLong"
+      }
+    }
+  },
   "noVideosMatchingFilters": "No videos match the filters",
   "@@noVideosMatchingFilters": {
     "description": "Message shown when no videos match the selected filters"

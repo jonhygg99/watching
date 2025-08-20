@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/shared/constants/show_status.dart';
 import 'package:watching/shared/utils/get_image.dart';
 import 'package:watching/show_details/widgets/header/widgets/rating.dart';
 import 'package:watching/show_details/widgets/header/widgets/gradient_overlay.dart';
@@ -23,7 +25,10 @@ class Header extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final rating = show['rating']?.toDouble() ?? 0.0;
-    final fanartUrl = getFirstAvailableImage(show['images'], preferredType: 'fanart');
+    final fanartUrl = getFirstAvailableImage(
+      show['images'],
+      preferredType: 'fanart',
+    );
 
     if (fanartUrl == null) {
       return _buildFallbackHeader(context);
@@ -72,14 +77,16 @@ class Header extends HookWidget {
             left: 16,
             right: 16,
             bottom: fanartHeight * 0.05, // Positioned above the bottom 20%
-            child: _buildHeaderContent(),
+            child: _buildHeaderContent(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderContent() {
+  Widget _buildHeaderContent(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -87,8 +94,12 @@ class Header extends HookWidget {
         InfoItemsRow(
           items: [
             if (show['year'] != null) show['year'].toString(),
-            if (show['runtime'] != null) '${show['runtime']} min',
-            if (show['status'] != null) show['status'].toString(),
+            if (show['runtime'] != null)
+              l10n.runtimeMinutes(
+                int.tryParse(show['runtime'].toString()) ?? 0,
+              ),
+            if (show['status'] != null)
+              ShowStatus.getTranslatedStatus(show['status'].toString(), l10n),
           ],
         ),
         TitleWidget(title: title),
@@ -97,6 +108,7 @@ class Header extends HookWidget {
       ],
     );
   }
+
 
   Widget _buildFallbackHeader(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -120,7 +132,7 @@ class Header extends HookWidget {
             left: 16,
             right: 16,
             bottom: headerHeight * 0.05, // Positioned above the bottom 20%
-            child: _buildHeaderContent(),
+            child: _buildHeaderContent(context),
           ),
         ],
       ),

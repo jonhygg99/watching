@@ -45,6 +45,134 @@ class AppLocalizationsEn extends AppLocalizations {
   String get popularShows => 'Popular Shows';
 
   @override
+  String get showStatusReturningSeries => 'Returning Series';
+
+  @override
+  String get showStatusInProduction => 'In Production';
+
+  @override
+  String get showStatusPlanned => 'Planned';
+
+  @override
+  String get showStatusUpcoming => 'Upcoming';
+
+  @override
+  String get showStatusPilot => 'Pilot';
+
+  @override
+  String get showStatusCanceled => 'Canceled';
+
+  @override
+  String get showStatusEnded => 'Ended';
+
+  @override
+  String get genreAction => 'Action';
+
+  @override
+  String get genreAdventure => 'Adventure';
+
+  @override
+  String get genreAnimation => 'Animation';
+
+  @override
+  String get genreAnime => 'Anime';
+
+  @override
+  String get genreComedy => 'Comedy';
+
+  @override
+  String get genreCrime => 'Crime';
+
+  @override
+  String get genreDisaster => 'Disaster';
+
+  @override
+  String get genreDocumentary => 'Documentary';
+
+  @override
+  String get genreDonghua => 'Donghua';
+
+  @override
+  String get genreDrama => 'Drama';
+
+  @override
+  String get genreEastern => 'Eastern';
+
+  @override
+  String get genreFamily => 'Family';
+
+  @override
+  String get genreFanFilm => 'Fan Film';
+
+  @override
+  String get genreFantasy => 'Fantasy';
+
+  @override
+  String get genreFilmNoir => 'Film Noir';
+
+  @override
+  String get genreHistory => 'History';
+
+  @override
+  String get genreHoliday => 'Holiday';
+
+  @override
+  String get genreHorror => 'Horror';
+
+  @override
+  String get genreIndie => 'Indie';
+
+  @override
+  String get genreMusic => 'Music';
+
+  @override
+  String get genreMusical => 'Musical';
+
+  @override
+  String get genreMystery => 'Mystery';
+
+  @override
+  String get genreNone => 'None';
+
+  @override
+  String get genreRoad => 'Road';
+
+  @override
+  String get genreRomance => 'Romance';
+
+  @override
+  String get genreScienceFiction => 'Science Fiction';
+
+  @override
+  String get genreShort => 'Short';
+
+  @override
+  String get genreSports => 'Sports';
+
+  @override
+  String get genreSportingEvent => 'Sporting Event';
+
+  @override
+  String get genreSuspense => 'Suspense';
+
+  @override
+  String get genreThriller => 'Thriller';
+
+  @override
+  String get genreTvMovie => 'TV Movie';
+
+  @override
+  String get genreWar => 'War';
+
+  @override
+  String get genreWestern => 'Western';
+
+  @override
+  String runtimeMinutes(Object minutes) {
+    return '$minutes min';
+  }
+
+  @override
   String get noVideosMatchingFilters => 'No videos match the filters';
 
   @override

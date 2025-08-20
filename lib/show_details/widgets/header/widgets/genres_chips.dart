@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/shared/constants/genres.dart';
+
+const double kRadiusChip = 16.0;
 
 class GenresChips extends StatelessWidget {
   final List<dynamic> genres;
@@ -36,7 +39,7 @@ class GenresChips extends StatelessWidget {
                 ),
               ),
               child: Text(
-                (genre as String).toUpperCase(),
+                Genres.getTranslatedGenre(genre as String, AppLocalizations.of(context)!).toUpperCase(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,

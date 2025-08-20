@@ -170,6 +170,258 @@ abstract class AppLocalizations {
   /// **'Popular Shows'**
   String get popularShows;
 
+  /// No description provided for @showStatusReturningSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'Returning Series'**
+  String get showStatusReturningSeries;
+
+  /// No description provided for @showStatusInProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'In Production'**
+  String get showStatusInProduction;
+
+  /// No description provided for @showStatusPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get showStatusPlanned;
+
+  /// No description provided for @showStatusUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get showStatusUpcoming;
+
+  /// No description provided for @showStatusPilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Pilot'**
+  String get showStatusPilot;
+
+  /// No description provided for @showStatusCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get showStatusCanceled;
+
+  /// No description provided for @showStatusEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get showStatusEnded;
+
+  /// No description provided for @genreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Action'**
+  String get genreAction;
+
+  /// No description provided for @genreAdventure.
+  ///
+  /// In en, this message translates to:
+  /// **'Adventure'**
+  String get genreAdventure;
+
+  /// No description provided for @genreAnimation.
+  ///
+  /// In en, this message translates to:
+  /// **'Animation'**
+  String get genreAnimation;
+
+  /// No description provided for @genreAnime.
+  ///
+  /// In en, this message translates to:
+  /// **'Anime'**
+  String get genreAnime;
+
+  /// No description provided for @genreComedy.
+  ///
+  /// In en, this message translates to:
+  /// **'Comedy'**
+  String get genreComedy;
+
+  /// No description provided for @genreCrime.
+  ///
+  /// In en, this message translates to:
+  /// **'Crime'**
+  String get genreCrime;
+
+  /// No description provided for @genreDisaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Disaster'**
+  String get genreDisaster;
+
+  /// No description provided for @genreDocumentary.
+  ///
+  /// In en, this message translates to:
+  /// **'Documentary'**
+  String get genreDocumentary;
+
+  /// No description provided for @genreDonghua.
+  ///
+  /// In en, this message translates to:
+  /// **'Donghua'**
+  String get genreDonghua;
+
+  /// No description provided for @genreDrama.
+  ///
+  /// In en, this message translates to:
+  /// **'Drama'**
+  String get genreDrama;
+
+  /// No description provided for @genreEastern.
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern'**
+  String get genreEastern;
+
+  /// No description provided for @genreFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get genreFamily;
+
+  /// No description provided for @genreFanFilm.
+  ///
+  /// In en, this message translates to:
+  /// **'Fan Film'**
+  String get genreFanFilm;
+
+  /// No description provided for @genreFantasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Fantasy'**
+  String get genreFantasy;
+
+  /// No description provided for @genreFilmNoir.
+  ///
+  /// In en, this message translates to:
+  /// **'Film Noir'**
+  String get genreFilmNoir;
+
+  /// No description provided for @genreHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get genreHistory;
+
+  /// No description provided for @genreHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday'**
+  String get genreHoliday;
+
+  /// No description provided for @genreHorror.
+  ///
+  /// In en, this message translates to:
+  /// **'Horror'**
+  String get genreHorror;
+
+  /// No description provided for @genreIndie.
+  ///
+  /// In en, this message translates to:
+  /// **'Indie'**
+  String get genreIndie;
+
+  /// No description provided for @genreMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get genreMusic;
+
+  /// No description provided for @genreMusical.
+  ///
+  /// In en, this message translates to:
+  /// **'Musical'**
+  String get genreMusical;
+
+  /// No description provided for @genreMystery.
+  ///
+  /// In en, this message translates to:
+  /// **'Mystery'**
+  String get genreMystery;
+
+  /// No description provided for @genreNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get genreNone;
+
+  /// No description provided for @genreRoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Road'**
+  String get genreRoad;
+
+  /// No description provided for @genreRomance.
+  ///
+  /// In en, this message translates to:
+  /// **'Romance'**
+  String get genreRomance;
+
+  /// No description provided for @genreScienceFiction.
+  ///
+  /// In en, this message translates to:
+  /// **'Science Fiction'**
+  String get genreScienceFiction;
+
+  /// No description provided for @genreShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Short'**
+  String get genreShort;
+
+  /// No description provided for @genreSports.
+  ///
+  /// In en, this message translates to:
+  /// **'Sports'**
+  String get genreSports;
+
+  /// No description provided for @genreSportingEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sporting Event'**
+  String get genreSportingEvent;
+
+  /// No description provided for @genreSuspense.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspense'**
+  String get genreSuspense;
+
+  /// No description provided for @genreThriller.
+  ///
+  /// In en, this message translates to:
+  /// **'Thriller'**
+  String get genreThriller;
+
+  /// No description provided for @genreTvMovie.
+  ///
+  /// In en, this message translates to:
+  /// **'TV Movie'**
+  String get genreTvMovie;
+
+  /// No description provided for @genreWar.
+  ///
+  /// In en, this message translates to:
+  /// **'War'**
+  String get genreWar;
+
+  /// No description provided for @genreWestern.
+  ///
+  /// In en, this message translates to:
+  /// **'Western'**
+  String get genreWestern;
+
+  /// No description provided for @runtimeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String runtimeMinutes(Object minutes);
+
   /// No description provided for @noVideosMatchingFilters.
   ///
   /// In en, this message translates to:

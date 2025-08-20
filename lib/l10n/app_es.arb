@@ -48,6 +48,180 @@
   "@@popularShows": {
     "description": "Título del carrusel de series populares"
   },
+  "showStatusReturningSeries": "En emisión",
+  "@@showStatusReturningSeries": {
+    "description": "Estado de la serie: La serie está emitiendo nuevos capítulos actualmente"
+  },
+  "showStatusInProduction": "En producción",
+  "@@showStatusInProduction": {
+    "description": "Estado de la serie: La serie está en producción"
+  },
+  "showStatusPlanned": "Planificada",
+  "@@showStatusPlanned": {
+    "description": "Estado de la serie: La serie está planificada para un lanzamiento futuro"
+  },
+  "showStatusUpcoming": "Próximamente",
+  "@@showStatusUpcoming": {
+    "description": "Estado de la serie: La serie está por estrenarse"
+  },
+  "showStatusPilot": "Piloto",
+  "@@showStatusPilot": {
+    "description": "Estado de la serie: La serie es un episodio piloto"
+  },
+  "showStatusCanceled": "Cancelada",
+  "@@showStatusCanceled": {
+    "description": "Estado de la serie: La serie ha sido cancelada"
+  },
+  "showStatusEnded": "Terminada",
+  "@@showStatusEnded": {
+    "description": "Estado del programa: El programa ha terminado"
+  },
+  "genreAction": "Acción",
+  "@@genreAction": {
+    "description": "Género: Acción"
+  },
+  "genreAdventure": "Aventura",
+  "@@genreAdventure": {
+    "description": "Género: Aventura"
+  },
+  "genreAnimation": "Animación",
+  "@@genreAnimation": {
+    "description": "Género: Animación"
+  },
+  "genreAnime": "Anime",
+  "@@genreAnime": {
+    "description": "Género: Anime"
+  },
+  "genreComedy": "Comedia",
+  "@@genreComedy": {
+    "description": "Género: Comedia"
+  },
+  "genreCrime": "Crimen",
+  "@@genreCrime": {
+    "description": "Género: Crimen"
+  },
+  "genreDisaster": "Desastre",
+  "@@genreDisaster": {
+    "description": "Género: Desastre"
+  },
+  "genreDocumentary": "Documental",
+  "@@genreDocumentary": {
+    "description": "Género: Documental"
+  },
+  "genreDonghua": "Donghua",
+  "@@genreDonghua": {
+    "description": "Género: Donghua"
+  },
+  "genreDrama": "Drama",
+  "@@genreDrama": {
+    "description": "Género: Drama"
+  },
+  "genreEastern": "Oriental",
+  "@@genreEastern": {
+    "description": "Género: Oriental"
+  },
+  "genreFamily": "Familiar",
+  "@@genreFamily": {
+    "description": "Género: Familiar"
+  },
+  "genreFanFilm": "Película de fans",
+  "@@genreFanFilm": {
+    "description": "Género: Película de fans"
+  },
+  "genreFantasy": "Fantasía",
+  "@@genreFantasy": {
+    "description": "Género: Fantasía"
+  },
+  "genreFilmNoir": "Cine negro",
+  "@@genreFilmNoir": {
+    "description": "Género: Cine negro"
+  },
+  "genreHistory": "Historia",
+  "@@genreHistory": {
+    "description": "Género: Historia"
+  },
+  "genreHoliday": "Navideño",
+  "@@genreHoliday": {
+    "description": "Género: Navideño"
+  },
+  "genreHorror": "Terror",
+  "@@genreHorror": {
+    "description": "Género: Terror"
+  },
+  "genreIndie": "Independiente",
+  "@@genreIndie": {
+    "description": "Género: Independiente"
+  },
+  "genreMusic": "Música",
+  "@@genreMusic": {
+    "description": "Género: Música"
+  },
+  "genreMusical": "Musical",
+  "@@genreMusical": {
+    "description": "Género: Musical"
+  },
+  "genreMystery": "Misterio",
+  "@@genreMystery": {
+    "description": "Género: Misterio"
+  },
+  "genreNone": "Ninguno",
+  "@@genreNone": {
+    "description": "Género: Ninguno"
+  },
+  "genreRoad": "Road Movie",
+  "@@genreRoad": {
+    "description": "Género: Road Movie"
+  },
+  "genreRomance": "Romance",
+  "@@genreRomance": {
+    "description": "Género: Romance"
+  },
+  "genreScienceFiction": "Ciencia Ficción",
+  "@@genreScienceFiction": {
+    "description": "Género: Ciencia Ficción"
+  },
+  "genreShort": "Corto",
+  "@@genreShort": {
+    "description": "Género: Corto"
+  },
+  "genreSports": "Deportes",
+  "@@genreSports": {
+    "description": "Género: Deportes"
+  },
+  "genreSportingEvent": "Evento Deportivo",
+  "@@genreSportingEvent": {
+    "description": "Género: Evento Deportivo"
+  },
+  "genreSuspense": "Suspense",
+  "@@genreSuspense": {
+    "description": "Género: Suspense"
+  },
+  "genreThriller": "Thriller",
+  "@@genreThriller": {
+    "description": "Género: Thriller"
+  },
+  "genreTvMovie": "Película de TV",
+  "@@genreTvMovie": {
+    "description": "Género: Película de TV"
+  },
+  "genreWar": "Bélica",
+  "@@genreWar": {
+    "description": "Género: Bélica"
+  },
+  "genreWestern": "Western",
+  "@@genreWestern": {
+    "description": "Género: Western"
+  },
+  "runtimeMinutes": "{minutes} min",
+  "@@runtimeMinutes": {
+    "description": "Duración en minutos",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "compactLong"
+      }
+    }
+  },
   "noVideosMatchingFilters": "No hay videos que coincidan con los filtros",
   "@@noVideosMatchingFilters": {
     "description": "Mensaje que se muestra cuando no hay videos que coincidan con los filtros seleccionados"
@@ -180,11 +354,11 @@
   "@@allEpisodesWatched": {
     "description": "Mensaje que se muestra cuando se han visto todos los episodios de una serie"
   },
-  "checkOutAllEpisodes": "Ver todos los episodios",
+  "checkOutAllEpisodes": "Ver episodios",
   "@@checkOutAllEpisodes": {
     "description": "Texto del botón para ver todos los episodios de una serie"
   },
-  "episodeInfo": "Información del episodio",
+  "episodeInfo": "Detalles del episodio",
   "@@episodeInfo": {
     "description": "Título de la sección de información del episodio"
   }

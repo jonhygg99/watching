@@ -45,6 +45,134 @@ class AppLocalizationsEs extends AppLocalizations {
   String get popularShows => 'Series populares';
 
   @override
+  String get showStatusReturningSeries => 'En emisión';
+
+  @override
+  String get showStatusInProduction => 'En producción';
+
+  @override
+  String get showStatusPlanned => 'Planificada';
+
+  @override
+  String get showStatusUpcoming => 'Próximamente';
+
+  @override
+  String get showStatusPilot => 'Piloto';
+
+  @override
+  String get showStatusCanceled => 'Cancelada';
+
+  @override
+  String get showStatusEnded => 'Terminada';
+
+  @override
+  String get genreAction => 'Acción';
+
+  @override
+  String get genreAdventure => 'Aventura';
+
+  @override
+  String get genreAnimation => 'Animación';
+
+  @override
+  String get genreAnime => 'Anime';
+
+  @override
+  String get genreComedy => 'Comedia';
+
+  @override
+  String get genreCrime => 'Crimen';
+
+  @override
+  String get genreDisaster => 'Desastre';
+
+  @override
+  String get genreDocumentary => 'Documental';
+
+  @override
+  String get genreDonghua => 'Donghua';
+
+  @override
+  String get genreDrama => 'Drama';
+
+  @override
+  String get genreEastern => 'Oriental';
+
+  @override
+  String get genreFamily => 'Familiar';
+
+  @override
+  String get genreFanFilm => 'Película de fans';
+
+  @override
+  String get genreFantasy => 'Fantasía';
+
+  @override
+  String get genreFilmNoir => 'Cine negro';
+
+  @override
+  String get genreHistory => 'Historia';
+
+  @override
+  String get genreHoliday => 'Navideño';
+
+  @override
+  String get genreHorror => 'Terror';
+
+  @override
+  String get genreIndie => 'Independiente';
+
+  @override
+  String get genreMusic => 'Música';
+
+  @override
+  String get genreMusical => 'Musical';
+
+  @override
+  String get genreMystery => 'Misterio';
+
+  @override
+  String get genreNone => 'Ninguno';
+
+  @override
+  String get genreRoad => 'Road Movie';
+
+  @override
+  String get genreRomance => 'Romance';
+
+  @override
+  String get genreScienceFiction => 'Ciencia Ficción';
+
+  @override
+  String get genreShort => 'Corto';
+
+  @override
+  String get genreSports => 'Deportes';
+
+  @override
+  String get genreSportingEvent => 'Evento Deportivo';
+
+  @override
+  String get genreSuspense => 'Suspense';
+
+  @override
+  String get genreThriller => 'Thriller';
+
+  @override
+  String get genreTvMovie => 'Película de TV';
+
+  @override
+  String get genreWar => 'Bélica';
+
+  @override
+  String get genreWestern => 'Western';
+
+  @override
+  String runtimeMinutes(Object minutes) {
+    return '$minutes min';
+  }
+
+  @override
   String get noVideosMatchingFilters =>
       'No hay videos que coincidan con los filtros';
 
@@ -137,8 +265,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get allEpisodesWatched => 'Todos los episodios vistos';
 
   @override
-  String get checkOutAllEpisodes => 'Ver todos los episodios';
+  String get checkOutAllEpisodes => 'Ver episodios';
 
   @override
-  String get episodeInfo => 'Información del episodio';
+  String get episodeInfo => 'Detalles del episodio';
 }
