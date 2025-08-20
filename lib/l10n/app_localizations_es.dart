@@ -45,6 +45,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get popularShows => 'Series populares';
 
   @override
+  String get noVideosMatchingFilters =>
+      'No hay videos que coincidan con los filtros';
+
+  @override
+  String get noTitle => 'Sin título';
+
+  @override
   String get mostFavoritedWeekly => 'Más favoritas (7 días)';
 
   @override

@@ -45,6 +45,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get popularShows => 'Popular Shows';
 
   @override
+  String get noVideosMatchingFilters => 'No videos match the filters';
+
+  @override
+  String get noTitle => 'No title';
+
+  @override
   String get mostFavoritedWeekly => 'Most Favorited (7 days)';
 
   @override

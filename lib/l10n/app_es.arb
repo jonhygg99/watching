@@ -48,6 +48,14 @@
   "@@popularShows": {
     "description": "Título del carrusel de series populares"
   },
+  "noVideosMatchingFilters": "No hay videos que coincidan con los filtros",
+  "@@noVideosMatchingFilters": {
+    "description": "Mensaje que se muestra cuando no hay videos que coincidan con los filtros seleccionados"
+  },
+  "noTitle": "Sin título",
+  "@@noTitle": {
+    "description": "Texto que se muestra cuando un vídeo no tiene título"
+  },
   "mostFavoritedWeekly": "Más favoritas (7 días)",
   "@@mostFavoritedWeekly": {
     "description": "Título del carrusel de series más favoritas semanal"

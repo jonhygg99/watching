@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/widgets/carousel/widgets/carousel_header.dart';
-import 'package:watching/show_details/widgets/video_item.dart';
-import 'package:watching/show_details/pages/all_videos_page.dart';
+import 'package:watching/show_details/widgets/video/video_item.dart';
+import 'package:watching/show_details/pages/videos/videos_page.dart';
 
 class ShowDetailVideos extends StatelessWidget {
   final List<dynamic>? videos;
@@ -28,13 +28,11 @@ class ShowDetailVideos extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder:
-                    (context) =>
-                        AllVideosPage(videos: videos!, showTitle: title),
+                    (context) => VideosPage(videos: videos!, showTitle: title),
               ),
             );
           },
         ),
-        const SizedBox(height: kSpaceBtwTitleWidget),
         SizedBox(
           height: 220,
           child: SingleChildScrollView(

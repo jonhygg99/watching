@@ -170,6 +170,18 @@ abstract class AppLocalizations {
   /// **'Popular Shows'**
   String get popularShows;
 
+  /// No description provided for @noVideosMatchingFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No videos match the filters'**
+  String get noVideosMatchingFilters;
+
+  /// No description provided for @noTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No title'**
+  String get noTitle;
+
   /// No description provided for @mostFavoritedWeekly.
   ///
   /// In en, this message translates to:

@@ -13,7 +13,7 @@ import 'package:watching/shared/widgets/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'package:watching/show_details/widgets/skeleton/show_detail_skeleton.dart';
 import 'widgets/show_description.dart';
-import 'videos.dart';
+import 'widgets/video/videos.dart';
 import 'cast.dart';
 // Related shows section removed
 

@@ -48,6 +48,14 @@
   "@@popularShows": {
     "description": "Title for popular shows carousel"
   },
+  "noVideosMatchingFilters": "No videos match the filters",
+  "@@noVideosMatchingFilters": {
+    "description": "Message shown when no videos match the selected filters"
+  },
+  "noTitle": "No title",
+  "@@noTitle": {
+    "description": "Default text shown when a video has no title"
+  },
   "mostFavoritedWeekly": "Most Favorited (7 days)",
   "@@mostFavoritedWeekly": {
     "description": "Title for most favorited shows weekly carousel"
