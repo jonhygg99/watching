@@ -358,8 +358,64 @@
   "@@checkOutAllEpisodes": {
     "description": "Texto del botón para ver todos los episodios de una serie"
   },
-  "episodeInfo": "Detalles del episodio",
+  "episodeInfo": "Información del episodio",
   "@@episodeInfo": {
-    "description": "Título de la sección de información del episodio"
+    "description": "Encabezado de la sección de información del episodio"
+  },
+  "noCommentsYet": "Aún no hay comentarios",
+  "@@noCommentsYet": {
+    "description": "Mensaje que se muestra cuando no hay comentarios para mostrar"
+  },
+  "retry": "Reintentar",
+  "@@retry": {
+    "description": "Etiqueta del botón para reintentar una acción"
+  },
+  "spoiler": "SPOILER",
+  "@@spoiler": {
+    "description": "Etiqueta que indica que un comentario contiene spoilers"
+  },
+  "review": "RESEÑA",
+  "@@review": {
+    "description": "Etiqueta que indica que un comentario es una reseña"
+  },
+  "sortOptionLikes": "Más Me Gusta",
+  "@@sortOptionLikes": {
+    "description": "Ordenar por más me gusta"
+  },
+  "sortOptionNewest": "Más Recientes",
+  "@@sortOptionNewest": {
+    "description": "Ordenar por más recientes"
+  },
+  "sortOptionOldest": "Más Antiguos",
+  "@@sortOptionOldest": {
+    "description": "Ordenar por más antiguos"
+  },
+  "sortOptionReplies": "Más Respuestas",
+  "@@sortOptionReplies": {
+    "description": "Ordenar por más respuestas"
+  },
+  "sortOptionHighest": "Mejor Valorados",
+  "@@sortOptionHighest": {
+    "description": "Ordenar por mejor valorados"
+  },
+  "sortOptionLowest": "Peor Valorados",
+  "@@sortOptionLowest": {
+    "description": "Ordenar por peor valorados"
+  },
+  "sortOptionPlays": "Más Reproducidos",
+  "@@sortOptionPlays": {
+    "description": "Ordenar por más reproducidos"
+  },
+  "sortOptionWatched": "Más Vistos",
+  "@@sortOptionWatched": {
+    "description": "Ordenar por más vistos"
+  },
+  "filters": "Filtros",
+  "@@filters": {
+    "description": "Etiqueta para la sección de filtros"
+  },
+  "errorLoadingComments": "Error al cargar los comentarios",
+  "@@errorLoadingComments": {
+    "description": "Mensaje de error que se muestra cuando falla la carga de los comentarios"
   }
 }

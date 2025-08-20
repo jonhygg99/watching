@@ -361,5 +361,61 @@
   "episodeInfo": "Episode Info",
   "@@episodeInfo": {
     "description": "Section header for episode information"
+  },
+  "noCommentsYet": "No comments yet",
+  "@@noCommentsYet": {
+    "description": "Message shown when there are no comments to display"
+  },
+  "retry": "Retry",
+  "@@retry": {
+    "description": "Button label to retry an action"
+  },
+  "spoiler": "SPOILER",
+  "@@spoiler": {
+    "description": "Label indicating a comment contains spoilers"
+  },
+  "review": "REVIEW",
+  "@@review": {
+    "description": "Label indicating that a comment is a review"
+  },
+  "sortOptionLikes": "Most Likes",
+  "@@sortOptionLikes": {
+    "description": "Sort by most likes"
+  },
+  "sortOptionNewest": "Newest",
+  "@@sortOptionNewest": {
+    "description": "Sort by newest"
+  },
+  "sortOptionOldest": "Oldest",
+  "@@sortOptionOldest": {
+    "description": "Sort by oldest"
+  },
+  "sortOptionReplies": "Most Replies",
+  "@@sortOptionReplies": {
+    "description": "Sort by most replies"
+  },
+  "sortOptionHighest": "Highest Rated",
+  "@@sortOptionHighest": {
+    "description": "Sort by highest rated"
+  },
+  "sortOptionLowest": "Lowest Rated",
+  "@@sortOptionLowest": {
+    "description": "Sort by lowest rated"
+  },
+  "sortOptionPlays": "Most Plays",
+  "@@sortOptionPlays": {
+    "description": "Sort by most plays"
+  },
+  "sortOptionWatched": "Most Watched",
+  "@@sortOptionWatched": {
+    "description": "Sort by most watched"
+  },
+  "filters": "Filters",
+  "@@filters": {
+    "description": "Label for the filters section"
+  },
+  "errorLoadingComments": "Error loading comments",
+  "@@errorLoadingComments": {
+    "description": "Error message shown when comments fail to load"
   }
 }

@@ -268,5 +268,47 @@ class AppLocalizationsEs extends AppLocalizations {
   String get checkOutAllEpisodes => 'Ver episodios';
 
   @override
-  String get episodeInfo => 'Detalles del episodio';
+  String get episodeInfo => 'Información del episodio';
+
+  @override
+  String get noCommentsYet => 'Aún no hay comentarios';
+
+  @override
+  String get retry => 'Reintentar';
+
+  @override
+  String get spoiler => 'SPOILER';
+
+  @override
+  String get review => 'RESEÑA';
+
+  @override
+  String get sortOptionLikes => 'Más Me Gusta';
+
+  @override
+  String get sortOptionNewest => 'Más Recientes';
+
+  @override
+  String get sortOptionOldest => 'Más Antiguos';
+
+  @override
+  String get sortOptionReplies => 'Más Respuestas';
+
+  @override
+  String get sortOptionHighest => 'Mejor Valorados';
+
+  @override
+  String get sortOptionLowest => 'Peor Valorados';
+
+  @override
+  String get sortOptionPlays => 'Más Reproducidos';
+
+  @override
+  String get sortOptionWatched => 'Más Vistos';
+
+  @override
+  String get filters => 'Filtros';
+
+  @override
+  String get errorLoadingComments => 'Error al cargar los comentarios';
 }

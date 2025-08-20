@@ -205,10 +205,11 @@ class ShowDetailPage extends HookConsumerWidget {
                                 );
                                 showAllComments(
                                   context,
-                                  showId,
-                                  sortNotifier,
-                                  commentSortOptions,
-                                  ref,
+                                  '', // Empty string as the second positional parameter
+                                  showId: showId,
+                                  sort: sortNotifier,
+                                  sortKeys: commentSortOptions.keys.toList(),
+                                  ref: ref,
                                 );
                               },
                               icon: const Icon(Icons.comment_outlined),

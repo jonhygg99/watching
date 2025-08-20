@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/shared/widgets/comments/comments_list.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'services/episode_rating_service.dart';
 import 'widgets/episode_header.dart';
 import 'widgets/episode_details.dart';
 import 'widgets/episode_actions.dart';
-import 'package:watching/shared/widgets/comments/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'skeleton/episode_info_modal_skeleton.dart';
 
@@ -217,18 +218,21 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                           episodeWithWatched,
                           isWatched,
                         );
-                        // Refresh the watched status after toggling
-                        await _loadWatchedStatus();
                       },
                       onCommentsPressed: () {
                         final sortNotifier = ValueNotifier<String>('likes');
+                        // Call showAllComments without awaiting it
                         showAllComments(
                           context,
-                          widget.showData['ids']['trakt'].toString(),
-                          sortNotifier,
-                          commentSortOptions,
-                          ref,
+                          '', // Empty string as the second positional parameter
+                          showId: widget.showData['ids']['trakt'].toString(),
+                          sort: sortNotifier,
+                          sortKeys: commentSortOptions.keys.toList(),
+                          ref: ref,
+                          seasonNumber: widget.seasonNumber,
+                          episodeNumber: widget.episodeNumber,
                         );
+                        // No need to await or handle the future here
                       },
                     );
                   },

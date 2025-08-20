@@ -76,13 +76,13 @@ class MockTraktApi extends Mock implements TraktApi {
 void main() {
   late MockTraktApi mockTraktApi;
   late ValueNotifier<String> sortNotifier;
-  late Map<String, String> sortLabels;
+  late List<String> sortKeys;
   const testShowId = 'test-show-123';
 
   setUp(() {
     mockTraktApi = MockTraktApi();
     sortNotifier = ValueNotifier<String>('newest');
-    sortLabels = {'newest': 'Newest', 'oldest': 'Oldest'};
+    sortKeys = ['newest', 'oldest'];
   });
 
   tearDown(() {
@@ -99,10 +99,11 @@ void main() {
               onPressed:
                   () => showAllComments(
                     context,
-                    testShowId,
-                    sortNotifier,
-                    sortLabels,
-                    ref,
+                    '',
+                    showId: testShowId,
+                    sort: sortNotifier,
+                    sortKeys: sortKeys,
+                    ref: ref,
                   ),
               child: const Text('Show Comments'),
             ),

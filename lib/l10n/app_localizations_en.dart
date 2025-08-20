@@ -268,4 +268,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get episodeInfo => 'Episode Info';
+
+  @override
+  String get noCommentsYet => 'No comments yet';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get spoiler => 'SPOILER';
+
+  @override
+  String get review => 'REVIEW';
+
+  @override
+  String get sortOptionLikes => 'Most Likes';
+
+  @override
+  String get sortOptionNewest => 'Newest';
+
+  @override
+  String get sortOptionOldest => 'Oldest';
+
+  @override
+  String get sortOptionReplies => 'Most Replies';
+
+  @override
+  String get sortOptionHighest => 'Highest Rated';
+
+  @override
+  String get sortOptionLowest => 'Lowest Rated';
+
+  @override
+  String get sortOptionPlays => 'Most Plays';
+
+  @override
+  String get sortOptionWatched => 'Most Watched';
+
+  @override
+  String get filters => 'Filters';
+
+  @override
+  String get errorLoadingComments => 'Error loading comments';
 }

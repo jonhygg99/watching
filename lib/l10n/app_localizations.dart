@@ -607,6 +607,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Episode Info'**
   String get episodeInfo;
+
+  /// No description provided for @noCommentsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No comments yet'**
+  String get noCommentsYet;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @spoiler.
+  ///
+  /// In en, this message translates to:
+  /// **'SPOILER'**
+  String get spoiler;
+
+  /// No description provided for @review.
+  ///
+  /// In en, this message translates to:
+  /// **'REVIEW'**
+  String get review;
+
+  /// No description provided for @sortOptionLikes.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Likes'**
+  String get sortOptionLikes;
+
+  /// No description provided for @sortOptionNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get sortOptionNewest;
+
+  /// No description provided for @sortOptionOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get sortOptionOldest;
+
+  /// No description provided for @sortOptionReplies.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Replies'**
+  String get sortOptionReplies;
+
+  /// No description provided for @sortOptionHighest.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest Rated'**
+  String get sortOptionHighest;
+
+  /// No description provided for @sortOptionLowest.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest Rated'**
+  String get sortOptionLowest;
+
+  /// No description provided for @sortOptionPlays.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Plays'**
+  String get sortOptionPlays;
+
+  /// No description provided for @sortOptionWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Watched'**
+  String get sortOptionWatched;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @errorLoadingComments.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading comments'**
+  String get errorLoadingComments;
 }
 
 class _AppLocalizationsDelegate
