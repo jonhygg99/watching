@@ -7,7 +7,7 @@ import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/show_details/current_episode.dart';
+import 'package:watching/show_details/widgets/current_episode/current_episode.dart';
 import 'package:watching/show_details/widgets/header/header.dart';
 import 'package:watching/show_details/widgets/related.dart';
 import 'package:watching/shared/widgets/comments_list.dart';
@@ -189,6 +189,7 @@ class ShowDetailPage extends HookConsumerWidget {
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.only(
+                          top: kSpaceBtwWidgets,
                           left: kSpacePhoneHorizontal,
                           right: kSpacePhoneHorizontal,
                           bottom: 50,

@@ -319,6 +319,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No videos available'**
   String get noVideosAvailable;
+
+  /// No description provided for @seasonEpisodeFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'S{season}E{episode}'**
+  String seasonEpisodeFormat(Object episode, Object season);
+
+  /// No description provided for @errorLoadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading data'**
+  String get errorLoadingData;
+
+  /// No description provided for @episodeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode {episodeNumber}'**
+  String episodeNumber(Object episodeNumber);
+
+  /// No description provided for @allEpisodesWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'All episodes watched'**
+  String get allEpisodesWatched;
+
+  /// No description provided for @checkOutAllEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Out All Episodes'**
+  String get checkOutAllEpisodes;
+
+  /// No description provided for @episodeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode Info'**
+  String get episodeInfo;
 }
 
 class _AppLocalizationsDelegate

@@ -147,5 +147,45 @@
   "noVideosAvailable": "No hay vídeos disponibles",
   "@@noVideosAvailable": {
     "description": "Mensaje que se muestra cuando no hay vídeos disponibles para mostrar"
+  },
+  "seasonEpisodeFormat": "T{season}E{episode}",
+  "@@seasonEpisodeFormat": {
+    "description": "Formato para mostrar los números de temporada y episodio (ej: T1C1)",
+    "placeholders": {
+      "season": {
+        "type": "int",
+        "format": "compact"
+      },
+      "episode": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "errorLoadingData": "Error al cargar los datos",
+  "@@errorLoadingData": {
+    "description": "Mensaje de error que se muestra cuando hay un problema al cargar los datos"
+  },
+  "episodeNumber": "Episodio {episodeNumber}",
+  "@@episodeNumber": {
+    "description": "Texto de respaldo cuando un episodio no tiene título, mostrando solo el número de episodio",
+    "placeholders": {
+      "episodeNumber": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "allEpisodesWatched": "Todos los episodios vistos",
+  "@@allEpisodesWatched": {
+    "description": "Mensaje que se muestra cuando se han visto todos los episodios de una serie"
+  },
+  "checkOutAllEpisodes": "Ver todos los episodios",
+  "@@checkOutAllEpisodes": {
+    "description": "Texto del botón para ver todos los episodios de una serie"
+  },
+  "episodeInfo": "Información del episodio",
+  "@@episodeInfo": {
+    "description": "Título de la sección de información del episodio"
   }
 }

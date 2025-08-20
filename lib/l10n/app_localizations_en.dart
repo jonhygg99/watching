@@ -118,4 +118,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noVideosAvailable => 'No videos available';
+
+  @override
+  String seasonEpisodeFormat(Object episode, Object season) {
+    return 'S${season}E$episode';
+  }
+
+  @override
+  String get errorLoadingData => 'Error loading data';
+
+  @override
+  String episodeNumber(Object episodeNumber) {
+    return 'Episode $episodeNumber';
+  }
+
+  @override
+  String get allEpisodesWatched => 'All episodes watched';
+
+  @override
+  String get checkOutAllEpisodes => 'Check Out All Episodes';
+
+  @override
+  String get episodeInfo => 'Episode Info';
 }

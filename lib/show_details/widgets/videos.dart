@@ -22,7 +22,7 @@ class ShowDetailVideos extends StatelessWidget {
       title: AppLocalizations.of(context)!.videos,
       items: videos!,
       itemBuilder: (context, video) => VideoItem(video: video),
-      itemHeight: 220,
+      itemHeight: 210,
       emptyText: AppLocalizations.of(context)!.noVideosAvailable,
       onViewMore: () {
         Navigator.push(

@@ -147,5 +147,45 @@
   "noVideosAvailable": "No videos available",
   "@@noVideosAvailable": {
     "description": "Message shown when no videos are available to display"
+  },
+  "seasonEpisodeFormat": "S{season}E{episode}",
+  "@@seasonEpisodeFormat": {
+    "description": "Format for displaying season and episode numbers (e.g., S1E1)",
+    "placeholders": {
+      "season": {
+        "type": "int",
+        "format": "compact"
+      },
+      "episode": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "errorLoadingData": "Error loading data",
+  "@@errorLoadingData": {
+    "description": "Error message shown when there is an issue loading data"
+  },
+  "episodeNumber": "Episode {episodeNumber}",
+  "@@episodeNumber": {
+    "description": "Fallback text when an episode has no title, showing just the episode number",
+    "placeholders": {
+      "episodeNumber": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "allEpisodesWatched": "All episodes watched",
+  "@@allEpisodesWatched": {
+    "description": "Message shown when all episodes of a show have been watched"
+  },
+  "checkOutAllEpisodes": "Check Out All Episodes",
+  "@@checkOutAllEpisodes": {
+    "description": "Button label to view all episodes of a show"
+  },
+  "episodeInfo": "Episode Info",
+  "@@episodeInfo": {
+    "description": "Section header for episode information"
   }
 }
