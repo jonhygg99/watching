@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/video_types.dart';
-import 'package:watching/shared/utils/video_utils.dart';
 import 'package:watching/show_details/pages/videos/empty_videos_state.dart';
-import 'package:watching/show_details/pages/videos/video_card.dart';
+import 'package:watching/shared/widgets/video/video_card.dart';
 import 'package:watching/show_details/pages/videos/video_filter_chips.dart';
-import 'package:watching/youtube_player_dialog.dart';
+import 'package:watching/shared/widgets/video/youtube_player_dialog.dart';
 
 class VideosPage extends StatefulWidget {
   final List<dynamic> videos;
@@ -70,13 +69,9 @@ class _VideosPageState extends State<VideosPage> {
         if (video['site'] != 'youtube') return const SizedBox.shrink();
 
         final url = video['url'] as String? ?? '';
-        final videoId = VideoUtils.extractYoutubeVideoId(url);
-        final thumbnailUrl = VideoUtils.getYoutubeThumbnailUrl(videoId);
 
         return VideoCard(
-          title: video['title'] ?? AppLocalizations.of(context)!.noTitle,
-          type: video['type'],
-          thumbnailUrl: thumbnailUrl,
+          video: video,
           onTap: () {
             showDialog(
               context: context,

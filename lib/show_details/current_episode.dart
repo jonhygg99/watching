@@ -189,7 +189,7 @@ class CurrentEpisode extends HookWidget {
       return Center(
         child: Text(
           'Error loading progress: ${error.value}',
-          style: textTheme.bodyMedium?.copyWith(color: Colors.red),
+          style: textTheme.bodyMedium?.copyWith(color: kErrorColorMessage),
         ),
       );
     }

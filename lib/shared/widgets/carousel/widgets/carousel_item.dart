@@ -12,27 +12,22 @@ import 'carousel_image_item.dart';
 class CarouselItem extends ConsumerWidget {
   const CarouselItem({
     super.key,
-    required this.ref,
-    required this.context,
     required this.show,
     required this.itemWidth,
     required this.shows,
     required this.index,
   });
 
-  final WidgetRef ref;
-  final BuildContext context;
   final Map<String, dynamic> show;
   final double itemWidth;
   final List<dynamic> shows;
   final int index;
 
-  void _navigateToDetail() {
+  void _navigateToDetail(BuildContext context) {
     final showId = show['ids']['trakt']?.toString() ?? '';
     if (showId.isNotEmpty) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => ShowDetailPage(showId: showId)));
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => ShowDetailPage(showId: showId)));
     }
   }
 
@@ -61,12 +56,12 @@ class CarouselItem extends ConsumerWidget {
                       imageUrl != null
                           ? CarouselImageItem(
                             imageUrl: imageUrl,
-                            onTap: _navigateToDetail,
+                            onTap: () => _navigateToDetail(context),
                             borderRadius: kShowBorderRadius,
                           )
                           : CarouselPlaceholderItem(
                             itemWidth: itemWidth,
-                            onTap: _navigateToDetail,
+                            onTap: () => _navigateToDetail(context),
                           ),
                 ),
               ),

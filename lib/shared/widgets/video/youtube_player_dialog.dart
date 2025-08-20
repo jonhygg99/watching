@@ -1,57 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/services.dart';
 
-class YoutubePlayerDialog extends StatefulWidget {
+class YoutubePlayerDialog extends HookWidget {
   final String url;
   final String title;
-  const YoutubePlayerDialog({super.key, required this.url, required this.title});
-
-  @override
-  State<YoutubePlayerDialog> createState() => _YoutubePlayerDialogState();
-}
-
-class _YoutubePlayerDialogState extends State<YoutubePlayerDialog> {
-  late YoutubePlayerController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    final videoId = YoutubePlayer.convertUrlToId(widget.url) ?? '';
-    _controller = YoutubePlayerController(
-      initialVideoId: videoId,
-      flags: const YoutubePlayerFlags(
-        autoPlay: true,
-        mute: false,
-        enableCaption: true,
-        disableDragSeek: false,
-        loop: false,
-        forceHD: true,
-        hideControls: false,
-        controlsVisibleAtStart: true,
-      ),
-    );
-
-    // Set preferred orientation to landscape when in fullscreen
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    // Reset preferred orientations when disposing the player
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
-    super.dispose();
-  }
+  
+  const YoutubePlayerDialog({
+    super.key, 
+    required this.url, 
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final videoId = YoutubePlayer.convertUrlToId(url) ?? '';
+    final controller = useMemoized(() {
+      return YoutubePlayerController(
+        initialVideoId: videoId,
+        flags: const YoutubePlayerFlags(
+          autoPlay: true,
+          mute: false,
+          enableCaption: true,
+          disableDragSeek: false,
+          loop: false,
+          forceHD: true,
+          hideControls: false,
+          controlsVisibleAtStart: true,
+        ),
+      );
+    }, [videoId]);
+
+    // Handle orientation changes
+    useEffect(() {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+
+      return () {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+        ]);
+        controller.dispose();
+      };
+    }, []);
+
     return Dialog(
       insetPadding: EdgeInsets.zero,
       backgroundColor: Colors.transparent,
@@ -62,7 +58,7 @@ class _YoutubePlayerDialogState extends State<YoutubePlayerDialog> {
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height * 0.3,
             child: YoutubePlayer(
-              controller: _controller,
+              controller: controller,
               showVideoProgressIndicator: true,
               aspectRatio: 16 / 9,
               onEnded: (_) {
@@ -88,7 +84,7 @@ class _YoutubePlayerDialogState extends State<YoutubePlayerDialog> {
                         backgroundColor: Colors.black,
                         body: Center(
                           child: YoutubePlayer(
-                            controller: _controller,
+                            controller: controller,
                             showVideoProgressIndicator: true,
                             aspectRatio: 16 / 9,
                             onEnded: (_) {

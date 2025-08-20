@@ -116,4 +116,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noImage => 'Sin imagen';
+
+  @override
+  String get noVideosAvailable => 'No hay vídeos disponibles';
 }

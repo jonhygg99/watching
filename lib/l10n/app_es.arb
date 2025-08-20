@@ -143,5 +143,9 @@
   "noImage": "Sin imagen",
   "@@noImage": {
     "description": "Texto de marcador de posición cuando no hay imagen disponible"
+  },
+  "noVideosAvailable": "No hay vídeos disponibles",
+  "@@noVideosAvailable": {
+    "description": "Mensaje que se muestra cuando no hay vídeos disponibles para mostrar"
   }
 }

@@ -143,5 +143,9 @@
   "noImage": "No image",
   "@@noImage": {
     "description": "Placeholder text when no image is available"
+  },
+  "noVideosAvailable": "No videos available",
+  "@@noVideosAvailable": {
+    "description": "Message shown when no videos are available to display"
   }
 }

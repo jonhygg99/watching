@@ -6,6 +6,7 @@ class VideoThumbnail extends StatelessWidget {
   final double height;
   final double width;
   final BorderRadius? borderRadius;
+  final bool showPlayButton;
 
   const VideoThumbnail({
     super.key,
@@ -13,28 +14,35 @@ class VideoThumbnail extends StatelessWidget {
     this.height = 200,
     this.width = double.infinity,
     this.borderRadius,
+    this.showPlayButton = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        if (thumbnailUrl != null)
-          ClipRRect(
-            borderRadius: borderRadius ?? BorderRadius.zero,
-            child: CachedNetworkImage(
+    return ClipRRect(
+      borderRadius: borderRadius ?? BorderRadius.zero,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (thumbnailUrl != null)
+            CachedNetworkImage(
               imageUrl: thumbnailUrl!,
               height: height,
               width: width,
               fit: BoxFit.cover,
-              errorWidget: _buildErrorWidget,
+              errorWidget: (context, url, error) => _buildPlaceholder(),
+              placeholder: (context, url) => _buildPlaceholder(),
+            )
+          else
+            _buildPlaceholder(),
+          if (showPlayButton)
+            const Icon(
+              Icons.play_circle_filled,
+              size: 50,
+              color: Colors.white,
             ),
-          )
-        else
-          _buildPlaceholder(),
-        const Icon(Icons.play_circle_filled, size: 60, color: Colors.white),
-      ],
+        ],
+      ),
     );
   }
 
@@ -46,11 +54,11 @@ class VideoThumbnail extends StatelessWidget {
         color: Colors.grey[300],
         borderRadius: borderRadius,
       ),
-      child: const Icon(Icons.videocam, size: 50),
+      child: const Icon(
+        Icons.videocam,
+        size: 50,
+        color: Colors.grey,
+      ),
     );
-  }
-
-  Widget _buildErrorWidget(BuildContext context, String url, dynamic error) {
-    return _buildPlaceholder();
   }
 }
