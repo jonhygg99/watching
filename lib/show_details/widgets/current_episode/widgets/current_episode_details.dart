@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'package:watching/show_details/widgets/current_episode/widgets/action_buttons.dart';
 import 'package:watching/show_details/widgets/current_episode/widgets/episode_info_row.dart';
@@ -37,35 +38,38 @@ class CurrentEpisodeDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        EpisodeInfoRow(
-          seasonNumber: seasonNumber,
-          episodeNumber: episodeNumber,
-          episodeName: episodeName,
-          watchedEpisodes: watchedEpisodes,
-          totalEpisodes: totalEpisodes,
-        ),
-        const SizedBox(height: 12),
-        TinyProgressBar(
-          percent: progressPercent,
-          watched: watchedEpisodes,
-          total: totalEpisodes,
-        ),
-        const SizedBox(height: 16),
-        ActionButtons(
-          nextEpisode: nextEpisode,
-          showData: showData,
-          traktId: traktId,
-          languageCode: languageCode,
-          onWatchedStatusChanged: onWatchedStatusChanged,
-          onRefreshProgress: onRefreshProgress,
-          seasonNumber: seasonNumber,
-          episodeNumber: episodeNumber,
-          progressData: progressData,
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 10.0, bottom: kSpaceBtwWidgets),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          EpisodeInfoRow(
+            seasonNumber: seasonNumber,
+            episodeNumber: episodeNumber,
+            episodeName: episodeName,
+            watchedEpisodes: watchedEpisodes,
+            totalEpisodes: totalEpisodes,
+          ),
+          const SizedBox(height: 12),
+          TinyProgressBar(
+            percent: progressPercent,
+            watched: watchedEpisodes,
+            total: totalEpisodes,
+          ),
+          const SizedBox(height: 16),
+          ActionButtons(
+            nextEpisode: nextEpisode,
+            showData: showData,
+            traktId: traktId,
+            languageCode: languageCode,
+            onWatchedStatusChanged: onWatchedStatusChanged,
+            onRefreshProgress: onRefreshProgress,
+            seasonNumber: seasonNumber,
+            episodeNumber: episodeNumber,
+            progressData: progressData,
+          ),
+        ],
+      ),
     );
   }
 }

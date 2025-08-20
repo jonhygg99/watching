@@ -145,17 +145,13 @@ class ShowDetailPage extends HookConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: kSpaceBtwWidgets),
-                            if (show['ids']?['trakt'] != null) ...[
-                              CurrentEpisode(
-                                traktId: show['ids']['trakt'].toString(),
-                                title: show['title']?.toString(),
-                                languageCode:
-                                    countryCode.substring(0, 2).toLowerCase(),
-                                showData: show,
-                              ),
-                              const SizedBox(height: kSpaceBtwWidgets),
-                            ],
+                            CurrentEpisode(
+                              traktId: show['ids']['trakt'].toString(),
+                              title: show['title']?.toString(),
+                              languageCode:
+                                  countryCode.substring(0, 2).toLowerCase(),
+                              showData: show,
+                            ),
                             ShowDescription(
                               tagline: originalTagline,
                               overview: originalOverview,

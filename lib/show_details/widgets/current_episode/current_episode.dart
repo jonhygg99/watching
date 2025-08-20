@@ -44,7 +44,7 @@ class CurrentEpisode extends HookWidget {
         season: seasonNumber,
         translations: languageCode,
       );
-      
+
       // Find the episode by number
       final episode = episodes.firstWhere(
         (e) => (e['number'] as int?) == episodeNumber,
@@ -52,7 +52,8 @@ class CurrentEpisode extends HookWidget {
       );
 
       // Check if we have translations
-      if (episode.containsKey('translations') && episode['translations'] is List) {
+      if (episode.containsKey('translations') &&
+          episode['translations'] is List) {
         final translations = episode['translations'] as List;
         if (translations.isNotEmpty) {
           return translations.first['title'] as String?;
