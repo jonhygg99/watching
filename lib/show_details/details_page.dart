@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:watching/shared/constants/colors.dart';
 import 'widgets/back_button.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -73,7 +74,7 @@ class ShowDetailPage extends HookConsumerWidget {
                   return Center(
                     child: Text(
                       'Error: \\${snapshot.error}',
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(color: kErrorColorMessage),
                     ),
                   );
                 }

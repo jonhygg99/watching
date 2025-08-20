@@ -6,10 +6,10 @@ import 'package:flutter/services.dart';
 class YoutubePlayerDialog extends HookWidget {
   final String url;
   final String title;
-  
+
   const YoutubePlayerDialog({
-    super.key, 
-    required this.url, 
+    super.key,
+    required this.url,
     required this.title,
   });
 
@@ -41,9 +41,7 @@ class YoutubePlayerDialog extends HookWidget {
       ]);
 
       return () {
-        SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-        ]);
+        SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
         controller.dispose();
       };
     }, []);
@@ -75,24 +73,29 @@ class YoutubePlayerDialog extends HookWidget {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.fullscreen, color: Colors.white, size: 24.0),
+                icon: const Icon(
+                  Icons.fullscreen,
+                  color: Colors.white,
+                  size: 24.0,
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                        backgroundColor: Colors.black,
-                        body: Center(
-                          child: YoutubePlayer(
-                            controller: controller,
-                            showVideoProgressIndicator: true,
-                            aspectRatio: 16 / 9,
-                            onEnded: (_) {
-                              Navigator.pop(context);
-                            },
+                      builder:
+                          (context) => Scaffold(
+                            backgroundColor: Colors.black,
+                            body: Center(
+                              child: YoutubePlayer(
+                                controller: controller,
+                                showVideoProgressIndicator: true,
+                                aspectRatio: 16 / 9,
+                                onEnded: (_) {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
                       fullscreenDialog: true,
                     ),
                   );

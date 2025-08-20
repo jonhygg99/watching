@@ -35,4 +35,3 @@ class ShowDetailVideos extends StatelessWidget {
     );
   }
 }
-

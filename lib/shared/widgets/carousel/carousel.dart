@@ -49,7 +49,7 @@ class Carousel extends ConsumerWidget {
               index: items.indexOf(showData),
             );
           },
-          itemHeight: kDiscoverShowImageHeight + 60, // Adjusted for title
+          itemHeight: kDiscoverShowImageHeight,
           emptyText: emptyText,
           onViewMore: onViewMore,
         );
