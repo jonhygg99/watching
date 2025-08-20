@@ -6,7 +6,7 @@ import 'services/episode_rating_service.dart';
 import 'widgets/episode_header.dart';
 import 'widgets/episode_details.dart';
 import 'widgets/episode_actions.dart';
-import 'package:watching/shared/widgets/comments_list.dart';
+import 'package:watching/shared/widgets/comments/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'skeleton/episode_info_modal_skeleton.dart';
 

@@ -10,7 +10,7 @@ import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/show_details/widgets/current_episode/current_episode.dart';
 import 'package:watching/show_details/widgets/header/header.dart';
 import 'package:watching/show_details/widgets/related.dart';
-import 'package:watching/shared/widgets/comments_list.dart';
+import 'package:watching/shared/widgets/comments/comments_list.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'package:watching/show_details/widgets/skeleton/show_detail_skeleton.dart';
 import 'widgets/show_description.dart';

@@ -15,12 +15,16 @@ class GenresChips extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context)!;
+
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 8,
       runSpacing: 8,
       children:
           genres.map<Widget>((genre) {
+            final translatedGenre = Genres.getTranslatedGenre(genre as String, l10n);
+            
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
               decoration: BoxDecoration(
@@ -39,7 +43,7 @@ class GenresChips extends StatelessWidget {
                 ),
               ),
               child: Text(
-                Genres.getTranslatedGenre(genre as String, AppLocalizations.of(context)!).toUpperCase(),
+                translatedGenre.toUpperCase(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
