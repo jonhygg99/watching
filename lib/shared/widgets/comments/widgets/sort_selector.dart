@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/shared/constants/sort_options.dart';
 
 class CommentsSortSelector extends StatelessWidget {
   final String value;
@@ -13,30 +14,6 @@ class CommentsSortSelector extends StatelessWidget {
     required this.onChanged,
   });
 
-  String _getTranslatedSortLabel(BuildContext context, String key) {
-    final localizations = AppLocalizations.of(context)!;
-    switch (key) {
-      case 'likes':
-        return localizations.sortOptionLikes;
-      case 'newest':
-        return localizations.sortOptionNewest;
-      case 'oldest':
-        return localizations.sortOptionOldest;
-      case 'replies':
-        return localizations.sortOptionReplies;
-      case 'highest':
-        return localizations.sortOptionHighest;
-      case 'lowest':
-        return localizations.sortOptionLowest;
-      case 'plays':
-        return localizations.sortOptionPlays;
-      case 'watched':
-        return localizations.sortOptionWatched;
-      default:
-        return '';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -44,21 +21,22 @@ class CommentsSortSelector extends StatelessWidget {
       children: [
         Text(
           AppLocalizations.of(context)!.filters,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         DropdownButton<String>(
           value: value,
           underline: const SizedBox(),
-          items: sortKeys
-              .map(
-                (key) => DropdownMenuItem(
-                  value: key,
-                  child: Text(_getTranslatedSortLabel(context, key)),
-                ),
-              )
-              .toList(),
+          items:
+              sortKeys
+                  .map(
+                    (key) => DropdownMenuItem(
+                      value: key,
+                      child: Text(getTranslatedSortLabel(context, key)),
+                    ),
+                  )
+                  .toList(),
           onChanged: onChanged,
           isExpanded: false,
         ),

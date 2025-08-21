@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
+import 'package:watching/shared/widgets/episode_info_modal/episode_info_modal.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/providers/app_providers.dart';
 

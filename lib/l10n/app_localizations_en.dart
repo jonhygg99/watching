@@ -309,5 +309,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filters => 'Filters';
 
   @override
+  String get comments => 'Comments';
+
+  @override
+  String get watched => 'Watched';
+
+  @override
+  String get unwatched => 'Not watched';
+
+  @override
   String get errorLoadingComments => 'Error loading comments';
 }

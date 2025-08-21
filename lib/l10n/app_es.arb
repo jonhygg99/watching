@@ -414,6 +414,18 @@
   "@@filters": {
     "description": "Etiqueta para la sección de filtros"
   },
+  "comments": "Comentarios",
+  "@@comments": {
+    "description": "Título para la sección de comentarios"
+  },
+  "watched": "Visto",
+  "@@watched": {
+    "description": "Etiqueta para estado de visto"
+  },
+  "unwatched": "No visto",
+  "@@unwatched": {
+    "description": "Etiqueta para estado de no visto"
+  },
   "errorLoadingComments": "Error al cargar los comentarios",
   "@@errorLoadingComments": {
     "description": "Mensaje de error que se muestra cuando falla la carga de los comentarios"

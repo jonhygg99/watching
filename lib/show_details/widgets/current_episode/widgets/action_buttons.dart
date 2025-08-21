@@ -4,7 +4,7 @@ import 'package:watching/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/show_details/pages/seasons/season_detail_page.dart';
 import 'package:watching/show_details/widgets/current_episode/widgets/episode_helpers.dart';
-import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
+import 'package:watching/shared/widgets/episode_info_modal/episode_info_modal.dart';
 
 class ActionButtons extends StatelessWidget {
   final Map<String, dynamic>? nextEpisode;

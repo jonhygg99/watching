@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/shared/widgets/comments/comments_list.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
@@ -11,13 +11,7 @@ import 'widgets/episode_actions.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'skeleton/episode_info_modal_skeleton.dart';
 
-class EpisodeInfoModal extends StatefulWidget {
-  final Future<Map<String, dynamic>> episodeFuture;
-  final Map<String, dynamic> showData;
-  final int seasonNumber;
-  final int episodeNumber;
-  final void Function()? onWatchedStatusChanged;
-
+class EpisodeInfoModal extends HookConsumerWidget {
   const EpisodeInfoModal({
     super.key,
     required this.episodeFuture,
@@ -27,46 +21,34 @@ class EpisodeInfoModal extends StatefulWidget {
     this.onWatchedStatusChanged,
   });
 
-  @override
-  State<EpisodeInfoModal> createState() => _EpisodeInfoModalState();
-}
+  final Future<Map<String, dynamic>> episodeFuture;
+  final Map<String, dynamic> showData;
+  final int seasonNumber;
+  final int episodeNumber;
+  final void Function()? onWatchedStatusChanged;
 
-class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
-  double? episodeRating;
-  bool _isRating = false;
-  bool? _isWatched;
-  late final EpisodeRatingService _ratingService;
-  late final TraktApi _traktApi;
-
-  @override
-  void initState() {
-    super.initState();
-    _traktApi = TraktApi();
-    _ratingService = EpisodeRatingService(_traktApi);
-    _loadWatchedStatus();
-  }
-
-  Future<void> _loadWatchedStatus() async {
+  Future<void> _loadWatchedStatus(
+    TraktApi traktApi,
+    ValueNotifier<bool?> isWatchedNotifier,
+  ) async {
     try {
-      final showId = widget.showData['ids']['trakt']?.toString();
+      final showId = showData['ids']['trakt']?.toString();
       if (showId == null) return;
 
-      final progress = await _traktApi.getShowWatchedProgress(id: showId);
+      final progress = await traktApi.getShowWatchedProgress(id: showId);
       final seasons = progress['seasons'] as List<dynamic>?;
 
       if (seasons != null) {
         for (final season in seasons) {
-          if (season['number'] == widget.seasonNumber) {
+          if (season['number'] == seasonNumber) {
             final episodes = season['episodes'] as List<dynamic>?;
             if (episodes != null) {
               final episode = episodes.firstWhere(
-                (e) => e['number'] == widget.episodeNumber,
+                (e) => e['number'] == episodeNumber,
                 orElse: () => null,
               );
-              if (episode != null && mounted) {
-                setState(() {
-                  _isWatched = episode['completed'] == true;
-                });
+              if (episode != null) {
+                isWatchedNotifier.value = episode['completed'] == true;
                 break;
               }
             }
@@ -78,59 +60,52 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
     }
   }
 
-  Future<void> _handleRatingUpdate(double? newRating) async {
-    // If we're already processing a rating update, queue this one
-    if (_isRating) {
+  Future<void> _handleRatingUpdate(
+    double? newRating, {
+    required ValueNotifier<bool> isRating,
+    required ValueNotifier<double?> currentRating,
+    required EpisodeRatingService ratingService,
+  }) async {
+    if (isRating.value) {
       await Future.delayed(const Duration(milliseconds: 500));
-      if (_isRating) {
-        // If still processing after delay, ignore this update
-        return;
-      }
+      if (isRating.value) return;
     }
 
-    setState(() {
-      _isRating = true;
-      episodeRating = (newRating != null && newRating > 0) ? newRating : null;
-    });
+    isRating.value = true;
+    currentRating.value = (newRating != null && newRating > 0) ? newRating : null;
 
     try {
       if (newRating != null && newRating > 0) {
-        await _addRating(newRating);
+        await _addRating(newRating, ratingService);
       } else {
-        await _removeRating();
+        await _removeRating(ratingService);
       }
     } catch (e) {
       debugPrint('Error updating rating: $e');
-      // Revert the UI if the API call fails
-      if (mounted) {
-        setState(() {
-          episodeRating = episodeRating == 0 ? null : episodeRating;
-        });
-      }
+      currentRating.value = currentRating.value == 0 ? null : currentRating.value;
       rethrow;
     } finally {
-      if (mounted) {
-        setState(() {
-          _isRating = false;
-        });
-      }
+      isRating.value = false;
     }
   }
 
-  Future<void> _addRating(double rating) async {
-    await _ratingService.addRating(
-      showData: widget.showData,
-      seasonNumber: widget.seasonNumber,
-      episodeNumber: widget.episodeNumber,
+  Future<void> _addRating(
+    double rating,
+    EpisodeRatingService ratingService,
+  ) async {
+    await ratingService.addRating(
+      showData: showData,
+      seasonNumber: seasonNumber,
+      episodeNumber: episodeNumber,
       rating: rating,
     );
   }
 
-  Future<void> _removeRating() async {
-    await _ratingService.removeRating(
-      showData: widget.showData,
-      seasonNumber: widget.seasonNumber,
-      episodeNumber: widget.episodeNumber,
+  Future<void> _removeRating(EpisodeRatingService ratingService) async {
+    await ratingService.removeRating(
+      showData: showData,
+      seasonNumber: seasonNumber,
+      episodeNumber: episodeNumber,
     );
   }
 
@@ -138,39 +113,53 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
     BuildContext context,
     WidgetRef ref,
     Map<String, dynamic> episode,
-    bool newWatchedState,
-  ) async {
+    bool newWatchedState, {
+    required ValueNotifier<bool?> isWatchedNotifier,
+    required void Function()? onWatchedStatusChanged,
+  }) async {
     final notifier = ref.read(watchlistProvider.notifier);
-    final showId = widget.showData['ids']['trakt']?.toString() ?? '';
+    final showId = showData['ids']['trakt']?.toString() ?? '';
 
     try {
       await notifier.toggleEpisodeWatchedStatus(
         showTraktId: showId,
-        seasonNumber: widget.seasonNumber,
-        episodeNumber: widget.episodeNumber,
+        seasonNumber: seasonNumber,
+        episodeNumber: episodeNumber,
         watched: newWatchedState,
       );
 
-      // Update local state
-      if (mounted) {
-        setState(() {
-          _isWatched = newWatchedState;
-        });
-
-        // Notify parent about the watched status change
-        if (widget.onWatchedStatusChanged != null) {
-          widget.onWatchedStatusChanged!();
-        }
-      }
+      isWatchedNotifier.value = newWatchedState;
+      onWatchedStatusChanged?.call();
     } catch (e) {
       // Error handled silently
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final episodeRating = useState<double?>(null);
+    final isRating = useState(false);
+    final isWatched = useState<bool?>(null);
+    final traktApi = useMemoized(() => TraktApi());
+    final ratingService = useMemoized(
+      () => EpisodeRatingService(traktApi),
+      [traktApi],
+    );
+
+    useEffect(() {
+      _loadWatchedStatus(traktApi, isWatched);
+      return null;
+    }, [traktApi]);
+
+    final episodeFutureState = useState<Future<Map<String, dynamic>>>(episodeFuture);
+
+    useEffect(() {
+      episodeFutureState.value = episodeFuture;
+      return null;
+    }, [episodeFuture]);
+
     return FutureBuilder<Map<String, dynamic>>(
-      future: widget.episodeFuture,
+      future: episodeFutureState.value,
       builder: (context, snapshot) {
         Widget content;
 
@@ -185,8 +174,8 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
           } else {
             // Merge the watched status into the episode data
             final episodeWithWatched = Map<String, dynamic>.from(episode);
-            if (_isWatched != null) {
-              episodeWithWatched['watched'] = _isWatched;
+            if (isWatched.value != null) {
+              episodeWithWatched['watched'] = isWatched.value;
             }
 
             final img = _getScreenshotUrl(episodeWithWatched);
@@ -206,33 +195,37 @@ class _EpisodeInfoModalState extends State<EpisodeInfoModal> {
                   builder: (context, ref, _) {
                     return EpisodeActions(
                       episode: episodeWithWatched,
-                      showData: widget.showData,
-                      seasonNumber: widget.seasonNumber,
-                      episodeNumber: widget.episodeNumber,
-                      currentRating: episodeRating,
-                      onRatingChanged: _handleRatingUpdate,
-                      onWatchedStatusChanged: (isWatched) async {
-                        await _handleWatchedStatusChanged(
-                          context,
-                          ref,
-                          episodeWithWatched,
-                          isWatched,
-                        );
-                      },
+                      showData: showData,
+                      seasonNumber: seasonNumber,
+                      episodeNumber: episodeNumber,
+                      currentRating: episodeRating.value,
+                      onRatingChanged: (rating) => _handleRatingUpdate(
+                        rating,
+                        isRating: isRating,
+                        currentRating: episodeRating,
+                        ratingService: ratingService,
+                      ),
+                      onWatchedStatusChanged: (isWatchedValue) =>
+                          _handleWatchedStatusChanged(
+                        context,
+                        ref,
+                        episodeWithWatched,
+                        isWatchedValue,
+                        isWatchedNotifier: isWatched,
+                        onWatchedStatusChanged: onWatchedStatusChanged,
+                      ),
                       onCommentsPressed: () {
                         final sortNotifier = ValueNotifier<String>('likes');
-                        // Call showAllComments without awaiting it
                         showAllComments(
                           context,
-                          '', // Empty string as the second positional parameter
-                          showId: widget.showData['ids']['trakt'].toString(),
+                          '',
+                          showId: showData['ids']['trakt'].toString(),
                           sort: sortNotifier,
                           sortKeys: commentSortOptions.keys.toList(),
                           ref: ref,
-                          seasonNumber: widget.seasonNumber,
-                          episodeNumber: widget.episodeNumber,
+                          seasonNumber: seasonNumber,
+                          episodeNumber: episodeNumber,
                         );
-                        // No need to await or handle the future here
                       },
                     );
                   },

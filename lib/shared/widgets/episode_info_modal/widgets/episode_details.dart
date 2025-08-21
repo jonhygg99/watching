@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/widgets/expandable_text.dart';
 
 class EpisodeDetails extends StatelessWidget {
   final Map<String, dynamic> episode;
 
-  const EpisodeDetails({
-    super.key,
-    required this.episode,
-  });
+  const EpisodeDetails({super.key, required this.episode});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +34,11 @@ class EpisodeDetails extends StatelessWidget {
             if (episode['runtime'] != null) ...[
               const Icon(Icons.timer, size: 18),
               const SizedBox(width: 4),
-              Text('${episode['runtime']} min'),
+              Text(
+                AppLocalizations.of(context)!.runtimeMinutes(
+                  int.tryParse(episode['runtime'].toString()) ?? 0,
+                ),
+              ),
             ],
           ],
         ),

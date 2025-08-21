@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'star_rating.dart';
 
 class EpisodeActions extends ConsumerWidget {
@@ -42,7 +43,7 @@ class EpisodeActions extends ConsumerWidget {
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           ),
-          child: const Text('Comentarios'),
+          child: Text(AppLocalizations.of(context)!.comments),
         ),
 
         // Spacer to push the watched button to the right
@@ -82,10 +83,12 @@ class EpisodeActions extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        isWatched ? 'Visto' : 'No visto',
+                        isWatched 
+                            ? AppLocalizations.of(context)!.watched 
+                            : AppLocalizations.of(context)!.unwatched,
                         style: TextStyle(
                           color: isWatched ? Colors.green[700] : null,
-                          fontWeight:
+                          fontWeight: 
                               isWatched ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),

@@ -686,6 +686,24 @@ abstract class AppLocalizations {
   /// **'Filters'**
   String get filters;
 
+  /// No description provided for @comments.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments'**
+  String get comments;
+
+  /// No description provided for @watched.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
+  String get watched;
+
+  /// No description provided for @unwatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Not watched'**
+  String get unwatched;
+
   /// No description provided for @errorLoadingComments.
   ///
   /// In en, this message translates to:

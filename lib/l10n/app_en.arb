@@ -414,6 +414,18 @@
   "@@filters": {
     "description": "Label for the filters section"
   },
+  "comments": "Comments",
+  "@@comments": {
+    "description": "Title for the comments section"
+  },
+  "watched": "Watched",
+  "@@watched": {
+    "description": "Label for watched status"
+  },
+  "unwatched": "Not watched",
+  "@@unwatched": {
+    "description": "Label for unwatched status"
+  },
   "errorLoadingComments": "Error loading comments",
   "@@errorLoadingComments": {
     "description": "Error message shown when comments fail to load"

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
 
 class EpisodeHeader extends StatelessWidget {
   final Map<String, dynamic> episode;
@@ -23,7 +24,9 @@ class EpisodeHeader extends StatelessWidget {
               ),
             ),
             Text(
-              'T${episode['season']}E${episode['number']}',
+              AppLocalizations.of(
+                context,
+              )!.seasonEpisodeFormat(episode['season'], episode['number']),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],

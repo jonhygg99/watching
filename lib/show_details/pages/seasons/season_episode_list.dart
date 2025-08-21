@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:watching/watchlist/episode_info_modal/episode_info_modal.dart';
+import 'package:watching/shared/widgets/episode_info_modal/episode_info_modal.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 
 /// Lista modular de episodios de temporada según Windsurf Guidelines.
@@ -78,7 +78,9 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
         (episode['images']?['screenshot'] as List).isNotEmpty) {
       final screenshot = episode['images']['screenshot'][0];
       if (screenshot is String) {
-        return screenshot.startsWith('http') ? screenshot : 'https://$screenshot';
+        return screenshot.startsWith('http')
+            ? screenshot
+            : 'https://$screenshot';
       } else if (screenshot is Map<String, dynamic>) {
         // If it's a map, try to get the full image URL
         return screenshot['full'] ??
@@ -87,13 +89,13 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
             (screenshot.values.isNotEmpty ? screenshot.values.first : null);
       }
     }
-    
+
     // Fall back to the old format if present
     if (episode['screenshot'] is Map<String, dynamic>) {
       final screenshot = episode['screenshot'] as Map<String, dynamic>;
       return screenshot['full'] ?? screenshot['medium'] ?? screenshot['thumb'];
     }
-    
+
     return null;
   }
 
