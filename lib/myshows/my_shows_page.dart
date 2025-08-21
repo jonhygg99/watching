@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/myshows/widgets/my_shows_skeleton.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
-import 'package:watching/features/myshows/providers/upcoming_episodes_provider.dart';
+import 'package:watching/pages/myshows/providers/upcoming_episodes_provider.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/myshows/waiting_shows.dart';
 import 'package:watching/myshows/ended_shows.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/show_details/details_page.dart';
+import 'package:watching/shared/pages/show_details/details_page.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 
 class ShowCard extends StatelessWidget {

@@ -5,7 +5,8 @@ import 'package:watching/api/trakt/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/utils/get_image.dart';
-import 'package:watching/show_details/details_page.dart' show ShowDetailPage;
+import 'package:watching/shared/pages/show_details/details_page.dart'
+    show ShowDetailPage;
 
 class ShowsGrid extends StatelessWidget {
   final ScrollController scrollController;

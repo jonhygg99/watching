@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/features/myshows/providers/my_shows_provider.dart';
+import 'package:watching/pages/myshows/providers/my_shows_provider.dart';
 import 'package:watching/myshows/widgets/show_poster.dart';
-import 'package:watching/show_details/details_page.dart';
+import 'package:watching/shared/pages/show_details/details_page.dart';
 
 // A helper function to safely convert dynamic maps to Map<String, dynamic>
 Map<String, dynamic> _convertToTypedMap(dynamic data) {
@@ -104,7 +104,7 @@ abstract class BaseShowsListState<T extends BaseShowsList>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(myShowsWithStatusProvider);
-    
+
     // Process shows whenever the state changes
     processShows(state);
 
@@ -128,10 +128,15 @@ abstract class BaseShowsListState<T extends BaseShowsList>
             children: [
               Text(
                 '${widget.title} (${_cachedShows.length})',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              if (state.isLoading || state.isRefreshing) const SizedBox(height: 8),
-              if (state.isLoading || state.isRefreshing) const LinearProgressIndicator(),
+              if (state.isLoading || state.isRefreshing)
+                const SizedBox(height: 8),
+              if (state.isLoading || state.isRefreshing)
+                const LinearProgressIndicator(),
             ],
           ),
         ),
@@ -142,8 +147,10 @@ abstract class BaseShowsListState<T extends BaseShowsList>
             // Calculate item width (3 items per row with spacing)
             const crossAxisCount = 3;
             const spacing = 8.0;
-            final itemWidth = (width - (spacing * (crossAxisCount - 1)) - 16.0) / crossAxisCount;
-            
+            final itemWidth =
+                (width - (spacing * (crossAxisCount - 1)) - 16.0) /
+                crossAxisCount;
+
             return GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),

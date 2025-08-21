@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
+import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'star_rating.dart';
 
@@ -83,12 +83,12 @@ class EpisodeActions extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        isWatched 
-                            ? AppLocalizations.of(context)!.watched 
+                        isWatched
+                            ? AppLocalizations.of(context)!.watched
                             : AppLocalizations.of(context)!.unwatched,
                         style: TextStyle(
                           color: isWatched ? Colors.green[700] : null,
-                          fontWeight: 
+                          fontWeight:
                               isWatched ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),

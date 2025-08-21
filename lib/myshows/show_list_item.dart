@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/myshows/days_bubble.dart';
-import 'package:watching/show_details/details_page.dart';
+import 'package:watching/shared/pages/show_details/details_page.dart';
 import 'package:watching/myshows/widgets/show_info.dart';
 import 'package:watching/myshows/widgets/expanded_episode_item.dart';
 import 'package:watching/myshows/widgets/show_poster.dart';
@@ -57,8 +57,10 @@ class ShowListItem extends StatelessWidget {
                 Consumer(
                   builder: (context, ref, _) {
                     final traktApi = ref.watch(traktApiProvider);
-                    final translationService = ref.watch(showTranslationServiceProvider);
-                    
+                    final translationService = ref.watch(
+                      showTranslationServiceProvider,
+                    );
+
                     return FutureBuilder<String>(
                       future: translationService.getTranslatedTitle(
                         show: show,

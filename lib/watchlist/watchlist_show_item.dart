@@ -3,10 +3,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/watchlist/animated_show_card.dart';
-import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
+import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/watchlist/show_card.dart';
 import 'package:watching/watchlist/watch_progress_info.dart';
-import 'package:watching/show_details/details_page.dart';
+import 'package:watching/shared/pages/show_details/details_page.dart';
 
 /// Widget for a single show/movie item in the watchlist.
 class WatchlistShowItem extends HookConsumerWidget {

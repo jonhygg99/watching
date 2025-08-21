@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_providers.dart';
 import '../api/trakt/show_translation.dart';
-import '../show_details/details_page.dart';
+import '../shared/pages/show_details/details_page.dart';
 import 'search_result_item.dart';
 
 /// Grid for search results using Freezed model and improved tile widget.

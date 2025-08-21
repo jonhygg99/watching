@@ -4,7 +4,7 @@ import 'package:watching/api/trakt/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/utils/get_image.dart';
-import 'package:watching/show_details/details_page.dart';
+import 'package:watching/shared/pages/show_details/details_page.dart';
 
 import 'carousel_placeholder_item.dart';
 import 'carousel_image_item.dart';
@@ -26,8 +26,9 @@ class CarouselItem extends ConsumerWidget {
   void _navigateToDetail(BuildContext context) {
     final showId = show['ids']['trakt']?.toString() ?? '';
     if (showId.isNotEmpty) {
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => ShowDetailPage(showId: showId)));
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => ShowDetailPage(showId: showId)));
     }
   }
 

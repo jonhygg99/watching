@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/shared/widgets/comments/comments_list.dart';
-import 'package:watching/features/watchlist/state/watchlist_notifier.dart';
+import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'services/episode_rating_service.dart';
 import 'widgets/episode_header.dart';
@@ -72,7 +72,8 @@ class EpisodeInfoModal extends HookConsumerWidget {
     }
 
     isRating.value = true;
-    currentRating.value = (newRating != null && newRating > 0) ? newRating : null;
+    currentRating.value =
+        (newRating != null && newRating > 0) ? newRating : null;
 
     try {
       if (newRating != null && newRating > 0) {
@@ -82,7 +83,8 @@ class EpisodeInfoModal extends HookConsumerWidget {
       }
     } catch (e) {
       debugPrint('Error updating rating: $e');
-      currentRating.value = currentRating.value == 0 ? null : currentRating.value;
+      currentRating.value =
+          currentRating.value == 0 ? null : currentRating.value;
       rethrow;
     } finally {
       isRating.value = false;
@@ -141,17 +143,18 @@ class EpisodeInfoModal extends HookConsumerWidget {
     final isRating = useState(false);
     final isWatched = useState<bool?>(null);
     final traktApi = useMemoized(() => TraktApi());
-    final ratingService = useMemoized(
-      () => EpisodeRatingService(traktApi),
-      [traktApi],
-    );
+    final ratingService = useMemoized(() => EpisodeRatingService(traktApi), [
+      traktApi,
+    ]);
 
     useEffect(() {
       _loadWatchedStatus(traktApi, isWatched);
       return null;
     }, [traktApi]);
 
-    final episodeFutureState = useState<Future<Map<String, dynamic>>>(episodeFuture);
+    final episodeFutureState = useState<Future<Map<String, dynamic>>>(
+      episodeFuture,
+    );
 
     useEffect(() {
       episodeFutureState.value = episodeFuture;
@@ -199,21 +202,22 @@ class EpisodeInfoModal extends HookConsumerWidget {
                       seasonNumber: seasonNumber,
                       episodeNumber: episodeNumber,
                       currentRating: episodeRating.value,
-                      onRatingChanged: (rating) => _handleRatingUpdate(
-                        rating,
-                        isRating: isRating,
-                        currentRating: episodeRating,
-                        ratingService: ratingService,
-                      ),
-                      onWatchedStatusChanged: (isWatchedValue) =>
-                          _handleWatchedStatusChanged(
-                        context,
-                        ref,
-                        episodeWithWatched,
-                        isWatchedValue,
-                        isWatchedNotifier: isWatched,
-                        onWatchedStatusChanged: onWatchedStatusChanged,
-                      ),
+                      onRatingChanged:
+                          (rating) => _handleRatingUpdate(
+                            rating,
+                            isRating: isRating,
+                            currentRating: episodeRating,
+                            ratingService: ratingService,
+                          ),
+                      onWatchedStatusChanged:
+                          (isWatchedValue) => _handleWatchedStatusChanged(
+                            context,
+                            ref,
+                            episodeWithWatched,
+                            isWatchedValue,
+                            isWatchedNotifier: isWatched,
+                            onWatchedStatusChanged: onWatchedStatusChanged,
+                          ),
                       onCommentsPressed: () {
                         final sortNotifier = ValueNotifier<String>('likes');
                         showAllComments(

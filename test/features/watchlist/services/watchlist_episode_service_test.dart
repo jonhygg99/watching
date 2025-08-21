@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/features/watchlist/services/watchlist_episode_service.dart';
+import 'package:watching/pages/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/providers/app_providers.dart';
 
 // Simple mock for Ref that returns a default country code
 class TestRef implements Ref {
   final String countryCode;
-  
+
   TestRef({this.countryCode = 'US'});
 
   @override
@@ -25,7 +25,7 @@ class TestRef implements Ref {
 // Simple mock for TraktClient
 class TestTraktClient {
   Map<String, Map<String, dynamic>> episodeResponses = {};
-  
+
   Future<Map<String, dynamic>> getEpisodeInfo({
     required String? id,
     required int? season,
@@ -73,10 +73,7 @@ void main() {
     required int number,
     List<Map<String, dynamic>> episodes = const [],
   }) {
-    return {
-      'number': number,
-      'episodes': episodes,
-    };
+    return {'number': number, 'episodes': episodes};
   }
 
   setUp(() {
@@ -115,7 +112,11 @@ void main() {
             number: 1,
             episodes: [
               createTestEpisode(number: 1, completed: true),
-              createTestEpisode(number: 2, completed: false, title: 'Next Episode'),
+              createTestEpisode(
+                number: 2,
+                completed: false,
+                title: 'Next Episode',
+              ),
             ],
           ),
         ],
@@ -125,7 +126,10 @@ void main() {
         id: '123',
         season: 1,
         episode: 2,
-        response: {'title': 'Translated Title', 'overview': 'Translated Overview'},
+        response: {
+          'title': 'Translated Title',
+          'overview': 'Translated Overview',
+        },
       );
 
       final result = await service.getNextEpisode(testTrakt, '123', progress);
@@ -142,13 +146,21 @@ void main() {
           createTestSeason(
             number: 0, // Specials season
             episodes: [
-              createTestEpisode(number: 1, completed: false, title: 'Special Episode'),
+              createTestEpisode(
+                number: 1,
+                completed: false,
+                title: 'Special Episode',
+              ),
             ],
           ),
           createTestSeason(
             number: 1,
             episodes: [
-              createTestEpisode(number: 1, completed: false, title: 'Regular Episode'),
+              createTestEpisode(
+                number: 1,
+                completed: false,
+                title: 'Regular Episode',
+              ),
             ],
           ),
         ],
@@ -173,7 +185,11 @@ void main() {
           createTestSeason(
             number: 1,
             episodes: [
-              createTestEpisode(number: 1, completed: false, title: 'Original Title'),
+              createTestEpisode(
+                number: 1,
+                completed: false,
+                title: 'Original Title',
+              ),
             ],
           ),
         ],
@@ -191,7 +207,11 @@ void main() {
           createTestSeason(
             number: 1,
             episodes: [
-              createTestEpisode(number: 1, completed: false, title: 'Test Episode'),
+              createTestEpisode(
+                number: 1,
+                completed: false,
+                title: 'Test Episode',
+              ),
             ],
           ),
         ],
