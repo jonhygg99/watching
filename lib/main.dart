@@ -8,10 +8,10 @@ import 'package:watching/pages/discover/discover_page.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/providers/locale_provider.dart';
 import 'package:watching/shared/theme/theme_provider.dart';
-import 'country_list.dart';
+import 'shared/constants/country_list.dart';
 import 'splash_wrapper.dart';
 import 'pages/settings/settings.dart';
-import 'watchlist/watchlist_page.dart';
+import 'pages/watchlist/watchlist.dart';
 import 'myshows/my_shows_page.dart';
 import 'pages/search/search.dart';
 

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/watchlist/animated_show_card.dart';
+import 'package:watching/pages/watchlist/widgets/animated_show_card.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
-import 'package:watching/watchlist/show_card.dart';
-import 'package:watching/watchlist/watch_progress_info.dart';
+import 'package:watching/pages/watchlist/widgets/show_card.dart';
+import 'package:watching/pages/watchlist/widgets/watch_progress_info.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
 
 /// Widget for a single show/movie item in the watchlist.
@@ -45,7 +46,7 @@ class WatchlistShowItem extends HookConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.errorMarkingEpisode),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -193,7 +194,7 @@ class WatchlistShowItem extends HookConsumerWidget {
                           _buildLoadingIndicator(),
                           const SizedBox(width: 16),
                           Text(
-                            'Marcando como no visto...',
+                            AppLocalizations.of(context)!.markingAsWatched,
                             style: _actionTextStyle,
                           ),
                         ],
@@ -204,7 +205,10 @@ class WatchlistShowItem extends HookConsumerWidget {
                         children: [
                           const Icon(Icons.undo, color: Colors.white, size: 28),
                           const SizedBox(width: 12),
-                          Text('No visto', style: _actionTextStyle),
+                          Text(
+                            AppLocalizations.of(context)!.unwatched,
+                            style: _actionTextStyle,
+                          ),
                         ],
                       ),
             ),
@@ -223,7 +227,7 @@ class WatchlistShowItem extends HookConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Marcando como visto...',
+                            AppLocalizations.of(context)!.markingAsWatched,
                             style: _actionTextStyle,
                           ),
                           const SizedBox(width: 16),
@@ -234,7 +238,10 @@ class WatchlistShowItem extends HookConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Visto', style: _actionTextStyle),
+                          Text(
+                            AppLocalizations.of(context)!.watched,
+                            style: _actionTextStyle,
+                          ),
                           const SizedBox(width: 12),
                           const Icon(
                             Icons.check,

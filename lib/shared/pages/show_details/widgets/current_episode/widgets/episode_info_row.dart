@@ -36,7 +36,7 @@ class EpisodeInfoRow extends StatelessWidget {
                 Text(
                   AppLocalizations.of(
                     context,
-                  )!.seasonEpisodeFormat(seasonNumber!, episodeNumber!),
+                  )!.seasonEpisodeFormat(episodeNumber!, seasonNumber!),
                   style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                 ),
               const SizedBox(width: kSpaceBtwTitleWidget),

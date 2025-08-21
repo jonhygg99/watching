@@ -26,7 +26,7 @@ class EpisodeHeader extends StatelessWidget {
             Text(
               AppLocalizations.of(
                 context,
-              )!.seasonEpisodeFormat(episode['season'], episode['number']),
+              )!.seasonEpisodeFormat(episode['number'], episode['season']),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],

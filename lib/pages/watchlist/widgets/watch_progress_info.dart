@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/widgets/progress_bar.dart';
-import 'package:watching/watchlist/episode_info_button.dart';
+import 'package:watching/shared/widgets/tiny_progress_bar.dart';
+import 'package:watching/pages/watchlist/widgets/episode_info_button.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 
 /// Displays the user's progress for a show, including next episode info and progress bar.
@@ -48,7 +51,7 @@ class WatchProgressInfo extends StatelessWidget {
         children: [
           if (titleStyle != null) Text(title, style: titleStyle),
           const SizedBox(height: 8),
-          Text('Sin progreso disponible', style: TextStyle(color: Colors.grey)),
+          Text(AppLocalizations.of(context)!.noProgressAvailable, style: TextStyle(color: Colors.grey)),
         ],
       );
     }
@@ -107,20 +110,27 @@ class _ProgressDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (effectiveTitleStyle != null)
-          Text(title, style: effectiveTitleStyle),
-        if (nextEpisode != null) ...[
-          const SizedBox(height: 6),
           Text(
-            'T${nextEpisode['season']}E${nextEpisode['number']} - ${nextEpisode['title']}',
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: effectiveTitleStyle,
+          ),
+        if (nextEpisode != null) ...[
+          const SizedBox(height: kSpaceBtwTitleWidget),
+          Text(
+            '${AppLocalizations.of(context)!.seasonEpisodeFormat(nextEpisode['number'], nextEpisode['season'])} - ${nextEpisode['title']}',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: effectiveEpisodeStyle?.copyWith(color: Colors.grey[700]),
           ),
-          const SizedBox(height: 6),
-          ProgressBar(
+          const SizedBox(height: kSpaceBtwTitleWidget),
+          TinyProgressBar(
             percent: percent,
             watched: episodesWatched,
             total: totalEpisodes,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: kSpaceBtwTitleWidget),
           EpisodeInfoButton(
             traktId: traktId,
             season: nextEpisode['season'],

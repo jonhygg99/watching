@@ -268,7 +268,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get checkOutAllEpisodes => 'Ver episodios';
 
   @override
-  String get episodeInfo => 'Información del episodio';
+  String get episodeInfo => 'Detalles del episodio';
+
+  @override
+  String get errorMarkingEpisode => 'Error al marcar el episodio';
+
+  @override
+  String get markingAsUnwatched => 'Marcando como no visto...';
+
+  @override
+  String get markingAsWatched => 'Marcando como visto...';
 
   @override
   String get noCommentsYet => 'Aún no hay comentarios';
@@ -347,4 +356,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get ok => 'Aceptar';
+
+  @override
+  String get noProgressAvailable => 'Sin progreso disponible';
+
+  @override
+  String get authenticationError => 'Error al verificar la autenticación';
+
+  @override
+  String get noItemsInWatchlist =>
+      'No hay elementos en tu lista de seguimiento';
 }

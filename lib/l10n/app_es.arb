@@ -358,9 +358,21 @@
   "@@checkOutAllEpisodes": {
     "description": "Texto del botón para ver todos los episodios de una serie"
   },
-  "episodeInfo": "Información del episodio",
+  "episodeInfo": "Detalles del episodio",
   "@@episodeInfo": {
     "description": "Encabezado de la sección de información del episodio"
+  },
+  "errorMarkingEpisode": "Error al marcar el episodio",
+  "@@errorMarkingEpisode": {
+    "description": "Mensaje de error que se muestra cuando hay un problema al marcar un episodio como visto/no visto"
+  },
+  "markingAsUnwatched": "Marcando como no visto...",
+  "@@markingAsUnwatched": {
+    "description": "Mensaje de carga que se muestra al marcar un episodio como no visto"
+  },
+  "markingAsWatched": "Marcando como visto...",
+  "@@markingAsWatched": {
+    "description": "Mensaje de carga que se muestra al marcar un episodio como visto"
   },
   "noCommentsYet": "Aún no hay comentarios",
   "@@noCommentsYet": {
@@ -499,5 +511,17 @@
   "ok": "Aceptar",
   "@@ok": {
     "description": "Texto para el botón Aceptar"
+  },
+  "noProgressAvailable": "Sin progreso disponible",
+  "@@noProgressAvailable": {
+    "description": "Mensaje que se muestra cuando no hay datos de progreso disponibles para una serie"
+  },
+  "authenticationError": "Error al verificar la autenticación",
+  "@@authenticationError": {
+    "description": "Mensaje de error que se muestra cuando hay un problema con la autenticación"
+  },
+  "noItemsInWatchlist": "No hay elementos en tu lista de seguimiento",
+  "@@noItemsInWatchlist": {
+    "description": "Mensaje que se muestra cuando la lista de seguimiento está vacía"
   }
 }

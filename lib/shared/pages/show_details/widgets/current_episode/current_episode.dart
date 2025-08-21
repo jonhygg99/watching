@@ -101,7 +101,7 @@ class CurrentEpisode extends HookWidget {
               !translatedEpisodeName.value.containsKey(
                 AppLocalizations.of(
                   context,
-                )!.seasonEpisodeFormat(seasonNumber, episodeNumber),
+                )!.seasonEpisodeFormat(episodeNumber, seasonNumber),
               )) {
             final translatedName = await _getTranslatedEpisodeName(
               trakt,

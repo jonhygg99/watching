@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'l10n/app_localizations.dart';
+import 'package:watching/shared/constants/colors.dart';
 import 'main.dart' show MyApp;
 import 'login/login_page.dart';
 import 'providers/auth_provider.dart';
 
-/// SplashWrapper now uses Riverpod for authentication state.
 class SplashWrapper extends ConsumerWidget {
   const SplashWrapper({super.key});
 
@@ -19,7 +20,10 @@ class SplashWrapper extends ConsumerWidget {
       error:
           (err, stack) => Scaffold(
             body: Center(
-              child: Text('Error: $err', style: TextStyle(color: Colors.red)),
+              child: Text(
+                AppLocalizations.of(context)!.authenticationError,
+                style: TextStyle(color: kErrorColorMessage),
+              ),
             ),
           ),
       data: (state) {

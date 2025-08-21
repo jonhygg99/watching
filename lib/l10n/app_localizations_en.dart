@@ -270,6 +270,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get episodeInfo => 'Episode Info';
 
   @override
+  String get errorMarkingEpisode => 'Error marking episode';
+
+  @override
+  String get markingAsUnwatched => 'Marking as unwatched...';
+
+  @override
+  String get markingAsWatched => 'Marking as watched...';
+
+  @override
   String get noCommentsYet => 'No comments yet';
 
   @override
@@ -346,4 +355,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ok => 'OK';
+
+  @override
+  String get noProgressAvailable => 'No progress available';
+
+  @override
+  String get authenticationError => 'Error verifying authentication';
+
+  @override
+  String get noItemsInWatchlist => 'No items in your watchlist yet';
 }

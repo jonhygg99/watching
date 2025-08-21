@@ -362,6 +362,18 @@
   "@@episodeInfo": {
     "description": "Section header for episode information"
   },
+  "errorMarkingEpisode": "Error marking episode",
+  "@@errorMarkingEpisode": {
+    "description": "Error message shown when there's an error marking an episode as watched/unwatched"
+  },
+  "markingAsUnwatched": "Marking as unwatched...",
+  "@@markingAsUnwatched": {
+    "description": "Loading message shown when marking an episode as unwatched"
+  },
+  "markingAsWatched": "Marking as watched...",
+  "@@markingAsWatched": {
+    "description": "Loading message shown when marking an episode as watched"
+  },
   "noCommentsYet": "No comments yet",
   "@@noCommentsYet": {
     "description": "Message shown when there are no comments yet"
@@ -499,5 +511,17 @@
   "ok": "OK",
   "@@ok": {
     "description": "Text for OK button"
+  },
+  "noProgressAvailable": "No progress available",
+  "@@noProgressAvailable": {
+    "description": "Message shown when no progress data is available for a show"
+  },
+  "authenticationError": "Error verifying authentication",
+  "@@authenticationError": {
+    "description": "Error message shown when there's an issue with authentication"
+  },
+  "noItemsInWatchlist": "No items in your watchlist yet",
+  "@@noItemsInWatchlist": {
+    "description": "Message shown when the watchlist is empty"
   }
 }

@@ -608,6 +608,24 @@ abstract class AppLocalizations {
   /// **'Episode Info'**
   String get episodeInfo;
 
+  /// No description provided for @errorMarkingEpisode.
+  ///
+  /// In en, this message translates to:
+  /// **'Error marking episode'**
+  String get errorMarkingEpisode;
+
+  /// No description provided for @markingAsUnwatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking as unwatched...'**
+  String get markingAsUnwatched;
+
+  /// No description provided for @markingAsWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking as watched...'**
+  String get markingAsWatched;
+
   /// No description provided for @noCommentsYet.
   ///
   /// In en, this message translates to:
@@ -757,6 +775,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get ok;
+
+  /// No description provided for @noProgressAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No progress available'**
+  String get noProgressAvailable;
+
+  /// No description provided for @authenticationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error verifying authentication'**
+  String get authenticationError;
+
+  /// No description provided for @noItemsInWatchlist.
+  ///
+  /// In en, this message translates to:
+  /// **'No items in your watchlist yet'**
+  String get noItemsInWatchlist;
 }
 
 class _AppLocalizationsDelegate

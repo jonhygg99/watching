@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/widgets/episode_info_modal/episode_info_modal.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/providers/app_providers.dart';
@@ -29,7 +30,7 @@ class EpisodeInfoButton extends HookConsumerWidget {
     final effectiveCountryCode = countryCode ?? countryCodeState;
     return TextButton.icon(
       icon: const Icon(Icons.info_outline),
-      label: const Text('Episode Info'),
+      label: Text(AppLocalizations.of(context)!.episodeInfo),
       onPressed:
           traktId == null
               ? null
