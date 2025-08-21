@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/myshows/widgets/my_shows_skeleton.dart';
-import 'package:watching/myshows/widgets/shows_lists.dart';
+import 'package:watching/myshows/widgets/shows_list/shows_list_content.dart';
 import 'package:watching/myshows/widgets/show_list_item.dart';
 import 'package:watching/pages/myshows/providers/upcoming_episodes_provider.dart';
 import 'package:watching/shared/constants/colors.dart';
@@ -150,9 +150,12 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
             ),
             _buildShowList(_calendarData ?? []),
           ],
-          const ShowsList(type: ShowsListType.waiting),
+          ShowsList(
+            type: ShowsListType.waiting,
+            title: 'Waiting for next season',
+          ),
           const SizedBox(height: 24),
-          const ShowsList(type: ShowsListType.ended),
+          ShowsList(type: ShowsListType.ended, title: 'Ended'),
           const SizedBox(height: 16),
         ],
       ),
