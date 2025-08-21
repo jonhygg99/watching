@@ -22,7 +22,12 @@ import 'cast.dart';
 /// Uses Riverpod for dependency injection and state management.
 class ShowDetailPage extends HookConsumerWidget {
   final String showId;
-  const ShowDetailPage({super.key, required this.showId});
+  const ShowDetailPage({
+    super.key,
+    required this.showId,
+    Map<String, dynamic>?
+    showData, // TODO: not using it and very powerful to not call apis again
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

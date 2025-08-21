@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/utils/get_image.dart';
 
 class ShowPoster extends StatelessWidget {
   final Map<String, dynamic> show;
@@ -17,7 +18,7 @@ class ShowPoster extends StatelessWidget {
     return ClipRRect(
       borderRadius: kShowBorderRadius,
       child: CachedNetworkImage(
-        imageUrl: 'https://${(show['images']!['poster'] as List).first}',
+        imageUrl: getFirstAvailableImage(show['images'])!,
         width: kMyShowItemWidth,
         height: kMyShowImageHeight,
         fit: BoxFit.cover,

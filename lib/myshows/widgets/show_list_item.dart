@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/myshows/days_bubble.dart';
+import 'package:watching/myshows/widgets/days_bubble.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
 import 'package:watching/myshows/widgets/show_info.dart';
 import 'package:watching/myshows/widgets/expanded_episode_item.dart';
@@ -79,8 +79,6 @@ class ShowListItem extends StatelessWidget {
                           episodeCount: episodes.length,
                           isExpanded: isExpanded,
                           onToggleExpand: onToggleExpand,
-                          formatDate: formatDate,
-                          formatTime: formatTime,
                         );
                       },
                     );
@@ -106,37 +104,11 @@ class ShowListItem extends StatelessWidget {
       final airDate = DateTime.tryParse(episode['first_aired'] ?? '');
       return ExpandedEpisodeItem(
         episode: episode,
-        formatDate: formatDate,
-        formatTime: formatTime,
         getEpisodeTitle: getEpisodeTitle,
         airDate: airDate,
       );
     }).toList();
   }
-}
-
-String formatDate(DateTime date) {
-  final months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return '${months[date.month - 1]} ${date.day} ${date.year}';
-}
-
-String formatTime(DateTime date) {
-  final hour = date.hour.toString().padLeft(2, '0');
-  final minute = date.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
 }
 
 /// Returns 'TBA' if the episode title is null, empty, 'TBA', or exactly 'Episode X' where X is the episode number.

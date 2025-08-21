@@ -23,10 +23,36 @@ String? getFirstAvailableImage(
   for (final type in ['poster', 'fanart', 'thumb', 'banner']) {
     // Skip if we already checked this as the preferred type
     if (type == preferredType) continue;
-    
+
     final url = _getImageUrl(images[type]);
     if (url != null) return url;
   }
-  
+
+  return null;
+}
+
+/// Extract screenshot URL from episode data
+String? getScreenshotUrl(Map<String, dynamic> episode) {
+  // Try the new format first (images object with screenshot array)
+  if (episode['images']?['screenshot'] is List &&
+      (episode['images']?['screenshot'] as List).isNotEmpty) {
+    final screenshot = episode['images']['screenshot'][0];
+    if (screenshot is String) {
+      return screenshot.startsWith('http') ? screenshot : 'https://$screenshot';
+    } else if (screenshot is Map<String, dynamic>) {
+      // If it's a map, try to get the full image URL
+      return screenshot['full'] ??
+          screenshot['medium'] ??
+          screenshot['thumb'] ??
+          (screenshot.values.isNotEmpty ? screenshot.values.first : null);
+    }
+  }
+
+  // Fall back to the old format if present
+  if (episode['screenshot'] is Map<String, dynamic>) {
+    final screenshot = episode['screenshot'] as Map<String, dynamic>;
+    return screenshot['full'] ?? screenshot['medium'] ?? screenshot['thumb'];
+  }
+
   return null;
 }

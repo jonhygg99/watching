@@ -575,7 +575,7 @@ abstract class AppLocalizations {
   /// No description provided for @seasonEpisodeFormat.
   ///
   /// In en, this message translates to:
-  /// **'S{season}E{episode}'**
+  /// **'S{season} E{episode}'**
   String seasonEpisodeFormat(Object episode, Object season);
 
   /// No description provided for @errorLoadingData.
@@ -791,8 +791,122 @@ abstract class AppLocalizations {
   /// No description provided for @noItemsInWatchlist.
   ///
   /// In en, this message translates to:
-  /// **'No items in your watchlist yet'**
+  /// **'No items in watchlist'**
   String get noItemsInWatchlist;
+
+  /// No description provided for @episodeAired.
+  ///
+  /// In en, this message translates to:
+  /// **'Aired'**
+  String get episodeAired;
+
+  /// No description provided for @episodeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get episodeToday;
+
+  /// No description provided for @episodeDaysAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String episodeDaysAway(Object days);
+
+  /// No description provided for @calendarDataError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading calendar data'**
+  String get calendarDataError;
+
+  /// No description provided for @upcomingEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Episodes'**
+  String get upcomingEpisodes;
+
+  /// No description provided for @noShowsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No shows found'**
+  String get noShowsFound;
+
+  /// No description provided for @noEpisodeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No episode information available'**
+  String get noEpisodeInfo;
+
+  /// No description provided for @removeFromHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from history'**
+  String get removeFromHistory;
+
+  /// No description provided for @markAsWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as watched'**
+  String get markAsWatched;
+
+  /// No description provided for @previousSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Season'**
+  String get previousSeason;
+
+  /// No description provided for @nextSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Season'**
+  String get nextSeason;
+
+  /// No description provided for @seasonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Season {seasonNumber}'**
+  String seasonTitle(Object seasonNumber);
+
+  /// No description provided for @readMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Read more'**
+  String get readMore;
+
+  /// No description provided for @readLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Read less'**
+  String get readLess;
+
+  /// No description provided for @monthNamesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec'**
+  String get monthNamesShort;
+
+  /// No description provided for @daysLeftText.
+  ///
+  /// In en, this message translates to:
+  /// **'days left'**
+  String get daysLeftText;
+
+  /// No description provided for @seasonPremiere.
+  ///
+  /// In en, this message translates to:
+  /// **'Season Premiere'**
+  String get seasonPremiere;
+
+  /// No description provided for @hideEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide episodes'**
+  String get hideEpisodes;
+
+  /// No description provided for @showMoreEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {count} more episodes'**
+  String showMoreEpisodes(Object count);
 }
 
 class _AppLocalizationsDelegate

@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:watching/myshows/episode_days_bubble.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/myshows/widgets/episode_days_bubble.dart';
+import 'package:watching/shared/utils/dates.dart';
 
 class ExpandedEpisodeItem extends StatelessWidget {
   final Map<String, dynamic> episode;
-  final String Function(DateTime) formatDate;
-  final String Function(DateTime) formatTime;
   final String Function(Map<String, dynamic>) getEpisodeTitle;
   final DateTime? airDate;
 
   const ExpandedEpisodeItem({
     super.key,
     required this.episode,
-    required this.formatDate,
-    required this.formatTime,
     required this.getEpisodeTitle,
     this.airDate,
   });
@@ -36,7 +34,10 @@ class ExpandedEpisodeItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'S${episode['season'].toString().padLeft(2, '0')}E${episode['episode'].toString().padLeft(2, '0')}',
+                    AppLocalizations.of(context)!.seasonEpisodeFormat(
+                      episode['episode'],
+                      episode['season'],
+                    ),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -45,7 +46,7 @@ class ExpandedEpisodeItem extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Episode title and air date
             Expanded(
               child: Column(
@@ -62,7 +63,7 @@ class ExpandedEpisodeItem extends StatelessWidget {
                   if (airDate != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      '${formatDate(airDate!)} • ${formatTime(airDate!)}',
+                      '${formatDate(airDate!, context)} • ${formatTime(airDate!)}',
                       style: TextStyle(
                         fontSize: 13,
                         color: Theme.of(context).textTheme.bodySmall?.color,
@@ -72,7 +73,7 @@ class ExpandedEpisodeItem extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Days bubble if air date is available
             if (airDate != null) EpisodeDaysBubble(airDate: airDate!),
           ],

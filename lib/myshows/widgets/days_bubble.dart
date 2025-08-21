@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
 
 class DaysBubble extends StatelessWidget {
-  const DaysBubble({
-    super.key,
-    required this.days,
-  });
+  const DaysBubble({super.key, required this.days});
 
   final int days;
 
@@ -30,8 +28,8 @@ class DaysBubble extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const Text(
-            'days',
+          Text(
+            AppLocalizations.of(context)!.daysLeftText,
             style: TextStyle(color: Colors.white, fontSize: 12),
           ),
         ],

@@ -23,7 +23,10 @@ class SeasonBulkActionButton extends StatelessWidget {
         Icons.done_all,
         color: allWatched ? Colors.green : Colors.grey,
       ),
-      tooltip: allWatched ? 'Eliminar temporada del historial' : 'Marcar todos como vistos',
+      tooltip:
+          allWatched
+              ? 'Eliminar temporada del historial'
+              : 'Marcar todos los episodios de la temporada como vistos',
       onPressed: loading ? null : () => onBulkAction(allWatched),
     );
   }

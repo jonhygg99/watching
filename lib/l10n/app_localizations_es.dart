@@ -250,7 +250,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String seasonEpisodeFormat(Object episode, Object season) {
-    return 'T${season}E$episode';
+    return 'T$season E$episode';
   }
 
   @override
@@ -365,5 +365,69 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noItemsInWatchlist =>
-      'No hay elementos en tu lista de seguimiento';
+      'No hay elementos en la lista de seguimiento';
+
+  @override
+  String get episodeAired => 'Emitido';
+
+  @override
+  String get episodeToday => 'Hoy';
+
+  @override
+  String episodeDaysAway(Object days) {
+    return '$days días';
+  }
+
+  @override
+  String get calendarDataError => 'Error al cargar los datos del Calendario';
+
+  @override
+  String get upcomingEpisodes => 'Próximos Episodios';
+
+  @override
+  String get noShowsFound => 'No se encontraron series';
+
+  @override
+  String get noEpisodeInfo => 'No hay información del episodio';
+
+  @override
+  String get removeFromHistory => 'Eliminar episodio del historial';
+
+  @override
+  String get markAsWatched => 'Marcar como visto';
+
+  @override
+  String get previousSeason => 'Temporada Anterior';
+
+  @override
+  String get nextSeason => 'Próxima Temporada';
+
+  @override
+  String seasonTitle(Object seasonNumber) {
+    return 'Temporada $seasonNumber';
+  }
+
+  @override
+  String get readMore => 'Leer más';
+
+  @override
+  String get readLess => 'Leer menos';
+
+  @override
+  String get monthNamesShort =>
+      'Ene,Feb,Mar,Abr,May,Jun,Jul,Ago,Sep,Oct,Nov,Dic';
+
+  @override
+  String get daysLeftText => 'días';
+
+  @override
+  String get seasonPremiere => 'Estreno de Temporada';
+
+  @override
+  String get hideEpisodes => 'Ocultar episodios';
+
+  @override
+  String showMoreEpisodes(Object count) {
+    return 'Mostrar $count episodios más';
+  }
 }

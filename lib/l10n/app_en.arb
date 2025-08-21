@@ -322,7 +322,7 @@
   "@@noVideosAvailable": {
     "description": "Message shown when no videos are available to display"
   },
-  "seasonEpisodeFormat": "S{season}E{episode}",
+  "seasonEpisodeFormat": "S{season} E{episode}",
   "@@seasonEpisodeFormat": {
     "description": "Format for displaying season and episode numbers (e.g., S1E1)",
     "placeholders": {
@@ -520,8 +520,105 @@
   "@@authenticationError": {
     "description": "Error message shown when there's an issue with authentication"
   },
-  "noItemsInWatchlist": "No items in your watchlist yet",
+  "noItemsInWatchlist": "No items in watchlist",
   "@@noItemsInWatchlist": {
     "description": "Message shown when the watchlist is empty"
+  },
+  "episodeAired": "Aired",
+  "@@episodeAired": {
+    "description": "Text shown for episodes that have already aired"
+  },
+  "episodeToday": "Today",
+  "@@episodeToday": {
+    "description": "Text shown for episodes airing today"
+  },
+  "episodeDaysAway": "{days} days",
+  "@@episodeDaysAway": {
+    "description": "Text shown for future episodes, showing number of days until airing",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "calendarDataError": "Error loading calendar data",
+  "@@calendarDataError": {
+    "description": "Error message shown when there's an issue loading calendar data"
+  },
+  "upcomingEpisodes": "Upcoming Episodes",
+  "@@upcomingEpisodes": {
+    "description": "Title for the upcoming episodes section"
+  },
+  "noShowsFound": "No shows found",
+  "@@noShowsFound": {
+    "description": "Message shown when no shows are found in the search results"
+  },
+  "noEpisodeInfo": "No episode information available",
+  "@@noEpisodeInfo": {
+    "description": "Message shown when there is no information available for an episode"
+  },
+  "removeFromHistory": "Remove from history",
+  "@@removeFromHistory": {
+    "description": "Tooltip text for removing an episode from watch history"
+  },
+  "markAsWatched": "Mark as watched",
+  "@@markAsWatched": {
+    "description": "Tooltip text for marking an episode as watched"
+  },
+  "previousSeason": "Previous Season",
+  "@@previousSeason": {
+    "description": "Text for the previous season navigation button"
+  },
+  "nextSeason": "Next Season",
+  "@@nextSeason": {
+    "description": "Text for the next season navigation button"
+  },
+  "seasonTitle": "Season {seasonNumber}",
+  "@@seasonTitle": {
+    "description": "Title for the season detail page with the season number",
+    "placeholders": {
+      "seasonNumber": {
+        "type": "int",
+        "format": "compact",
+        "optionalParameters": {
+          "compact": {}
+        }
+      }
+    }
+  },
+  "readMore": "Read more",
+  "@@readMore": {
+    "description": "Text for the 'Read more' button in expandable text"
+  },
+  "readLess": "Read less",
+  "@@readLess": {
+    "description": "Text for the 'Read less' button in expandable text"
+  },
+  "monthNamesShort": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+  "@@monthNamesShort": {
+    "description": "Comma-separated list of short month names (3 letters) for date formatting"
+  },
+  "daysLeftText": "days left",
+  "@@daysLeftText": {
+    "description": "Text shown for the number of days left until the next episode"
+  },
+  "seasonPremiere": "Season Premiere",
+  "@@seasonPremiere": {
+    "description": "Text shown for a season premiere episode"
+  },
+  "hideEpisodes": "Hide episodes",
+  "@@hideEpisodes": {
+    "description": "Text for the button to hide episodes"
+  },
+  "showMoreEpisodes": "Show {count} more episodes",
+  "@@showMoreEpisodes": {
+    "description": "Text for the button to show more episodes",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
   }
 }

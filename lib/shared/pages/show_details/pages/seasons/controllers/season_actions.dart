@@ -1,6 +1,5 @@
 /// Controlador de acciones bulk y toggle para episodios de temporada.
 import 'dart:async';
-import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 

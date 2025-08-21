@@ -4,6 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/pages/myshows/providers/my_shows_provider.dart';
 import 'package:watching/myshows/widgets/show_poster.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
+import 'package:watching/shared/constants/show_status.dart';
+import 'package:watching/pages/myshows/providers/upcoming_episodes_provider.dart';
 
 // A helper function to safely convert dynamic maps to Map<String, dynamic>
 Map<String, dynamic> _convertToTypedMap(dynamic data) {
@@ -15,6 +17,7 @@ Map<String, dynamic> _convertToTypedMap(dynamic data) {
   return <String, dynamic>{};
 }
 
+/// Base abstract class for shows lists
 abstract class BaseShowsList extends ConsumerStatefulWidget {
   final String title;
 
@@ -26,6 +29,7 @@ abstract class BaseShowsList extends ConsumerStatefulWidget {
   bool shouldIncludeShow(Map<String, dynamic> showData);
 }
 
+/// Base state class for shows lists
 abstract class BaseShowsListState<T extends BaseShowsList>
     extends ConsumerState<T> {
   // Cache for shows to prevent unnecessary rebuilds
@@ -191,3 +195,78 @@ abstract class BaseShowsListState<T extends BaseShowsList>
     );
   }
 }
+
+/// Type of shows to display in the list
+enum ShowsListType { ended, waiting }
+
+/// A configurable widget that can display different types of shows
+class ShowsList extends ConsumerWidget {
+  final ShowsListType type;
+  final String? title;
+
+  const ShowsList({super.key, required this.type, this.title});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (type == ShowsListType.waiting) {
+      final upcomingEpisodesAsync = ref.watch(upcomingEpisodesProvider);
+
+      return upcomingEpisodesAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:
+            (error, stack) =>
+                const Center(child: Text('Error loading upcoming episodes')),
+        data: (showsWithUpcomingEpisodes) {
+          return _ShowsListContent(
+            type: type,
+            title: title,
+            showsWithUpcomingEpisodes: showsWithUpcomingEpisodes,
+          );
+        },
+      );
+    }
+
+    // For ended shows, we don't need to wait for any additional data
+    return _ShowsListContent(
+      type: type,
+      title: title,
+      showsWithUpcomingEpisodes: const {},
+    );
+  }
+}
+
+class _ShowsListContent extends BaseShowsList {
+  final ShowsListType type;
+  final Set<int> showsWithUpcomingEpisodes;
+
+  const _ShowsListContent({
+    required this.type,
+    required String? title,
+    required this.showsWithUpcomingEpisodes,
+  }) : super(
+         title:
+             title ??
+             (type == ShowsListType.ended ? 'Ended Shows' : 'Upcoming Shows'),
+       );
+
+  @override
+  ConsumerState<BaseShowsList> createState() => _ShowsListState();
+
+  @override
+  bool shouldIncludeShow(Map<String, dynamic> showData) {
+    final status = (showData['status'] ?? '').toString();
+
+    if (type == ShowsListType.ended) {
+      // Include shows that are marked as ended or canceled
+      return ShowStatus.isEnded(status);
+    } else {
+      // For waiting shows, include active shows without upcoming episodes
+      final traktId = (showData['ids']?['trakt'] ?? 0) as int;
+      return ShowStatus.isActive(status) &&
+          !ShowStatus.isEnded(status) &&
+          !showsWithUpcomingEpisodes.contains(traktId);
+    }
+  }
+}
+
+class _ShowsListState extends BaseShowsListState<_ShowsListContent> {}

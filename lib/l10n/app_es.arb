@@ -322,7 +322,7 @@
   "@@noVideosAvailable": {
     "description": "Mensaje que se muestra cuando no hay vídeos disponibles para mostrar"
   },
-  "seasonEpisodeFormat": "T{season}E{episode}",
+  "seasonEpisodeFormat": "T{season} E{episode}",
   "@@seasonEpisodeFormat": {
     "description": "Formato para mostrar los números de temporada y episodio (ej: T1C1)",
     "placeholders": {
@@ -520,8 +520,105 @@
   "@@authenticationError": {
     "description": "Mensaje de error que se muestra cuando hay un problema con la autenticación"
   },
-  "noItemsInWatchlist": "No hay elementos en tu lista de seguimiento",
+  "noItemsInWatchlist": "No hay elementos en la lista de seguimiento",
   "@@noItemsInWatchlist": {
     "description": "Mensaje que se muestra cuando la lista de seguimiento está vacía"
+  },
+  "episodeAired": "Emitido",
+  "@@episodeAired": {
+    "description": "Texto que se muestra para los episodios que ya se han emitido"
+  },
+  "episodeToday": "Hoy",
+  "@@episodeToday": {
+    "description": "Texto que se muestra para los episodios que se emiten hoy"
+  },
+  "episodeDaysAway": "{days} días",
+  "@@episodeDaysAway": {
+    "description": "Texto que se muestra para los episodios futuros, mostrando el número de días hasta su emisión",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "calendarDataError": "Error al cargar los datos del Calendario",
+  "@@calendarDataError": {
+    "description": "Mensaje de error que se muestra cuando hay un problema al cargar los datos del calendario"
+  },
+  "upcomingEpisodes": "Próximos Episodios",
+  "@@upcomingEpisodes": {
+    "description": "Título para la sección de próximos episodios"
+  },
+  "noShowsFound": "No se encontraron series",
+  "@@noShowsFound": {
+    "description": "Mensaje que se muestra cuando no se encuentran series en los resultados de búsqueda"
+  },
+  "noEpisodeInfo": "No hay información del episodio",
+  "@@noEpisodeInfo": {
+    "description": "Mensaje que se muestra cuando no hay información disponible para un episodio"
+  },
+  "removeFromHistory": "Eliminar episodio del historial",
+  "@@removeFromHistory": {
+    "description": "Texto del tooltip para eliminar un episodio del historial de visualización"
+  },
+  "markAsWatched": "Marcar como visto",
+  "@@markAsWatched": {
+    "description": "Texto del tooltip para marcar un episodio como visto"
+  },
+  "previousSeason": "Temporada Anterior",
+  "@@previousSeason": {
+    "description": "Texto para el botón de navegación a la temporada anterior"
+  },
+  "nextSeason": "Próxima Temporada",
+  "@@nextSeason": {
+    "description": "Texto para el botón de navegación a la siguiente temporada"
+  },
+  "seasonTitle": "Temporada {seasonNumber}",
+  "@@seasonTitle": {
+    "description": "Título para la página de detalles de temporada con el número de temporada",
+    "placeholders": {
+      "seasonNumber": {
+        "type": "int",
+        "format": "compact",
+        "optionalParameters": {
+          "compact": {}
+        }
+      }
+    }
+  },
+  "readMore": "Leer más",
+  "@@readMore": {
+    "description": "Texto para el botón 'Leer más' en texto expandible"
+  },
+  "readLess": "Leer menos",
+  "@@readLess": {
+    "description": "Texto para el botón 'Leer menos' en texto expandible"
+  },
+  "monthNamesShort": "Ene,Feb,Mar,Abr,May,Jun,Jul,Ago,Sep,Oct,Nov,Dic",
+  "@@monthNamesShort": {
+    "description": "Lista separada por comas de los nombres cortos de los meses (3 letras) para formato de fecha"
+  },
+  "daysLeftText": "días",
+  "@@daysLeftText": {
+    "description": "Texto que muestra la cantidad de días restantes hasta el próximo episodio"
+  },
+  "seasonPremiere": "Estreno de Temporada",
+  "@@seasonPremiere": {
+    "description": "Texto mostrado para el episodio de estreno de temporada"
+  },
+  "hideEpisodes": "Ocultar episodios",
+  "@@hideEpisodes": {
+    "description": "Texto para el botón de ocultar episodios"
+  },
+  "showMoreEpisodes": "Mostrar {count} episodios más",
+  "@@showMoreEpisodes": {
+    "description": "Texto para el botón de mostrar más episodios",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
   }
 }

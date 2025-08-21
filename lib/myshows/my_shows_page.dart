@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/myshows/widgets/my_shows_skeleton.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/myshows/widgets/my_shows_skeleton.dart';
+import 'package:watching/myshows/widgets/shows_lists.dart';
+import 'package:watching/myshows/widgets/show_list_item.dart';
 import 'package:watching/pages/myshows/providers/upcoming_episodes_provider.dart';
+import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/providers/app_providers.dart';
-import 'package:watching/myshows/waiting_shows.dart';
-import 'package:watching/myshows/ended_shows.dart';
-import 'package:watching/myshows/show_list_item.dart';
 
 class MyShowsPage extends ConsumerStatefulWidget {
   const MyShowsPage({super.key});
@@ -126,8 +127,8 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
     if (_error != null) {
       return Center(
         child: Text(
-          'Error: $_error',
-          style: const TextStyle(color: Colors.red),
+          AppLocalizations.of(context)!.calendarDataError,
+          style: const TextStyle(color: kErrorColorMessage),
         ),
       );
     }
@@ -143,15 +144,15 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
                 vertical: 8.0,
               ),
               child: Text(
-                'Upcoming Episodes',
+                AppLocalizations.of(context)!.upcomingEpisodes,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
             _buildShowList(_calendarData ?? []),
           ],
-          const WaitingShows(),
+          const ShowsList(type: ShowsListType.waiting),
           const SizedBox(height: 24),
-          const EndedShows(),
+          const ShowsList(type: ShowsListType.ended),
           const SizedBox(height: 16),
         ],
       ),
@@ -163,7 +164,7 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
 
   Widget _buildShowList(List<dynamic> items) {
     if (items.isEmpty) {
-      return const Center(child: Text('No shows found'));
+      return Center(child: Text(AppLocalizations.of(context)!.noShowsFound));
     }
 
     return Column(

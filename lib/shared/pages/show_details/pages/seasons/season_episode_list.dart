@@ -1,4 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/utils/get_image.dart';
 import 'package:watching/shared/widgets/episode_info_modal/episode_info_modal.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 
@@ -71,34 +76,6 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
     return false;
   }
 
-  /// Extract screenshot URL from episode data
-  String? _getScreenshotUrl(Map<String, dynamic> episode) {
-    // Try the new format first (images object with screenshot array)
-    if (episode['images']?['screenshot'] is List &&
-        (episode['images']?['screenshot'] as List).isNotEmpty) {
-      final screenshot = episode['images']['screenshot'][0];
-      if (screenshot is String) {
-        return screenshot.startsWith('http')
-            ? screenshot
-            : 'https://$screenshot';
-      } else if (screenshot is Map<String, dynamic>) {
-        // If it's a map, try to get the full image URL
-        return screenshot['full'] ??
-            screenshot['medium'] ??
-            screenshot['thumb'] ??
-            (screenshot.values.isNotEmpty ? screenshot.values.first : null);
-      }
-    }
-
-    // Fall back to the old format if present
-    if (episode['screenshot'] is Map<String, dynamic>) {
-      final screenshot = episode['screenshot'] as Map<String, dynamic>;
-      return screenshot['full'] ?? screenshot['medium'] ?? screenshot['thumb'];
-    }
-
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -109,7 +86,7 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
         final int epNumber = ep['number'] as int;
         final String epTitle = ep['title'] ?? '';
         final bool watched = _epWatched(epNumber);
-        final String? imageUrl = _getScreenshotUrl(ep);
+        final String? imageUrl = getScreenshotUrl(ep);
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
@@ -131,8 +108,8 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                 ),
                 builder: (sheetContext) {
                   if (epInfo == null) {
-                    return const Center(
-                      child: Text('No hay información del episodio.'),
+                    return Center(
+                      child: Text(AppLocalizations.of(context)!.noEpisodeInfo),
                     );
                   }
                   return EpisodeInfoModal(
@@ -157,11 +134,11 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                 children: [
                   // Episode image on the left
                   if (imageUrl != null)
-                    Image.network(
-                      imageUrl,
+                    CachedNetworkImage(
+                      imageUrl: imageUrl,
                       width: 150,
                       fit: BoxFit.cover,
-                      errorBuilder:
+                      errorWidget:
                           (context, error, stackTrace) => Container(
                             width: 150,
                             color: Colors.grey[300],
@@ -190,7 +167,10 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'T${widget.seasonNumber}E${epNumber.toString().padLeft(2, '0')}',
+                            AppLocalizations.of(context)!.seasonEpisodeFormat(
+                              epNumber,
+                              widget.seasonNumber,
+                            ),
                             style: Theme.of(
                               context,
                             ).textTheme.bodySmall?.copyWith(
@@ -198,7 +178,7 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: kSpaceBtwTitleWidget),
                           Text(
                             epTitle,
                             style: Theme.of(context).textTheme.bodyMedium
@@ -220,7 +200,7 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                         widget.onToggleEpisode(epNumber, newWatchedState);
                         widget.setMarkingColor(
                           epNumber,
-                          newWatchedState ? Colors.green : Colors.red,
+                          newWatchedState ? Colors.green : kErrorColorMessage,
                           delayMs: 500,
                         );
                       },
@@ -236,8 +216,8 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                       ),
                       tooltip:
                           watched
-                              ? 'Eliminar episodio del historial'
-                              : 'Marcar como visto',
+                              ? AppLocalizations.of(context)!.removeFromHistory
+                              : AppLocalizations.of(context)!.markAsWatched,
                       onPressed:
                           widget.loading
                               ? null
