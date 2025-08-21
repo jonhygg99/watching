@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/myshows/widgets/days_bubble.dart';
+import 'package:watching/pages/myshows/widgets/days_bubble.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
-import 'package:watching/myshows/widgets/show_info.dart';
-import 'package:watching/myshows/widgets/expanded_episode_item.dart';
-import 'package:watching/myshows/widgets/show_poster.dart';
+import 'package:watching/pages/myshows/widgets/show_info.dart';
+import 'package:watching/pages/myshows/widgets/expanded_episode_item.dart';
+import 'package:watching/pages/myshows/widgets/show_poster.dart';
 import 'package:watching/api/trakt/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 

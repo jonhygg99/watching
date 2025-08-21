@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/pages/myshows/providers/my_shows_provider.dart';
-import 'package:watching/myshows/widgets/shows_list/show_grid.dart';
+import 'package:watching/pages/myshows/widgets/shows_list/show_grid.dart';
 
 /// A helper function to safely convert dynamic maps to Map<String, dynamic>
 Map<String, dynamic> convertToTypedMap(dynamic data) {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/l10n/app_localizations.dart';
-import 'package:watching/myshows/widgets/shows_list/show_grid.dart';
+import 'package:watching/pages/myshows/widgets/shows_list/show_grid.dart';
 import 'package:watching/pages/myshows/providers/my_shows_provider.dart';
 import 'package:watching/pages/myshows/providers/upcoming_episodes_provider.dart';
-import 'package:watching/myshows/widgets/shows_list/base_shows_list.dart';
+import 'package:watching/pages/myshows/widgets/shows_list/base_shows_list.dart';
 import 'package:watching/shared/constants/show_status.dart';
 
 /// Type of shows to display in the list

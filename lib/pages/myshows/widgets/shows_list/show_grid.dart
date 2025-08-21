@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:watching/myshows/widgets/show_poster.dart';
+import 'package:watching/pages/myshows/widgets/show_poster.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
 
 class ShowGrid extends StatelessWidget {
@@ -25,8 +25,8 @@ class ShowGrid extends StatelessWidget {
         // Calculate the available width for the grid
         final width = constraints.maxWidth;
         // Calculate item width based on crossAxisCount and spacing
-        final itemWidth = (width - (spacing * (crossAxisCount - 1)) - 16.0) / 
-                         crossAxisCount;
+        final itemWidth =
+            (width - (spacing * (crossAxisCount - 1)) - 16.0) / crossAxisCount;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -43,20 +43,23 @@ class ShowGrid extends StatelessWidget {
           itemBuilder: (context, index) {
             final showData = shows[index];
             final show = _convertToTypedMap(showData['show'] ?? showData);
-            final traktId = show['ids']?['trakt']?.toString() ??
-                          show['ids']?['slug']?.toString();
+            final traktId =
+                show['ids']?['trakt']?.toString() ??
+                show['ids']?['slug']?.toString();
 
             return GestureDetector(
-              onTap: traktId == null
-                  ? null
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ShowDetailPage(showId: traktId),
-                        ),
-                      );
-                    },
+              onTap:
+                  traktId == null
+                      ? null
+                      : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => ShowDetailPage(showId: traktId),
+                          ),
+                        );
+                      },
               child: ShowPoster(show: show),
             );
           },

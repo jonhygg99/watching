@@ -428,7 +428,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec';
 
   @override
-  String get daysLeftText => 'days left';
+  String get loginTitle => 'Login / Register';
+
+  @override
+  String get loginWithTrakt => 'Login with Trakt.tv';
+
+  @override
+  String get signupWithTrakt => 'Sign up with Trakt.tv';
+
+  @override
+  String get browserOpenError => 'Could not open browser';
+
+  @override
+  String get enterCodeError => 'Please enter the code';
+
+  @override
+  String get invalidCodeError => 'Incorrect or expired code';
+
+  @override
+  String get authCodeLabel => 'Authorization Code';
+
+  @override
+  String get submitCodeButton => 'Submit Code';
+
+  @override
+  String greeting(Object username) {
+    return 'Hello, $username';
+  }
+
+  @override
+  String get daysLeftText => 'days';
 
   @override
   String get seasonPremiere => 'Season Premiere';

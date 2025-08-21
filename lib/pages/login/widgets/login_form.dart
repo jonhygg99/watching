@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:watching/l10n/app_localizations.dart';
 
 /// LoginForm displays the code input and handles submission.
 class LoginForm extends ConsumerWidget {
@@ -24,7 +25,7 @@ class LoginForm extends ConsumerWidget {
         TextField(
           controller: codeController,
           decoration: InputDecoration(
-            labelText: 'Código de autorización',
+            labelText: AppLocalizations.of(context)!.authCodeLabel,
             errorText: error,
           ),
           enabled: !loading,
@@ -39,7 +40,7 @@ class LoginForm extends ConsumerWidget {
             child:
                 loading
                     ? const CircularProgressIndicator(strokeWidth: 2)
-                    : const Text('Enviar código'),
+                    : Text(AppLocalizations.of(context)!.submitCodeButton),
           ),
         ),
       ],

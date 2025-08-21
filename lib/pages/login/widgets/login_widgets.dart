@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/shared/constants/colors.dart';
 
 /// Displays the current user if logged in.
 class UserDisplay extends StatelessWidget {
@@ -13,7 +15,7 @@ class UserDisplay extends StatelessWidget {
         const Icon(Icons.person, size: 32, color: Colors.green),
         const SizedBox(height: 8),
         Text(
-          'Hola, $username',
+          AppLocalizations.of(context)!.greeting(username ?? ''),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ],
@@ -31,10 +33,7 @@ class ErrorDisplay extends StatelessWidget {
     if (error == null) return const SizedBox();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Text(
-        error!,
-        style: const TextStyle(color: Colors.red),
-      ),
+      child: Text(error!, style: const TextStyle(color: kErrorColorMessage)),
     );
   }
 }

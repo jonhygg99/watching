@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/providers/auth_provider.dart';
+import 'package:watching/l10n/app_localizations.dart';
 
 /// State for the login flow.
 class LoginState {
@@ -57,14 +59,14 @@ class LoginController extends StateNotifier<LoginState> {
     } else {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir el navegador.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.browserOpenError)),
       );
     }
   }
 
   Future<void> submitCode(String code) async {
     if (code.isEmpty) {
-      state = state.copyWith(error: 'Introduce el código', loading: false);
+      state = state.copyWith(error: AppLocalizations.of(context)!.enterCodeError, loading: false);
       return;
     }
     state = state.copyWith(loading: true, error: null);
@@ -79,7 +81,7 @@ class LoginController extends StateNotifier<LoginState> {
       }
     } catch (e) {
       state = state.copyWith(
-        error: 'Código incorrecto o expirado',
+        error: AppLocalizations.of(context)!.invalidCodeError,
         loading: false,
       );
     }

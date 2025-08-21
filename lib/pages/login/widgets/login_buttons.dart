@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
 
 /// LoginButtons displays the Trakt login and signup buttons.
 class LoginButtons extends StatelessWidget {
@@ -29,7 +30,7 @@ class LoginButtons extends StatelessWidget {
                     height: 24,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Iniciar sesión con Trakt.tv'),
+                : Text(AppLocalizations.of(context)!.loginWithTrakt),
           ),
         ),
         const SizedBox(height: 24),
@@ -44,7 +45,7 @@ class LoginButtons extends StatelessWidget {
                     height: 24,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Registrarse con Trakt.tv'),
+                : Text(AppLocalizations.of(context)!.signupWithTrakt),
           ),
         ),
       ],

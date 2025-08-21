@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'login_controller.dart';
-import 'login_form.dart';
-import 'login_buttons.dart';
-import 'login_widgets.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'widgets/login_controller.dart';
+import 'widgets/login_form.dart';
+import 'widgets/login_buttons.dart';
+import 'widgets/login_widgets.dart';
 
 /// LoginPage is the entry point for the login flow.
 /// Splits UI and logic for maintainability and testability.
@@ -18,7 +19,7 @@ class LoginPage extends ConsumerWidget {
     final loginCtrl = ref.read(loginControllerProvider(context).notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Login / Registro')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.loginTitle)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),

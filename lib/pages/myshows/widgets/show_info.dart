@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
-import '../../shared/utils/dates.dart';
+import '../../../shared/utils/dates.dart';
 
 class ShowInfo extends StatelessWidget {
   final Map<String, dynamic> show;

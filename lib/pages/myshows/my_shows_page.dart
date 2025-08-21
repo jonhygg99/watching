@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
-import 'package:watching/myshows/widgets/my_shows_skeleton.dart';
-import 'package:watching/myshows/widgets/shows_list/shows_list_content.dart';
-import 'package:watching/myshows/widgets/show_list_item.dart';
+import 'package:watching/pages/myshows/widgets/my_shows_skeleton.dart';
+import 'package:watching/pages/myshows/widgets/shows_list/shows_list_content.dart';
+import 'package:watching/pages/myshows/widgets/show_list_item.dart';
 import 'package:watching/pages/myshows/providers/upcoming_episodes_provider.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/l10n/app_localizations.dart';

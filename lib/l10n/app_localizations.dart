@@ -908,10 +908,64 @@ abstract class AppLocalizations {
   /// **'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec'**
   String get monthNamesShort;
 
+  /// No description provided for @loginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Login / Register'**
+  String get loginTitle;
+
+  /// No description provided for @loginWithTrakt.
+  ///
+  /// In en, this message translates to:
+  /// **'Login with Trakt.tv'**
+  String get loginWithTrakt;
+
+  /// No description provided for @signupWithTrakt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up with Trakt.tv'**
+  String get signupWithTrakt;
+
+  /// No description provided for @browserOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open browser'**
+  String get browserOpenError;
+
+  /// No description provided for @enterCodeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the code'**
+  String get enterCodeError;
+
+  /// No description provided for @invalidCodeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect or expired code'**
+  String get invalidCodeError;
+
+  /// No description provided for @authCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization Code'**
+  String get authCodeLabel;
+
+  /// No description provided for @submitCodeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Code'**
+  String get submitCodeButton;
+
+  /// Greeting message with username
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {username}'**
+  String greeting(Object username);
+
   /// No description provided for @daysLeftText.
   ///
   /// In en, this message translates to:
-  /// **'days left'**
+  /// **'days'**
   String get daysLeftText;
 
   /// No description provided for @seasonPremiere.

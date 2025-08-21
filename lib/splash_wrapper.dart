@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'l10n/app_localizations.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'main.dart' show MyApp;
-import 'login/login_page.dart';
+import 'pages/login/login_page.dart';
 import 'providers/auth_provider.dart';
 
 class SplashWrapper extends ConsumerWidget {

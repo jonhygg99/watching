@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
-import 'package:watching/myshows/widgets/episode_days_bubble.dart';
+import 'package:watching/pages/myshows/widgets/episode_days_bubble.dart';
 import 'package:watching/shared/utils/dates.dart';
 
 class ExpandedEpisodeItem extends StatelessWidget {

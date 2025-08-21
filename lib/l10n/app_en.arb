@@ -615,7 +615,46 @@
   "@@monthNamesShort": {
     "description": "Comma-separated list of short month names (3 letters) for date formatting"
   },
-  "daysLeftText": "days left",
+  "loginTitle": "Login / Register",
+  "@@loginTitle": {
+    "description": "Title for the login/registration page"
+  },
+  "loginWithTrakt": "Login with Trakt.tv",
+  "@@loginWithTrakt": {
+    "description": "Text for the login button"
+  },
+  "signupWithTrakt": "Sign up with Trakt.tv",
+  "@@signupWithTrakt": {
+    "description": "Text for the signup button"
+  },
+  "browserOpenError": "Could not open browser",
+  "@@browserOpenError": {
+    "description": "Error message when browser fails to open"
+  },
+  "enterCodeError": "Please enter the code",
+  "@@enterCodeError": {
+    "description": "Error message when no code is entered"
+  },
+  "invalidCodeError": "Incorrect or expired code",
+  "@@invalidCodeError": {
+    "description": "Error message when an invalid or expired code is entered"
+  },
+  "authCodeLabel": "Authorization Code",
+  "@@authCodeLabel": {
+    "description": "Label for the authorization code input field"
+  },
+  "submitCodeButton": "Submit Code",
+  "@@submitCodeButton": {
+    "description": "Text for the submit code button"
+  },
+  "greeting": "Hello, {username}",
+  "@greeting": {
+    "description": "Greeting message with username",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "daysLeftText": "days",
   "@@daysLeftText": {
     "description": "Text shown for the number of days left until the next episode"
   },

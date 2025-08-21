@@ -12,7 +12,7 @@ import 'shared/constants/country_list.dart';
 import 'splash_wrapper.dart';
 import 'pages/settings/settings.dart';
 import 'pages/watchlist/watchlist.dart';
-import 'myshows/my_shows_page.dart';
+import 'pages/myshows/my_shows_page.dart';
 import 'pages/search/search.dart';
 
 /// Main entry point for the Watching app.

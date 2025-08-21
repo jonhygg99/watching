@@ -615,6 +615,45 @@
   "@@monthNamesShort": {
     "description": "Lista separada por comas de los nombres cortos de los meses (3 letras) para formato de fecha"
   },
+  "loginTitle": "Iniciar sesión / Registro",
+  "@@loginTitle": {
+    "description": "Título de la página de inicio de sesión/registro"
+  },
+  "loginWithTrakt": "Iniciar sesión con Trakt.tv",
+  "@@loginWithTrakt": {
+    "description": "Texto para el botón de inicio de sesión"
+  },
+  "signupWithTrakt": "Registrarse en Trakt.tv",
+  "@@signupWithTrakt": {
+    "description": "Texto para el botón de registro"
+  },
+  "browserOpenError": "No se pudo abrir el navegador",
+  "@@browserOpenError": {
+    "description": "Mensaje de error cuando falla al abrir el navegador"
+  },
+  "enterCodeError": "Introduce el código",
+  "@@enterCodeError": {
+    "description": "Mensaje de error cuando no se introduce ningún código"
+  },
+  "invalidCodeError": "Código incorrecto o expirado",
+  "@@invalidCodeError": {
+    "description": "Mensaje de error cuando se introduce un código inválido o expirado"
+  },
+  "authCodeLabel": "Código de autorización",
+  "@@authCodeLabel": {
+    "description": "Etiqueta para el campo de entrada del código de autorización"
+  },
+  "submitCodeButton": "Enviar código",
+  "@@submitCodeButton": {
+    "description": "Texto para el botón de enviar código"
+  },
+  "greeting": "Hola, {username}",
+  "@greeting": {
+    "description": "Mensaje de saludo con nombre de usuario",
+    "placeholders": {
+      "username": {}
+    }
+  },
   "daysLeftText": "días",
   "@@daysLeftText": {
     "description": "Texto que muestra la cantidad de días restantes hasta el próximo episodio"
