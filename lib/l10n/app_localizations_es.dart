@@ -368,6 +368,19 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hay elementos en la lista de seguimiento';
 
   @override
+  String get endedShows => 'Series finalizadas';
+
+  @override
+  String get upcomingShows => 'Próximas series';
+
+  @override
+  String get errorLoadingShows => 'Error al cargar las series';
+
+  @override
+  String get errorLoadingUpcomingEpisodes =>
+      'Error al cargar los próximos episodios';
+
+  @override
   String get episodeAired => 'Emitido';
 
   @override

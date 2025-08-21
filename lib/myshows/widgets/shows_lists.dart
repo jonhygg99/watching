@@ -1,11 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/pages/myshows/providers/my_shows_provider.dart';
 import 'package:watching/myshows/widgets/show_poster.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
 import 'package:watching/shared/constants/show_status.dart';
 import 'package:watching/pages/myshows/providers/upcoming_episodes_provider.dart';
+
+extension LocalizationExtension on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
+}
 
 // A helper function to safely convert dynamic maps to Map<String, dynamic>
 Map<String, dynamic> _convertToTypedMap(dynamic data) {
@@ -113,7 +118,7 @@ abstract class BaseShowsListState<T extends BaseShowsList>
     processShows(state);
 
     if (state.error != null) {
-      return Center(child: Text('Error: ${state.error}'));
+      return Center(child: Text(context.l10n.errorLoadingShows));
     }
 
     // Don't show anything if we don't have any shows and not loading
@@ -215,7 +220,7 @@ class ShowsList extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error:
             (error, stack) =>
-                const Center(child: Text('Error loading upcoming episodes')),
+                Center(child: Text(context.l10n.errorLoadingUpcomingEpisodes)),
         data: (showsWithUpcomingEpisodes) {
           return _ShowsListContent(
             type: type,
@@ -238,35 +243,115 @@ class ShowsList extends ConsumerWidget {
 class _ShowsListContent extends BaseShowsList {
   final ShowsListType type;
   final Set<int> showsWithUpcomingEpisodes;
+  final String? _title;
 
-  const _ShowsListContent({
+  _ShowsListContent({
     required this.type,
-    required String? title,
+    String? title,
     required this.showsWithUpcomingEpisodes,
-  }) : super(
-         title:
-             title ??
-             (type == ShowsListType.ended ? 'Ended Shows' : 'Upcoming Shows'),
-       );
+  }) : _title = title,
+       super(title: '');
 
   @override
-  ConsumerState<BaseShowsList> createState() => _ShowsListState();
+  _ShowsListContentState createState() => _ShowsListContentState();
 
   @override
   bool shouldIncludeShow(Map<String, dynamic> showData) {
     final status = (showData['status'] ?? '').toString();
 
     if (type == ShowsListType.ended) {
-      // Include shows that are marked as ended or canceled
       return ShowStatus.isEnded(status);
     } else {
-      // For waiting shows, include active shows without upcoming episodes
-      final traktId = (showData['ids']?['trakt'] ?? 0) as int;
+      // For waiting shows, only include active shows that don't have upcoming episodes
+      final showId = showData['ids']?['trakt']?.toString();
       return ShowStatus.isActive(status) &&
-          !ShowStatus.isEnded(status) &&
-          !showsWithUpcomingEpisodes.contains(traktId);
+          showId != null &&
+          !showsWithUpcomingEpisodes.contains(int.tryParse(showId));
     }
   }
 }
 
-class _ShowsListState extends BaseShowsListState<_ShowsListContent> {}
+class _ShowsListContentState extends BaseShowsListState<_ShowsListContent> {
+  @override
+  Widget build(BuildContext context) {
+    // Use the custom title if provided, otherwise use the default based on type
+    final title =
+        widget._title ??
+        (widget.type == ShowsListType.ended
+            ? context.l10n.endedShows
+            : context.l10n.upcomingShows);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Text(
+            '$title (${_cachedShows.length})',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        _buildShowGrid(),
+      ],
+    );
+  }
+
+  Widget _buildShowGrid() {
+    final state = ref.watch(myShowsWithStatusProvider);
+    processShows(state);
+
+    if (state.error != null) {
+      return Center(child: Text(context.l10n.errorLoadingShows));
+    }
+
+    if (_cachedShows.isEmpty && !state.isLoading) {
+      return const SizedBox.shrink();
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        const crossAxisCount = 3;
+        const spacing = 8.0;
+        final itemWidth =
+            (width - (spacing * (crossAxisCount - 1)) - 16.0) / crossAxisCount;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.6,
+            crossAxisSpacing: spacing,
+            mainAxisSpacing: spacing,
+            mainAxisExtent: itemWidth * 1.67,
+          ),
+          itemCount: _cachedShows.length,
+          itemBuilder: (context, index) {
+            final showData = _cachedShows[index];
+            final show = _convertToTypedMap(showData['show'] ?? showData);
+            final traktId =
+                show['ids']?['trakt']?.toString() ??
+                show['ids']?['slug']?.toString();
+
+            return GestureDetector(
+              onTap: () {
+                if (traktId != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ShowDetailPage(showId: traktId),
+                    ),
+                  );
+                }
+              },
+              child: ShowPoster(show: show),
+            );
+          },
+        );
+      },
+    );
+  }
+}

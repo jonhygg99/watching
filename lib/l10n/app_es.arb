@@ -524,6 +524,22 @@
   "@@noItemsInWatchlist": {
     "description": "Mensaje que se muestra cuando la lista de seguimiento está vacía"
   },
+  "endedShows": "Series finalizadas",
+  "@@endedShows": {
+    "description": "Título para la sección de series finalizadas"
+  },
+  "upcomingShows": "Próximas series",
+  "@@upcomingShows": {
+    "description": "Título para la sección de próximas series"
+  },
+  "errorLoadingShows": "Error al cargar las series",
+  "@@errorLoadingShows": {
+    "description": "Mensaje de error que se muestra cuando hay un problema al cargar las series"
+  },
+  "errorLoadingUpcomingEpisodes": "Error al cargar los próximos episodios",
+  "@@errorLoadingUpcomingEpisodes": {
+    "description": "Mensaje de error que se muestra cuando hay un problema al cargar los próximos episodios"
+  },
   "episodeAired": "Emitido",
   "@@episodeAired": {
     "description": "Texto que se muestra para los episodios que ya se han emitido"

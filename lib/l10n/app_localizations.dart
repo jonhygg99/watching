@@ -794,6 +794,30 @@ abstract class AppLocalizations {
   /// **'No items in watchlist'**
   String get noItemsInWatchlist;
 
+  /// No description provided for @endedShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended Shows'**
+  String get endedShows;
+
+  /// No description provided for @upcomingShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Shows'**
+  String get upcomingShows;
+
+  /// No description provided for @errorLoadingShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading shows'**
+  String get errorLoadingShows;
+
+  /// No description provided for @errorLoadingUpcomingEpisodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading upcoming episodes'**
+  String get errorLoadingUpcomingEpisodes;
+
   /// No description provided for @episodeAired.
   ///
   /// In en, this message translates to:

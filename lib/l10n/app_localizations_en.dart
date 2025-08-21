@@ -366,6 +366,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noItemsInWatchlist => 'No items in watchlist';
 
   @override
+  String get endedShows => 'Ended Shows';
+
+  @override
+  String get upcomingShows => 'Upcoming Shows';
+
+  @override
+  String get errorLoadingShows => 'Error loading shows';
+
+  @override
+  String get errorLoadingUpcomingEpisodes => 'Error loading upcoming episodes';
+
+  @override
   String get episodeAired => 'Aired';
 
   @override

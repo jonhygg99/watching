@@ -524,6 +524,22 @@
   "@@noItemsInWatchlist": {
     "description": "Message shown when the watchlist is empty"
   },
+  "endedShows": "Ended Shows",
+  "@@endedShows": {
+    "description": "Title for the ended shows section"
+  },
+  "upcomingShows": "Upcoming Shows",
+  "@@upcomingShows": {
+    "description": "Title for the upcoming shows section"
+  },
+  "errorLoadingShows": "Error loading shows",
+  "@@errorLoadingShows": {
+    "description": "Error message shown when there's an error loading shows"
+  },
+  "errorLoadingUpcomingEpisodes": "Error loading upcoming episodes",
+  "@@errorLoadingUpcomingEpisodes": {
+    "description": "Error message shown when there's an error loading upcoming episodes"
+  },
   "episodeAired": "Aired",
   "@@episodeAired": {
     "description": "Text shown for episodes that have already aired"
