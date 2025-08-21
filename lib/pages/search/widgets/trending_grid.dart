@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/app_providers.dart';
-import '../shared/pages/show_details/details_page.dart';
+import '../../../providers/app_providers.dart';
+import '../../../shared/pages/show_details/details_page.dart';
 import 'search_result_item.dart';
-import '../api/trakt/show_translation.dart';
+import '../../../api/trakt/show_translation.dart';
 
 /// Grid for trending shows using Freezed model and improved tile widget.
 class TrendingGrid extends ConsumerWidget {
@@ -85,7 +85,7 @@ class TrendingGrid extends ConsumerWidget {
         }
         final shows = snapshot.data ?? [];
         if (shows.isEmpty) {
-          return const Center(child: Text('No hay shows en tendencia.'));
+          return const SizedBox.shrink();
         }
 
         // Process shows to get translated titles

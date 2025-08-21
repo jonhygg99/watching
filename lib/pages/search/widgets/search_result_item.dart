@@ -59,7 +59,7 @@ class SearchResultGridTile extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             show['title'] ?? '',
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),

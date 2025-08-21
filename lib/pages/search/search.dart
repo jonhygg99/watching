@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'search_results_grid.dart';
-import 'trending_grid.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'widgets/search_results_grid.dart';
+import 'widgets/trending_grid.dart';
 
 /// Main search page using hooks and Riverpod for state management.
 /// Main search page using Riverpod for state management.
 class SearchPage extends ConsumerStatefulWidget {
   final List<dynamic>? initialTrendingShows;
-  
-  const SearchPage({
-    super.key,
-    this.initialTrendingShows,
-  });
+
+  const SearchPage({super.key, this.initialTrendingShows});
 
   @override
   ConsumerState<SearchPage> createState() => _SearchPageState();
@@ -67,9 +65,9 @@ class _SearchScroll extends StatelessWidget {
               children: [
                 TextField(
                   autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Buscar...',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.search,
+                    border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                   onChanged: onQueryChanged,
@@ -79,7 +77,7 @@ class _SearchScroll extends StatelessWidget {
                   spacing: 8,
                   children: [
                     FilterChip(
-                      label: const Text('Películas'),
+                      label: Text(AppLocalizations.of(context)!.movies),
                       selected: types.contains('movie'),
                       onSelected: (selected) {
                         final newTypes = List<String>.from(types);
@@ -92,7 +90,7 @@ class _SearchScroll extends StatelessWidget {
                       },
                     ),
                     FilterChip(
-                      label: const Text('Series'),
+                      label: Text(AppLocalizations.of(context)!.shows),
                       selected: types.contains('show'),
                       onSelected: (selected) {
                         final newTypes = List<String>.from(types);
@@ -121,5 +119,3 @@ class _SearchScroll extends StatelessWidget {
     );
   }
 }
-
-

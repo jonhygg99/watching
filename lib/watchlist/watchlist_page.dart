@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/pages/watchlist/providers/watchlist_providers.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/watchlist/loading_skeleton.dart';
@@ -42,19 +43,19 @@ class WatchlistPage extends HookConsumerWidget {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: const Text('Error'),
+                title: Text(AppLocalizations.of(context)!.errorLoadingData),
                 content: Text(error.toString()),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('OK'),
+                    child: Text(AppLocalizations.of(context)!.ok),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                       refreshWatchlist();
                     },
-                    child: const Text('Retry'),
+                    child: Text(AppLocalizations.of(context)!.retry),
                   ),
                 ],
               ),

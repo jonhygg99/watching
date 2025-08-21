@@ -13,7 +13,7 @@ import 'splash_wrapper.dart';
 import 'pages/settings/settings.dart';
 import 'watchlist/watchlist_page.dart';
 import 'myshows/my_shows_page.dart';
-import 'search/search_page.dart';
+import 'pages/search/search.dart';
 
 /// Main entry point for the Watching app.
 /// Loads environment and initializes Riverpod.

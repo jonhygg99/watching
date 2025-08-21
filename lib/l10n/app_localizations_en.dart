@@ -273,6 +273,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCommentsYet => 'No comments yet';
 
   @override
+  String get searchHint => 'Search...';
+
+  @override
+  String get movies => 'Movies';
+
+  @override
+  String get shows => 'TV Shows';
+
+  @override
+  String get selectAtLeastOneType =>
+      'Select at least one type (Movie or TV Show)';
+
+  @override
+  String get searchError => 'Error searching. Please try again.';
+
+  @override
+  String get noSearchTerm => 'Enter a search term';
+
+  @override
+  String noSearchResults(Object query) {
+    return 'No results found for \"$query\"';
+  }
+
+  @override
   String get retry => 'Retry';
 
   @override
@@ -319,4 +343,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLoadingComments => 'Error loading comments';
+
+  @override
+  String get ok => 'OK';
 }

@@ -364,7 +364,40 @@
   },
   "noCommentsYet": "Aún no hay comentarios",
   "@@noCommentsYet": {
-    "description": "Mensaje que se muestra cuando no hay comentarios para mostrar"
+    "description": "Mensaje que se muestra cuando no hay comentarios aún"
+  },
+  "searchHint": "Buscar...",
+  "@@searchHint": {
+    "description": "Texto de ayuda para el campo de búsqueda"
+  },
+  "movies": "Películas",
+  "@@movies": {
+    "description": "Etiqueta para el filtro de películas"
+  },
+  "shows": "Series",
+  "@@shows": {
+    "description": "Etiqueta para el filtro de series de TV"
+  },
+  "selectAtLeastOneType": "Selecciona al menos un tipo (Película o Serie)",
+  "@@selectAtLeastOneType": {
+    "description": "Mensaje que se muestra cuando no se ha seleccionado ningún tipo de contenido en la búsqueda"
+  },
+  "searchError": "Error al buscar. Por favor, inténtalo de nuevo.",
+  "@@searchError": {
+    "description": "Mensaje de error que se muestra cuando falla la búsqueda"
+  },
+  "noSearchTerm": "Ingresa un término de búsqueda",
+  "@@noSearchTerm": {
+    "description": "Mensaje que se muestra cuando no se ha ingresado ningún término de búsqueda"
+  },
+  "noSearchResults": "No se encontraron resultados para \"{query}\"",
+  "@@noSearchResults": {
+    "description": "Mensaje que se muestra cuando no se encuentran resultados de búsqueda",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "retry": "Reintentar",
   "@@retry": {
@@ -426,8 +459,45 @@
   "@@unwatched": {
     "description": "Etiqueta para estado de no visto"
   },
+  "searchHint": "Buscar...",
+  "@@searchHint": {
+    "description": "Texto de ayuda para el campo de búsqueda"
+  },
+  "movies": "Películas",
+  "@@movies": {
+    "description": "Etiqueta para el filtro de películas"
+  },
+  "shows": "Series",
+  "@@shows": {
+    "description": "Etiqueta para el filtro de series de TV"
+  },
+  "selectAtLeastOneType": "Selecciona al menos un tipo (Película o Serie)",
+  "@@selectAtLeastOneType": {
+    "description": "Mensaje que se muestra cuando no se ha seleccionado ningún tipo de medio en la búsqueda"
+  },
+  "searchError": "Error al buscar. Por favor, inténtalo de nuevo.",
+  "@@searchError": {
+    "description": "Mensaje de error que se muestra cuando falla la búsqueda"
+  },
+  "noSearchTerm": "Ingresa un término de búsqueda",
+  "@@noSearchTerm": {
+    "description": "Mensaje que se muestra cuando no se ha ingresado un término de búsqueda"
+  },
+  "noSearchResults": "No se encontraron resultados para \"{query}\"",
+  "@@noSearchResults": {
+    "description": "Mensaje que se muestra cuando no se encuentran resultados de búsqueda",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "errorLoadingComments": "Error al cargar los comentarios",
   "@@errorLoadingComments": {
     "description": "Mensaje de error que se muestra cuando falla la carga de los comentarios"
+  },
+  "ok": "Aceptar",
+  "@@ok": {
+    "description": "Texto para el botón Aceptar"
   }
 }

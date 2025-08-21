@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:watching/search/search_result_item.dart';
+import 'package:watching/pages/search/widgets/search_result_item.dart';
 
 void main() {
   group('SearchResultItem', () {
@@ -9,15 +9,12 @@ void main() {
       final data = {
         'title': 'Test Show',
         'images': {
-          'poster': ['https://example.com/poster.jpg']
+          'poster': ['https://example.com/poster.jpg'],
         },
       };
 
       // Act
-      final result = SearchResultItem(
-        data: data,
-        type: 'show',
-      );
+      final result = SearchResultItem(data: data, type: 'show');
 
       // Assert
       expect(result.data, equals(data));
@@ -31,7 +28,9 @@ void main() {
       final item = SearchResultItem(
         data: {
           'title': 'Test Show',
-          'images': {'poster': ['https://example.com/poster.jpg']}
+          'images': {
+            'poster': ['https://example.com/poster.jpg'],
+          },
         },
         type: 'show',
       );
@@ -39,9 +38,7 @@ void main() {
       // Act
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: SearchResultGridTile(item: item, onTap: () {}),
-          ),
+          home: Scaffold(body: SearchResultGridTile(item: item, onTap: () {})),
         ),
       );
 
@@ -55,7 +52,9 @@ void main() {
       final item = SearchResultItem(
         data: {
           'title': 'Test Show',
-          'images': {'poster': ['https://example.com/poster.jpg']}
+          'images': {
+            'poster': ['https://example.com/poster.jpg'],
+          },
         },
         type: 'show',
       );
@@ -64,10 +63,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SearchResultGridTile(
-              item: item,
-              onTap: () => tapped = true,
-            ),
+            body: SearchResultGridTile(item: item, onTap: () => tapped = true),
           ),
         ),
       );
@@ -82,30 +78,24 @@ void main() {
     testWidgets('should handle missing poster URL', (tester) async {
       // Test with a widget that has no images
       final widget = SearchResultGridTile(
-        item: const SearchResultItem(
-          data: {'title': 'Test'},
-          type: 'show',
-        ),
+        item: const SearchResultItem(data: {'title': 'Test'}, type: 'show'),
       );
 
       // Test with null images
       expect(widget.getFirstAvailableImage(null), isNull);
-      
+
       // Test with empty images object
       expect(widget.getFirstAvailableImage({}), isNull);
-      
+
       // Test with empty image lists
       expect(
-        widget.getFirstAvailableImage({
-          'poster': [],
-          'thumb': []
-        }), 
-        isNull
+        widget.getFirstAvailableImage({'poster': [], 'thumb': []}),
+        isNull,
       );
-      
+
       // Test with a valid image URL (no http)
       final result = widget.getFirstAvailableImage({
-        'poster': ['example.com/image.jpg']
+        'poster': ['example.com/image.jpg'],
       });
       expect(result, 'https://example.com/image.jpg');
     });
@@ -114,7 +104,9 @@ void main() {
       // Arrange
       final item = SearchResultItem(
         data: {
-          'images': {'poster': ['https://example.com/poster.jpg']}
+          'images': {
+            'poster': ['https://example.com/poster.jpg'],
+          },
         },
         type: 'show',
       );
@@ -122,9 +114,7 @@ void main() {
       // Act
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: SearchResultGridTile(item: item, onTap: () {}),
-          ),
+          home: Scaffold(body: SearchResultGridTile(item: item, onTap: () {})),
         ),
       );
 
@@ -137,18 +127,16 @@ void main() {
       final item = SearchResultItem(
         data: {
           'title': 'Test Show',
-          'images': {'poster': ['https://example.com/poster.jpg']}
+          'images': {
+            'poster': ['https://example.com/poster.jpg'],
+          },
         },
         type: 'show',
       );
 
       // Act & Assert (should not throw)
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultGridTile(item: item),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: SearchResultGridTile(item: item))),
       );
 
       await tester.tap(find.byType(GestureDetector).first);
@@ -160,10 +148,7 @@ void main() {
     test('should return null for null images', () {
       // Arrange
       final widget = SearchResultGridTile(
-        item: const SearchResultItem(
-          data: {},
-          type: 'show',
-        ),
+        item: const SearchResultItem(data: {}, type: 'show'),
       );
 
       // Act
@@ -176,10 +161,7 @@ void main() {
     test('should return first available image URL', () {
       // Arrange
       final widget = SearchResultGridTile(
-        item: const SearchResultItem(
-          data: {},
-          type: 'show',
-        ),
+        item: const SearchResultItem(data: {}, type: 'show'),
       );
 
       final images = {
@@ -198,10 +180,7 @@ void main() {
     test('should fall back to next available image type', () {
       // Arrange
       final widget = SearchResultGridTile(
-        item: const SearchResultItem(
-          data: {},
-          type: 'show',
-        ),
+        item: const SearchResultItem(data: {}, type: 'show'),
       );
 
       final images = {
@@ -219,16 +198,10 @@ void main() {
     test('should handle empty image lists', () {
       // Arrange
       final widget = SearchResultGridTile(
-        item: const SearchResultItem(
-          data: {},
-          type: 'show',
-        ),
+        item: const SearchResultItem(data: {}, type: 'show'),
       );
 
-      final images = {
-        'poster': [],
-        'thumb': [],
-      };
+      final images = {'poster': [], 'thumb': []};
 
       // Act
       final result = widget.getFirstAvailableImage(images);

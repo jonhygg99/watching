@@ -364,7 +364,40 @@
   },
   "noCommentsYet": "No comments yet",
   "@@noCommentsYet": {
-    "description": "Message shown when there are no comments to display"
+    "description": "Message shown when there are no comments yet"
+  },
+  "searchHint": "Search...",
+  "@@searchHint": {
+    "description": "Hint text for search input field"
+  },
+  "movies": "Movies",
+  "@@movies": {
+    "description": "Label for movies filter chip"
+  },
+  "shows": "TV Shows",
+  "@@shows": {
+    "description": "Label for TV shows filter chip"
+  },
+  "selectAtLeastOneType": "Select at least one type (Movie or TV Show)",
+  "@@selectAtLeastOneType": {
+    "description": "Message shown when no media type is selected in search"
+  },
+  "searchError": "Error searching. Please try again.",
+  "@@searchError": {
+    "description": "Error message shown when search fails"
+  },
+  "noSearchTerm": "Enter a search term",
+  "@@noSearchTerm": {
+    "description": "Message shown when no search term is entered"
+  },
+  "noSearchResults": "No results found for \"{query}\"",
+  "@@noSearchResults": {
+    "description": "Message shown when no search results are found",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
   },
   "retry": "Retry",
   "@@retry": {
@@ -426,8 +459,45 @@
   "@@unwatched": {
     "description": "Label for unwatched status"
   },
+  "searchHint": "Search...",
+  "@@searchHint": {
+    "description": "Hint text for search input field"
+  },
+  "movies": "Movies",
+  "@@movies": {
+    "description": "Label for movies filter chip"
+  },
+  "shows": "TV Shows",
+  "@@shows": {
+    "description": "Label for TV shows filter chip"
+  },
+  "selectAtLeastOneType": "Select at least one type (Movie or TV Show)",
+  "@@selectAtLeastOneType": {
+    "description": "Message shown when no media type is selected in search"
+  },
+  "searchError": "Error searching. Please try again.",
+  "@@searchError": {
+    "description": "Error message shown when search fails"
+  },
+  "noSearchTerm": "Enter a search term",
+  "@@noSearchTerm": {
+    "description": "Message shown when no search term is entered"
+  },
+  "noSearchResults": "No results found for \"{query}\"",
+  "@@noSearchResults": {
+    "description": "Message shown when no search results are found",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "errorLoadingComments": "Error loading comments",
   "@@errorLoadingComments": {
     "description": "Error message shown when comments fail to load"
+  },
+  "ok": "OK",
+  "@@ok": {
+    "description": "Text for OK button"
   }
 }

@@ -274,6 +274,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noCommentsYet => 'Aún no hay comentarios';
 
   @override
+  String get searchHint => 'Buscar...';
+
+  @override
+  String get movies => 'Películas';
+
+  @override
+  String get shows => 'Series';
+
+  @override
+  String get selectAtLeastOneType =>
+      'Selecciona al menos un tipo (Película o Serie)';
+
+  @override
+  String get searchError => 'Error al buscar. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get noSearchTerm => 'Ingresa un término de búsqueda';
+
+  @override
+  String noSearchResults(Object query) {
+    return 'No se encontraron resultados para \"$query\"';
+  }
+
+  @override
   String get retry => 'Reintentar';
 
   @override
@@ -320,4 +344,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorLoadingComments => 'Error al cargar los comentarios';
+
+  @override
+  String get ok => 'Aceptar';
 }

@@ -614,6 +614,48 @@ abstract class AppLocalizations {
   /// **'No comments yet'**
   String get noCommentsYet;
 
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get searchHint;
+
+  /// No description provided for @movies.
+  ///
+  /// In en, this message translates to:
+  /// **'Movies'**
+  String get movies;
+
+  /// No description provided for @shows.
+  ///
+  /// In en, this message translates to:
+  /// **'TV Shows'**
+  String get shows;
+
+  /// No description provided for @selectAtLeastOneType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one type (Movie or TV Show)'**
+  String get selectAtLeastOneType;
+
+  /// No description provided for @searchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error searching. Please try again.'**
+  String get searchError;
+
+  /// No description provided for @noSearchTerm.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a search term'**
+  String get noSearchTerm;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found for \"{query}\"'**
+  String noSearchResults(Object query);
+
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:
@@ -709,6 +751,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading comments'**
   String get errorLoadingComments;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
 }
 
 class _AppLocalizationsDelegate

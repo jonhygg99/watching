@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/app_providers.dart';
-import '../api/trakt/show_translation.dart';
-import '../shared/pages/show_details/details_page.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/api/trakt/show_translation.dart';
+import 'package:watching/providers/app_providers.dart';
+import 'package:watching/shared/pages/show_details/details_page.dart';
 import 'search_result_item.dart';
 
 /// Grid for search results using Freezed model and improved tile widget.
@@ -20,8 +21,8 @@ class SearchResultsGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Show message if no types are selected
     if (types.isEmpty) {
-      return const Center(
-        child: Text('Selecciona al menos un tipo (Película o Serie)'),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.selectAtLeastOneType),
       );
     }
 
@@ -40,7 +41,7 @@ class SearchResultsGrid extends ConsumerWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(child: Text('Error al buscar.'));
+          return Center(child: Text(AppLocalizations.of(context)!.searchError));
         }
 
         final results = snapshot.data?['items'] ?? [];
@@ -55,8 +56,8 @@ class SearchResultsGrid extends ConsumerWidget {
           return Center(
             child: Text(
               query.isEmpty
-                  ? 'Ingresa un término de búsqueda'
-                  : 'No se encontraron resultados para "$query".',
+                  ? AppLocalizations.of(context)!.noSearchTerm
+                  : AppLocalizations.of(context)!.noSearchResults(query),
             ),
           );
         }
