@@ -187,42 +187,10 @@ class ShowDetailPage extends HookConsumerWidget {
                         showId: showId,
                       ),
                     ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          top: kSpaceBtwWidgets,
-                          left: kSpacePhoneHorizontal,
-                          right: kSpacePhoneHorizontal,
-                          bottom: 50,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Lo que otros dicen',
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            TextButton.icon(
-                              onPressed: () {
-                                final sortNotifier = ValueNotifier<String>(
-                                  'likes',
-                                );
-                                showAllComments(
-                                  context,
-                                  '', // Empty string as the second positional parameter
-                                  showId: showId,
-                                  sort: sortNotifier,
-                                  sortKeys: commentSortOptions.keys.toList(),
-                                  ref: ref,
-                                );
-                              },
-                              icon: const Icon(Icons.comment_outlined),
-                              label: const Text('Comentarios'),
-                            ),
-                          ],
-                        ),
-                      ),
+                    CommentsSliver(
+                      showId: showId,
+                      sortKeys: commentSortOptions.keys.toList(),
+                      scrollController: scrollController,
                     ),
                   ],
                 );

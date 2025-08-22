@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -12,6 +14,7 @@ class CommentsController extends StateNotifier<CommentsState> {
   final int? seasonNumber;
   final int? episodeNumber;
   final int commentsPerPage = 10;
+  final ScrollController scrollController;
 
   int _currentPage = 1;
   bool _hasMore = true;
@@ -26,9 +29,26 @@ class CommentsController extends StateNotifier<CommentsState> {
     required this.sortValue,
     this.seasonNumber,
     this.episodeNumber,
-  }) : ref = ref,
-       super(CommentsState.initial()) {
+    ScrollController? scrollController,
+  })  : scrollController = scrollController ?? ScrollController(),
+        ref = ref,
+        super(CommentsState.initial()) {
     _loadComments();
+    this.scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_onScroll);
+    // Do not dispose the scroll controller if it was passed in
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (scrollController.position.pixels >=
+        scrollController.position.maxScrollExtent - 200) {
+      loadMore();
+    }
   }
 
   bool get isLoadingMore => _isLoadingMore;
