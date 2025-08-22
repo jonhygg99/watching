@@ -58,7 +58,8 @@ class _CommentsSliverList extends ConsumerStatefulWidget {
   final ScrollController? scrollController;
 
   @override
-  ConsumerState<_CommentsSliverList> createState() => _CommentsSliverListState();
+  ConsumerState<_CommentsSliverList> createState() =>
+      _CommentsSliverListState();
 }
 
 class _CommentsSliverListState extends ConsumerState<_CommentsSliverList> {
@@ -94,6 +95,8 @@ class _CommentsSliverListState extends ConsumerState<_CommentsSliverList> {
 
   @override
   Widget build(BuildContext context) {
+    final isShowDetails =
+        widget.episodeNumber == null && widget.seasonNumber == null;
     return StreamBuilder<CommentsState>(
       stream: _controller.stream,
       builder: (context, snapshot) {
@@ -122,27 +125,39 @@ class _CommentsSliverListState extends ConsumerState<_CommentsSliverList> {
                   top: kSpaceBtwWidgets,
                   bottom: kSpaceBtwTitleWidget,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.comments,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    CommentsSortSelector(
-                      value: widget.sort.value,
-                      sortKeys: widget.sortKeys,
-                      onChanged: (value) {
-                        if (value != null) {
-                          widget.sort.value = value;
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                child:
+                    isShowDetails
+                        ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (isShowDetails)
+                              Text(
+                                AppLocalizations.of(context)!.comments,
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            CommentsSortSelector(
+                              value: widget.sort.value,
+                              sortKeys: widget.sortKeys,
+                              isShowDetails: isShowDetails,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  widget.sort.value = value;
+                                }
+                              },
+                            ),
+                          ],
+                        )
+                        : CommentsSortSelector(
+                          value: widget.sort.value,
+                          sortKeys: widget.sortKeys,
+                          isShowDetails: isShowDetails,
+                          onChanged: (value) {
+                            if (value != null) {
+                              widget.sort.value = value;
+                            }
+                          },
+                        ),
               ),
             ),
             if (state.comments.isEmpty)
@@ -151,9 +166,10 @@ class _CommentsSliverListState extends ConsumerState<_CommentsSliverList> {
               _buildCommentsList(state),
             if (state.hasMore)
               SliverToBoxAdapter(
-                child: _controller.isLoadingMore
-                    ? const CommentsLoadingWidget(isInitialLoad: false)
-                    : const SizedBox.shrink(),
+                child:
+                    _controller.isLoadingMore
+                        ? const CommentsLoadingWidget(isInitialLoad: false)
+                        : const SizedBox.shrink(),
               ),
           ],
         );
@@ -163,12 +179,9 @@ class _CommentsSliverListState extends ConsumerState<_CommentsSliverList> {
 
   Widget _buildCommentsList(CommentsState state) {
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          return CommentTile(comment: state.comments[index]);
-        },
-        childCount: state.comments.length,
-      ),
+      delegate: SliverChildBuilderDelegate((context, index) {
+        return CommentTile(comment: state.comments[index]);
+      }, childCount: state.comments.length),
     );
   }
 
@@ -179,8 +192,8 @@ class _CommentsSliverListState extends ConsumerState<_CommentsSliverList> {
         child: Text(
           AppLocalizations.of(context)!.noCommentsYet,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );
@@ -208,30 +221,43 @@ Future<void> showAllComments(
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
     builder: (context) {
       final scrollController = ScrollController();
-      return Container(
-        height: MediaQuery.of(context).size.height * 0.9,
-        decoration: BoxDecoration(
+      return ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.8,
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: CustomScrollView(
-          controller: scrollController,
-          slivers: [
-            SliverToBoxAdapter(
-              child: _CommentsHeader(onClose: () => Navigator.of(context).pop()),
-            ),
-            const SliverToBoxAdapter(child: Divider(height: 1)),
-            CommentsSliver(
-              showId: showId,
-              sortKeys: sortKeys,
-              seasonNumber: seasonNumber,
-              episodeNumber: episodeNumber,
-              scrollController: scrollController,
-            ),
-          ],
+          child: CustomScrollView(
+            controller: scrollController,
+            physics: const ClampingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                pinned: true,
+                automaticallyImplyLeading: false,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                surfaceTintColor: Colors.transparent,
+                toolbarHeight: kToolbarHeight,
+                elevation: 0,
+                title: _CommentsHeader(
+                  onClose: () => Navigator.of(context).pop(),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor,
+                ),
+              ),
+              CommentsSliver(
+                showId: showId,
+                sortKeys: sortKeys,
+                seasonNumber: seasonNumber,
+                episodeNumber: episodeNumber,
+                scrollController: scrollController,
+              ),
+            ],
+          ),
         ),
       );
     },

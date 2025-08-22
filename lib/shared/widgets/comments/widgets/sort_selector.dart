@@ -6,11 +6,13 @@ class CommentsSortSelector extends StatelessWidget {
   final String value;
   final ValueChanged<String?> onChanged;
   final List<String> sortKeys;
+  final bool isShowDetails;
 
   const CommentsSortSelector({
     super.key,
     required this.value,
     required this.sortKeys,
+    required this.isShowDetails,
     required this.onChanged,
   });
 
@@ -19,12 +21,13 @@ class CommentsSortSelector extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          AppLocalizations.of(context)!.filters,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-        ),
+        if (!isShowDetails)
+          Text(
+            AppLocalizations.of(context)!.filters,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
         DropdownButton<String>(
           value: value,
           underline: const SizedBox(),

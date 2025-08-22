@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/shared/utils/get_image.dart';
 import 'package:watching/shared/widgets/comments/comments_list.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
@@ -181,12 +182,10 @@ class EpisodeInfoModal extends HookConsumerWidget {
               episodeWithWatched['watched'] = isWatched.value;
             }
 
-            final img = _getScreenshotUrl(episodeWithWatched);
+            final img = getScreenshotUrl(episodeWithWatched);
             final imageUrl =
                 img != null
-                    ? (img is String && !img.startsWith('http')
-                        ? 'https://$img'
-                        : img)
+                    ? (!img.startsWith('http') ? 'https://$img' : img)
                     : null;
 
             content = Column(
@@ -245,13 +244,5 @@ class EpisodeInfoModal extends HookConsumerWidget {
         );
       },
     );
-  }
-
-  dynamic _getScreenshotUrl(Map<String, dynamic> episode) {
-    if (episode['images']?['screenshot'] is List &&
-        (episode['images']?['screenshot'] as List).isNotEmpty) {
-      return episode['images']['screenshot'][0];
-    }
-    return null;
   }
 }
