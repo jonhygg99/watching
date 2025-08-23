@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 const kScaffoldDarkBackgroundColor = Color(0xFF1E1C1C);
 const kScaffoldLightBackgroundColor = Colors.white;
 
+// Gradient colors for dark theme
 const kGradientLightColor = Color(0xFFD6C498);
 const kGradientDarkColor = Color(0xFF966D39);
+
+// Gradient colors for light theme
+const kGradientLightColorLight = Color(0xFF6D9EEB);  // Soft blue
+const kGradientDarkColorLight = Color(0xFF3D5A80);   // Darker blue
 
 const kErrorColorMessage = Colors.red;
 

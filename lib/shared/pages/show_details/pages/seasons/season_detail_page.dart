@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
-import 'package:watching/shared/constants/colors.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
@@ -277,7 +276,9 @@ class SeasonDetailPage extends HookConsumerWidget {
                                     }
                                   }
                                   : null,
-                          child: Text(AppLocalizations.of(context)!.previousSeason),
+                          child: Text(
+                            AppLocalizations.of(context)!.previousSeason,
+                          ),
                         ),
 
                         // Season Dropdown

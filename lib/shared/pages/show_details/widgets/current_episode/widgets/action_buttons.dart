@@ -44,8 +44,11 @@ class ActionButtons extends StatelessWidget {
                     : const EdgeInsets.only(right: 4.0),
             child: Container(
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [kGradientLightColor, kGradientDarkColor],
+                gradient: LinearGradient(
+                  colors:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? [kGradientLightColor, kGradientDarkColor]
+                          : [kGradientLightColorLight, kGradientDarkColorLight],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -103,8 +106,10 @@ class ActionButtons extends StatelessWidget {
               padding: const EdgeInsets.only(left: 4.0),
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFD6C498), Color(0xFF966D39)],
+                  gradient: LinearGradient(
+                    colors: Theme.of(context).brightness == Brightness.dark
+                        ? [kGradientLightColor, kGradientDarkColor]
+                        : [kGradientLightColorLight, kGradientDarkColorLight],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
