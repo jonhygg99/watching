@@ -30,9 +30,9 @@ class CommentsController extends StateNotifier<CommentsState> {
     this.seasonNumber,
     this.episodeNumber,
     ScrollController? scrollController,
-  })  : scrollController = scrollController ?? ScrollController(),
-        ref = ref,
-        super(CommentsState.initial()) {
+  }) : scrollController = scrollController ?? ScrollController(),
+       ref = ref,
+       super(CommentsState.initial()) {
     _loadComments();
     this.scrollController.addListener(_onScroll);
   }

@@ -95,15 +95,17 @@ class _CommentsSliverListState extends ConsumerState<_CommentsSliverList> {
 
   @override
   Widget build(BuildContext context) {
-    final isShowDetails =
-        widget.episodeNumber == null && widget.seasonNumber == null;
     return StreamBuilder<CommentsState>(
       stream: _controller.stream,
       builder: (context, snapshot) {
         final state = snapshot.data;
+        final isShowDetails =
+            widget.episodeNumber == null && widget.seasonNumber == null;
 
         if (state == null || state.isInitialLoading) {
-          return const SliverToBoxAdapter(child: CommentsLoadingWidget());
+          return SliverToBoxAdapter(
+            child: CommentsLoadingWidget(isShowDetails: isShowDetails),
+          );
         }
 
         if (state.errorMessage != null) {
