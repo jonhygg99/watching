@@ -34,8 +34,6 @@ class CommentTileSkeleton extends StatelessWidget {
                       Container(height: 12, width: 80, color: highlightColor),
                     ],
                   ),
-                  const Spacer(),
-                  Container(height: 12, width: 60, color: highlightColor),
                 ],
               ),
               const SizedBox(height: 16),

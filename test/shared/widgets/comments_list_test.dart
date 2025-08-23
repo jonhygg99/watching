@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:watching/shared/widgets/comments/widgets/comments_modal.dart';
 import 'package:mockito/mockito.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
@@ -97,9 +98,8 @@ void main() {
         builder:
             (context, ref, _) => TextButton(
               onPressed:
-                  () => showAllComments(
+                  () => CommentsModal.show(
                     context,
-                    '',
                     showId: testShowId,
                     sort: sortNotifier,
                     sortKeys: sortKeys,

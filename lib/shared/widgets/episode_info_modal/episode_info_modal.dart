@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/shared/utils/get_image.dart';
-import 'package:watching/shared/widgets/comments/comments_list.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'services/episode_rating_service.dart';
 import 'widgets/episode_header.dart';
 import 'widgets/episode_details.dart';
 import 'widgets/episode_actions.dart';
+import '../comments/widgets/comments_modal.dart';
 import 'package:watching/shared/constants/sort_options.dart';
 import 'skeleton/episode_info_modal_skeleton.dart';
 
@@ -219,9 +219,8 @@ class EpisodeInfoModal extends HookConsumerWidget {
                           ),
                       onCommentsPressed: () {
                         final sortNotifier = ValueNotifier<String>('likes');
-                        showAllComments(
+                        CommentsModal.show(
                           context,
-                          '',
                           showId: showData['ids']['trakt'].toString(),
                           sort: sortNotifier,
                           sortKeys: commentSortOptions.keys.toList(),
