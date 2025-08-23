@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/colors.dart';
 
 /// A widget that displays a text that can be expanded to show more text.
@@ -26,8 +27,6 @@ class ExpandableText extends StatefulWidget {
   final String text;
   final int maxLines;
   final TextStyle? style;
-  final String expandText;
-  final String collapseText;
   final TextStyle? buttonStyle;
   final Duration animationDuration;
   final Curve animationCurve;
@@ -37,8 +36,6 @@ class ExpandableText extends StatefulWidget {
     super.key,
     this.maxLines = 3,
     this.style,
-    this.expandText = 'Read more',
-    this.collapseText = 'Read less',
     this.buttonStyle,
     this.animationDuration = const Duration(milliseconds: 200),
     this.animationCurve = Curves.easeInOut,
@@ -151,8 +148,8 @@ class _ExpandableTextState extends State<ExpandableText> {
                             final theme = Theme.of(context);
                             final color =
                                 theme.brightness == Brightness.dark
-                                    ? scaffoldLightBackgroundColor
-                                    : scaffoldDarkBackgroundColor;
+                                    ? kScaffoldLightBackgroundColor
+                                    : kScaffoldDarkBackgroundColor;
                             return LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -195,8 +192,9 @@ class _ExpandableTextState extends State<ExpandableText> {
                   MaterialTapTargetSize.shrinkWrap, // Minimize tap target
             ),
             child: Text(
-              // Toggle between 'Read more' and 'Read less' text
-              _isExpanded ? widget.collapseText : widget.expandText,
+              _isExpanded
+                  ? AppLocalizations.of(context)!.readLess
+                  : AppLocalizations.of(context)!.readMore,
               style: widget.buttonStyle ?? const TextStyle(fontSize: 14),
             ),
           ),

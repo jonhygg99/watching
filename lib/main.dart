@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:watching/providers/auth_provider.dart';
-import 'package:watching/discover/discover_page.dart';
-
+import 'package:watching/pages/discover/discover_page.dart';
 import 'package:watching/providers/app_providers.dart';
-import 'package:watching/theme/theme_provider.dart';
-import 'country_list.dart';
+import 'package:watching/providers/locale_provider.dart';
+import 'package:watching/shared/theme/theme_provider.dart';
+import 'shared/constants/country_list.dart';
 import 'splash_wrapper.dart';
-import 'settings/settings.dart';
-import 'watchlist/watchlist_page.dart';
-import 'myshows/my_shows_page.dart';
-import 'search/search_page.dart';
+import 'pages/settings/settings.dart';
+import 'pages/watchlist/watchlist.dart';
+import 'pages/myshows/my_shows_page.dart';
+import 'pages/search/search.dart';
 
 /// Main entry point for the Watching app.
 /// Loads environment and initializes Riverpod.
@@ -40,14 +42,30 @@ class AppRoot extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appThemeMode = ref.watch(themeProvider);
-    
+
     // Map AppThemeMode to Flutter's ThemeMode
-    final themeMode = appThemeMode == AppThemeMode.dark 
-        ? ThemeMode.dark 
-        : (appThemeMode == AppThemeMode.light ? ThemeMode.light : ThemeMode.system);
-    
+    final themeMode =
+        appThemeMode == AppThemeMode.dark
+            ? ThemeMode.dark
+            : (appThemeMode == AppThemeMode.light
+                ? ThemeMode.light
+                : ThemeMode.system);
+
+    final locale = ref.watch(localeProvider);
+
     return MaterialApp(
       title: 'Watching',
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('es'), // Spanish
+      ],
+      locale: locale,
       theme: getLightTheme(),
       darkTheme: getDarkTheme(),
       themeMode: themeMode,

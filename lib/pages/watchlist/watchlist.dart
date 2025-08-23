@@ -1,0 +1,164 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/pages/watchlist/providers/watchlist_providers.dart';
+import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
+import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/pages/watchlist/widgets/loading_skeleton.dart';
+import 'package:watching/pages/watchlist/widgets/watchlist_show_item.dart';
+
+/// Main Watchlist Page - Riverpod + Hooks
+class WatchlistPage extends HookConsumerWidget {
+  const WatchlistPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch the watchlist state
+    final watchlistState = ref.watch(watchlistProvider);
+    final watchlistItems = ref.watch(watchlistItemsProvider);
+    final isLoading = ref.watch(watchlistLoadingProvider);
+    final error = ref.watch(watchlistErrorProvider);
+
+    // Animation state for items being removed
+    final animatingOut = useState<Set<String>>({});
+    final stateUpdater = useState(0); // For forcing rebuilds
+
+    // Refresh the watchlist data
+    Future<void> refreshWatchlist() async {
+      await ref.read(watchlistProvider.notifier).refresh();
+    }
+
+    // Handle type change
+    void handleTypeChange(WatchlistType? newType) {
+      if (newType != null) {
+        ref.read(watchlistTypeProvider.notifier).state = newType;
+        refreshWatchlist();
+      }
+    }
+
+    // Show error dialog if there's an error
+    if (error != null && !watchlistState.hasData) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: Text(AppLocalizations.of(context)!.errorLoadingData),
+                content: Text(error.toString()),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(AppLocalizations.of(context)!.ok),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      refreshWatchlist();
+                    },
+                    child: Text(AppLocalizations.of(context)!.retry),
+                  ),
+                ],
+              ),
+        );
+      });
+    }
+
+    return RefreshIndicator(
+      onRefresh: refreshWatchlist,
+      child: Column(
+        children: [
+          // Type selector
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12.0,
+              horizontal: 16.0,
+            ),
+            child: Row(
+              children: [
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButton<WatchlistType>(
+                    value: ref.watch(watchlistTypeProvider),
+                    items: [
+                      DropdownMenuItem(
+                        value: WatchlistType.shows,
+                        child: Text(AppLocalizations.of(context)!.shows),
+                      ),
+                      DropdownMenuItem(
+                        value: WatchlistType.movies,
+                        child: Text(AppLocalizations.of(context)!.movies),
+                      ),
+                    ],
+                    onChanged: handleTypeChange,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Main content
+          Expanded(
+            child: Builder(
+              builder: (context) {
+                // Show empty state if no items and not loading
+                if (watchlistItems.isEmpty && !isLoading) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(kSpacePhoneHorizontal),
+                      child: Text(
+                        AppLocalizations.of(context)!.noItemsInWatchlist,
+                        style: const TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
+
+                // Show shimmer/skeleton loading if no data yet
+                if (watchlistItems.isEmpty && isLoading) {
+                  return const LoadingSkeleton();
+                }
+
+                // Show the list of items
+                return ListView.builder(
+                  itemCount: watchlistItems.length,
+                  itemBuilder: (context, index) {
+                    final item = watchlistItems[index];
+                    final ids = item['show']?['ids'] ?? item['ids'];
+                    final traktId = ids?['trakt']?.toString() ?? ids?['slug'];
+
+                    if (traktId == null) return const SizedBox.shrink();
+
+                    return WatchlistShowItem(
+                      key: ValueKey(traktId),
+                      item: item,
+                      animatingOut: animatingOut.value,
+                      onFullyWatched: (traktId) {
+                        // Update UI optimistically
+                        animatingOut.value = {...animatingOut.value, traktId};
+                        stateUpdater.value++;
+
+                        // Remove from list after animation and refresh show progress
+                        Future.delayed(
+                          const Duration(milliseconds: 300),
+                          () async {
+                            await ref
+                                .read(watchlistProvider.notifier)
+                                .updateShowProgress(traktId);
+                            animatingOut.value = {};
+                            stateUpdater.value++;
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

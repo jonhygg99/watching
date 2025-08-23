@@ -1,3 +1,5 @@
+import 'package:watching/l10n/app_localizations.dart';
+
 /// Status values for TV shows
 class ShowStatus {
   /// The show is currently airing new episodes
@@ -49,5 +51,26 @@ class ShowStatus {
       canceled,
       ended,
     ].contains(status);
+  }
+
+  /// Get the translated status string based on the status value
+  static String getTranslatedStatus(String status, AppLocalizations l10n) {
+    final statusLower = status.toLowerCase();
+    if (statusLower.contains('returning')) {
+      return l10n.showStatusReturningSeries;
+    } else if (statusLower.contains('production')) {
+      return l10n.showStatusInProduction;
+    } else if (statusLower.contains('planned')) {
+      return l10n.showStatusPlanned;
+    } else if (statusLower.contains('upcoming')) {
+      return l10n.showStatusUpcoming;
+    } else if (statusLower.contains('pilot')) {
+      return l10n.showStatusPilot;
+    } else if (statusLower.contains('cancel')) {
+      return l10n.showStatusCanceled;
+    } else if (statusLower.contains('ended')) {
+      return l10n.showStatusEnded;
+    }
+    return status;
   }
 }

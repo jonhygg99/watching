@@ -1,0 +1,679 @@
+{
+  "@@locale": "en",
+  "appTitle": "Watching",
+  "@@appTitle": {
+    "description": "The title of the application"
+  },
+  "language": "Language",
+  "@@language": {
+    "description": "Label for language selection"
+  },
+  "settings": "Settings",
+  "@@settings": {
+    "description": "Title for the settings screen"
+  },
+  "discover": "Discover",
+  "@@discover": {
+    "description": "Tab label for the discover section"
+  },
+  "relatedShows": "Related Shows",
+  "@@relatedShows": {
+    "description": "Title for the related shows section"
+  },
+  "videos": "Videos",
+  "@@videos": {
+    "description": "Title for the videos section"
+  },
+  "viewMore": "View More",
+  "@@viewMore": {
+    "description": "Text for view more button"
+  },
+  "watchlist": "Watchlist",
+  "@@watchlist": {
+    "description": "Tab label for the user's watchlist"
+  },
+  "myShows": "My Shows",
+  "@@myShows": {
+    "description": "Tab label for the user's shows collection"
+  },
+  "search": "Search",
+  "@@search": {
+    "description": "Label for the search tab"
+  },
+  "trendingShows": "Trending Shows",
+  "@@trendingShows": {
+    "description": "Title for trending shows carousel"
+  },
+  "popularShows": "Popular Shows",
+  "@@popularShows": {
+    "description": "Title for popular shows carousel"
+  },
+  "showStatusReturningSeries": "Returning Series",
+  "@@showStatusReturningSeries": {
+    "description": "Show status: The show is currently airing new episodes"
+  },
+  "showStatusInProduction": "In Production",
+  "@@showStatusInProduction": {
+    "description": "Show status: The show is still in production"
+  },
+  "showStatusPlanned": "Planned",
+  "@@showStatusPlanned": {
+    "description": "Show status: The show is planned for future release"
+  },
+  "showStatusUpcoming": "Upcoming",
+  "@@showStatusUpcoming": {
+    "description": "Show status: The show is upcoming"
+  },
+  "showStatusPilot": "Pilot",
+  "@@showStatusPilot": {
+    "description": "Show status: The show is a pilot episode"
+  },
+  "showStatusCanceled": "Canceled",
+  "@@showStatusCanceled": {
+    "description": "Show status: The show has been canceled"
+  },
+  "showStatusEnded": "Ended",
+  "@@showStatusEnded": {
+    "description": "Show status: The show has ended"
+  },
+  "genreAction": "Action",
+  "@@genreAction": {
+    "description": "Genre: Action"
+  },
+  "genreAdventure": "Adventure",
+  "@@genreAdventure": {
+    "description": "Genre: Adventure"
+  },
+  "genreAnimation": "Animation",
+  "@@genreAnimation": {
+    "description": "Genre: Animation"
+  },
+  "genreAnime": "Anime",
+  "@@genreAnime": {
+    "description": "Genre: Anime"
+  },
+  "genreComedy": "Comedy",
+  "@@genreComedy": {
+    "description": "Genre: Comedy"
+  },
+  "genreCrime": "Crime",
+  "@@genreCrime": {
+    "description": "Genre: Crime"
+  },
+  "genreDisaster": "Disaster",
+  "@@genreDisaster": {
+    "description": "Genre: Disaster"
+  },
+  "genreDocumentary": "Documentary",
+  "@@genreDocumentary": {
+    "description": "Genre: Documentary"
+  },
+  "genreDonghua": "Donghua",
+  "@@genreDonghua": {
+    "description": "Genre: Donghua"
+  },
+  "genreDrama": "Drama",
+  "@@genreDrama": {
+    "description": "Genre: Drama"
+  },
+  "genreEastern": "Eastern",
+  "@@genreEastern": {
+    "description": "Genre: Eastern"
+  },
+  "genreFamily": "Family",
+  "@@genreFamily": {
+    "description": "Genre: Family"
+  },
+  "genreFanFilm": "Fan Film",
+  "@@genreFanFilm": {
+    "description": "Genre: Fan Film"
+  },
+  "genreFantasy": "Fantasy",
+  "@@genreFantasy": {
+    "description": "Genre: Fantasy"
+  },
+  "genreFilmNoir": "Film Noir",
+  "@@genreFilmNoir": {
+    "description": "Genre: Film Noir"
+  },
+  "genreHistory": "History",
+  "@@genreHistory": {
+    "description": "Genre: History"
+  },
+  "genreHoliday": "Holiday",
+  "@@genreHoliday": {
+    "description": "Genre: Holiday"
+  },
+  "genreHorror": "Horror",
+  "@@genreHorror": {
+    "description": "Genre: Horror"
+  },
+  "genreIndie": "Indie",
+  "@@genreIndie": {
+    "description": "Genre: Indie"
+  },
+  "genreMusic": "Music",
+  "@@genreMusic": {
+    "description": "Genre: Music"
+  },
+  "genreMusical": "Musical",
+  "@@genreMusical": {
+    "description": "Genre: Musical"
+  },
+  "genreMystery": "Mystery",
+  "@@genreMystery": {
+    "description": "Genre: Mystery"
+  },
+  "genreNone": "None",
+  "@@genreNone": {
+    "description": "Genre: None"
+  },
+  "genreRoad": "Road",
+  "@@genreRoad": {
+    "description": "Genre: Road"
+  },
+  "genreRomance": "Romance",
+  "@@genreRomance": {
+    "description": "Genre: Romance"
+  },
+  "genreScienceFiction": "Science Fiction",
+  "@@genreScienceFiction": {
+    "description": "Genre: Science Fiction"
+  },
+  "genreShort": "Short",
+  "@@genreShort": {
+    "description": "Genre: Short"
+  },
+  "genreSports": "Sports",
+  "@@genreSports": {
+    "description": "Genre: Sports"
+  },
+  "genreSportingEvent": "Sporting Event",
+  "@@genreSportingEvent": {
+    "description": "Genre: Sporting Event"
+  },
+  "genreSuspense": "Suspense",
+  "@@genreSuspense": {
+    "description": "Genre: Suspense"
+  },
+  "genreThriller": "Thriller",
+  "@@genreThriller": {
+    "description": "Genre: Thriller"
+  },
+  "genreTvMovie": "TV Movie",
+  "@@genreTvMovie": {
+    "description": "Genre: TV Movie"
+  },
+  "genreWar": "War",
+  "@@genreWar": {
+    "description": "Genre: War"
+  },
+  "genreWestern": "Western",
+  "@@genreWestern": {
+    "description": "Genre: Western"
+  },
+  "runtimeMinutes": "{minutes} min",
+  "@@runtimeMinutes": {
+    "description": "Runtime duration in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "compactLong"
+      }
+    }
+  },
+  "noVideosMatchingFilters": "No videos match the filters",
+  "@@noVideosMatchingFilters": {
+    "description": "Message shown when no videos match the selected filters"
+  },
+  "noTitle": "No title",
+  "@@noTitle": {
+    "description": "Default text shown when a video has no title"
+  },
+  "mostFavoritedWeekly": "Most Favorited (7 days)",
+  "@@mostFavoritedWeekly": {
+    "description": "Title for most favorited shows weekly carousel"
+  },
+  "mostFavoritedMonthly": "Most Favorited (30 days)",
+  "@@mostFavoritedMonthly": {
+    "description": "Title for most favorited shows monthly carousel"
+  },
+  "errorLoadingMoreShows": "Error loading more shows",
+  "@@errorLoadingMoreShows": {
+    "description": "Error message shown when more shows fail to load"
+  },
+  "noShowsAvailable": "No shows available",
+  "@@noShowsAvailable": {
+    "description": "Message shown when no shows are available to display"
+  },
+  "mostCollectedWeekly": "Most Collected (7 days)",
+  "@@mostCollectedWeekly": {
+    "description": "Title for most collected shows weekly carousel"
+  },
+  "mostPlayedWeekly": "Most Played (7 days)",
+  "@@mostPlayedWeekly": {
+    "description": "Title for most played shows weekly carousel"
+  },
+  "mostWatchedWeekly": "Most Watched (7 days)",
+  "@@mostWatchedWeekly": {
+    "description": "Title for most watched shows weekly carousel"
+  },
+  "mostAnticipated": "Most Anticipated",
+  "@@mostAnticipated": {
+    "description": "Title for most anticipated shows carousel"
+  },
+  "english": "English",
+  "@@english": {
+    "description": "English language option"
+  },
+  "spanish": "Spanish",
+  "@@spanish": {
+    "description": "Spanish language option"
+  },
+  "noResults": "No results found",
+  "@@noResults": {
+    "description": "Message shown when no results are available"
+  },
+  "selectLanguage": "Select Language",
+  "@@selectLanguage": {
+    "description": "Title for language selection dialog"
+  },
+  "theme": "Theme",
+  "@@theme": {
+    "description": "Label for theme selection section"
+  },
+  "light": "Light",
+  "@@light": {
+    "description": "Light theme option"
+  },
+  "dark": "Dark",
+  "@@dark": {
+    "description": "Dark theme option"
+  },
+  "noDataFound": "No data found",
+  "@@noDataFound": {
+    "description": "Message shown when no data is available to display"
+  },
+  "system": "System",
+  "@@system": {
+    "description": "System default theme option"
+  },
+  "revokeToken": "Revoke Trakt.tv Token",
+  "@@revokeToken": {
+    "description": "Button label to revoke Trakt.tv authentication"
+  },
+  "country": "Country",
+  "@@country": {
+    "description": "Label for country selection"
+  },
+  "changeCountry": "Change Country",
+  "@@changeCountry": {
+    "description": "Button label to change the country setting"
+  },
+  "user": "User",
+  "@@user": {
+    "description": "Label for user account section"
+  },
+  "noImage": "No image",
+  "@@noImage": {
+    "description": "Placeholder text when no image is available"
+  },
+  "noVideosAvailable": "No videos available",
+  "@@noVideosAvailable": {
+    "description": "Message shown when no videos are available to display"
+  },
+  "seasonEpisodeFormat": "S{season} E{episode}",
+  "@@seasonEpisodeFormat": {
+    "description": "Format for displaying season and episode numbers (e.g., S1E1)",
+    "placeholders": {
+      "season": {
+        "type": "int",
+        "format": "compact"
+      },
+      "episode": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "errorLoadingData": "Error loading data",
+  "@@errorLoadingData": {
+    "description": "Error message shown when there is an issue loading data"
+  },
+  "episodeNumber": "Episode {episodeNumber}",
+  "@@episodeNumber": {
+    "description": "Fallback text when an episode has no title, showing just the episode number",
+    "placeholders": {
+      "episodeNumber": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "allEpisodesWatched": "All episodes watched",
+  "@@allEpisodesWatched": {
+    "description": "Message shown when all episodes of a show have been watched"
+  },
+  "checkOutAllEpisodes": "Check Out All Episodes",
+  "@@checkOutAllEpisodes": {
+    "description": "Button label to view all episodes of a show"
+  },
+  "episodeInfo": "Episode Info",
+  "@@episodeInfo": {
+    "description": "Section header for episode information"
+  },
+  "errorMarkingEpisode": "Error marking episode",
+  "@@errorMarkingEpisode": {
+    "description": "Error message shown when there's an error marking an episode as watched/unwatched"
+  },
+  "markingAsUnwatched": "Marking as unwatched...",
+  "@@markingAsUnwatched": {
+    "description": "Loading message shown when marking an episode as unwatched"
+  },
+  "markingAsWatched": "Marking as watched...",
+  "@@markingAsWatched": {
+    "description": "Loading message shown when marking an episode as watched"
+  },
+  "noCommentsYet": "No comments yet",
+  "@@noCommentsYet": {
+    "description": "Message shown when there are no comments yet"
+  },
+  "searchHint": "Search...",
+  "@@searchHint": {
+    "description": "Hint text for search input field"
+  },
+  "movies": "Movies",
+  "@@movies": {
+    "description": "Label for movies filter chip"
+  },
+  "shows": "TV Shows",
+  "@@shows": {
+    "description": "Label for TV shows filter chip"
+  },
+  "selectAtLeastOneType": "Select at least one type (Movie or TV Show)",
+  "@@selectAtLeastOneType": {
+    "description": "Message shown when no media type is selected in search"
+  },
+  "searchError": "Error searching. Please try again.",
+  "@@searchError": {
+    "description": "Error message shown when search fails"
+  },
+  "noSearchTerm": "Enter a search term",
+  "@@noSearchTerm": {
+    "description": "Message shown when no search term is entered"
+  },
+  "noSearchResults": "No results found for \"{query}\"",
+  "@@noSearchResults": {
+    "description": "Message shown when no search results are found",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "retry": "Retry",
+  "@@retry": {
+    "description": "Button label to retry an action"
+  },
+  "spoiler": "SPOILER",
+  "@@spoiler": {
+    "description": "Label indicating a comment contains spoilers"
+  },
+  "review": "REVIEW",
+  "@@review": {
+    "description": "Label indicating that a comment is a review"
+  },
+  "sortOptionLikes": "Most Likes",
+  "@@sortOptionLikes": {
+    "description": "Sort by most likes"
+  },
+  "sortOptionNewest": "Newest",
+  "@@sortOptionNewest": {
+    "description": "Sort by newest"
+  },
+  "sortOptionOldest": "Oldest",
+  "@@sortOptionOldest": {
+    "description": "Sort by oldest"
+  },
+  "sortOptionReplies": "Most Replies",
+  "@@sortOptionReplies": {
+    "description": "Sort by most replies"
+  },
+  "sortOptionHighest": "Highest Rated",
+  "@@sortOptionHighest": {
+    "description": "Sort by highest rated"
+  },
+  "sortOptionLowest": "Lowest Rated",
+  "@@sortOptionLowest": {
+    "description": "Sort by lowest rated"
+  },
+  "sortOptionPlays": "Most Plays",
+  "@@sortOptionPlays": {
+    "description": "Sort by most plays"
+  },
+  "sortOptionWatched": "Most Watched",
+  "@@sortOptionWatched": {
+    "description": "Sort by most watched"
+  },
+  "filters": "Filters",
+  "@@filters": {
+    "description": "Label for the filters section"
+  },
+  "comments": "Comments",
+  "@@comments": {
+    "description": "Title for the comments section"
+  },
+  "watched": "Watched",
+  "@@watched": {
+    "description": "Label for watched status"
+  },
+  "unwatched": "Not watched",
+  "@@unwatched": {
+    "description": "Label for unwatched status"
+  },
+  "searchHint": "Search...",
+  "@@searchHint": {
+    "description": "Hint text for search input field"
+  },
+  "movies": "Movies",
+  "@@movies": {
+    "description": "Label for movies filter chip"
+  },
+  "shows": "TV Shows",
+  "@@shows": {
+    "description": "Label for TV shows filter chip"
+  },
+  "selectAtLeastOneType": "Select at least one type (Movie or TV Show)",
+  "@@selectAtLeastOneType": {
+    "description": "Message shown when no media type is selected in search"
+  },
+  "searchError": "Error searching. Please try again.",
+  "@@searchError": {
+    "description": "Error message shown when search fails"
+  },
+  "noSearchTerm": "Enter a search term",
+  "@@noSearchTerm": {
+    "description": "Message shown when no search term is entered"
+  },
+  "noSearchResults": "No results found for \"{query}\"",
+  "@@noSearchResults": {
+    "description": "Message shown when no search results are found",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "errorLoadingComments": "Error loading comments",
+  "@@errorLoadingComments": {
+    "description": "Error message shown when comments fail to load"
+  },
+  "ok": "OK",
+  "@@ok": {
+    "description": "Text for OK button"
+  },
+  "noProgressAvailable": "No progress available",
+  "@@noProgressAvailable": {
+    "description": "Message shown when no progress data is available for a show"
+  },
+  "authenticationError": "Error verifying authentication",
+  "@@authenticationError": {
+    "description": "Error message shown when there's an issue with authentication"
+  },
+  "noItemsInWatchlist": "No items in watchlist",
+  "@@noItemsInWatchlist": {
+    "description": "Message shown when the watchlist is empty"
+  },
+  "endedShows": "Ended Shows",
+  "@@endedShows": {
+    "description": "Title for the ended shows section"
+  },
+  "upcomingShows": "Upcoming Shows",
+  "@@upcomingShows": {
+    "description": "Title for the upcoming shows section"
+  },
+  "errorLoadingShows": "Error loading shows",
+  "@@errorLoadingShows": {
+    "description": "Error message shown when there's an error loading shows"
+  },
+  "errorLoadingUpcomingEpisodes": "Error loading upcoming episodes",
+  "@@errorLoadingUpcomingEpisodes": {
+    "description": "Error message shown when there's an error loading upcoming episodes"
+  },
+  "episodeAired": "Aired",
+  "@@episodeAired": {
+    "description": "Text shown for episodes that have already aired"
+  },
+  "episodeToday": "Today",
+  "@@episodeToday": {
+    "description": "Text shown for episodes airing today"
+  },
+  "episodeDaysAway": "{days} days",
+  "@@episodeDaysAway": {
+    "description": "Text shown for future episodes, showing number of days until airing",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  },
+  "calendarDataError": "Error loading calendar data",
+  "@@calendarDataError": {
+    "description": "Error message shown when there's an issue loading calendar data"
+  },
+  "upcomingEpisodes": "Upcoming Episodes",
+  "@@upcomingEpisodes": {
+    "description": "Title for the upcoming episodes section"
+  },
+  "noShowsFound": "No shows found",
+  "@@noShowsFound": {
+    "description": "Message shown when no shows are found in the search results"
+  },
+  "noEpisodeInfo": "No episode information available",
+  "@@noEpisodeInfo": {
+    "description": "Message shown when there is no information available for an episode"
+  },
+  "removeFromHistory": "Remove from history",
+  "@@removeFromHistory": {
+    "description": "Tooltip text for removing an episode from watch history"
+  },
+  "markAsWatched": "Mark as watched",
+  "@@markAsWatched": {
+    "description": "Tooltip text for marking an episode as watched"
+  },
+  "previousSeason": "Previous Season",
+  "@@previousSeason": {
+    "description": "Text for the previous season navigation button"
+  },
+  "nextSeason": "Next Season",
+  "@@nextSeason": {
+    "description": "Text for the next season navigation button"
+  },
+  "seasonTitle": "Season {seasonNumber}",
+  "@@seasonTitle": {
+    "description": "Title for the season detail page with the season number",
+    "placeholders": {
+      "seasonNumber": {
+        "type": "int",
+        "format": "compact",
+        "optionalParameters": {
+          "compact": {}
+        }
+      }
+    }
+  },
+  "readMore": "Read more",
+  "@@readMore": {
+    "description": "Text for the 'Read more' button in expandable text"
+  },
+  "readLess": "Read less",
+  "@@readLess": {
+    "description": "Text for the 'Read less' button in expandable text"
+  },
+  "monthNamesShort": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
+  "@@monthNamesShort": {
+    "description": "Comma-separated list of short month names (3 letters) for date formatting"
+  },
+  "loginTitle": "Login / Register",
+  "@@loginTitle": {
+    "description": "Title for the login/registration page"
+  },
+  "loginWithTrakt": "Login with Trakt.tv",
+  "@@loginWithTrakt": {
+    "description": "Text for the login button"
+  },
+  "signupWithTrakt": "Sign up with Trakt.tv",
+  "@@signupWithTrakt": {
+    "description": "Text for the signup button"
+  },
+  "browserOpenError": "Could not open browser",
+  "@@browserOpenError": {
+    "description": "Error message when browser fails to open"
+  },
+  "enterCodeError": "Please enter the code",
+  "@@enterCodeError": {
+    "description": "Error message when no code is entered"
+  },
+  "invalidCodeError": "Incorrect or expired code",
+  "@@invalidCodeError": {
+    "description": "Error message when an invalid or expired code is entered"
+  },
+  "authCodeLabel": "Authorization Code",
+  "@@authCodeLabel": {
+    "description": "Label for the authorization code input field"
+  },
+  "submitCodeButton": "Submit Code",
+  "@@submitCodeButton": {
+    "description": "Text for the submit code button"
+  },
+  "greeting": "Hello, {username}",
+  "@greeting": {
+    "description": "Greeting message with username",
+    "placeholders": {
+      "username": {}
+    }
+  },
+  "daysLeftText": "days",
+  "@@daysLeftText": {
+    "description": "Text shown for the number of days left until the next episode"
+  },
+  "seasonPremiere": "Season Premiere",
+  "@@seasonPremiere": {
+    "description": "Text shown for a season premiere episode"
+  },
+  "hideEpisodes": "Hide episodes",
+  "@@hideEpisodes": {
+    "description": "Text for the button to hide episodes"
+  },
+  "showMoreEpisodes": "Show {count} more episodes",
+  "@@showMoreEpisodes": {
+    "description": "Text for the button to show more episodes",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "compact"
+      }
+    }
+  }
+}

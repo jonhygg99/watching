@@ -285,12 +285,7 @@ mixin ShowsApi on TraktApiBase {
       if (response.statusCode == 200) {
         final videos = jsonDecode(response.body) as List<dynamic>;
         return videos
-            .where(
-              (v) =>
-                  v is Map<String, dynamic> &&
-                  v['site'] == 'youtube' &&
-                  v['type'] == 'trailer',
-            )
+            .where((v) => v is Map<String, dynamic> && v['site'] == 'youtube')
             .toList();
       } else if (response.statusCode == 401) {
         if (kDebugMode) {

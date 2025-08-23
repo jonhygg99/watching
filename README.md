@@ -1,5 +1,48 @@
 # watching
 
+## Internationalization (i18n) & Localization
+
+The app supports multiple languages using Flutter's built-in localization system. Here's how to work with translations:
+
+### Adding New Translations
+
+1. **Edit the ARB files** in `lib/l10n/`:
+
+   - `app_en.arb` - English translations
+   - `app_es.arb` - Spanish translations
+
+2. **Add a new translation** by adding a new key-value pair and its description:
+
+   ```json
+   "keyName": "Translated text",
+   "@@keyName": {
+     "description": "Context or usage description for translators"
+   }
+   ```
+
+3. **Run the code generator** to update the localization files:
+
+   ```bash
+   flutter gen-l10n
+   ```
+
+4. **Use the translation** in your code:
+   ```dart
+   Text(AppLocalizations.of(context)!.keyName)
+   ```
+
+### Supported Languages
+
+- English (en) - Default
+- Spanish (es) - Español
+
+### Adding a New Language
+
+1. Create a new ARB file `app_XX.arb` where XX is the language code
+2. Copy the structure from `app_en.arb`
+3. Add translations for all keys
+4. Update `supportedLocales` in `lib/main.dart`
+
 ## Trakt.tv API Usage
 
 ### Pagination
@@ -102,8 +145,6 @@ Trakt can return images by appending `?extended=images` to most URLs. This will 
 > **NOTE**
 >
 > All images are returned in WebP format for reduced file size, at the same image quality. You'll also need to prepend the `https://` prefix to all image URLs.
-
-You are an expert Flutter and Dart assistant. Refactor, clean up, and improve any Dart/Flutter code according to the **Windsurf Development Guidelines** documented in @rules.md
 
 ## 📌 Key Instructions
 

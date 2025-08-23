@@ -8,7 +8,7 @@ import 'dart:async' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i3;
 import 'package:riverpod/src/internals.dart' as _i2;
-import 'package:watching/features/watchlist/services/watchlist_episode_service.dart'
+import 'package:watching/pages/watchlist/services/watchlist_episode_service.dart'
     as _i4;
 
 import 'watchlist_processor_test.dart' as _i6;
