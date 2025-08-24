@@ -22,7 +22,9 @@ class LoadingIndicator extends StatelessWidget {
       bottom: 0,
       child: Container(
         height: height,
-        color: Theme.of(context).scaffoldBackgroundColor.withOpacity(alpha),
+        color: Theme.of(
+          context,
+        ).scaffoldBackgroundColor.withValues(alpha: alpha),
         child: const Center(
           child: SizedBox(
             width: 24,

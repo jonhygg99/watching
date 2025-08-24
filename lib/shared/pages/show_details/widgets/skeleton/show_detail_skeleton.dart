@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:watching/shared/constants/colors.dart';
 
 import 'widgets/skeleton_header.dart';
 import 'widgets/skeleton_episode.dart';
@@ -18,10 +19,15 @@ class ShowDetailSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final baseColor =
+        (isDark ? kSkeletonBaseColorDark : kSkeletonBaseColorLight)!;
+    final highlightColor =
+        (isDark ? kSkeletonHighlightColorDark : kSkeletonHighlightColorLight)!;
 
     return Shimmer.fromColors(
-      baseColor: theme.colorScheme.surfaceContainerHighest,
-      highlightColor: theme.colorScheme.surface,
+      baseColor: baseColor,
+      highlightColor: highlightColor,
       child: CustomScrollView(
         slivers: [
           const SkeletonHeader(),

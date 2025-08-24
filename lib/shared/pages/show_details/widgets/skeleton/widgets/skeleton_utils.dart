@@ -33,7 +33,7 @@ class SkeletonContainer extends StatelessWidget {
 
 class SkeletonSpacer extends StatelessWidget {
   final double height;
-  
+
   const SkeletonSpacer({super.key, this.height = 24.0});
 
   @override
