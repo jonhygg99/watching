@@ -106,6 +106,8 @@ class _ProgressDetails extends StatelessWidget {
         Theme.of(
           context,
         ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,16 +121,38 @@ class _ProgressDetails extends StatelessWidget {
           ),
         if (nextEpisode != null) ...[
           const SizedBox(height: kSpaceBtwTitleWidget),
-          Text(
-            '${AppLocalizations.of(context)!.seasonEpisodeFormat(nextEpisode['number'], nextEpisode['season'])} - ${nextEpisode['title']}',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Text(
+                  '${AppLocalizations.of(context)!.seasonEpisodeFormat(nextEpisode['number'], nextEpisode['season'])} · ${nextEpisode['title']}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$episodesWatched/$totalEpisodes',
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: kSpaceBtwTitleWidget),
           TinyProgressBar(
             percent: percent,
             watched: episodesWatched,
             total: totalEpisodes,
+            showText: true,
           ),
           const SizedBox(height: kSpaceBtwTitleWidget),
           EpisodeInfoButton(

@@ -88,34 +88,18 @@ class LoadingSkeleton extends StatelessWidget {
                   ), // Matches the SizedBox(height: 6) in _ProgressDetails
                   child: Row(
                     children: [
-                      // Progress bar track and fill
+                      // Progress bar (matches TinyProgressBar)
                       Expanded(
-                        child: Stack(
-                          children: [
-                            // Track
-                            Container(
-                              height: 16,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            // Fill (40% width as a placeholder)
-                            FractionallySizedBox(
-                              widthFactor: 0.4,
-                              child: Container(
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[400],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: Container(
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
                       ),
                       // Progress text (bodySmall style)
-                      const SizedBox(width: 10), // Matches ProgressBar spacing
+                      const SizedBox(width: 10),
                       Container(
                         width: 40, // Approximate width for "X/Y" text
                         height:
@@ -123,7 +107,10 @@ class LoadingSkeleton extends StatelessWidget {
                                 ? textTheme.bodySmall!.fontSize! *
                                     1.4 // Account for line height
                                 : 16,
-                        color: Colors.grey[300],
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ],
                   ),

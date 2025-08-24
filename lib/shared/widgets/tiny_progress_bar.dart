@@ -5,12 +5,14 @@ class TinyProgressBar extends StatelessWidget {
   final double percent;
   final int watched;
   final int total;
+  final bool showText;
 
   const TinyProgressBar({
     super.key,
     required this.percent,
     required this.watched,
     required this.total,
+    this.showText = false,
   });
 
   @override
@@ -23,9 +25,10 @@ class TinyProgressBar extends StatelessWidget {
               Container(
                 height: 5,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Color(0xFF3E3D39)
-                      : Colors.grey[300],
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Color(0xFF3E3D39)
+                          : Colors.grey[300],
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -35,9 +38,13 @@ class TinyProgressBar extends StatelessWidget {
                   height: 5,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: Theme.of(context).brightness == Brightness.dark
-                          ? [kGradientLightColor, kGradientDarkColor]
-                          : [kGradientLightColorLight, kGradientDarkColorLight],
+                      colors:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? [kGradientLightColor, kGradientDarkColor]
+                              : [
+                                kGradientLightColorLight,
+                                kGradientDarkColorLight,
+                              ],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),
