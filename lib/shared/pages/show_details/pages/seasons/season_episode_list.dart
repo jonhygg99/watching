@@ -79,7 +79,12 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      padding: const EdgeInsets.only(
+        left: kSpacePhoneHorizontal,
+        right: kSpacePhoneHorizontal,
+        top: 10,
+        bottom: 30,
+      ),
       itemCount: widget.episodes.length,
       itemBuilder: (BuildContext context, int idx) {
         final Map<String, dynamic> ep = widget.episodes[idx];
@@ -89,7 +94,7 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
         final String? imageUrl = getScreenshotUrl(ep);
 
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+          margin: const EdgeInsets.symmetric(vertical: 5.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.0),
           ),
@@ -99,7 +104,6 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
               // Existing tap handler code
               final epInfo = await _fetchEpisodeInfo(epNumber);
               if (!mounted) return;
-
               showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,

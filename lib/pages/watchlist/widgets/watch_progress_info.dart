@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/shared/widgets/progress_bar.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'package:watching/pages/watchlist/widgets/episode_info_button.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
@@ -51,7 +50,10 @@ class WatchProgressInfo extends StatelessWidget {
         children: [
           if (titleStyle != null) Text(title, style: titleStyle),
           const SizedBox(height: 8),
-          Text(AppLocalizations.of(context)!.noProgressAvailable, style: TextStyle(color: Colors.grey)),
+          Text(
+            AppLocalizations.of(context)!.noProgressAvailable,
+            style: TextStyle(color: Colors.grey),
+          ),
         ],
       );
     }
@@ -104,8 +106,7 @@ class _ProgressDetails extends StatelessWidget {
         Theme.of(
           context,
         ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
-    final effectiveEpisodeStyle =
-        episodeStyle ?? Theme.of(context).textTheme.bodyMedium;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -122,7 +123,6 @@ class _ProgressDetails extends StatelessWidget {
             '${AppLocalizations.of(context)!.seasonEpisodeFormat(nextEpisode['number'], nextEpisode['season'])} - ${nextEpisode['title']}',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: effectiveEpisodeStyle?.copyWith(color: Colors.grey[700]),
           ),
           const SizedBox(height: kSpaceBtwTitleWidget),
           TinyProgressBar(
