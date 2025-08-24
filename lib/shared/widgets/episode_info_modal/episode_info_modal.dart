@@ -10,7 +10,7 @@ import 'widgets/episode_details.dart';
 import 'widgets/episode_actions.dart';
 import '../comments/widgets/comments_modal.dart';
 import 'package:watching/shared/constants/sort_options.dart';
-import 'skeleton/episode_info_modal_skeleton.dart';
+import 'widgets/skeleton/skeleton.dart';
 
 class EpisodeInfoModal extends HookConsumerWidget {
   const EpisodeInfoModal({
