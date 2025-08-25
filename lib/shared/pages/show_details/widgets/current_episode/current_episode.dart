@@ -19,6 +19,7 @@ class CurrentEpisode extends HookWidget {
   final String? languageCode;
   final Map<String, dynamic>? showData;
   final VoidCallback? onWatchedStatusChanged;
+  final VoidCallback? onEpisodeWatched;
 
   const CurrentEpisode({
     super.key,
@@ -27,6 +28,7 @@ class CurrentEpisode extends HookWidget {
     this.languageCode,
     this.showData,
     this.onWatchedStatusChanged,
+    this.onEpisodeWatched,
   });
 
   /// Fetches the translated episode name
@@ -183,6 +185,7 @@ class CurrentEpisode extends HookWidget {
         traktId: traktId,
         languageCode: languageCode,
         onWatchedStatusChanged: onWatchedStatusChanged,
+        onEpisodeWatched: onEpisodeWatched,
       );
     } else if (total > 0) {
       // Show progress for completed shows
@@ -200,6 +203,7 @@ class CurrentEpisode extends HookWidget {
         traktId: traktId,
         languageCode: languageCode,
         onWatchedStatusChanged: onWatchedStatusChanged,
+        onEpisodeWatched: onEpisodeWatched,
       );
     }
 

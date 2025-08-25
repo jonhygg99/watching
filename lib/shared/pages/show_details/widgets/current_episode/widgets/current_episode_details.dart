@@ -18,6 +18,7 @@ class CurrentEpisodeDetails extends StatelessWidget {
   final String traktId;
   final String? languageCode;
   final VoidCallback? onWatchedStatusChanged;
+  final VoidCallback? onEpisodeWatched;
 
   const CurrentEpisodeDetails({
     super.key,
@@ -34,6 +35,7 @@ class CurrentEpisodeDetails extends StatelessWidget {
     required this.traktId,
     required this.languageCode,
     required this.onWatchedStatusChanged,
+    this.onEpisodeWatched,
   });
 
   @override
@@ -67,6 +69,7 @@ class CurrentEpisodeDetails extends StatelessWidget {
             seasonNumber: seasonNumber,
             episodeNumber: episodeNumber,
             progressData: progressData,
+            onEpisodeWatched: onEpisodeWatched,
           ),
         ],
       ),

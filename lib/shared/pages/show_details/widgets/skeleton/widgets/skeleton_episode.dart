@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:watching/shared/constants/colors.dart';
-import 'package:watching/shared/constants/measures.dart';
 import 'skeleton_utils.dart';
 
 class SkeletonEpisode extends StatelessWidget {

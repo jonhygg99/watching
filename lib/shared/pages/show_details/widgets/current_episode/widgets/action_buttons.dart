@@ -16,6 +16,7 @@ class ActionButtons extends StatelessWidget {
   final int? seasonNumber;
   final int? episodeNumber;
   final Map<String, dynamic>? progressData;
+  final VoidCallback? onEpisodeWatched;
 
   const ActionButtons({
     super.key,
@@ -28,6 +29,7 @@ class ActionButtons extends StatelessWidget {
     required this.seasonNumber,
     required this.episodeNumber,
     required this.progressData,
+    this.onEpisodeWatched,
   });
 
   @override
@@ -70,7 +72,7 @@ class ActionButtons extends StatelessWidget {
                               showId: traktId,
                               showData: showData!,
                               languageCode: languageCode,
-                              onEpisodeWatched: onWatchedStatusChanged,
+                              onEpisodeWatched: onEpisodeWatched,
                             ),
                       ),
                     );

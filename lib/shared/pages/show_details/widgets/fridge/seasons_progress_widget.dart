@@ -128,7 +128,6 @@ class SeasonsProgressWidget extends HookConsumerWidget {
                           onProgressChanged?.call();
                           onWatchlistUpdate?.call();
                         },
-                        onWatchlistUpdate: onWatchlistUpdate,
                       ),
                 ),
               );
