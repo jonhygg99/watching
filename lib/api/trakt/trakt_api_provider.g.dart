@@ -6,7 +6,7 @@ part of 'trakt_api_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$traktApiHash() => r'a69fc7fdd1114854472cd9e85dd62632c7c789fb';
+String _$traktApiHash() => r'067b10c027edc0d22a5f51178b23a53b4765ba1e';
 
 /// Provides the TraktApi instance to the app.
 ///

@@ -14,7 +14,7 @@ class SeasonEpisodeList extends StatefulWidget {
   final List<Map<String, dynamic>> episodes;
   final Map<String, dynamic>? progress;
   final Map<int, Color> markingColors;
-  final bool loading;
+  final Map<int, bool> loadingEpisodes;
   final int seasonNumber;
   final String showId;
   final Map<String, dynamic> showData;
@@ -27,7 +27,7 @@ class SeasonEpisodeList extends StatefulWidget {
     required this.episodes,
     required this.progress,
     required this.markingColors,
-    required this.loading,
+    required this.loadingEpisodes,
     required this.seasonNumber,
     required this.showId,
     required this.showData,
@@ -208,25 +208,28 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                           delayMs: 500,
                         );
                       },
+                      style: IconButton.styleFrom(
+                        backgroundColor: widget.loadingEpisodes[epNumber] == true 
+                            ? Colors.blue.withOpacity(0.2) 
+                            : null,
+                      ),
                       icon: Icon(
                         Icons.check_circle,
                         size: 28,
-                        color:
-                            watched
-                                ? (widget.markingColors[epNumber] ??
-                                    Colors.green)
-                                : (widget.markingColors[epNumber] ??
-                                    Colors.grey[400]),
+                        color: widget.loadingEpisodes[epNumber] == true
+                            ? Colors.blue
+                            : (widget.markingColors[epNumber] != null 
+                                ? widget.markingColors[epNumber] 
+                                : (watched ? Colors.green : Colors.grey[400])),
                       ),
-                      tooltip:
-                          watched
+                      tooltip: widget.loadingEpisodes[epNumber] == true
+                          ? ''
+                          : (watched
                               ? AppLocalizations.of(context)!.removeFromHistory
-                              : AppLocalizations.of(context)!.markAsWatched,
-                      onPressed:
-                          widget.loading
-                              ? null
-                              : () =>
-                                  widget.onToggleEpisode(epNumber, !watched),
+                              : AppLocalizations.of(context)!.markAsWatched),
+                      onPressed: widget.loadingEpisodes[epNumber] == true
+                          ? null
+                          : () => widget.onToggleEpisode(epNumber, !watched),
                     ),
                   ),
                 ],

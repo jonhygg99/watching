@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
@@ -11,7 +12,7 @@ import 'widgets/season_bulk_actions.dart';
 import 'widgets/season_episode_list.dart';
 import 'widgets/season_navigation.dart';
 
-class SeasonDetailPage extends ConsumerWidget {
+class SeasonDetailPage extends ConsumerStatefulWidget {
   final int seasonNumber;
   final String showId;
   final Map<String, dynamic> showData;
@@ -27,43 +28,57 @@ class SeasonDetailPage extends ConsumerWidget {
     this.onEpisodeWatched,
   });
 
+  @override
+  ConsumerState<SeasonDetailPage> createState() => _SeasonDetailPageState();
+}
+
+class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
+  final Map<int, bool> _loadingEpisodes = {};
+  final Map<int, Color> _markingColors = {};
+
   void _navigateToSeason(BuildContext context, int newSeasonNumber) {
-    if (newSeasonNumber == seasonNumber) return;
+    if (newSeasonNumber == widget.seasonNumber) return;
 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => SeasonDetailPage(
           seasonNumber: newSeasonNumber,
-          showId: showId,
-          showData: showData,
-          languageCode: languageCode,
-          onEpisodeWatched: onEpisodeWatched,
+          showId: widget.showId,
+          showData: widget.showData,
+          languageCode: widget.languageCode,
+          onEpisodeWatched: widget.onEpisodeWatched,
         ),
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    // Initialize any required state here
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final seasonDetail = ref.watch(seasonDetailProvider(
-      showId: showId,
-      seasonNumber: seasonNumber,
-      languageCode: languageCode,
+      showId: widget.showId,
+      seasonNumber: widget.seasonNumber,
+      languageCode: widget.languageCode,
     ));
-    final seasonsAsync = ref.watch(seasonsProvider(showId: showId));
+    final seasonsAsync = ref.watch(seasonsProvider(showId: widget.showId));
 
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: Text(AppLocalizations.of(context)!.seasonTitle(seasonNumber)),
+        title: Text(AppLocalizations.of(context)!.seasonTitle(widget.seasonNumber)),
         actions: [
           seasonDetail.when(
             data: (details) => SeasonBulkActionButton(
               allWatched: allEpisodesWatched(
                 details.episodes,
                 details.progress,
-                seasonNumber,
+                widget.seasonNumber,
               ),
               loading: false,
               episodeNumbers:
@@ -71,13 +86,13 @@ class SeasonDetailPage extends ConsumerWidget {
               onBulkAction: (watched) async {
                 await ref
                     .read(seasonDetailProvider(
-                      showId: showId,
-                      seasonNumber: seasonNumber,
-                      languageCode: languageCode,
+                      showId: widget.showId,
+                      seasonNumber: widget.seasonNumber,
+                      languageCode: widget.languageCode,
                     ).notifier)
                     .toggleSeasonWatched(watched, details.episodes);
-                onEpisodeWatched?.call();
-                ref.read(watchlistProvider.notifier).updateShowProgress(showId);
+                widget.onEpisodeWatched?.call();
+                ref.read(watchlistProvider.notifier).updateShowProgress(widget.showId);
               },
             ),
             loading: () => const SizedBox.shrink(),
@@ -88,7 +103,7 @@ class SeasonDetailPage extends ConsumerWidget {
       body: seasonDetail.when(
         data: (details) {
           final seasons = seasonsAsync.asData?.value ?? [];
-          final currentIndex = seasons.indexWhere((s) => s['number'] == seasonNumber);
+          final currentIndex = seasons.indexWhere((s) => s['number'] == widget.seasonNumber);
           final hasPreviousSeason = currentIndex > 0;
           final hasNextSeason = currentIndex < seasons.length - 1;
 
@@ -99,7 +114,7 @@ class SeasonDetailPage extends ConsumerWidget {
                 hasPreviousSeason: hasPreviousSeason,
                 hasNextSeason: hasNextSeason,
                 isLoadingSeasons: seasonsAsync.isLoading,
-                seasonNumber: seasonNumber,
+                seasonNumber: widget.seasonNumber,
                 seasonsList: seasons,
                 onSeasonChanged: (newSeason) => _navigateToSeason(context, newSeason),
                 onPreviousSeason: () {
@@ -121,42 +136,65 @@ class SeasonDetailPage extends ConsumerWidget {
                   horizontal: 16.0,
                 ),
                 child: TinyProgressBar(
-                  percent: getSeasonProgress(details.progress, seasonNumber),
-                  watched: (details.progress['seasons'] as List?)
-                          ?.firstWhere((s) => s['number'] == seasonNumber, orElse: () => {'completed': 0})
-                          ['completed'] ??
-                      0,
-                  total: (details.progress['seasons'] as List?)
-                          ?.firstWhere((s) => s['number'] == seasonNumber, orElse: () => {'aired': 1})
-                          ['aired'] ??
-                      1,
+                  percent: getSeasonProgress(details.progress, widget.seasonNumber),
+                  watched: (details.progress['seasons'] as List?)?.firstWhere(
+                            (s) => s['number'] == widget.seasonNumber, 
+                            orElse: () => {'completed': 0}
+                          )['completed'] ?? 0,
+                  total: (details.progress['seasons'] as List?)?.firstWhere(
+                            (s) => s['number'] == widget.seasonNumber, 
+                            orElse: () => {'aired': 1}
+                          )['aired'] ?? 1,
                 ),
               ),
               Expanded(
                 child: SeasonEpisodeList(
                   episodes: details.episodes,
                   progress: details.progress,
-                  seasonNumber: seasonNumber,
-                  markingColors: const {}, // Initialize with empty map
-                  loading: false, // Set to false as we already have the data
-                  showId: showId,
-                  showData: showData,
-                  languageCode: languageCode,
+                  seasonNumber: widget.seasonNumber,
+                  markingColors: _markingColors,
+                  loadingEpisodes: _loadingEpisodes,
+                  showId: widget.showId,
+                  showData: widget.showData,
+                  languageCode: widget.languageCode,
                   onToggleEpisode: (epNumber, watched) async {
-                    await ref
-                        .read(seasonDetailProvider(
-                          showId: showId,
-                          seasonNumber: seasonNumber,
-                          languageCode: languageCode,
-                        ).notifier)
-                        .toggleEpisodeWatched(watched, epNumber);
-                    onEpisodeWatched?.call();
-                    ref.read(watchlistProvider.notifier).updateShowProgress(showId);
+                    // Update loading and marking state immediately
+                    setState(() {
+                      _loadingEpisodes[epNumber] = true;
+                      _markingColors[epNumber] = watched ? Colors.green : Colors.grey[400]!;
+                    });
+                    
+                    try {
+                      await ref
+                          .read(seasonDetailProvider(
+                            showId: widget.showId,
+                            seasonNumber: widget.seasonNumber,
+                            languageCode: widget.languageCode,
+                          ).notifier)
+                          .toggleEpisodeWatched(watched, epNumber);
+                      widget.onEpisodeWatched?.call();
+                      if (mounted) {
+                        ref.read(watchlistProvider.notifier).updateShowProgress(widget.showId);
+                      }
+                    } finally {
+                      if (mounted) {
+                        setState(() {
+                          _loadingEpisodes[epNumber] = false;
+                          // The marking color is already set, no need to update it again
+                        });
+                      }
+                    }
                   },
                   setMarkingColor: (epNumber, color, {delayMs = 0}) async {
-                    // This can be implemented if needed for visual feedback
-                    if (delayMs > 0) {
-                      await Future.delayed(Duration(milliseconds: delayMs));
+                    if (color != _markingColors[epNumber]) {
+                      if (delayMs > 0) {
+                        await Future.delayed(Duration(milliseconds: delayMs));
+                      }
+                      if (mounted) {
+                        setState(() {
+                          _markingColors[epNumber] = color;
+                        });
+                      }
                     }
                   },
                 ),
