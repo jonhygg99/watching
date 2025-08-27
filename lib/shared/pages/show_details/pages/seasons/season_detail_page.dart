@@ -204,26 +204,21 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
                             .updateShowProgress(widget.showId);
                       }
                     } catch (e) {
-                      debugPrint('Error toggling episode: $e');
                       if (mounted) {
-                        debugPrint('In mounted');
                         // Set error color and reset loading state immediately
                         setState(() {
                           _markingColors[epNumber] = kErrorColorMessage;
                           _loadingEpisodes[epNumber] = false;
                         });
-                        
+
                         // Wait for 5 seconds before resetting the error color
-                        await Future.delayed(const Duration(seconds: 5));
-                        
-                        debugPrint('In 5 seconds');
-                        
+                        await Future.delayed(const Duration(milliseconds: 500));
+
                         // Only update if still mounted
                         if (mounted) {
                           setState(() {
                             // Remove the error color and let the UI show the actual watched state
                             _markingColors.remove(epNumber);
-                            debugPrint('Resetting to actual watched state');
                           });
                         }
                       }
