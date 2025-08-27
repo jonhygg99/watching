@@ -209,27 +209,55 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                         );
                       },
                       style: IconButton.styleFrom(
-                        backgroundColor: widget.loadingEpisodes[epNumber] == true 
-                            ? Colors.blue.withOpacity(0.2) 
-                            : null,
+                        backgroundColor:
+                            widget.loadingEpisodes[epNumber] == true
+                                ? Colors.blue.withOpacity(0.2)
+                                : null,
                       ),
-                      icon: Icon(
-                        Icons.check_circle,
-                        size: 28,
-                        color: widget.loadingEpisodes[epNumber] == true
-                            ? Colors.blue
-                            : (widget.markingColors[epNumber] != null 
-                                ? widget.markingColors[epNumber] 
-                                : (watched ? Colors.green : Colors.grey[400])),
+                      icon: ValueListenableBuilder<bool>(
+                        valueListenable: ValueNotifier<bool>(
+                          widget.loadingEpisodes[epNumber] == true,
+                        ),
+                        builder: (context, isLoading, _) {
+                          if (isLoading) {
+                            return const Icon(
+                              Icons.check_circle,
+                              size: 28,
+                              color: Colors.blue,
+                            );
+                          }
+
+                          final markedColor = widget.markingColors[epNumber];
+                          if (markedColor != null) {
+                            return Icon(
+                              Icons.check_circle,
+                              size: 28,
+                              color: markedColor,
+                            );
+                          }
+
+                          return Icon(
+                            Icons.check_circle,
+                            size: 28,
+                            color: watched ? Colors.green : Colors.grey[400],
+                          );
+                        },
                       ),
-                      tooltip: widget.loadingEpisodes[epNumber] == true
-                          ? ''
-                          : (watched
-                              ? AppLocalizations.of(context)!.removeFromHistory
-                              : AppLocalizations.of(context)!.markAsWatched),
-                      onPressed: widget.loadingEpisodes[epNumber] == true
-                          ? null
-                          : () => widget.onToggleEpisode(epNumber, !watched),
+                      tooltip:
+                          widget.loadingEpisodes[epNumber] == true
+                              ? ''
+                              : (watched
+                                  ? AppLocalizations.of(
+                                    context,
+                                  )!.removeFromHistory
+                                  : AppLocalizations.of(
+                                    context,
+                                  )!.markAsWatched),
+                      onPressed:
+                          widget.loadingEpisodes[epNumber] == true
+                              ? null
+                              : () =>
+                                  widget.onToggleEpisode(epNumber, !watched),
                     ),
                   ),
                 ],

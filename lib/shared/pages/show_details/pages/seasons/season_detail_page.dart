@@ -33,6 +33,9 @@ class SeasonDetailPage extends ConsumerStatefulWidget {
 }
 
 class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
+  static const kErrorColorMessage = Color(
+    0xFFDC3545,
+  ); // Red color for error state
   final Map<int, bool> _loadingEpisodes = {};
   final Map<int, Color> _markingColors = {};
 
@@ -42,13 +45,14 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => SeasonDetailPage(
-          seasonNumber: newSeasonNumber,
-          showId: widget.showId,
-          showData: widget.showData,
-          languageCode: widget.languageCode,
-          onEpisodeWatched: widget.onEpisodeWatched,
-        ),
+        builder:
+            (context) => SeasonDetailPage(
+              seasonNumber: newSeasonNumber,
+              showId: widget.showId,
+              showData: widget.showData,
+              languageCode: widget.languageCode,
+              onEpisodeWatched: widget.onEpisodeWatched,
+            ),
       ),
     );
   }
@@ -61,40 +65,49 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final seasonDetail = ref.watch(seasonDetailProvider(
-      showId: widget.showId,
-      seasonNumber: widget.seasonNumber,
-      languageCode: widget.languageCode,
-    ));
+    final seasonDetail = ref.watch(
+      seasonDetailProvider(
+        showId: widget.showId,
+        seasonNumber: widget.seasonNumber,
+        languageCode: widget.languageCode,
+      ),
+    );
     final seasonsAsync = ref.watch(seasonsProvider(showId: widget.showId));
 
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(),
-        title: Text(AppLocalizations.of(context)!.seasonTitle(widget.seasonNumber)),
+        title: Text(
+          AppLocalizations.of(context)!.seasonTitle(widget.seasonNumber),
+        ),
         actions: [
           seasonDetail.when(
-            data: (details) => SeasonBulkActionButton(
-              allWatched: allEpisodesWatched(
-                details.episodes,
-                details.progress,
-                widget.seasonNumber,
-              ),
-              loading: false,
-              episodeNumbers:
-                  details.episodes.map((e) => e['number'] as int).toList(),
-              onBulkAction: (watched) async {
-                await ref
-                    .read(seasonDetailProvider(
-                      showId: widget.showId,
-                      seasonNumber: widget.seasonNumber,
-                      languageCode: widget.languageCode,
-                    ).notifier)
-                    .toggleSeasonWatched(watched, details.episodes);
-                widget.onEpisodeWatched?.call();
-                ref.read(watchlistProvider.notifier).updateShowProgress(widget.showId);
-              },
-            ),
+            data:
+                (details) => SeasonBulkActionButton(
+                  allWatched: allEpisodesWatched(
+                    details.episodes,
+                    details.progress,
+                    widget.seasonNumber,
+                  ),
+                  loading: false,
+                  episodeNumbers:
+                      details.episodes.map((e) => e['number'] as int).toList(),
+                  onBulkAction: (watched) async {
+                    await ref
+                        .read(
+                          seasonDetailProvider(
+                            showId: widget.showId,
+                            seasonNumber: widget.seasonNumber,
+                            languageCode: widget.languageCode,
+                          ).notifier,
+                        )
+                        .toggleSeasonWatched(watched, details.episodes);
+                    widget.onEpisodeWatched?.call();
+                    ref
+                        .read(watchlistProvider.notifier)
+                        .updateShowProgress(widget.showId);
+                  },
+                ),
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
           ),
@@ -103,7 +116,9 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
       body: seasonDetail.when(
         data: (details) {
           final seasons = seasonsAsync.asData?.value ?? [];
-          final currentIndex = seasons.indexWhere((s) => s['number'] == widget.seasonNumber);
+          final currentIndex = seasons.indexWhere(
+            (s) => s['number'] == widget.seasonNumber,
+          );
           final hasPreviousSeason = currentIndex > 0;
           final hasNextSeason = currentIndex < seasons.length - 1;
 
@@ -116,7 +131,8 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
                 isLoadingSeasons: seasonsAsync.isLoading,
                 seasonNumber: widget.seasonNumber,
                 seasonsList: seasons,
-                onSeasonChanged: (newSeason) => _navigateToSeason(context, newSeason),
+                onSeasonChanged:
+                    (newSeason) => _navigateToSeason(context, newSeason),
                 onPreviousSeason: () {
                   if (hasPreviousSeason) {
                     final prevSeason = seasons[currentIndex - 1];
@@ -136,15 +152,22 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
                   horizontal: 16.0,
                 ),
                 child: TinyProgressBar(
-                  percent: getSeasonProgress(details.progress, widget.seasonNumber),
-                  watched: (details.progress['seasons'] as List?)?.firstWhere(
-                            (s) => s['number'] == widget.seasonNumber, 
-                            orElse: () => {'completed': 0}
-                          )['completed'] ?? 0,
-                  total: (details.progress['seasons'] as List?)?.firstWhere(
-                            (s) => s['number'] == widget.seasonNumber, 
-                            orElse: () => {'aired': 1}
-                          )['aired'] ?? 1,
+                  percent: getSeasonProgress(
+                    details.progress,
+                    widget.seasonNumber,
+                  ),
+                  watched:
+                      (details.progress['seasons'] as List?)?.firstWhere(
+                        (s) => s['number'] == widget.seasonNumber,
+                        orElse: () => {'completed': 0},
+                      )['completed'] ??
+                      0,
+                  total:
+                      (details.progress['seasons'] as List?)?.firstWhere(
+                        (s) => s['number'] == widget.seasonNumber,
+                        orElse: () => {'aired': 1},
+                      )['aired'] ??
+                      1,
                 ),
               ),
               Expanded(
@@ -158,29 +181,56 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
                   showData: widget.showData,
                   languageCode: widget.languageCode,
                   onToggleEpisode: (epNumber, watched) async {
-                    // Update loading and marking state immediately
+                    // Save the original color before making any changes
                     setState(() {
                       _loadingEpisodes[epNumber] = true;
-                      _markingColors[epNumber] = watched ? Colors.green : Colors.grey[400]!;
                     });
-                    
+
                     try {
-                      await ref
-                          .read(seasonDetailProvider(
-                            showId: widget.showId,
-                            seasonNumber: widget.seasonNumber,
-                            languageCode: widget.languageCode,
-                          ).notifier)
-                          .toggleEpisodeWatched(watched, epNumber);
+                      final provider = ref.read(
+                        seasonDetailProvider(
+                          showId: widget.showId,
+                          seasonNumber: widget.seasonNumber,
+                          languageCode: widget.languageCode,
+                        ).notifier,
+                      );
+
+                      await provider.toggleEpisodeWatched(watched, epNumber);
+
                       widget.onEpisodeWatched?.call();
                       if (mounted) {
-                        ref.read(watchlistProvider.notifier).updateShowProgress(widget.showId);
+                        ref
+                            .read(watchlistProvider.notifier)
+                            .updateShowProgress(widget.showId);
+                      }
+                    } catch (e) {
+                      debugPrint('Error toggling episode: $e');
+                      if (mounted) {
+                        debugPrint('In mounted');
+                        // Set error color and reset loading state immediately
+                        setState(() {
+                          _markingColors[epNumber] = kErrorColorMessage;
+                          _loadingEpisodes[epNumber] = false;
+                        });
+                        
+                        // Wait for 5 seconds before resetting the error color
+                        await Future.delayed(const Duration(seconds: 5));
+                        
+                        debugPrint('In 5 seconds');
+                        
+                        // Only update if still mounted
+                        if (mounted) {
+                          setState(() {
+                            // Remove the error color and let the UI show the actual watched state
+                            _markingColors.remove(epNumber);
+                            debugPrint('Resetting to actual watched state');
+                          });
+                        }
                       }
                     } finally {
                       if (mounted) {
                         setState(() {
                           _loadingEpisodes[epNumber] = false;
-                          // The marking color is already set, no need to update it again
                         });
                       }
                     }
@@ -203,9 +253,7 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Text('Error: $error'),
-        ),
+        error: (error, stackTrace) => Center(child: Text('Error: $error')),
       ),
     );
   }
