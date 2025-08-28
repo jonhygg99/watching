@@ -61,11 +61,16 @@ class SeasonDetail extends _$SeasonDetail {
   }
 
   Future<void> toggleSeasonWatched(
-    bool watched,
+    bool allWatched,
     List<Map<String, dynamic>> episodes,
   ) async {
     final traktApi = ref.read(traktApiProvider);
-    final action = watched ? traktApi.addToWatchHistory : traktApi.removeFromHistory;
+    
+    // Determine if we should mark as watched or unwatched
+    final shouldMarkAsWatched = !allWatched;
+    final action = shouldMarkAsWatched 
+        ? traktApi.addToWatchHistory 
+        : traktApi.removeFromHistory;
 
     final episodePayload = episodes.map((ep) => {'number': ep['number']}).toList();
 
