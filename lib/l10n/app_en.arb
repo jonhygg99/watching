@@ -356,7 +356,7 @@
   },
   "checkOutAllEpisodes": "Check Out All Episodes",
   "@@checkOutAllEpisodes": {
-    "description": "Button label to view all episodes of a show"
+    "description": "Button text to view all episodes of a season"
   },
   "episodeInfo": "Episode Info",
   "@@episodeInfo": {

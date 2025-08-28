@@ -265,7 +265,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get allEpisodesWatched => 'Todos los episodios vistos';
 
   @override
-  String get checkOutAllEpisodes => 'Ver episodios';
+  String get checkOutAllEpisodes => 'Ver Temporada';
 
   @override
   String get episodeInfo => 'Detalles del episodio';

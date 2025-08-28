@@ -354,9 +354,9 @@
   "@@allEpisodesWatched": {
     "description": "Mensaje que se muestra cuando se han visto todos los episodios de una serie"
   },
-  "checkOutAllEpisodes": "Ver episodios",
+  "checkOutAllEpisodes": "Ver Temporada",
   "@@checkOutAllEpisodes": {
-    "description": "Texto del botón para ver todos los episodios de una serie"
+    "description": "Texto del botón para ver todos los episodios de una temporada"
   },
   "episodeInfo": "Detalles del episodio",
   "@@episodeInfo": {
