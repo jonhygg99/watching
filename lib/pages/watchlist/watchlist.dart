@@ -5,7 +5,7 @@ import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/pages/watchlist/providers/watchlist_providers.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/pages/watchlist/widgets/loading_skeleton.dart';
+import 'package:watching/pages/watchlist/widgets/skeleton.dart';
 import 'package:watching/pages/watchlist/widgets/watchlist_show_item.dart';
 
 /// Main Watchlist Page - Riverpod + Hooks
@@ -117,7 +117,7 @@ class WatchlistPage extends HookConsumerWidget {
 
                 // Show shimmer/skeleton loading if no data yet
                 if (watchlistItems.isEmpty && isLoading) {
-                  return const LoadingSkeleton();
+                  return const Skeleton();
                 }
 
                 // Show the list of items

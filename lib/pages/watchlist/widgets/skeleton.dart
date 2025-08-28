@@ -3,8 +3,8 @@ import 'package:shimmer/shimmer.dart';
 import 'package:watching/shared/constants/colors.dart';
 
 /// A skeleton loading widget for watchlist items with shimmer effect
-class LoadingSkeleton extends StatelessWidget {
-  const LoadingSkeleton({super.key});
+class Skeleton extends StatelessWidget {
+  const Skeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -62,24 +62,46 @@ class LoadingSkeleton extends StatelessWidget {
                               1.4 // Account for line height
                           : 24,
                   width: 200,
-                  color: Colors.grey[300],
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                   margin: const EdgeInsets.only(bottom: 8),
                 ),
-
-                // Episode info (T1E1 - Episode Title) - bodyMedium style
-                Container(
-                  height:
-                      textTheme.bodyMedium?.fontSize != null
-                          ? textTheme.bodyMedium!.fontSize! *
-                              1.4 // Account for line height
-                          : 20,
-                  width: 180,
-                  color: Colors.grey[300],
-                  margin: const EdgeInsets.only(
-                    bottom: 6,
-                  ), // Matches the SizedBox(height: 6) in _ProgressDetails
+                Row(
+                  children: [
+                    // Episode info (T1E1 - Episode Title) - bodyMedium style
+                    Container(
+                      height:
+                          textTheme.bodyMedium?.fontSize != null
+                              ? textTheme.bodyMedium!.fontSize! *
+                                  1.4 // Account for line height
+                              : 20,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      margin: const EdgeInsets.only(
+                        bottom: 6,
+                      ), // Matches the SizedBox(height: 6) in _ProgressDetails
+                    ),
+                    const SizedBox(width: 8), // Add spacing between containers
+                    // Episodes Watched / Total Episodes
+                    Container(
+                      width: 40, // Approximate width for "X/Y" text
+                      height:
+                          textTheme.bodySmall?.fontSize != null
+                              ? textTheme.bodySmall!.fontSize! *
+                                  1.4 // Account for line height
+                              : 16,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ],
                 ),
-
                 // Progress bar (matches ProgressBar widget)
                 Container(
                   height: 16, // Matches ProgressBar height
@@ -96,20 +118,6 @@ class LoadingSkeleton extends StatelessWidget {
                             color: Colors.grey[300],
                             borderRadius: BorderRadius.circular(4),
                           ),
-                        ),
-                      ),
-                      // Progress text (bodySmall style)
-                      const SizedBox(width: 10),
-                      Container(
-                        width: 40, // Approximate width for "X/Y" text
-                        height:
-                            textTheme.bodySmall?.fontSize != null
-                                ? textTheme.bodySmall!.fontSize! *
-                                    1.4 // Account for line height
-                                : 16,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                     ],
