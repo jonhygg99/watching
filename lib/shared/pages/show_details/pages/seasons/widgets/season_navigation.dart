@@ -32,7 +32,14 @@ class SeasonNavigation extends StatelessWidget {
         children: [
           TextButton(
             onPressed: hasPreviousSeason ? onPreviousSeason : null,
-            child: Text(AppLocalizations.of(context)!.previousSeason),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.arrow_back_rounded, size: 16),
+                const SizedBox(width: 4),
+                Text(AppLocalizations.of(context)!.previousSeason),
+              ],
+            ),
           ),
           if (isLoadingSeasons)
             const Padding(
@@ -46,12 +53,13 @@ class SeasonNavigation extends StatelessWidget {
           else if (seasonsList.isNotEmpty)
             DropdownButton<int>(
               value: seasonNumber,
-              items: seasonsList.map<DropdownMenuItem<int>>((season) {
-                return DropdownMenuItem<int>(
-                  value: season['number'],
-                  child: Text('Season ${season['number']}'),
-                );
-              }).toList(),
+              items:
+                  seasonsList.map<DropdownMenuItem<int>>((season) {
+                    return DropdownMenuItem<int>(
+                      value: season['number'],
+                      child: Text('Season ${season['number']}'),
+                    );
+                  }).toList(),
               onChanged: (int? newValue) {
                 if (newValue != null) {
                   onSeasonChanged(newValue);
@@ -60,7 +68,14 @@ class SeasonNavigation extends StatelessWidget {
             ),
           TextButton(
             onPressed: hasNextSeason ? onNextSeason : null,
-            child: Text(AppLocalizations.of(context)!.nextSeason),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(AppLocalizations.of(context)!.nextSeason),
+                const SizedBox(width: 4),
+                const Icon(Icons.arrow_forward_rounded, size: 16),
+              ],
+            ),
           ),
         ],
       ),

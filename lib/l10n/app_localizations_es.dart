@@ -410,10 +410,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get markAsWatched => 'Marcar como visto';
 
   @override
-  String get previousSeason => 'Temporada Anterior';
+  String get previousSeason => 'Anterior';
 
   @override
-  String get nextSeason => 'Próxima Temporada';
+  String get nextSeason => 'Siguiente';
 
   @override
   String seasonTitle(Object seasonNumber) {

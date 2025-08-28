@@ -582,11 +582,11 @@
   "@@markAsWatched": {
     "description": "Texto del tooltip para marcar un episodio como visto"
   },
-  "previousSeason": "Temporada Anterior",
+  "previousSeason": "Anterior",
   "@@previousSeason": {
     "description": "Texto para el botón de navegación a la temporada anterior"
   },
-  "nextSeason": "Próxima Temporada",
+  "nextSeason": "Siguiente",
   "@@nextSeason": {
     "description": "Texto para el botón de navegación a la siguiente temporada"
   },

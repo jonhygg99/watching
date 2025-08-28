@@ -875,13 +875,13 @@ abstract class AppLocalizations {
   /// No description provided for @previousSeason.
   ///
   /// In en, this message translates to:
-  /// **'Previous Season'**
+  /// **'Previous'**
   String get previousSeason;
 
   /// No description provided for @nextSeason.
   ///
   /// In en, this message translates to:
-  /// **'Next Season'**
+  /// **'Next'**
   String get nextSeason;
 
   /// No description provided for @seasonTitle.

@@ -582,13 +582,13 @@
   "@@markAsWatched": {
     "description": "Tooltip text for marking an episode as watched"
   },
-  "previousSeason": "Previous Season",
+  "previousSeason": "Previous",
   "@@previousSeason": {
-    "description": "Text for the previous season navigation button"
+    "description": "Label for the button to navigate to the previous season"
   },
-  "nextSeason": "Next Season",
+  "nextSeason": "Next",
   "@@nextSeason": {
-    "description": "Text for the next season navigation button"
+    "description": "Label for the button to navigate to the next season"
   },
   "seasonTitle": "Season {seasonNumber}",
   "@@seasonTitle": {
