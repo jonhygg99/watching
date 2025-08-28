@@ -4,6 +4,105 @@ import 'trakt_api.dart';
 
 /// Mixin for watch history endpoints.
 mixin HistoryApi on TraktApiBase {
+  /// Batch updates the watch status of multiple episodes.
+  ///
+  /// [episodesToAdd] - List of episodes to add to watch history
+  /// [episodesToRemove] - List of episodes to remove from watch history
+  /// Each episode should be a map with 'show_id' (int), 'season' (int), and 'episode' (int)
+  ///
+  /// Returns a map with the number of added and removed episodes
+  /// Throws an [Exception] if the API call fails
+  Future<Map<String, int>> batchUpdateEpisodeWatchStatus({
+    List<Map<String, dynamic>> episodesToAdd = const [],
+    List<Map<String, dynamic>> episodesToRemove = const [],
+  }) async {
+    // Process additions if any
+    final added = <String, int>{};
+    if (episodesToAdd.isNotEmpty) {
+      final showsMap = <int, Map<String, dynamic>>{};
+      
+      // Group episodes by show and season
+      for (final ep in episodesToAdd) {
+        final showId = ep['show_id'] as int;
+        final season = ep['season'] as int;
+        final episode = ep['episode'] as int;
+        
+        showsMap.putIfAbsent(showId, () => {
+          'ids': {'trakt': showId},
+          'seasons': <Map<String, dynamic>>[],
+        });
+        
+        var seasonData = showsMap[showId]!['seasons']
+            .firstWhere(
+              (s) => s['number'] == season,
+              orElse: () {
+                final newSeason = {
+                  'number': season,
+                  'episodes': <Map<String, dynamic>>[],
+                };
+                showsMap[showId]!['seasons'].add(newSeason);
+                return newSeason;
+              },
+            );
+            
+        (seasonData['episodes'] as List).add({'number': episode});
+      }
+      
+      // Only make the API call if there are shows to process
+      if (showsMap.isNotEmpty) {
+        await addToWatchHistory(
+          shows: showsMap.values.toList(),
+        );
+        added['shows'] = showsMap.length;
+      }
+    }
+    
+    // Process removals if any
+    final removed = <String, int>{};
+    if (episodesToRemove.isNotEmpty) {
+      final showsMap = <int, Map<String, dynamic>>{};
+      
+      // Group episodes by show and season
+      for (final ep in episodesToRemove) {
+        final showId = ep['show_id'] as int;
+        final season = ep['season'] as int;
+        final episode = ep['episode'] as int;
+        
+        showsMap.putIfAbsent(showId, () => {
+          'ids': {'trakt': showId},
+          'seasons': <Map<String, dynamic>>[],
+        });
+        
+        var seasonData = showsMap[showId]!['seasons']
+            .firstWhere(
+              (s) => s['number'] == season,
+              orElse: () {
+                final newSeason = {
+                  'number': season,
+                  'episodes': <Map<String, dynamic>>[],
+                };
+                showsMap[showId]!['seasons'].add(newSeason);
+                return newSeason;
+              },
+            );
+            
+        (seasonData['episodes'] as List).add({'number': episode});
+      }
+      
+      // Only make the API call if there are shows to process
+      if (showsMap.isNotEmpty) {
+        await removeFromHistory(
+          shows: showsMap.values.toList(),
+        );
+        removed['shows'] = showsMap.length;
+      }
+    }
+    
+    return {
+      'added': added['shows'] ?? 0,
+      'removed': removed['shows'] ?? 0,
+    };
+  }
   /// Adds movies, shows, seasons, or episodes to the user's watch history.
   Future<void> addToWatchHistory({
     List<Map<String, dynamic>>? movies,

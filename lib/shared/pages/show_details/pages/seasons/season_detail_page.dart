@@ -38,6 +38,70 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
   ); // Red color for error state
   final Map<int, bool> _loadingEpisodes = {};
   final Map<int, Color> _markingColors = {};
+  
+  Future<void> _handleToggleEpisode(int epNumber, bool watched) async {
+    // Update local UI state immediately for better UX
+    setState(() {
+      _loadingEpisodes[epNumber] = true;
+    });
+    
+    try {
+      await ref.read(
+        seasonDetailProvider(
+          showId: widget.showId,
+          seasonNumber: widget.seasonNumber,
+          languageCode: widget.languageCode,
+        ).notifier,
+      ).toggleEpisodeWatched(epNumber, watched);
+      
+      widget.onEpisodeWatched?.call();
+      
+      if (mounted) {
+        ref.read(watchlistProvider.notifier).updateShowProgress(widget.showId);
+      }
+    } catch (e) {
+      if (mounted) {
+        // Set error color and reset loading state immediately
+        setState(() {
+          _markingColors[epNumber] = kErrorColorMessage;
+          _loadingEpisodes[epNumber] = false;
+        });
+
+        // Wait for 5 seconds before resetting the error color
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Only update if still mounted
+        if (mounted) {
+          setState(() {
+            // Remove the error color and let the UI show the actual watched state
+            _markingColors.remove(epNumber);
+          });
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingEpisodes[epNumber] = false;
+        });
+      }
+    }
+  }
+  
+  void _handleSetMarkingColor(int epNumber, Color color, {int delayMs = 0}) {
+    setState(() {
+      _markingColors[epNumber] = color;
+    });
+    
+    if (delayMs > 0) {
+      Future.delayed(Duration(milliseconds: delayMs), () {
+        if (mounted) {
+          setState(() {
+            _markingColors.remove(epNumber);
+          });
+        }
+      });
+    }
+  }
 
   void _navigateToSeason(BuildContext context, int newSeasonNumber) {
     if (newSeasonNumber == widget.seasonNumber) return;
@@ -101,7 +165,7 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
                             languageCode: widget.languageCode,
                           ).notifier,
                         )
-                        .toggleSeasonWatched(watched, details.episodes);
+                        .toggleSeasonWatched(!watched);
                     widget.onEpisodeWatched?.call();
                     ref
                         .read(watchlistProvider.notifier)
@@ -175,73 +239,14 @@ class _SeasonDetailPageState extends ConsumerState<SeasonDetailPage> {
                   episodes: details.episodes,
                   progress: details.progress,
                   seasonNumber: widget.seasonNumber,
+                  episodeStates: details.episodeStates,
                   markingColors: _markingColors,
                   loadingEpisodes: _loadingEpisodes,
                   showId: widget.showId,
                   showData: widget.showData,
                   languageCode: widget.languageCode,
-                  onToggleEpisode: (epNumber, watched) async {
-                    // Save the original color before making any changes
-                    setState(() {
-                      _loadingEpisodes[epNumber] = true;
-                    });
-
-                    try {
-                      final provider = ref.read(
-                        seasonDetailProvider(
-                          showId: widget.showId,
-                          seasonNumber: widget.seasonNumber,
-                          languageCode: widget.languageCode,
-                        ).notifier,
-                      );
-
-                      await provider.toggleEpisodeWatched(watched, epNumber);
-
-                      widget.onEpisodeWatched?.call();
-                      if (mounted) {
-                        ref
-                            .read(watchlistProvider.notifier)
-                            .updateShowProgress(widget.showId);
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        // Set error color and reset loading state immediately
-                        setState(() {
-                          _markingColors[epNumber] = kErrorColorMessage;
-                          _loadingEpisodes[epNumber] = false;
-                        });
-
-                        // Wait for 5 seconds before resetting the error color
-                        await Future.delayed(const Duration(milliseconds: 500));
-
-                        // Only update if still mounted
-                        if (mounted) {
-                          setState(() {
-                            // Remove the error color and let the UI show the actual watched state
-                            _markingColors.remove(epNumber);
-                          });
-                        }
-                      }
-                    } finally {
-                      if (mounted) {
-                        setState(() {
-                          _loadingEpisodes[epNumber] = false;
-                        });
-                      }
-                    }
-                  },
-                  setMarkingColor: (epNumber, color, {delayMs = 0}) async {
-                    if (color != _markingColors[epNumber]) {
-                      if (delayMs > 0) {
-                        await Future.delayed(Duration(milliseconds: delayMs));
-                      }
-                      if (mounted) {
-                        setState(() {
-                          _markingColors[epNumber] = color;
-                        });
-                      }
-                    }
-                  },
+                  onToggleEpisode: _handleToggleEpisode,
+                  setMarkingColor: _handleSetMarkingColor,
                 ),
               ),
             ],
