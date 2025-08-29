@@ -51,20 +51,40 @@ class SeasonNavigation extends StatelessWidget {
               ),
             )
           else if (seasonsList.isNotEmpty)
-            DropdownButton<int>(
-              value: seasonNumber,
-              items:
-                  seasonsList.map<DropdownMenuItem<int>>((season) {
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).dividerColor),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  value: seasonNumber,
+                  isDense: true,
+                  icon: const Icon(Icons.arrow_drop_down_rounded, size: 24),
+                  items: seasonsList.map<DropdownMenuItem<int>>((season) {
                     return DropdownMenuItem<int>(
                       value: season['number'],
-                      child: Text('Season ${season['number']}'),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          'Season ${season['number']}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
                     );
                   }).toList(),
-              onChanged: (int? newValue) {
-                if (newValue != null) {
-                  onSeasonChanged(newValue);
-                }
-              },
+                  onChanged: (int? newValue) {
+                    if (newValue != null) {
+                      onSeasonChanged(newValue);
+                    }
+                  },
+                  dropdownColor: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(8),
+                  elevation: 8,
+                  menuMaxHeight: 300,
+                ),
+              ),
             ),
           TextButton(
             onPressed: hasNextSeason ? onNextSeason : null,
