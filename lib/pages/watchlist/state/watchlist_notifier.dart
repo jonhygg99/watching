@@ -32,33 +32,19 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
   /// Find the next episode to watch based on the show's progress
   /// Returns the next episode or null if all episodes are watched
-  Map<String, dynamic>? _findNextEpisode(Map<String, dynamic> showData) {
+  Future<Map<String, dynamic>?> _findNextEpisode(Map<String, dynamic> showData) async {
     try {
       final progress = showData['progress'] as Map<String, dynamic>?;
-      final seasons = showData['seasons'] as List<dynamic>?;
+      if (progress == null) return null;
 
-      if (progress == null || seasons == null) return null;
-      final nextEpisode = progress['next_episode'] as Map<String, dynamic>?;
+      final traktId = showData['show']['ids']['trakt']?.toString();
+      if (traktId == null) return null;
 
-      // If we have a next episode from the API, use it
-      if (nextEpisode != null) {
-        return nextEpisode;
-      }
-
-      // Otherwise, find the first unwatched episode
-      for (final seasonData in seasons.cast<Map<String, dynamic>>()) {
-        final episodes = seasonData['episodes'] as List<dynamic>?;
-        if (episodes == null) continue;
-
-        for (final episode in episodes.cast<Map<String, dynamic>>()) {
-          final watched = episode['watched'] as bool? ?? false;
-          if (!watched) {
-            return episode;
-          }
-        }
-      }
-
-      return null;
+      return await _episodeService.getNextEpisode(
+        _ref.read(traktApiProvider),
+        traktId,
+        progress,
+      );
     } catch (e) {
       debugPrint('Error in _findNextEpisode: $e');
       return null;
@@ -213,9 +199,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
           showIdToUse,
           progress,
         );
-        nextEpisode ??= _findNextEpisode(progress);
+        nextEpisode ??= await _findNextEpisode(progress);
       } catch (e) {
-        nextEpisode = _findNextEpisode(progress);
+        nextEpisode = await _findNextEpisode(progress);
       }
 
       if (nextEpisode == null) {
