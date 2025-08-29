@@ -173,7 +173,8 @@ class SeasonDetail extends _$SeasonDetail {
   }
 
   /// Toggles watched status for all episodes in the season
-  Future<void> toggleSeasonWatched(bool allWatched) async {
+  /// [markAsWatched] - if true, marks all episodes as watched, if false, marks all as unwatched
+  Future<void> toggleSeasonWatched(bool markAsWatched) async {
     try {
       final state = this.state;
       if (state.isLoading || state.hasError) return;
@@ -183,10 +184,9 @@ class SeasonDetail extends _$SeasonDetail {
       final episodesToRemove = <Map<String, dynamic>>[];
       final showIdInt = int.parse(showId);
       
-      // Group episodes by their current watched state
+      // Update all episodes based on the markAsWatched flag
       for (final episode in episodes) {
         final epNumber = episode['number'] as int;
-        final isWatched = getEpisodeState(epNumber) == EpisodeState.watched;
         
         final episodeData = {
           'show_id': showIdInt,
@@ -194,10 +194,10 @@ class SeasonDetail extends _$SeasonDetail {
           'episode': epNumber,
         };
         
-        if (isWatched) {
-          episodesToRemove.add(episodeData);
-        } else {
+        if (markAsWatched) {
           episodesToAdd.add(episodeData);
+        } else {
+          episodesToRemove.add(episodeData);
         }
       }
       
@@ -210,14 +210,17 @@ class SeasonDetail extends _$SeasonDetail {
       // Process all updates in a single batch API call
       final traktApi = ref.read(traktApiProvider);
       await traktApi.batchUpdateEpisodeWatchStatus(
-        episodesToAdd: allWatched ? const [] : episodesToAdd,
-        episodesToRemove: allWatched ? episodesToRemove : const [],
+        episodesToAdd: markAsWatched ? episodesToAdd : [],
+        episodesToRemove: markAsWatched ? [] : episodesToRemove,
       );
       
       // Update local states to final values
       for (final episode in episodes) {
         final epNumber = episode['number'] as int;
-        _updateEpisodeState(epNumber, allWatched ? EpisodeState.unwatched : EpisodeState.watched);
+        _updateEpisodeState(
+          epNumber,
+          markAsWatched ? EpisodeState.watched : EpisodeState.unwatched,
+        );
       }
       
       // Invalidate to refresh the UI
