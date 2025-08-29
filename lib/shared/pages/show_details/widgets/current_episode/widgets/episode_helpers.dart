@@ -29,25 +29,41 @@ Map<String, dynamic>? findNextEpisode(Map<String, dynamic>? progress) {
   try {
     if (progress == null) return null;
 
-    // First check if we have a next_episode from the API
-    final nextEpisode = progress['next_episode'];
-    if (nextEpisode != null) return nextEpisode;
+    // If no next_episode, try to find the first unwatched episode in the earliest possible season
+    final seasons =
+        (progress['seasons'] as List<dynamic>?)
+            ?.where((s) => s['number'] != 0) // Skip specials (season 0)
+            .toList()
+          ?..sort((a, b) => (a['number'] as int).compareTo(b['number'] as int));
 
-    // If no next_episode, try to find the first unwatched episode
-    final seasons = progress['seasons'] as List<dynamic>?;
-    if (seasons == null) return null;
+    if (seasons == null) {
+      return null;
+    }
 
     for (final season in seasons) {
-      final episodes = season['episodes'] as List<dynamic>?;
-      if (episodes == null) continue;
+      final seasonNumber = season['number'] as int;
+      final episodes =
+          (season['episodes'] as List<dynamic>?)
+              ?.where((e) => e != null)
+              .toList()
+            ?..sort(
+              (a, b) => (a['number'] as int).compareTo(b['number'] as int),
+            );
 
+      if (episodes == null || episodes.isEmpty) {
+        continue;
+      }
+
+      // Find the first unwatched episode in this season
       for (final episode in episodes) {
+        final episodeNumber = episode['number'] as int;
         final completed = episode['completed'] as bool? ?? false;
+
         if (!completed) {
           return {
-            'season': season['number'],
-            'number': episode['number'],
-            'title': episode['title'],
+            'season': seasonNumber,
+            'number': episodeNumber,
+            'title': episode['title'] ?? 'Episode $episodeNumber',
           };
         }
       }
