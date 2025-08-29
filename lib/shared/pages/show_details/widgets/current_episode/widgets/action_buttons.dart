@@ -143,7 +143,7 @@ class ActionButtons extends StatelessWidget {
                               showData: showData!,
                               seasonNumber: seasonNumber!,
                               episodeNumber: episodeNumber!,
-                              onWatchedStatusChanged: () {
+                              onWatchedStatusChanged: (_) {
                                 onRefreshProgress();
                                 if (context.mounted) {
                                   onWatchedStatusChanged?.call();

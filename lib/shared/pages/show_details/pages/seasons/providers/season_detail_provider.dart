@@ -106,8 +106,10 @@ class SeasonDetail extends _$SeasonDetail {
     try {
       // Process all updates in a single batch API call
       await traktApi.batchUpdateEpisodeWatchStatus(
-        episodesToAdd: episodesToAdd,
-        episodesToRemove: episodesToRemove,
+        showId: showIdInt,
+        seasonNumber: seasonNumber,
+        episodesToAdd: episodesToAdd.map((e) => e['episode'] as int).toList(),
+        episodesToRemove: episodesToRemove.map((e) => e['episode'] as int).toList(),
       );
       
       // Complete all completers
@@ -210,8 +212,14 @@ class SeasonDetail extends _$SeasonDetail {
       // Process all updates in a single batch API call
       final traktApi = ref.read(traktApiProvider);
       await traktApi.batchUpdateEpisodeWatchStatus(
-        episodesToAdd: markAsWatched ? episodesToAdd : [],
-        episodesToRemove: markAsWatched ? [] : episodesToRemove,
+        showId: showIdInt,
+        seasonNumber: seasonNumber,
+        episodesToAdd: markAsWatched 
+            ? episodesToAdd.map((e) => e['episode'] as int).toList() 
+            : [],
+        episodesToRemove: markAsWatched 
+            ? [] 
+            : episodesToRemove.map((e) => e['episode'] as int).toList(),
       );
       
       // Update local states to final values

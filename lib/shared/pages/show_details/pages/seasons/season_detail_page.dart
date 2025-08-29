@@ -71,9 +71,18 @@ class _SeasonDetailPageState extends HookConsumerWidget {
     final currentSeasonNumber = useState(seasonNumber);
     final seasonsAsync = ref.watch(seasonsProvider(showId: showId));
 
+    // Properly dispose the page controller when the widget is disposed
     useEffect(() {
-      return () => pageController.dispose();
-    }, const []);
+      final controller = pageController;
+      return () {
+        // Add a small delay to ensure any pending animations complete
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (controller.hasClients && !controller.position.hasContentDimensions) {
+            controller.dispose();
+          }
+        });
+      };
+    }, [pageController]);
 
     return Scaffold(
       appBar: AppBar(

@@ -1,109 +1,94 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 import 'trakt_api.dart';
+import 'utils/rate_limiter.dart';
 
 /// Mixin for watch history endpoints.
 mixin HistoryApi on TraktApiBase {
-  /// Batch updates the watch status of multiple episodes.
-  ///
-  /// [episodesToAdd] - List of episodes to add to watch history
-  /// [episodesToRemove] - List of episodes to remove from watch history
-  /// Each episode should be a map with 'show_id' (int), 'season' (int), and 'episode' (int)
-  ///
-  /// Returns a map with the number of added and removed episodes
-  /// Throws an [Exception] if the API call fails
-  Future<Map<String, int>> batchUpdateEpisodeWatchStatus({
-    List<Map<String, dynamic>> episodesToAdd = const [],
-    List<Map<String, dynamic>> episodesToRemove = const [],
-  }) async {
-    // Process additions if any
-    final added = <String, int>{};
-    if (episodesToAdd.isNotEmpty) {
-      final showsMap = <int, Map<String, dynamic>>{};
-      
-      // Group episodes by show and season
-      for (final ep in episodesToAdd) {
-        final showId = ep['show_id'] as int;
-        final season = ep['season'] as int;
-        final episode = ep['episode'] as int;
-        
-        showsMap.putIfAbsent(showId, () => {
-          'ids': {'trakt': showId},
-          'seasons': <Map<String, dynamic>>[],
-        });
-        
-        var seasonData = showsMap[showId]!['seasons']
-            .firstWhere(
-              (s) => s['number'] == season,
-              orElse: () {
-                final newSeason = {
-                  'number': season,
-                  'episodes': <Map<String, dynamic>>[],
-                };
-                showsMap[showId]!['seasons'].add(newSeason);
-                return newSeason;
-              },
-            );
-            
-        (seasonData['episodes'] as List).add({'number': episode});
-      }
-      
-      // Only make the API call if there are shows to process
-      if (showsMap.isNotEmpty) {
-        await addToWatchHistory(
-          shows: showsMap.values.toList(),
-        );
-        added['shows'] = showsMap.length;
-      }
-    }
-    
-    // Process removals if any
-    final removed = <String, int>{};
-    if (episodesToRemove.isNotEmpty) {
-      final showsMap = <int, Map<String, dynamic>>{};
-      
-      // Group episodes by show and season
-      for (final ep in episodesToRemove) {
-        final showId = ep['show_id'] as int;
-        final season = ep['season'] as int;
-        final episode = ep['episode'] as int;
-        
-        showsMap.putIfAbsent(showId, () => {
-          'ids': {'trakt': showId},
-          'seasons': <Map<String, dynamic>>[],
-        });
-        
-        var seasonData = showsMap[showId]!['seasons']
-            .firstWhere(
-              (s) => s['number'] == season,
-              orElse: () {
-                final newSeason = {
-                  'number': season,
-                  'episodes': <Map<String, dynamic>>[],
-                };
-                showsMap[showId]!['seasons'].add(newSeason);
-                return newSeason;
-              },
-            );
-            
-        (seasonData['episodes'] as List).add({'number': episode});
-      }
-      
-      // Only make the API call if there are shows to process
-      if (showsMap.isNotEmpty) {
-        await removeFromHistory(
-          shows: showsMap.values.toList(),
-        );
-        removed['shows'] = showsMap.length;
-      }
-    }
-    
-    return {
-      'added': added['shows'] ?? 0,
-      'removed': removed['shows'] ?? 0,
-    };
+  final RateLimitedHttpClient _httpClient = RateLimitedHttpClient();
+
+  @override
+  void dispose() {
+    _httpClient.close();
+    super.dispose();
   }
+
+  /// Updates the watch status of multiple episodes for a single show and season.
+  ///
+  /// This is optimized for the common case where all episodes belong to the same show and season.
+  /// It will make a single API call for adding and another for removing episodes.
+  Future<Map<String, dynamic>> batchUpdateEpisodeWatchStatus({
+    required int showId,
+    required int seasonNumber,
+    List<int> episodesToAdd = const [],
+    List<int> episodesToRemove = const [],
+  }) async {
+    try {
+      int added = 0;
+      int removed = 0;
+
+      // Process episodes to add
+      if (episodesToAdd.isNotEmpty) {
+        final payload = {
+          'shows': [
+            {
+              'ids': {'trakt': showId},
+              'seasons': [
+                {
+                  'number': seasonNumber,
+                  'episodes':
+                      episodesToAdd.map((ep) => {'number': ep}).toList(),
+                },
+              ],
+            },
+          ],
+        };
+
+        final showData = payload['shows']?[0];
+        if (showData != null) {
+          await addToWatchHistory(shows: [showData]);
+        }
+        added = episodesToAdd.length;
+      }
+
+      // Process episodes to remove
+      if (episodesToRemove.isNotEmpty) {
+        final payload = {
+          'shows': [
+            {
+              'ids': {'trakt': showId},
+              'seasons': [
+                {
+                  'number': seasonNumber,
+                  'episodes':
+                      episodesToRemove.map((ep) => {'number': ep}).toList(),
+                },
+              ],
+            },
+          ],
+        };
+
+        final showData = payload['shows']?[0];
+        if (showData != null) {
+          await removeFromHistory(shows: [showData]);
+        }
+        removed = episodesToRemove.length;
+      }
+
+      return {'added': added, 'removed': removed};
+    } catch (e) {
+      debugPrint('Failed to update episode watch status: $e');
+      rethrow;
+    }
+  }
+
   /// Adds movies, shows, seasons, or episodes to the user's watch history.
+  /// Adds movies, shows, seasons, or episodes to the user's watch history.
+  ///
+  /// This method uses rate limiting and automatic retry with exponential backoff.
   Future<void> addToWatchHistory({
     List<Map<String, dynamic>>? movies,
     List<Map<String, dynamic>>? shows,
@@ -111,21 +96,30 @@ mixin HistoryApi on TraktApiBase {
     List<Map<String, dynamic>>? episodes,
   }) async {
     await ensureValidToken();
-    final Map<String, dynamic> payload = {};
+
+    final payload = <String, dynamic>{};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;
     if (seasons != null && seasons.isNotEmpty) payload['seasons'] = seasons;
     if (episodes != null && episodes.isNotEmpty) payload['episodes'] = episodes;
+
     final url = Uri.parse('$baseUrl/sync/history');
-    final response = await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(payload),
-    );
-    if (response.statusCode != 201) {
-      throw Exception(
-        'Error POST /sync/history: ${response.statusCode}\n${response.body}',
+
+    try {
+      final response = await _httpClient.post(
+        url,
+        headers: headers,
+        body: jsonEncode(payload),
       );
+
+      if (response.statusCode != 201) {
+        throw Exception(
+          'Error POST /sync/history: ${response.statusCode}\n${response.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to add to watch history: $e');
+      rethrow;
     }
   }
 
@@ -136,6 +130,11 @@ mixin HistoryApi on TraktApiBase {
   ///   await removeFromHistory(shows: [...], seasons: [...], episodes: [...], ids: [...]);
   ///
   /// Throws an [Exception] if the API call fails.
+  /// Removes movies, shows, seasons, episodes, or history ids from the user's watch history.
+  ///
+  /// This method uses rate limiting and automatic retry with exponential backoff.
+  /// It will automatically handle rate limiting (429) responses by waiting the
+  /// appropriate amount of time before retrying.
   Future<Map<String, dynamic>> removeFromHistory({
     List<Map<String, dynamic>>? movies,
     List<Map<String, dynamic>>? shows,
@@ -144,24 +143,34 @@ mixin HistoryApi on TraktApiBase {
     List<int>? ids,
   }) async {
     await ensureValidToken();
-    final Map<String, dynamic> payload = {};
+
+    final payload = <String, dynamic>{};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;
     if (seasons != null && seasons.isNotEmpty) payload['seasons'] = seasons;
     if (episodes != null && episodes.isNotEmpty) payload['episodes'] = episodes;
     if (ids != null && ids.isNotEmpty) payload['ids'] = ids;
+
     final url = Uri.parse('$baseUrl/sync/history/remove');
-    final response = await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(payload),
-    );
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Error POST /sync/history/remove: ${response.statusCode}\n${response.body}',
+
+    try {
+      final response = await _httpClient.post(
+        url,
+        headers: headers,
+        body: jsonEncode(payload),
       );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Error POST /sync/history/remove: ${response.statusCode}\n${response.body}',
+        );
+      }
+
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('Failed to remove from history: $e');
+      rethrow;
     }
-    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
   /// Gets the watched history for shows or movies.
@@ -229,7 +238,7 @@ mixin HistoryApi on TraktApiBase {
     List<Map<String, dynamic>>? episodes,
   }) async {
     await ensureValidToken();
-    
+
     final Map<String, dynamic> payload = {};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;
@@ -282,7 +291,7 @@ mixin HistoryApi on TraktApiBase {
     List<Map<String, dynamic>>? episodes,
   }) async {
     await ensureValidToken();
-    
+
     final Map<String, dynamic> payload = {};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;

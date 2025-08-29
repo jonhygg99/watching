@@ -26,7 +26,7 @@ class EpisodeInfoModal extends HookConsumerWidget {
   final Map<String, dynamic> showData;
   final int seasonNumber;
   final int episodeNumber;
-  final void Function()? onWatchedStatusChanged;
+  final void Function(bool)? onWatchedStatusChanged;
 
   Future<void> _loadWatchedStatus(
     TraktApi traktApi,
@@ -118,7 +118,7 @@ class EpisodeInfoModal extends HookConsumerWidget {
     Map<String, dynamic> episode,
     bool newWatchedState, {
     required ValueNotifier<bool?> isWatchedNotifier,
-    required void Function()? onWatchedStatusChanged,
+    required void Function(bool)? onWatchedStatusChanged,
   }) async {
     final notifier = ref.read(watchlistProvider.notifier);
     final showId = showData['ids']['trakt']?.toString() ?? '';
@@ -132,7 +132,7 @@ class EpisodeInfoModal extends HookConsumerWidget {
       );
 
       isWatchedNotifier.value = newWatchedState;
-      onWatchedStatusChanged?.call();
+      onWatchedStatusChanged?.call(newWatchedState);
     } catch (e) {
       // Error handled silently
     }

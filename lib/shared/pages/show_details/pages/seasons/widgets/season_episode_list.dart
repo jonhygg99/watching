@@ -156,8 +156,10 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                   showData: widget.showData,
                   seasonNumber: widget.seasonNumber,
                   episodeNumber: epNumber,
-                  onWatchedStatusChanged: () {
-                    // Refresh the episode list when watch status changes
+                  onWatchedStatusChanged: (isWatched) async {
+                    // Toggle the episode watched status
+                    await widget.onToggleEpisode(epNumber, isWatched);
+                    // Refresh the UI
                     if (mounted) setState(() {});
                   },
                 ),
