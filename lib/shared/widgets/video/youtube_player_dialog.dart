@@ -52,19 +52,29 @@ class YoutubePlayerDialog extends HookWidget {
         final size = MediaQuery.of(context).size;
         final isLandscape = orientation == Orientation.landscape;
         
+        if (isLandscape) {
+          return Scaffold(
+            backgroundColor: Colors.black,
+            body: YoutubePlayer(
+              controller: controller,
+              showVideoProgressIndicator: true,
+              aspectRatio: size.width / size.height,
+              onEnded: (_) => Navigator.pop(context),
+            ),
+          );
+        }
+        
         return Dialog(
           insetPadding: EdgeInsets.zero,
           backgroundColor: Colors.transparent,
           child: Container(
-            width: isLandscape ? size.width : size.width,
-            height: isLandscape ? size.height : size.height * 0.3,
+            width: size.width,
+            height: size.height * 0.3,
             child: YoutubePlayer(
               controller: controller,
               showVideoProgressIndicator: true,
-              aspectRatio: isLandscape ? size.width / size.height : 16 / 9,
-              onEnded: (_) {
-                Navigator.pop(context);
-              },
+              aspectRatio: 16 / 9,
+              onEnded: (_) => Navigator.pop(context),
             ),
           ),
         );
