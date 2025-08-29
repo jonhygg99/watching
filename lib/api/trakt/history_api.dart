@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
 import 'trakt_api.dart';
 import 'utils/rate_limiter.dart';
 
