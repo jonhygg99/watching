@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/shared/pages/show_list/widgets/loading_indicator.dart';
 import 'package:watching/shared/pages/show_list/widgets/show_grid_item.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:watching/shared/constants/colors.dart';

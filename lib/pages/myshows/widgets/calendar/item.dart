@@ -97,8 +97,32 @@ class CalendarItem extends StatelessWidget {
                 if (daysUntil >= 0) ShowDaysLeft(days: daysUntil),
               ],
             ),
-            if (isExpanded && episodes.length > 1)
-              ..._buildExpandedEpisodes(context),
+            if (episodes.length > 1)
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      axisAlignment: -1.0,
+                      child: child,
+                    ),
+                  );
+                },
+                child:
+                    isExpanded
+                        ? Column(
+                          key: ValueKey(
+                            'expanded_episodes_${show['ids']['trakt']}',
+                          ),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: _buildExpandedEpisodes(context),
+                        )
+                        : const SizedBox.shrink(),
+              ),
           ],
         ),
       ),
@@ -112,10 +136,13 @@ class CalendarItem extends StatelessWidget {
   List<Widget> _buildExpandedEpisodes(BuildContext context) {
     return episodes.sublist(1).map((episode) {
       final airDate = DateTime.tryParse(episode['first_aired'] ?? '');
-      return CalendarShowEpisodes(
-        episode: episode,
-        getEpisodeTitle: getEpisodeTitle,
-        airDate: airDate,
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: CalendarShowEpisodes(
+          episode: episode,
+          getEpisodeTitle: getEpisodeTitle,
+          airDate: airDate,
+        ),
       );
     }).toList();
   }

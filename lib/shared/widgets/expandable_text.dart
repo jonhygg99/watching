@@ -125,43 +125,43 @@ class _ExpandableTextState extends State<ExpandableText> {
             // (only when text overflows and is not expanded)
             final needsFade = textPainter.didExceedMaxLines && !_isExpanded;
 
-            // AnimatedSize handles smooth transitions between states
-            return AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOutCubic,
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                // Ensure text doesn't exceed available width
-                constraints: BoxConstraints(maxWidth: constraints.maxWidth),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Show either expanded or collapsed text
-                    _isExpanded
-                        // Expanded state - show all text
-                        ? Text(widget.text, style: textStyle, key: _textKey)
-                        // Collapsed state - apply fade effect if needed
-                        : ShaderMask(
-                          // Creates a gradient mask for the fade effect
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SizeTransition(
+                        sizeFactor: animation,
+                        axisAlignment: -1.0,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _isExpanded
+                      ? Text(
+                          widget.text,
+                          style: textStyle,
+                          key: const ValueKey('expanded'),
+                        )
+                      : ShaderMask(
+                          key: const ValueKey('collapsed'),
                           shaderCallback: (Rect bounds) {
-                            final theme = Theme.of(context);
-                            final color =
-                                theme.brightness == Brightness.dark
-                                    ? kScaffoldLightBackgroundColor
-                                    : kScaffoldDarkBackgroundColor;
+                            final color = Theme.of(context).brightness == Brightness.dark
+                                ? kScaffoldLightBackgroundColor
+                                : kScaffoldDarkBackgroundColor;
                             return LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                color.withValues(
-                                  alpha: 1.0,
-                                ), // Opaque at the top
-                                color.withValues(
-                                  alpha: needsFade ? 0.0 : 1.0,
-                                ), // Transparent at bottom if needed
+                                color.withAlpha(255),
+                                color.withAlpha(needsFade ? 0 : 255),
                               ],
-                              // Position the gradient (70% opaque, 100% transparent)
                               stops: needsFade ? const [0.7, 1.0] : null,
                             ).createShader(bounds);
                           },
@@ -169,14 +169,12 @@ class _ExpandableTextState extends State<ExpandableText> {
                             widget.text,
                             style: textStyle,
                             maxLines: widget.maxLines,
-                            overflow:
-                                TextOverflow.fade, // Fade the overflow text
-                            key: _textKey, // Key for measuring text dimensions
+                            overflow: TextOverflow.fade,
+                            key: _textKey,
                           ),
                         ),
-                  ],
                 ),
-              ),
+              ],
             );
           },
         ),
