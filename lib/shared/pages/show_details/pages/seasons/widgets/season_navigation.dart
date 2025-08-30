@@ -62,18 +62,21 @@ class SeasonNavigation extends StatelessWidget {
                   value: seasonNumber,
                   isDense: true,
                   icon: const Icon(Icons.arrow_drop_down_rounded, size: 24),
-                  items: seasonsList.map<DropdownMenuItem<int>>((season) {
-                    return DropdownMenuItem<int>(
-                      value: season['number'],
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Text(
-                          'Season ${season['number']}',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                  items:
+                      seasonsList.map<DropdownMenuItem<int>>((season) {
+                        return DropdownMenuItem<int>(
+                          value: season['number'],
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.seasonTitle(season['number'] as int),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                   onChanged: (int? newValue) {
                     if (newValue != null) {
                       onSeasonChanged(newValue);
