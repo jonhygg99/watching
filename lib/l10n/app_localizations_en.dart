@@ -460,6 +460,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get daysLeftText => 'days';
 
   @override
+  String get dayLeftText => 'day';
+
+  @override
   String get seasonPremiere => 'Season Premiere';
 
   @override
@@ -468,5 +471,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String showMoreEpisodes(Object count) {
     return 'Show $count more episodes';
+  }
+
+  @override
+  String get today => 'TODAY';
+
+  @override
+  String get thisWeek => 'THIS WEEK';
+
+  @override
+  String get tomorrow => 'TOMORROW';
+
+  @override
+  String get inADay => 'IN A DAY';
+
+  @override
+  String inNDays(Object days) {
+    return 'IN $days DAYS';
+  }
+
+  @override
+  String get inAWeek => 'IN A WEEK';
+
+  @override
+  String inNWeeks(Object weeks) {
+    return 'IN $weeks WEEKS';
+  }
+
+  @override
+  String get inAMonth => 'IN A MONTH';
+
+  @override
+  String inNMonths(Object months) {
+    return 'IN $months MONTHS';
+  }
+
+  @override
+  String get inAYear => 'IN A YEAR';
+
+  @override
+  String inNYears(Object years) {
+    return 'IN $years YEARS';
   }
 }

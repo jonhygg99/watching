@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/pages/myshows/widgets/days_bubble.dart';
+import 'package:watching/pages/myshows/widgets/calendar/show_days_left.dart';
+import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
-import 'package:watching/pages/myshows/widgets/show_info.dart';
-import 'package:watching/pages/myshows/widgets/expanded_episode_item.dart';
+import 'package:watching/pages/myshows/widgets/calendar/show_info.dart';
+import 'package:watching/pages/myshows/widgets/calendar/show_episodes.dart';
 import 'package:watching/pages/myshows/widgets/show_poster.dart';
 import 'package:watching/api/trakt/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 
-class ShowListItem extends StatelessWidget {
+class CalendarItem extends StatelessWidget {
   final Map<String, dynamic> show;
   final List<Map<String, dynamic>> episodes;
   final bool isExpanded;
   final VoidCallback onToggleExpand;
 
-  const ShowListItem({
+  const CalendarItem({
     super.key,
     required this.show,
     required this.episodes,
@@ -45,12 +46,21 @@ class ShowListItem extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.symmetric(
+          horizontal: kSpacePhoneHorizontal,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(12),
+            bottom: Radius.circular(12),
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildShowPoster(),
                 const SizedBox(width: 16),
@@ -71,7 +81,7 @@ class ShowListItem extends StatelessWidget {
                         if (snapshot.hasData) {
                           translatedShow['title'] = snapshot.data!;
                         }
-                        return ShowInfo(
+                        return CalendarShowInfo(
                           show: translatedShow,
                           isSeasonPremiere: isSeasonPremiere,
                           nextEpisode: nextEpisode,
@@ -84,7 +94,7 @@ class ShowListItem extends StatelessWidget {
                     );
                   },
                 ),
-                if (daysUntil >= 0) DaysBubble(days: daysUntil),
+                if (daysUntil >= 0) ShowDaysLeft(days: daysUntil),
               ],
             ),
             if (isExpanded && episodes.length > 1)
@@ -102,7 +112,7 @@ class ShowListItem extends StatelessWidget {
   List<Widget> _buildExpandedEpisodes(BuildContext context) {
     return episodes.sublist(1).map((episode) {
       final airDate = DateTime.tryParse(episode['first_aired'] ?? '');
-      return ExpandedEpisodeItem(
+      return CalendarShowEpisodes(
         episode: episode,
         getEpisodeTitle: getEpisodeTitle,
         airDate: airDate,

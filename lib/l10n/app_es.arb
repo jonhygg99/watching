@@ -615,6 +615,70 @@
   "@@monthNamesShort": {
     "description": "Lista separada por comas de los nombres cortos de los meses (3 letras) para formato de fecha"
   },
+  "today": "HOY",
+  "@@today": {
+    "description": "Texto que se muestra cuando un episodio se emite hoy"
+  },
+  "thisWeek": "ESTA SEMANA",
+  "@@thisWeek": {
+    "description": "Texto que se muestra cuando un episodio se emite esta semana"
+  },
+  "tomorrow": "MAÑANA",
+  "@@tomorrow": {
+    "description": "Texto que se muestra cuando un episodio se emite mañana"
+  },
+  "inADay": "EN UN DÍA",
+  "@@inADay": {
+    "description": "Texto que se muestra cuando un episodio se emite en un día"
+  },
+  "inNDays": "EN {days} DÍAS",
+  "@@inNDays": {
+    "description": "Texto que se muestra cuando un episodio se emite en varios días",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "inAWeek": "EN UNA SEMANA",
+  "@@inAWeek": {
+    "description": "Texto que se muestra cuando un episodio se emite en una semana"
+  },
+  "inNWeeks": "EN {weeks} SEMANAS",
+  "@@inNWeeks": {
+    "description": "Texto que se muestra cuando un episodio se emite en varias semanas",
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "inAMonth": "EN UN MES",
+  "@@inAMonth": {
+    "description": "Texto que se muestra cuando un episodio se emite en un mes"
+  },
+  "inNMonths": "EN {months} MESES",
+  "@@inNMonths": {
+    "description": "Texto que se muestra cuando un episodio se emite en varios meses",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "inAYear": "EN UN AÑO",
+  "@@inAYear": {
+    "description": "Texto que se muestra cuando un episodio se emite en un año"
+  },
+  "inNYears": "EN {years} AÑOS",
+  "@@inNYears": {
+    "description": "Texto que se muestra cuando un episodio se emite en varios años",
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
   "loginTitle": "Iniciar sesión / Registro",
   "@@loginTitle": {
     "description": "Título de la página de inicio de sesión/registro"
@@ -657,6 +721,10 @@
   "daysLeftText": "días",
   "@@daysLeftText": {
     "description": "Texto que muestra la cantidad de días restantes hasta el próximo episodio"
+  },
+  "dayLeftText": "día",
+  "@@dayLeftText": {
+    "description": "Texto que se muestra cuando queda 1 día para el próximo episodio"
   },
   "seasonPremiere": "Estreno de Temporada",
   "@@seasonPremiere": {

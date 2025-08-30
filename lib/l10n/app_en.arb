@@ -658,6 +658,10 @@
   "@@daysLeftText": {
     "description": "Text shown for the number of days left until the next episode"
   },
+  "dayLeftText": "day",
+  "@@dayLeftText": {
+    "description": "Text shown when there is 1 day left until the next episode"
+  },
   "seasonPremiere": "Season Premiere",
   "@@seasonPremiere": {
     "description": "Text shown for a season premiere episode"
@@ -667,6 +671,70 @@
     "description": "Text for the button to hide episodes"
   },
   "showMoreEpisodes": "Show {count} more episodes",
+  "today": "TODAY",
+  "@@today": {
+    "description": "Text shown when an episode airs today"
+  },
+  "thisWeek": "THIS WEEK",
+  "@@thisWeek": {
+    "description": "Text shown when an episode airs this week"
+  },
+  "tomorrow": "TOMORROW",
+  "@@tomorrow": {
+    "description": "Text shown when an episode airs tomorrow"
+  },
+  "inADay": "IN A DAY",
+  "@@inADay": {
+    "description": "Text shown when an episode airs in one day"
+  },
+  "inNDays": "IN {days} DAYS",
+  "@@inNDays": {
+    "description": "Text shown when an episode airs in multiple days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "inAWeek": "IN A WEEK",
+  "@@inAWeek": {
+    "description": "Text shown when an episode airs in one week"
+  },
+  "inNWeeks": "IN {weeks} WEEKS",
+  "@@inNWeeks": {
+    "description": "Text shown when an episode airs in multiple weeks",
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "inAMonth": "IN A MONTH",
+  "@@inAMonth": {
+    "description": "Text shown when an episode airs in one month"
+  },
+  "inNMonths": "IN {months} MONTHS",
+  "@@inNMonths": {
+    "description": "Text shown when an episode airs in multiple months",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "inAYear": "IN A YEAR",
+  "@@inAYear": {
+    "description": "Text shown when an episode airs in one year"
+  },
+  "inNYears": "IN {years} YEARS",
+  "@@inNYears": {
+    "description": "Text shown when an episode airs in multiple years",
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
   "@@showMoreEpisodes": {
     "description": "Text for the button to show more episodes",
     "placeholders": {

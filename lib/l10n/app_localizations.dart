@@ -968,6 +968,12 @@ abstract class AppLocalizations {
   /// **'days'**
   String get daysLeftText;
 
+  /// No description provided for @dayLeftText.
+  ///
+  /// In en, this message translates to:
+  /// **'day'**
+  String get dayLeftText;
+
   /// No description provided for @seasonPremiere.
   ///
   /// In en, this message translates to:
@@ -985,6 +991,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show {count} more episodes'**
   String showMoreEpisodes(Object count);
+
+  /// No description provided for @today.
+  ///
+  /// In en, this message translates to:
+  /// **'TODAY'**
+  String get today;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'THIS WEEK'**
+  String get thisWeek;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'TOMORROW'**
+  String get tomorrow;
+
+  /// No description provided for @inADay.
+  ///
+  /// In en, this message translates to:
+  /// **'IN A DAY'**
+  String get inADay;
+
+  /// No description provided for @inNDays.
+  ///
+  /// In en, this message translates to:
+  /// **'IN {days} DAYS'**
+  String inNDays(Object days);
+
+  /// No description provided for @inAWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'IN A WEEK'**
+  String get inAWeek;
+
+  /// No description provided for @inNWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'IN {weeks} WEEKS'**
+  String inNWeeks(Object weeks);
+
+  /// No description provided for @inAMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'IN A MONTH'**
+  String get inAMonth;
+
+  /// No description provided for @inNMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'IN {months} MONTHS'**
+  String inNMonths(Object months);
+
+  /// No description provided for @inAYear.
+  ///
+  /// In en, this message translates to:
+  /// **'IN A YEAR'**
+  String get inAYear;
+
+  /// No description provided for @inNYears.
+  ///
+  /// In en, this message translates to:
+  /// **'IN {years} YEARS'**
+  String inNYears(Object years);
 }
 
 class _AppLocalizationsDelegate

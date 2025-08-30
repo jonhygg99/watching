@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/pages/myshows/widgets/calendar/calendar.dart';
 import 'package:watching/pages/myshows/widgets/my_shows_skeleton.dart';
 import 'package:watching/pages/myshows/widgets/shows_list/shows_list_content.dart';
-import 'package:watching/pages/myshows/widgets/show_list_item.dart';
 import 'package:watching/pages/myshows/providers/upcoming_episodes_provider.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/l10n/app_localizations.dart';
-import 'package:watching/providers/app_providers.dart';
+import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
 
 class MyShowsPage extends ConsumerStatefulWidget {
   const MyShowsPage({super.key});
@@ -27,6 +27,9 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
     super.initState();
     _fetchCalendar();
   }
+
+  // Add this provider if it doesn't exist in your project
+  final countryCodeProvider = StateProvider<String>((ref) => '');
 
   Future<void> _fetchCalendar() async {
     setState(() {
@@ -138,17 +141,8 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_calendarData?.isNotEmpty ?? false) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              child: Text(
-                AppLocalizations.of(context)!.upcomingEpisodes,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            _buildShowList(_calendarData ?? []),
+            Padding(padding: const EdgeInsets.only(top: kPhoneSpaceVertical)),
+            Calendar(items: _calendarData ?? []),
           ],
           ShowsList(
             type: ShowsListType.waiting,
@@ -159,52 +153,6 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
           const SizedBox(height: 16),
         ],
       ),
-    );
-  }
-
-  // Map to track which shows are expanded
-  final Map<int, bool> _expandedShows = {};
-
-  Widget _buildShowList(List<dynamic> items) {
-    if (items.isEmpty) {
-      return Center(child: Text(AppLocalizations.of(context)!.noShowsFound));
-    }
-
-    return Column(
-      children:
-          items.asMap().entries.map((entry) {
-            final index = entry.key;
-            final showData = entry.value;
-            final show = showData['show'] ?? {};
-            final episodes = List<Map<String, dynamic>>.from(
-              showData['episodes'] ?? [],
-            );
-
-            // Sort episodes by air date
-            episodes.sort(
-              (a, b) => (a['first_aired'] as String).compareTo(
-                b['first_aired'] as String,
-              ),
-            );
-
-            // Initialize expanded state if not exists
-            _expandedShows.putIfAbsent(index, () => false);
-
-            return StatefulBuilder(
-              builder: (context, setState) {
-                return ShowListItem(
-                  show: show,
-                  episodes: episodes,
-                  isExpanded: _expandedShows[index]!,
-                  onToggleExpand: () {
-                    setState(() {
-                      _expandedShows[index] = !_expandedShows[index]!;
-                    });
-                  },
-                );
-              },
-            );
-          }).toList(),
     );
   }
 }
