@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'locale_provider.dart';
 part 'app_providers.g.dart';
 
 /// Provides a singleton instance of [TraktApi].
@@ -53,11 +52,7 @@ class TrendingShowsState {
   final bool isLoading;
   final String? error;
 
-  const TrendingShowsState({
-    this.shows,
-    this.isLoading = false,
-    this.error,
-  });
+  const TrendingShowsState({this.shows, this.isLoading = false, this.error});
 
   TrendingShowsState copyWith({
     List<dynamic>? shows,
@@ -75,8 +70,9 @@ class TrendingShowsState {
 /// Notifier for trending shows
 class TrendingShowsNotifier extends StateNotifier<TrendingShowsState> {
   final Ref _ref;
-  
-  TrendingShowsNotifier(this._ref) : super(const TrendingShowsState(isLoading: true)) {
+
+  TrendingShowsNotifier(this._ref)
+    : super(const TrendingShowsState(isLoading: true)) {
     _loadTrendingShows();
   }
 
@@ -85,11 +81,7 @@ class TrendingShowsNotifier extends StateNotifier<TrendingShowsState> {
       state = state.copyWith(isLoading: true);
       final api = _ref.read(traktApiProvider);
       final shows = await api.getTrendingShows();
-      state = state.copyWith(
-        shows: shows,
-        isLoading: false,
-        error: null,
-      );
+      state = state.copyWith(shows: shows, isLoading: false, error: null);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -100,6 +92,7 @@ class TrendingShowsNotifier extends StateNotifier<TrendingShowsState> {
 }
 
 /// Provider for trending shows
-final trendingShowsProvider = StateNotifierProvider<TrendingShowsNotifier, TrendingShowsState>((ref) {
-  return TrendingShowsNotifier(ref);
-});
+final trendingShowsProvider =
+    StateNotifierProvider<TrendingShowsNotifier, TrendingShowsState>((ref) {
+      return TrendingShowsNotifier(ref);
+    });

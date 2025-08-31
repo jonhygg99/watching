@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
+import 'show_more_button.dart';
 import 'package:watching/shared/utils/dates.dart';
 
 class CalendarShowInfo extends StatelessWidget {
@@ -50,24 +51,10 @@ class CalendarShowInfo extends StatelessWidget {
           if (airDate != null)
             Text('${formatDate(airDate!, context)} • ${formatTime(airDate!)}'),
           if (episodeCount > 1)
-            TextButton(
-              onPressed: onToggleExpand,
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                isExpanded
-                    ? AppLocalizations.of(context)!.hideEpisodes
-                    : AppLocalizations.of(
-                      context,
-                    )!.showMoreEpisodes(episodeCount - 1),
-                style: const TextStyle(
-                  fontSize: 14,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
+            ShowMoreButton(
+              isExpanded: isExpanded,
+              episodeCount: episodeCount,
+              onToggleExpand: onToggleExpand,
             ),
         ],
       ),
