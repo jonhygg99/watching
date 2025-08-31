@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // Phone Padding
 const double kSpacePhoneHorizontal = 16.0;
 const double kPhoneSpaceVertical = 12.0;
+const double kPhoneBottomSpacing = 30.0;
 
 const EdgeInsets kPaddingPhone = EdgeInsets.all(kSpacePhoneHorizontal);
 const double kHorizontalSpacePhone = kSpacePhoneHorizontal;

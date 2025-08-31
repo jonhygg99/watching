@@ -16,6 +16,7 @@ class ActionButtons extends StatelessWidget {
   final int? seasonNumber;
   final int? episodeNumber;
   final Map<String, dynamic>? progressData;
+  final VoidCallback? onEpisodeWatched;
 
   const ActionButtons({
     super.key,
@@ -28,6 +29,7 @@ class ActionButtons extends StatelessWidget {
     required this.seasonNumber,
     required this.episodeNumber,
     required this.progressData,
+    this.onEpisodeWatched,
   });
 
   @override
@@ -44,8 +46,11 @@ class ActionButtons extends StatelessWidget {
                     : const EdgeInsets.only(right: 4.0),
             child: Container(
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [kGradientLightColor, kGradientDarkColor],
+                gradient: LinearGradient(
+                  colors:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? [kGradientLightColor, kGradientDarkColor]
+                          : [kGradientLightColorLight, kGradientDarkColorLight],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -67,25 +72,27 @@ class ActionButtons extends StatelessWidget {
                               showId: traktId,
                               showData: showData!,
                               languageCode: languageCode,
-                              onEpisodeWatched: onWatchedStatusChanged,
+                              onEpisodeWatched: onEpisodeWatched,
                             ),
                       ),
                     );
                   }
                 },
-                label: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    AppLocalizations.of(context)!.checkOutAllEpisodes,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                label: Text(
+                  AppLocalizations.of(context)!.checkOutAllEpisodes,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.visible,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    height: 1.1,
                   ),
                 ),
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  minimumSize: const Size(double.infinity, 56),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   backgroundColor: Colors.transparent,
                   foregroundColor: Colors.white,
                   shadowColor: Colors.transparent,
@@ -103,8 +110,14 @@ class ActionButtons extends StatelessWidget {
               padding: const EdgeInsets.only(left: 4.0),
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFD6C498), Color(0xFF966D39)],
+                  gradient: LinearGradient(
+                    colors:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? [kGradientLightColor, kGradientDarkColor]
+                            : [
+                              kGradientLightColorLight,
+                              kGradientDarkColorLight,
+                            ],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
@@ -130,7 +143,7 @@ class ActionButtons extends StatelessWidget {
                               showData: showData!,
                               seasonNumber: seasonNumber!,
                               episodeNumber: episodeNumber!,
-                              onWatchedStatusChanged: () {
+                              onWatchedStatusChanged: (_) {
                                 onRefreshProgress();
                                 if (context.mounted) {
                                   onWatchedStatusChanged?.call();
@@ -140,19 +153,21 @@ class ActionButtons extends StatelessWidget {
                       );
                     }
                   },
-                  label: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      AppLocalizations.of(context)!.episodeInfo,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                  label: Text(
+                    AppLocalizations.of(context)!.episodeInfo,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.visible,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      height: 1.1,
                     ),
                   ),
                   style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: const Size(double.infinity, 56),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                     backgroundColor: Colors.transparent,
                     foregroundColor: Colors.white,
                     shadowColor: Colors.transparent,

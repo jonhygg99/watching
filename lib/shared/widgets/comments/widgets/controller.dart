@@ -10,6 +10,7 @@ class CommentsController extends StateNotifier<CommentsState> {
   final WidgetRef ref;
   final BuildContext context;
   final String showId;
+  bool _isDisposed = false;
   String sortValue;
   final int? seasonNumber;
   final int? episodeNumber;
@@ -39,6 +40,7 @@ class CommentsController extends StateNotifier<CommentsState> {
 
   @override
   void dispose() {
+    _isDisposed = true;
     scrollController.removeListener(_onScroll);
     // Do not dispose the scroll controller if it was passed in
     super.dispose();
@@ -61,17 +63,25 @@ class CommentsController extends StateNotifier<CommentsState> {
   @override
   Stream<CommentsState> get stream => super.stream;
 
-  Future<void> _loadComments() async {
-    if (_isLoadingMore || !_hasMore) return;
+  bool get mounted => !_isDisposed;
 
+  Future<void> _loadComments() async {
+    if (_isLoadingMore || !_hasMore || _isDisposed) return;
+
+    // Store the current page number to handle race conditions
+    final currentPage = _currentPage;
+    
     // Update loading state
     _updateState(
-      isLoadingMore: _currentPage > 1,
-      isInitialLoading: _currentPage == 1,
+      isLoadingMore: currentPage > 1,
+      isInitialLoading: currentPage == 1,
       errorMessage: null,
     );
 
     try {
+      // Store the current page number to handle race conditions
+      final currentPage = _currentPage;
+      
       final traktApi = ref.read(traktApiProvider);
       final List<dynamic> response;
 
@@ -82,7 +92,7 @@ class CommentsController extends StateNotifier<CommentsState> {
           season: seasonNumber!,
           episode: episodeNumber!,
           sort: sortValue,
-          page: _currentPage,
+          page: currentPage,
           limit: commentsPerPage,
         );
       } else {
@@ -90,7 +100,7 @@ class CommentsController extends StateNotifier<CommentsState> {
         response = await traktApi.getShowComments(
           id: showId,
           sort: sortValue,
-          page: _currentPage,
+          page: currentPage,
           limit: commentsPerPage,
         );
       }
@@ -108,13 +118,13 @@ class CommentsController extends StateNotifier<CommentsState> {
                   season: seasonNumber!,
                   episode: episodeNumber!,
                   sort: sortValue,
-                  page: _currentPage + 1,
+                  page: currentPage + 1,
                   limit: 1,
                 )
                 : await traktApi.getShowComments(
                   id: showId,
                   sort: sortValue,
-                  page: _currentPage + 1,
+                  page: currentPage + 1,
                   limit: 1,
                 );
         hasNextPage = nextPageResponse.isNotEmpty;
@@ -123,19 +133,21 @@ class CommentsController extends StateNotifier<CommentsState> {
         hasNextPage = true;
       }
 
-      // Update state with new comments
-      _updateState(
-        comments:
-            _currentPage == 1
-                ? currentPageComments
-                : [...state.comments, ...currentPageComments],
-        isLoadingMore: false,
-        isInitialLoading: false,
-        hasMore:
-            hasNextPage ||
-            (currentPageComments.isNotEmpty &&
-                currentPageComments.length >= commentsPerPage),
-      );
+      // Only update state if we're still on the same page and the widget is still mounted
+      if (mounted && currentPage == _currentPage) {
+        _updateState(
+          comments:
+              currentPage == 1
+                  ? currentPageComments
+                  : [...state.comments, ...currentPageComments],
+          isLoadingMore: false,
+          isInitialLoading: false,
+          hasMore:
+              hasNextPage ||
+              (currentPageComments.isNotEmpty &&
+                  currentPageComments.length >= commentsPerPage),
+        );
+      }
     } catch (e) {
       _updateState(
         isLoadingMore: false,
@@ -147,12 +159,13 @@ class CommentsController extends StateNotifier<CommentsState> {
   }
 
   Future<void> loadMore() async {
-    if (_isLoadingMore || !_hasMore || _isInitialLoading) return;
+    if (_isLoadingMore || !_hasMore || _isInitialLoading || _isDisposed) return;
     _currentPage++;
     await _loadComments();
   }
 
   Future<void> refresh() async {
+    if (_isDisposed) return;
     _currentPage = 1;
     _updateState(comments: []);
     await _loadComments();
@@ -198,12 +211,12 @@ class CommentsState {
   });
 
   factory CommentsState.initial() => const CommentsState(
-    comments: [],
-    isLoadingMore: false,
-    isInitialLoading: true,
-    hasMore: true,
-    errorMessage: null,
-  );
+        comments: [],
+        isLoadingMore: false,
+        isInitialLoading: true,
+        hasMore: true,
+        errorMessage: null,
+      );
 
   CommentsState copyWith({
     List<Map<String, dynamic>>? comments,

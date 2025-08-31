@@ -24,7 +24,7 @@ class GradientOverlay extends ConsumerWidget {
               Colors.transparent,
               Colors.black.withValues(alpha: 0.1),
               Colors.black.withValues(alpha: 0.6),
-              isDarkMode ? kScaffoldDarkBackgroundColor : Color(0xFFF5F5F5),
+              isDarkMode ? kScaffoldDarkBackgroundColor : Colors.white,
             ],
           ),
         ),

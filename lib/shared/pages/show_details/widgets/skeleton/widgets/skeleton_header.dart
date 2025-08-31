@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:watching/shared/constants/colors.dart';
 
 class SkeletonHeader extends StatelessWidget {
   const SkeletonHeader({super.key});
@@ -10,11 +11,16 @@ class SkeletonHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final fanartHeight = size.height * 0.65;
     final topPadding = MediaQuery.of(context).padding.top + 16;
+    final isDark = theme.brightness == Brightness.dark;
+    final baseColor =
+        (isDark ? kSkeletonBaseColorDark : kSkeletonBaseColorLight)!;
+    final highlightColor =
+        (isDark ? kSkeletonHighlightColorDark : kSkeletonHighlightColorLight)!;
 
     return SliverToBoxAdapter(
       child: Shimmer.fromColors(
-        baseColor: theme.colorScheme.surfaceContainerHighest,
-        highlightColor: theme.colorScheme.surface,
+        baseColor: baseColor,
+        highlightColor: highlightColor,
         child: SizedBox(
           height: fanartHeight,
           child: Stack(
@@ -31,15 +37,15 @@ class SkeletonHeader extends StatelessWidget {
                     10,
                   ), // 10px padding on all sides
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    // color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.3),
+                      // color: Colors.white.withValues(alpha: 0.3),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.5),
+                        // color: Colors.black.withValues(alpha: 0.5),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -60,7 +66,6 @@ class SkeletonHeader extends StatelessWidget {
                               24, // Adjusted to match typical rating text width
                           height: 20, // Matches text height
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -150,7 +155,7 @@ class SkeletonHeader extends StatelessWidget {
       width: width,
       height: 16,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.4),
+        color: Colors.black.withValues(alpha: 1),
         borderRadius: BorderRadius.circular(12),
       ),
     );
@@ -158,12 +163,11 @@ class SkeletonHeader extends StatelessWidget {
 
   Widget _buildGenreChip(BuildContext context) {
     return Container(
-      width: 80, // Fixed width for all chips
-      height: 28, // Fixed height for all chips
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16.0), // Match kRadiusChip
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.3),
@@ -172,9 +176,13 @@ class SkeletonHeader extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
+          color: Colors.white.withValues(alpha: 0.1),
           width: 1,
         ),
+      ),
+      child: Container(
+        width: 50, // Approximate width for skeleton text
+        height: 14, // Matches text height with padding
       ),
     );
   }

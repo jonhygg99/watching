@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/constants/measures.dart';
 
 import 'widgets/skeleton_header.dart';
 import 'widgets/skeleton_episode.dart';
@@ -18,10 +20,15 @@ class ShowDetailSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final baseColor =
+        (isDark ? kSkeletonBaseColorDark : kSkeletonBaseColorLight)!;
+    final highlightColor =
+        (isDark ? kSkeletonHighlightColorDark : kSkeletonHighlightColorLight)!;
 
     return Shimmer.fromColors(
-      baseColor: theme.colorScheme.surfaceContainerHighest,
-      highlightColor: theme.colorScheme.surface,
+      baseColor: baseColor,
+      highlightColor: highlightColor,
       child: CustomScrollView(
         slivers: [
           const SkeletonHeader(),
@@ -32,15 +39,15 @@ class ShowDetailSkeleton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SkeletonEpisode(),
-                  const SkeletonSpacer(height: 24),
+                  // Spacing it's added in the skeleton episode,
                   const SkeletonDescription(),
-                  const SkeletonSpacer(height: 32),
+                  const SkeletonSpacer(height: kSpaceBtwWidgets),
                   const SkeletonCast(),
-                  const SkeletonSpacer(height: 32),
+                  const SkeletonSpacer(height: kSpaceBtwWidgets),
                   const SkeletonCommentsHeader(),
-                  const SkeletonSpacer(height: 24),
+                  const SkeletonSpacer(height: kSpaceBtwWidgets),
                   const SkeletonVideos(),
-                  const SkeletonSpacer(height: 32),
+                  const SkeletonSpacer(height: kSpaceBtwWidgets),
                   const SkeletonRelatedShows(),
                 ],
               ),

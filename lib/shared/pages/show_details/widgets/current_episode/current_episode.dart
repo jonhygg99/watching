@@ -6,8 +6,8 @@ import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/shared/pages/show_details/widgets/current_episode/widgets/current_episode_details.dart';
-import 'package:watching/shared/pages/show_details/widgets/current_episode/widgets/episode_helpers.dart';
 import 'package:watching/shared/pages/show_details/widgets/skeleton/widgets/skeleton_episode.dart';
+import 'package:watching/shared/utils/episode_utils.dart';
 
 /// A widget that displays the current episode information and progress for a show.
 ///
@@ -19,6 +19,7 @@ class CurrentEpisode extends HookWidget {
   final String? languageCode;
   final Map<String, dynamic>? showData;
   final VoidCallback? onWatchedStatusChanged;
+  final VoidCallback? onEpisodeWatched;
 
   const CurrentEpisode({
     super.key,
@@ -27,6 +28,7 @@ class CurrentEpisode extends HookWidget {
     this.languageCode,
     this.showData,
     this.onWatchedStatusChanged,
+    this.onEpisodeWatched,
   });
 
   /// Fetches the translated episode name
@@ -77,6 +79,7 @@ class CurrentEpisode extends HookWidget {
 
     // State variables
     final progress = useState<Map<String, dynamic>?>(null);
+    final nextEpisode = useState<Map<String, dynamic>?>(null);
     final isLoading = useState(true);
     final error = useState<String?>(null);
     final translatedEpisodeName = useState<Map<String, String>>({});
@@ -89,11 +92,12 @@ class CurrentEpisode extends HookWidget {
 
         progress.value = progressData;
 
-        // Find the next episode to get translated name
-        final nextEpisode = findNextEpisode(progressData);
-        if (nextEpisode != null) {
-          final seasonNumber = nextEpisode['season'] as int?;
-          final episodeNumber = nextEpisode['number'] as int?;
+        // Find and store the next episode
+        nextEpisode.value = EpisodeUtils.findNextEpisode(progressData);
+
+        if (nextEpisode.value != null) {
+          final seasonNumber = nextEpisode.value!['season'] as int?;
+          final episodeNumber = nextEpisode.value!['number'] as int?;
 
           // Only fetch translation if not already loaded
           if (seasonNumber != null &&
@@ -154,19 +158,19 @@ class CurrentEpisode extends HookWidget {
       return const SizedBox.shrink();
     }
 
-    final nextEpisode = findNextEpisode(progressData);
     final watched = progressData['completed'] as int? ?? 0;
     final total = progressData['aired'] as int? ?? 0;
 
-    if (nextEpisode != null) {
-      final seasonNumber = nextEpisode['season'] as int;
-      final episodeNumber = nextEpisode['number'] as int;
+    final currentNextEpisode = nextEpisode.value;
+    if (currentNextEpisode != null) {
+      final seasonNumber = currentNextEpisode['season'] as int;
+      final episodeNumber = currentNextEpisode['number'] as int;
       final episodeKey = 'S${seasonNumber}E$episodeNumber';
 
       // Use translated name if available, fallback to original
       final episodeName =
           translatedEpisodeName.value[episodeKey] ??
-          nextEpisode['title'] ??
+          currentNextEpisode['title'] as String? ??
           AppLocalizations.of(context)!.episodeNumber(episodeNumber);
 
       return CurrentEpisodeDetails(
@@ -178,11 +182,12 @@ class CurrentEpisode extends HookWidget {
         progressPercent: total > 0 ? (watched / total).clamp(0.0, 1.0) : 0.0,
         onRefreshProgress: refreshProgress,
         progressData: progressData,
-        nextEpisode: nextEpisode,
+        nextEpisode: currentNextEpisode,
         showData: showData,
         traktId: traktId,
         languageCode: languageCode,
         onWatchedStatusChanged: onWatchedStatusChanged,
+        onEpisodeWatched: onEpisodeWatched,
       );
     } else if (total > 0) {
       // Show progress for completed shows
@@ -195,11 +200,12 @@ class CurrentEpisode extends HookWidget {
         progressPercent: 1.0,
         onRefreshProgress: refreshProgress,
         progressData: progressData,
-        nextEpisode: null,
+        nextEpisode: nextEpisode.value,
         showData: showData,
         traktId: traktId,
         languageCode: languageCode,
         onWatchedStatusChanged: onWatchedStatusChanged,
+        onEpisodeWatched: onEpisodeWatched,
       );
     }
 

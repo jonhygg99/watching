@@ -28,6 +28,7 @@ class YoutubePlayerDialog extends HookWidget {
           forceHD: true,
           hideControls: false,
           controlsVisibleAtStart: true,
+          useHybridComposition: true,
         ),
       );
     }, [videoId]);
@@ -46,65 +47,38 @@ class YoutubePlayerDialog extends HookWidget {
       };
     }, []);
 
-    return Dialog(
-      insetPadding: EdgeInsets.zero,
-      backgroundColor: Colors.transparent,
-      child: Stack(
-        alignment: Alignment.topRight,
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.3,
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        final size = MediaQuery.of(context).size;
+        final isLandscape = orientation == Orientation.landscape;
+        
+        if (isLandscape) {
+          return Scaffold(
+            backgroundColor: Colors.black,
+            body: YoutubePlayer(
+              controller: controller,
+              showVideoProgressIndicator: true,
+              aspectRatio: size.width / size.height,
+              onEnded: (_) => Navigator.pop(context),
+            ),
+          );
+        }
+        
+        return Dialog(
+          insetPadding: EdgeInsets.zero,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: size.width,
+            height: size.height * 0.3,
             child: YoutubePlayer(
               controller: controller,
               showVideoProgressIndicator: true,
               aspectRatio: 16 / 9,
-              onEnded: (_) {
-                Navigator.pop(context);
-              },
+              onEnded: (_) => Navigator.pop(context),
             ),
           ),
-          Positioned(
-            top: 8.0,
-            right: 8.0,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.black54,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.fullscreen,
-                  color: Colors.white,
-                  size: 24.0,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => Scaffold(
-                            backgroundColor: Colors.black,
-                            body: Center(
-                              child: YoutubePlayer(
-                                controller: controller,
-                                showVideoProgressIndicator: true,
-                                aspectRatio: 16 / 9,
-                                onEnded: (_) {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ),
-                          ),
-                      fullscreenDialog: true,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

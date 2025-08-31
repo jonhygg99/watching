@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:watching/shared/constants/colors.dart';
 
 class EpisodeHeaderSkeleton extends StatelessWidget {
   const EpisodeHeaderSkeleton({super.key});
@@ -8,10 +9,14 @@ class EpisodeHeaderSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final baseColor =
+        (isDark ? kSkeletonBaseColorDark : kSkeletonBaseColorLight)!;
+    final highlightColor =
+        (isDark ? kSkeletonHighlightColorDark : kSkeletonHighlightColorLight)!;
 
     return Shimmer.fromColors(
-      baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
-      highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+      baseColor: baseColor,
+      highlightColor: highlightColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

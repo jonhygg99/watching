@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:watching/shared/constants/colors.dart';
-import 'widgets/back_button.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/constants/sort_options.dart';
+import 'package:watching/shared/pages/show_details/cast.dart';
+import 'package:watching/shared/pages/show_details/widgets/back_button.dart';
 import 'package:watching/shared/pages/show_details/widgets/current_episode/current_episode.dart';
 import 'package:watching/shared/pages/show_details/widgets/header/header.dart';
 import 'package:watching/shared/pages/show_details/widgets/related.dart';
-import 'package:watching/shared/widgets/comments/comments_list.dart';
-import 'package:watching/shared/constants/sort_options.dart';
+import 'package:watching/shared/pages/show_details/widgets/show_description.dart';
 import 'package:watching/shared/pages/show_details/widgets/skeleton/show_detail_skeleton.dart';
-import 'widgets/show_description.dart';
-import 'widgets/videos.dart';
-import 'cast.dart';
-// Related shows section removed
+import 'package:watching/shared/pages/show_details/widgets/videos.dart';
+import 'package:watching/shared/widgets/comments/comments_list.dart';
 
 /// Displays detailed information about a TV show, including header, seasons, videos, cast, related shows, and comments.
 /// Uses Riverpod for dependency injection and state management.
@@ -36,6 +35,7 @@ class ShowDetailPage extends HookConsumerWidget {
 
     final apiService = ref.watch(traktApiProvider);
     final countryCode = ref.watch(countryCodeProvider);
+    final refreshCounter = useState(0);
 
     // Function to refresh watchlist data
     Future<void> refreshWatchlist() async {
@@ -156,6 +156,7 @@ class ShowDetailPage extends HookConsumerWidget {
                               languageCode:
                                   countryCode.substring(0, 2).toLowerCase(),
                               showData: show,
+                              onEpisodeWatched: () => refreshCounter.value++,
                             ),
                             ShowDescription(
                               tagline: originalTagline,

@@ -1,10 +1,93 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'trakt_api.dart';
+import 'utils/rate_limiter.dart';
 
 /// Mixin for watch history endpoints.
 mixin HistoryApi on TraktApiBase {
+  final RateLimitedHttpClient _httpClient = RateLimitedHttpClient();
+
+  @override
+  void dispose() {
+    _httpClient.close();
+    super.dispose();
+  }
+
+  /// Updates the watch status of multiple episodes for a single show and season.
+  ///
+  /// This is optimized for the common case where all episodes belong to the same show and season.
+  /// It will make a single API call for adding and another for removing episodes.
+  Future<Map<String, dynamic>> batchUpdateEpisodeWatchStatus({
+    required int showId,
+    required int seasonNumber,
+    List<int> episodesToAdd = const [],
+    List<int> episodesToRemove = const [],
+  }) async {
+    try {
+      int added = 0;
+      int removed = 0;
+
+      // Process episodes to add
+      if (episodesToAdd.isNotEmpty) {
+        final payload = {
+          'shows': [
+            {
+              'ids': {'trakt': showId},
+              'seasons': [
+                {
+                  'number': seasonNumber,
+                  'episodes':
+                      episodesToAdd.map((ep) => {'number': ep}).toList(),
+                },
+              ],
+            },
+          ],
+        };
+
+        final showData = payload['shows']?[0];
+        if (showData != null) {
+          await addToWatchHistory(shows: [showData]);
+        }
+        added = episodesToAdd.length;
+      }
+
+      // Process episodes to remove
+      if (episodesToRemove.isNotEmpty) {
+        final payload = {
+          'shows': [
+            {
+              'ids': {'trakt': showId},
+              'seasons': [
+                {
+                  'number': seasonNumber,
+                  'episodes':
+                      episodesToRemove.map((ep) => {'number': ep}).toList(),
+                },
+              ],
+            },
+          ],
+        };
+
+        final showData = payload['shows']?[0];
+        if (showData != null) {
+          await removeFromHistory(shows: [showData]);
+        }
+        removed = episodesToRemove.length;
+      }
+
+      return {'added': added, 'removed': removed};
+    } catch (e) {
+      debugPrint('Failed to update episode watch status: $e');
+      rethrow;
+    }
+  }
+
   /// Adds movies, shows, seasons, or episodes to the user's watch history.
+  /// Adds movies, shows, seasons, or episodes to the user's watch history.
+  ///
+  /// This method uses rate limiting and automatic retry with exponential backoff.
   Future<void> addToWatchHistory({
     List<Map<String, dynamic>>? movies,
     List<Map<String, dynamic>>? shows,
@@ -12,21 +95,30 @@ mixin HistoryApi on TraktApiBase {
     List<Map<String, dynamic>>? episodes,
   }) async {
     await ensureValidToken();
-    final Map<String, dynamic> payload = {};
+
+    final payload = <String, dynamic>{};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;
     if (seasons != null && seasons.isNotEmpty) payload['seasons'] = seasons;
     if (episodes != null && episodes.isNotEmpty) payload['episodes'] = episodes;
+
     final url = Uri.parse('$baseUrl/sync/history');
-    final response = await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(payload),
-    );
-    if (response.statusCode != 201) {
-      throw Exception(
-        'Error POST /sync/history: ${response.statusCode}\n${response.body}',
+
+    try {
+      final response = await _httpClient.post(
+        url,
+        headers: headers,
+        body: jsonEncode(payload),
       );
+
+      if (response.statusCode != 201) {
+        throw Exception(
+          'Error POST /sync/history: ${response.statusCode}\n${response.body}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to add to watch history: $e');
+      rethrow;
     }
   }
 
@@ -37,6 +129,11 @@ mixin HistoryApi on TraktApiBase {
   ///   await removeFromHistory(shows: [...], seasons: [...], episodes: [...], ids: [...]);
   ///
   /// Throws an [Exception] if the API call fails.
+  /// Removes movies, shows, seasons, episodes, or history ids from the user's watch history.
+  ///
+  /// This method uses rate limiting and automatic retry with exponential backoff.
+  /// It will automatically handle rate limiting (429) responses by waiting the
+  /// appropriate amount of time before retrying.
   Future<Map<String, dynamic>> removeFromHistory({
     List<Map<String, dynamic>>? movies,
     List<Map<String, dynamic>>? shows,
@@ -45,24 +142,34 @@ mixin HistoryApi on TraktApiBase {
     List<int>? ids,
   }) async {
     await ensureValidToken();
-    final Map<String, dynamic> payload = {};
+
+    final payload = <String, dynamic>{};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;
     if (seasons != null && seasons.isNotEmpty) payload['seasons'] = seasons;
     if (episodes != null && episodes.isNotEmpty) payload['episodes'] = episodes;
     if (ids != null && ids.isNotEmpty) payload['ids'] = ids;
+
     final url = Uri.parse('$baseUrl/sync/history/remove');
-    final response = await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(payload),
-    );
-    if (response.statusCode != 200) {
-      throw Exception(
-        'Error POST /sync/history/remove: ${response.statusCode}\n${response.body}',
+
+    try {
+      final response = await _httpClient.post(
+        url,
+        headers: headers,
+        body: jsonEncode(payload),
       );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Error POST /sync/history/remove: ${response.statusCode}\n${response.body}',
+        );
+      }
+
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('Failed to remove from history: $e');
+      rethrow;
     }
-    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
   /// Gets the watched history for shows or movies.
@@ -130,7 +237,7 @@ mixin HistoryApi on TraktApiBase {
     List<Map<String, dynamic>>? episodes,
   }) async {
     await ensureValidToken();
-    
+
     final Map<String, dynamic> payload = {};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;
@@ -183,7 +290,7 @@ mixin HistoryApi on TraktApiBase {
     List<Map<String, dynamic>>? episodes,
   }) async {
     await ensureValidToken();
-    
+
     final Map<String, dynamic> payload = {};
     if (movies != null && movies.isNotEmpty) payload['movies'] = movies;
     if (shows != null && shows.isNotEmpty) payload['shows'] = shows;

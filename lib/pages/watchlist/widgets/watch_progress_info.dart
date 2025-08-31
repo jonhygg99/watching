@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/shared/widgets/progress_bar.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'package:watching/pages/watchlist/widgets/episode_info_button.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
@@ -51,7 +50,10 @@ class WatchProgressInfo extends StatelessWidget {
         children: [
           if (titleStyle != null) Text(title, style: titleStyle),
           const SizedBox(height: 8),
-          Text(AppLocalizations.of(context)!.noProgressAvailable, style: TextStyle(color: Colors.grey)),
+          Text(
+            AppLocalizations.of(context)!.noProgressAvailable,
+            style: TextStyle(color: Colors.grey),
+          ),
         ],
       );
     }
@@ -104,8 +106,9 @@ class _ProgressDetails extends StatelessWidget {
         Theme.of(
           context,
         ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);
-    final effectiveEpisodeStyle =
-        episodeStyle ?? Theme.of(context).textTheme.bodyMedium;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -118,17 +121,38 @@ class _ProgressDetails extends StatelessWidget {
           ),
         if (nextEpisode != null) ...[
           const SizedBox(height: kSpaceBtwTitleWidget),
-          Text(
-            '${AppLocalizations.of(context)!.seasonEpisodeFormat(nextEpisode['number'], nextEpisode['season'])} - ${nextEpisode['title']}',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: effectiveEpisodeStyle?.copyWith(color: Colors.grey[700]),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Text(
+                  '${AppLocalizations.of(context)!.seasonEpisodeFormat(nextEpisode['number'], nextEpisode['season'])} · ${nextEpisode['title']}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$episodesWatched/$totalEpisodes',
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: kSpaceBtwTitleWidget),
           TinyProgressBar(
             percent: percent,
             watched: episodesWatched,
             total: totalEpisodes,
+            showText: true,
           ),
           const SizedBox(height: kSpaceBtwTitleWidget),
           EpisodeInfoButton(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:watching/shared/constants/colors.dart';
 
 class MyShowsSkeleton extends StatelessWidget {
   const MyShowsSkeleton({super.key});
@@ -7,8 +8,10 @@ class MyShowsSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+    final baseColor =
+        (isDark ? kSkeletonBaseColorDark : kSkeletonBaseColorLight)!;
+    final highlightColor =
+        (isDark ? kSkeletonHighlightColorDark : kSkeletonHighlightColorLight)!;
 
     return Shimmer.fromColors(
       baseColor: baseColor,

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
-import '../../../shared/utils/dates.dart';
+import 'show_more_button.dart';
+import 'package:watching/shared/utils/dates.dart';
 
-class ShowInfo extends StatelessWidget {
+class CalendarShowInfo extends StatelessWidget {
   final Map<String, dynamic> show;
   final bool isSeasonPremiere;
   final Map<String, dynamic>? nextEpisode;
@@ -11,7 +12,7 @@ class ShowInfo extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback onToggleExpand;
 
-  const ShowInfo({
+  const CalendarShowInfo({
     super.key,
     required this.show,
     required this.isSeasonPremiere,
@@ -28,6 +29,7 @@ class ShowInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          ..._buildDateIndicator(context),
           Text(
             show['title']?.toString() ?? 'Unknown Show',
             style: Theme.of(
@@ -49,27 +51,53 @@ class ShowInfo extends StatelessWidget {
           if (airDate != null)
             Text('${formatDate(airDate!, context)} • ${formatTime(airDate!)}'),
           if (episodeCount > 1)
-            TextButton(
-              onPressed: onToggleExpand,
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                isExpanded
-                    ? AppLocalizations.of(context)!.hideEpisodes
-                    : AppLocalizations.of(
-                      context,
-                    )!.showMoreEpisodes(episodeCount - 1),
-                style: const TextStyle(
-                  fontSize: 14,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
+            ShowMoreButton(
+              isExpanded: isExpanded,
+              episodeCount: episodeCount,
+              onToggleExpand: onToggleExpand,
             ),
         ],
       ),
     );
+  }
+
+  List<Widget> _buildDateIndicator(BuildContext context) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final difference = airDate!.difference(today);
+    final days = difference.inDays;
+
+    String text;
+    final l10n = AppLocalizations.of(context)!;
+
+    if (days == 0) {
+      text = l10n.today;
+    } else if (days == 1) {
+      text = l10n.tomorrow;
+    } else if (days > 1 && days <= 7) {
+      text = l10n.thisWeek;
+    } else if (days > 7 && days <= 30) {
+      final weeks = (days / 7).floor();
+      text = weeks == 1 ? l10n.inAWeek : l10n.inNWeeks(weeks);
+    } else if (days > 30 && days <= 365) {
+      final months = (days / 30).floor();
+      text = months == 1 ? l10n.inAMonth : l10n.inNMonths(months);
+    } else {
+      final years = (days / 365).floor();
+      text = years == 1 ? l10n.inAYear : l10n.inNYears(years);
+    }
+
+    return [
+      Text(
+        text,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+          letterSpacing: 0.5,
+        ),
+      ),
+      const SizedBox(height: 2),
+    ];
   }
 }

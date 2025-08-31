@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:watching/l10n/app_localizations.dart';
 
 /// Constants for TV show and movie genres
@@ -81,7 +80,7 @@ class Genres {
   static String getTranslatedGenre(String genre, AppLocalizations l10n) {
     // Normalize the input genre to handle case differences and extra spaces
     final normalizedGenre = genre.trim();
-    
+
     // Handle common variations that might come from the API
     final genreMap = {
       // Direct matches (case insensitive)
@@ -120,11 +119,11 @@ class Genres {
       'war': war,
       'western': western,
     };
-    
+
     // Try to find a match (case insensitive)
     final key = normalizedGenre.toLowerCase();
     final matchedGenre = genreMap[key];
-    
+
     if (matchedGenre != null) {
       switch (matchedGenre) {
         case action:
@@ -197,7 +196,7 @@ class Genres {
           return l10n.genreWestern;
       }
     }
-    
+
     // If no match found, return the original genre
     return genre;
   }

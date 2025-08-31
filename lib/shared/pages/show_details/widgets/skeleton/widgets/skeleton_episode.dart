@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/constants/measures.dart';
 import 'skeleton_utils.dart';
 
 class SkeletonEpisode extends StatelessWidget {
@@ -8,12 +10,17 @@ class SkeletonEpisode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final baseColor =
+        (isDark ? kSkeletonBaseColorDark : kSkeletonBaseColorLight)!;
+    final highlightColor =
+        (isDark ? kSkeletonHighlightColorDark : kSkeletonHighlightColorLight)!;
 
     return Shimmer.fromColors(
-      baseColor: theme.colorScheme.surfaceContainerHighest,
-      highlightColor: theme.colorScheme.surface,
+      baseColor: baseColor,
+      highlightColor: highlightColor,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        padding: EdgeInsetsGeometry.only(bottom: kSpaceBtwWidgets),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -56,7 +63,6 @@ class SkeletonEpisode extends StatelessWidget {
                     margin: const EdgeInsets.only(right: 4),
                   ),
                 ),
-
                 // Episode Info button
                 Expanded(
                   child: SkeletonContainer(

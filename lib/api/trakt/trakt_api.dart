@@ -28,10 +28,20 @@ abstract class TraktApiBase {
   Future<List<dynamic>> getJsonList(String endpoint);
   String get baseUrl;
   Map<String, String> get headers;
+  
+  /// Dispose of any resources used by the API client.
+  /// Subclasses should override this method to clean up their resources.
+  void dispose() {}
 }
 
 class TraktApi extends TraktApiBase
     with ShowsApi, ShowsListsApi, HistoryApi, UserApi, SearchApi, CalendarApi {
+  
+  @override
+  void dispose() {
+    super.dispose();
+    // Any TraktApi specific cleanup can go here
+  }
   TraktApi({String? clientId, String? clientSecret, String? redirectUri})
     : _clientId = clientId,
       _clientSecret = clientSecret,

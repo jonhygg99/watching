@@ -51,9 +51,8 @@ class ShowListPage extends HookConsumerWidget {
         allShows.value = [...allShows.value, ...newShows];
         currentPage.value = nextPage;
         hasMore.value = hasMoreShows;
-      } catch (e, stackTrace) {
+      } catch (e) {
         debugPrint('Error loading more shows: $e');
-        debugPrint('Stack trace: $stackTrace');
         errorMessage.value = "Error";
       } finally {
         isLoadingMore.value = false;
