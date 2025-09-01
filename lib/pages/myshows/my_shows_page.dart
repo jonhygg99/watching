@@ -146,10 +146,10 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
           ],
           ShowsList(
             type: ShowsListType.waiting,
-            title: 'Waiting for next season',
+            title: AppLocalizations.of(context)!.waitingForNextSeason,
           ),
           const SizedBox(height: 24),
-          ShowsList(type: ShowsListType.ended, title: 'Ended'),
+          ShowsList(type: ShowsListType.ended, title: AppLocalizations.of(context)!.endedShows),
           const SizedBox(height: 16),
         ],
       ),

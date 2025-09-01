@@ -29,14 +29,6 @@ class WatchlistPage extends HookConsumerWidget {
       await ref.read(watchlistProvider.notifier).refresh();
     }
 
-    // Handle type change
-    void handleTypeChange(WatchlistType? newType) {
-      if (newType != null) {
-        ref.read(watchlistTypeProvider.notifier).state = newType;
-        refreshWatchlist();
-      }
-    }
-
     // Show error dialog if there's an error
     if (error != null && !watchlistState.hasData) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -68,35 +60,7 @@ class WatchlistPage extends HookConsumerWidget {
       onRefresh: refreshWatchlist,
       child: Column(
         children: [
-          // Type selector
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12.0,
-              horizontal: 16.0,
-            ),
-            child: Row(
-              children: [
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButton<WatchlistType>(
-                    value: ref.watch(watchlistTypeProvider),
-                    items: [
-                      DropdownMenuItem(
-                        value: WatchlistType.shows,
-                        child: Text(AppLocalizations.of(context)!.shows),
-                      ),
-                      DropdownMenuItem(
-                        value: WatchlistType.movies,
-                        child: Text(AppLocalizations.of(context)!.movies),
-                      ),
-                    ],
-                    onChanged: handleTypeChange,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
+          const SizedBox(height: kPhoneSpaceVertical),
           // Main content
           Expanded(
             child: Builder(

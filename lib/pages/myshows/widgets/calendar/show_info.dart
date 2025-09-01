@@ -11,6 +11,7 @@ class CalendarShowInfo extends StatelessWidget {
   final int episodeCount;
   final bool isExpanded;
   final VoidCallback onToggleExpand;
+  final int days;
 
   const CalendarShowInfo({
     super.key,
@@ -21,6 +22,7 @@ class CalendarShowInfo extends StatelessWidget {
     required this.episodeCount,
     required this.isExpanded,
     required this.onToggleExpand,
+    required this.days,
   });
 
   @override
@@ -62,11 +64,6 @@ class CalendarShowInfo extends StatelessWidget {
   }
 
   List<Widget> _buildDateIndicator(BuildContext context) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final difference = airDate!.difference(today);
-    final days = difference.inDays;
-
     String text;
     final l10n = AppLocalizations.of(context)!;
 
@@ -89,7 +86,7 @@ class CalendarShowInfo extends StatelessWidget {
 
     return [
       Text(
-        text,
+        text.toUpperCase(),
         style: TextStyle(
           color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.bold,

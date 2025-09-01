@@ -524,9 +524,13 @@
   "@@noItemsInWatchlist": {
     "description": "Mensaje que se muestra cuando la lista de seguimiento está vacía"
   },
-  "endedShows": "Series finalizadas",
+  "waitingForNextSeason": "Esperando la próxima temporada",
+  "@@waitingForNextSeason": {
+    "description": "Título para la sección 'esperando la próxima temporada'"
+  },
+  "endedShows": "Series terminadas",
   "@@endedShows": {
-    "description": "Título para la sección de series finalizadas"
+    "description": "Título para la sección de series terminadas"
   },
   "upcomingShows": "Próximas series",
   "@@upcomingShows": {
@@ -615,23 +619,23 @@
   "@@monthNamesShort": {
     "description": "Lista separada por comas de los nombres cortos de los meses (3 letras) para formato de fecha"
   },
-  "today": "HOY",
+  "today": "Hoy",
   "@@today": {
     "description": "Texto que se muestra cuando un episodio se emite hoy"
   },
-  "thisWeek": "ESTA SEMANA",
+  "thisWeek": "Esta semana",
   "@@thisWeek": {
     "description": "Texto que se muestra cuando un episodio se emite esta semana"
   },
-  "tomorrow": "MAÑANA",
+  "tomorrow": "Mañana",
   "@@tomorrow": {
     "description": "Texto que se muestra cuando un episodio se emite mañana"
   },
-  "inADay": "EN UN DÍA",
+  "inADay": "En un día",
   "@@inADay": {
     "description": "Texto que se muestra cuando un episodio se emite en un día"
   },
-  "inNDays": "EN {days} DÍAS",
+  "inNDays": "En {days} días",
   "@@inNDays": {
     "description": "Texto que se muestra cuando un episodio se emite en varios días",
     "placeholders": {
@@ -640,11 +644,11 @@
       }
     }
   },
-  "inAWeek": "EN UNA SEMANA",
+  "inAWeek": "En una semana",
   "@@inAWeek": {
     "description": "Texto que se muestra cuando un episodio se emite en una semana"
   },
-  "inNWeeks": "EN {weeks} SEMANAS",
+  "inNWeeks": "En {weeks} semanas",
   "@@inNWeeks": {
     "description": "Texto que se muestra cuando un episodio se emite en varias semanas",
     "placeholders": {
@@ -653,11 +657,11 @@
       }
     }
   },
-  "inAMonth": "EN UN MES",
+  "inAMonth": "En un mes",
   "@@inAMonth": {
     "description": "Texto que se muestra cuando un episodio se emite en un mes"
   },
-  "inNMonths": "EN {months} MESES",
+  "inNMonths": "En {months} meses",
   "@@inNMonths": {
     "description": "Texto que se muestra cuando un episodio se emite en varios meses",
     "placeholders": {
@@ -666,11 +670,11 @@
       }
     }
   },
-  "inAYear": "EN UN AÑO",
+  "inAYear": "En un año",
   "@@inAYear": {
     "description": "Texto que se muestra cuando un episodio se emite en un año"
   },
-  "inNYears": "EN {years} AÑOS",
+  "inNYears": "En {years} años",
   "@@inNYears": {
     "description": "Texto que se muestra cuando un episodio se emite en varios años",
     "placeholders": {

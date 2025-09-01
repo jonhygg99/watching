@@ -7,12 +7,14 @@ class CalendarShowEpisodes extends StatelessWidget {
   final Map<String, dynamic> episode;
   final String Function(Map<String, dynamic>) getEpisodeTitle;
   final DateTime? airDate;
+  final int days;
 
   const CalendarShowEpisodes({
     super.key,
     required this.episode,
     required this.getEpisodeTitle,
     this.airDate,
+    required this.days,
   });
 
   @override
@@ -72,7 +74,7 @@ class CalendarShowEpisodes extends StatelessWidget {
           ),
 
           // Days bubble if air date is available
-          if (airDate != null) EpisodeDaysBubble(airDate: airDate!),
+          if (airDate != null) EpisodeDaysBubble(days: days),
         ],
       ),
     );

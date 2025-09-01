@@ -366,6 +366,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noItemsInWatchlist => 'No items in watchlist';
 
   @override
+  String get waitingForNextSeason => 'Waiting for next season';
+
+  @override
   String get endedShows => 'Ended Shows';
 
   @override
@@ -474,43 +477,43 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get today => 'TODAY';
+  String get today => 'Today';
 
   @override
-  String get thisWeek => 'THIS WEEK';
+  String get thisWeek => 'This Week';
 
   @override
-  String get tomorrow => 'TOMORROW';
+  String get tomorrow => 'Tomorrow';
 
   @override
-  String get inADay => 'IN A DAY';
+  String get inADay => 'In a day';
 
   @override
   String inNDays(Object days) {
-    return 'IN $days DAYS';
+    return 'In $days days';
   }
 
   @override
-  String get inAWeek => 'IN A WEEK';
+  String get inAWeek => 'In a week';
 
   @override
   String inNWeeks(Object weeks) {
-    return 'IN $weeks WEEKS';
+    return 'In $weeks weeks';
   }
 
   @override
-  String get inAMonth => 'IN A MONTH';
+  String get inAMonth => 'In a month';
 
   @override
   String inNMonths(Object months) {
-    return 'IN $months MONTHS';
+    return 'In $months months';
   }
 
   @override
-  String get inAYear => 'IN A YEAR';
+  String get inAYear => 'In a year';
 
   @override
   String inNYears(Object years) {
-    return 'IN $years YEARS';
+    return 'In $years years';
   }
 }
