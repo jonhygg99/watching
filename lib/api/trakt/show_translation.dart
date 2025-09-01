@@ -17,8 +17,6 @@ class ShowTranslationService {
       final ids = show['ids'] ?? {};
       final traktId = ids['slug']?.toString() ?? ids['trakt']?.toString();
 
-      return show['title'] ?? 'Untitled';
-
       if (traktId == null) {
         return show['title'] ?? 'Untitled';
       }

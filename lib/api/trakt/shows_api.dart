@@ -267,7 +267,6 @@ mixin ShowsApi on TraktApiBase {
     required String id,
     required String language,
   }) async {
-    return List<dynamic>.empty();
     return await getJsonList('/shows/$id/translations/$language');
   }
 
