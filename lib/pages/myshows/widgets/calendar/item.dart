@@ -31,7 +31,11 @@ class CalendarItem extends StatelessWidget {
         nextEpisode != null
             ? DateTime.tryParse(nextEpisode['first_aired'])
             : null;
-    final daysUntil = airDate?.difference(DateTime.now()).inDays ?? 0;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final difference = airDate?.difference(today);
+    final days = difference?.inDays ?? 0;
+
     final isSeasonPremiere = nextEpisode != null && nextEpisode['episode'] == 1;
 
     return GestureDetector(
@@ -89,12 +93,13 @@ class CalendarItem extends StatelessWidget {
                           episodeCount: episodes.length,
                           isExpanded: isExpanded,
                           onToggleExpand: onToggleExpand,
+                          days: days,
                         );
                       },
                     );
                   },
                 ),
-                if (daysUntil >= 0) ShowDaysLeft(days: daysUntil),
+                if (days >= 0) ShowDaysLeft(days: days),
               ],
             ),
             if (episodes.length > 1)
@@ -119,7 +124,7 @@ class CalendarItem extends StatelessWidget {
                             'expanded_episodes_${show['ids']['trakt']}',
                           ),
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _buildExpandedEpisodes(context),
+                          children: _buildExpandedEpisodes(context, days),
                         )
                         : const SizedBox.shrink(),
               ),
@@ -133,7 +138,7 @@ class CalendarItem extends StatelessWidget {
     return ShowPoster(show: show);
   }
 
-  List<Widget> _buildExpandedEpisodes(BuildContext context) {
+  List<Widget> _buildExpandedEpisodes(BuildContext context, int days) {
     return episodes.sublist(1).map((episode) {
       final airDate = DateTime.tryParse(episode['first_aired'] ?? '');
       return Padding(
@@ -142,6 +147,7 @@ class CalendarItem extends StatelessWidget {
           episode: episode,
           getEpisodeTitle: getEpisodeTitle,
           airDate: airDate,
+          days: days,
         ),
       );
     }).toList();

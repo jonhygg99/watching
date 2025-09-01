@@ -16,7 +16,7 @@ class ShowTranslationService {
     try {
       final ids = show['ids'] ?? {};
       final traktId = ids['slug']?.toString() ?? ids['trakt']?.toString();
-      
+
       if (traktId == null) {
         return show['title'] ?? 'Untitled';
       }
@@ -27,10 +27,12 @@ class ShowTranslationService {
       }
 
       final cacheKey = '${traktId}_${countryCode.toLowerCase()}';
-      
+
       // Check cache first
       if (_translationCache.containsKey(cacheKey)) {
-        return _translationCache[cacheKey]?['title'] ?? show['title'] ?? 'Untitled';
+        return _translationCache[cacheKey]?['title'] ??
+            show['title'] ??
+            'Untitled';
       }
 
       // Fetch translation
@@ -49,7 +51,7 @@ class ShowTranslationService {
     } catch (e) {
       debugPrint('Error getting show translation: $e');
     }
-    
+
     return show['title'] ?? 'Untitled';
   }
 
@@ -60,7 +62,7 @@ class ShowTranslationService {
   ) {
     try {
       if (translations == null) return null;
-      
+
       List<dynamic> translationsList;
       if (translations is List) {
         translationsList = translations;
@@ -69,18 +71,19 @@ class ShowTranslationService {
       } else {
         return null;
       }
-      
+
       if (translationsList.isEmpty) return null;
-      
+
       // Filter out translations with null titles
-      final validTranslations = translationsList
-          .where((t) => t != null && t is Map && t['title'] != null)
-          .toList();
-          
+      final validTranslations =
+          translationsList
+              .where((t) => t != null && t is Map && t['title'] != null)
+              .toList();
+
       if (validTranslations.isEmpty) return null;
-      
+
       final countryPrefix = countryCode.toLowerCase().substring(0, 2);
-      
+
       // Try exact match for user's country
       return validTranslations.firstWhere(
         (t) => t['language']?.toString().toLowerCase() == countryPrefix,

@@ -794,6 +794,12 @@ abstract class AppLocalizations {
   /// **'No items in watchlist'**
   String get noItemsInWatchlist;
 
+  /// No description provided for @waitingForNextSeason.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for next season'**
+  String get waitingForNextSeason;
+
   /// No description provided for @endedShows.
   ///
   /// In en, this message translates to:
@@ -995,67 +1001,67 @@ abstract class AppLocalizations {
   /// No description provided for @today.
   ///
   /// In en, this message translates to:
-  /// **'TODAY'**
+  /// **'Today'**
   String get today;
 
   /// No description provided for @thisWeek.
   ///
   /// In en, this message translates to:
-  /// **'THIS WEEK'**
+  /// **'This Week'**
   String get thisWeek;
 
   /// No description provided for @tomorrow.
   ///
   /// In en, this message translates to:
-  /// **'TOMORROW'**
+  /// **'Tomorrow'**
   String get tomorrow;
 
   /// No description provided for @inADay.
   ///
   /// In en, this message translates to:
-  /// **'IN A DAY'**
+  /// **'In a day'**
   String get inADay;
 
   /// No description provided for @inNDays.
   ///
   /// In en, this message translates to:
-  /// **'IN {days} DAYS'**
+  /// **'In {days} days'**
   String inNDays(Object days);
 
   /// No description provided for @inAWeek.
   ///
   /// In en, this message translates to:
-  /// **'IN A WEEK'**
+  /// **'In a week'**
   String get inAWeek;
 
   /// No description provided for @inNWeeks.
   ///
   /// In en, this message translates to:
-  /// **'IN {weeks} WEEKS'**
+  /// **'In {weeks} weeks'**
   String inNWeeks(Object weeks);
 
   /// No description provided for @inAMonth.
   ///
   /// In en, this message translates to:
-  /// **'IN A MONTH'**
+  /// **'In a month'**
   String get inAMonth;
 
   /// No description provided for @inNMonths.
   ///
   /// In en, this message translates to:
-  /// **'IN {months} MONTHS'**
+  /// **'In {months} months'**
   String inNMonths(Object months);
 
   /// No description provided for @inAYear.
   ///
   /// In en, this message translates to:
-  /// **'IN A YEAR'**
+  /// **'In a year'**
   String get inAYear;
 
   /// No description provided for @inNYears.
   ///
   /// In en, this message translates to:
-  /// **'IN {years} YEARS'**
+  /// **'In {years} years'**
   String inNYears(Object years);
 }
 

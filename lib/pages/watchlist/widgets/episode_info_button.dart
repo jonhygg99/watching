@@ -4,6 +4,7 @@ import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/widgets/episode_info_modal/episode_info_modal.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:watching/shared/widgets/primary_button.dart';
 
 /// A button that shows episode information in a modal
 class EpisodeInfoButton extends HookConsumerWidget {
@@ -28,13 +29,17 @@ class EpisodeInfoButton extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final countryCodeState = ref.watch(countryCodeProvider);
     final effectiveCountryCode = countryCode ?? countryCodeState;
-    return TextButton.icon(
-      icon: const Icon(Icons.info_outline),
-      label: Text(AppLocalizations.of(context)!.episodeInfo),
+
+    return PrimaryButton(
+      text: AppLocalizations.of(context)!.episodeInfo,
+      icon: Icon(
+        Icons.info_outline,
+        color: Theme.of(context).colorScheme.primary,
+      ),
       onPressed:
           traktId == null
               ? null
-              : () async {
+              : () {
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,

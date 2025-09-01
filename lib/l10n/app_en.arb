@@ -524,6 +524,10 @@
   "@@noItemsInWatchlist": {
     "description": "Message shown when the watchlist is empty"
   },
+  "waitingForNextSeason": "Waiting for next season",
+  "@@waitingForNextSeason": {
+    "description": "Title for the 'waiting for next season' section"
+  },
   "endedShows": "Ended Shows",
   "@@endedShows": {
     "description": "Title for the ended shows section"
@@ -671,23 +675,23 @@
     "description": "Text for the button to hide episodes"
   },
   "showMoreEpisodes": "Show {count} more episodes",
-  "today": "TODAY",
+  "today": "Today",
   "@@today": {
     "description": "Text shown when an episode airs today"
   },
-  "thisWeek": "THIS WEEK",
+  "thisWeek": "This Week",
   "@@thisWeek": {
     "description": "Text shown when an episode airs this week"
   },
-  "tomorrow": "TOMORROW",
+  "tomorrow": "Tomorrow",
   "@@tomorrow": {
     "description": "Text shown when an episode airs tomorrow"
   },
-  "inADay": "IN A DAY",
+  "inADay": "In a day",
   "@@inADay": {
     "description": "Text shown when an episode airs in one day"
   },
-  "inNDays": "IN {days} DAYS",
+  "inNDays": "In {days} days",
   "@@inNDays": {
     "description": "Text shown when an episode airs in multiple days",
     "placeholders": {
@@ -696,11 +700,11 @@
       }
     }
   },
-  "inAWeek": "IN A WEEK",
+  "inAWeek": "In a week",
   "@@inAWeek": {
     "description": "Text shown when an episode airs in one week"
   },
-  "inNWeeks": "IN {weeks} WEEKS",
+  "inNWeeks": "In {weeks} weeks",
   "@@inNWeeks": {
     "description": "Text shown when an episode airs in multiple weeks",
     "placeholders": {
@@ -709,11 +713,11 @@
       }
     }
   },
-  "inAMonth": "IN A MONTH",
+  "inAMonth": "In a month",
   "@@inAMonth": {
     "description": "Text shown when an episode airs in one month"
   },
-  "inNMonths": "IN {months} MONTHS",
+  "inNMonths": "In {months} months",
   "@@inNMonths": {
     "description": "Text shown when an episode airs in multiple months",
     "placeholders": {
@@ -722,11 +726,11 @@
       }
     }
   },
-  "inAYear": "IN A YEAR",
+  "inAYear": "In a year",
   "@@inAYear": {
     "description": "Text shown when an episode airs in one year"
   },
-  "inNYears": "IN {years} YEARS",
+  "inNYears": "In {years} years",
   "@@inNYears": {
     "description": "Text shown when an episode airs in multiple years",
     "placeholders": {

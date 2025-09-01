@@ -368,7 +368,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'No hay elementos en la lista de seguimiento';
 
   @override
-  String get endedShows => 'Series finalizadas';
+  String get waitingForNextSeason => 'Esperando la próxima temporada';
+
+  @override
+  String get endedShows => 'Series terminadas';
 
   @override
   String get upcomingShows => 'Próximas series';
@@ -477,43 +480,43 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get today => 'HOY';
+  String get today => 'Hoy';
 
   @override
-  String get thisWeek => 'ESTA SEMANA';
+  String get thisWeek => 'Esta semana';
 
   @override
-  String get tomorrow => 'MAÑANA';
+  String get tomorrow => 'Mañana';
 
   @override
-  String get inADay => 'EN UN DÍA';
+  String get inADay => 'En un día';
 
   @override
   String inNDays(Object days) {
-    return 'EN $days DÍAS';
+    return 'En $days días';
   }
 
   @override
-  String get inAWeek => 'EN UNA SEMANA';
+  String get inAWeek => 'En una semana';
 
   @override
   String inNWeeks(Object weeks) {
-    return 'EN $weeks SEMANAS';
+    return 'En $weeks semanas';
   }
 
   @override
-  String get inAMonth => 'EN UN MES';
+  String get inAMonth => 'En un mes';
 
   @override
   String inNMonths(Object months) {
-    return 'EN $months MESES';
+    return 'En $months meses';
   }
 
   @override
-  String get inAYear => 'EN UN AÑO';
+  String get inAYear => 'En un año';
 
   @override
   String inNYears(Object years) {
-    return 'EN $years AÑOS';
+    return 'En $years años';
   }
 }
