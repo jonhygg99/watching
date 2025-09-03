@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/widgets/carousel/app_carousel.dart';
@@ -34,7 +35,7 @@ class Carousel extends ConsumerWidget {
         }
 
         if (snapshot.hasError) {
-          return _buildErrorWidget(snapshot.error.toString());
+          return _buildErrorWidget(context, snapshot.error.toString());
         }
 
         final items = snapshot.data ?? [];
@@ -58,12 +59,12 @@ class Carousel extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorWidget(String error) {
+  Widget _buildErrorWidget(BuildContext context, String error) {
     return Padding(
       padding: kVerticalPaddingPhone,
       child: Center(
         child: Text(
-          'Error loading data: $error',
+          AppLocalizations.of(context)!.errorLoadingData,
           style: const TextStyle(color: kErrorColorMessage),
         ),
       ),

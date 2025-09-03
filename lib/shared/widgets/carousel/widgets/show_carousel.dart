@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watching/api/trakt/shows_lists_api.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/enum/list_type.dart';
 import 'package:watching/shared/models/show_models.dart';

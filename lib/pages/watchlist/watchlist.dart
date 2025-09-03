@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:watching/pages/watchlist/widgets/error_dialog.dart';
+import 'package:watching/pages/watchlist/widgets/empty_watchlist.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/pages/watchlist/providers/watchlist_providers.dart';
@@ -31,29 +33,11 @@ class WatchlistPage extends HookConsumerWidget {
 
     // Show error dialog if there's an error
     if (error != null && !watchlistState.hasData) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showDialog(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: Text(AppLocalizations.of(context)!.errorLoadingData),
-                content: Text(error.toString()),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(AppLocalizations.of(context)!.ok),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      refreshWatchlist();
-                    },
-                    child: Text(AppLocalizations.of(context)!.retry),
-                  ),
-                ],
-              ),
-        );
-      });
+      ErrorDialog.show(
+        context,
+        error: error,
+        onRetry: refreshWatchlist,
+      );
     }
 
     return RefreshIndicator(
@@ -67,16 +51,7 @@ class WatchlistPage extends HookConsumerWidget {
               builder: (context) {
                 // Show empty state if no items and not loading
                 if (watchlistItems.isEmpty && !isLoading) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(kSpacePhoneHorizontal),
-                      child: Text(
-                        AppLocalizations.of(context)!.noItemsInWatchlist,
-                        style: const TextStyle(fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  );
+                  return const EmptyWatchlist();
                 }
 
                 // Show shimmer/skeleton loading if no data yet

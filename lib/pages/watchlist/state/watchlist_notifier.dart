@@ -23,8 +23,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
   bool _isLoading = false;
 
   WatchlistNotifier(this._ref)
-    : _episodeService = WatchlistEpisodeService(_ref),
-      super(const WatchlistState()) {
+      : _episodeService = WatchlistEpisodeService(_ref),
+        super(const WatchlistState()) {
     _processor = WatchlistProcessor(_ref);
     // Initial load
     _loadWatchlist();
@@ -32,7 +32,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
   /// Find the next episode to watch based on the show's progress
   /// Returns the next episode or null if all episodes are watched
-  Future<Map<String, dynamic>?> _findNextEpisode(Map<String, dynamic> showData) async {
+  Future<Map<String, dynamic>?> _findNextEpisode(
+      Map<String, dynamic> showData) async {
     try {
       final progress = showData['progress'] as Map<String, dynamic>?;
       if (progress == null) return null;
@@ -66,7 +67,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       final items = await trakt.getWatched(type: typeStr);
 
       // Process items in chunks for progressive loading
-      final chunkSize = 5; // Process 5 items at a time
+      const chunkSize = 5; // Process 5 items at a time
       final chunks = items.slices(chunkSize);
 
       List<Map<String, dynamic>> allProcessedItems = [];
@@ -224,14 +225,12 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         episodeData,
       );
 
-      final seasonNumber =
-          episodeMap['season'] is num
-              ? (episodeMap['season'] as num).toInt()
-              : null;
-      final episodeNumber =
-          episodeMap['number'] is num
-              ? (episodeMap['number'] as num).toInt()
-              : null;
+      final seasonNumber = episodeMap['season'] is num
+          ? (episodeMap['season'] as num).toInt()
+          : null;
+      final episodeNumber = episodeMap['number'] is num
+          ? (episodeMap['number'] as num).toInt()
+          : null;
 
       if (seasonNumber == null || episodeNumber == null) {
         throw Exception(
@@ -380,14 +379,13 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       final episodeNumber = lastWatchedEpisode['number'] as int;
 
       // Prepare the show data with the correct ID format
-      final Map<String, dynamic> showDataMap =
-          int.tryParse(traktId) != null
-              ? {
-                'ids': {'trakt': int.parse(traktId)},
-              }
-              : {
-                'ids': {'slug': traktId},
-              };
+      final Map<String, dynamic> showDataMap = int.tryParse(traktId) != null
+          ? {
+              'ids': {'trakt': int.parse(traktId)},
+            }
+          : {
+              'ids': {'slug': traktId},
+            };
 
       try {
         // Remove the episode from watched history
@@ -449,10 +447,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       // Prepare the show data with the correct ID format
       final Map<String, dynamic> showData = {
-        'ids':
-            isNumericId
-                ? {'trakt': int.parse(showIdToUse)}
-                : {'slug': showIdToUse},
+        'ids': isNumericId
+            ? {'trakt': int.parse(showIdToUse)}
+            : {'slug': showIdToUse},
       };
 
       if (watched) {
@@ -493,52 +490,51 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       // Update the local state
       state = state.copyWith(
-        items:
-            state.items.map((show) {
-              if (_getItemId(show) == _getItemId(showData)) {
-                // Create a deep copy of the show to avoid direct mutations
-                final updatedShow = Map<String, dynamic>.from(show);
+        items: state.items.map((show) {
+          if (_getItemId(show) == _getItemId(showData)) {
+            // Create a deep copy of the show to avoid direct mutations
+            final updatedShow = Map<String, dynamic>.from(show);
 
-                // Update the specific episode in the show's seasons
-                final seasons = List<Map<String, dynamic>>.from(
-                  show['seasons'] ?? [],
+            // Update the specific episode in the show's seasons
+            final seasons = List<Map<String, dynamic>>.from(
+              show['seasons'] ?? [],
+            );
+
+            for (int i = 0; i < seasons.length; i++) {
+              final season = Map<String, dynamic>.from(seasons[i]);
+              if (season['number'] == seasonNumber) {
+                final episodes = List<Map<String, dynamic>>.from(
+                  season['episodes'] ?? [],
                 );
 
-                for (int i = 0; i < seasons.length; i++) {
-                  final season = Map<String, dynamic>.from(seasons[i]);
-                  if (season['number'] == seasonNumber) {
-                    final episodes = List<Map<String, dynamic>>.from(
-                      season['episodes'] ?? [],
-                    );
-
-                    for (int j = 0; j < episodes.length; j++) {
-                      final episode = episodes[j];
-                      if (episode['number'] == episodeNumber) {
-                        // Update only the necessary fields while preserving the rest
-                        episodes[j] = {
-                          ...episode,
-                          'completed': watched,
-                          'watched': watched,
-                          'last_watched_at':
-                              watched ? DateTime.now().toIso8601String() : null,
-                        };
-                        break;
-                      }
-                    }
-
-                    // Update the season with modified episodes
-                    season['episodes'] = episodes;
-                    seasons[i] = season;
+                for (int j = 0; j < episodes.length; j++) {
+                  final episode = episodes[j];
+                  if (episode['number'] == episodeNumber) {
+                    // Update only the necessary fields while preserving the rest
+                    episodes[j] = {
+                      ...episode,
+                      'completed': watched,
+                      'watched': watched,
+                      'last_watched_at':
+                          watched ? DateTime.now().toIso8601String() : null,
+                    };
                     break;
                   }
                 }
 
-                // Update the show with modified seasons
-                updatedShow['seasons'] = seasons;
-                return updatedShow;
+                // Update the season with modified episodes
+                season['episodes'] = episodes;
+                seasons[i] = season;
+                break;
               }
-              return show;
-            }).toList(),
+            }
+
+            // Update the show with modified seasons
+            updatedShow['seasons'] = seasons;
+            return updatedShow;
+          }
+          return show;
+        }).toList(),
       );
 
       // Force a refresh of the progress
@@ -567,10 +563,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       final progress = await trakt.getShowWatchedProgress(id: traktId);
 
       // Get the next episode if progress data is available
-      final nextEpisode =
-          progress.isNotEmpty
-              ? await _episodeService.getNextEpisode(trakt, traktId, progress)
-              : null;
+      final nextEpisode = progress.isNotEmpty
+          ? await _episodeService.getNextEpisode(trakt, traktId, progress)
+          : null;
 
       if (nextEpisode != null) {
         progress['next_episode'] = nextEpisode;
@@ -633,13 +628,13 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 /// Provider for watchlist state
 final watchlistProvider =
     StateNotifierProvider<WatchlistNotifier, WatchlistState>((ref) {
-      final notifier = WatchlistNotifier(ref);
-      // Initial load
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifier.refresh();
-      });
-      return notifier;
-    });
+  final notifier = WatchlistNotifier(ref);
+  // Initial load
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    notifier.refresh();
+  });
+  return notifier;
+});
 
 /// Provider for watchlist items
 final watchlistItemsProvider = Provider<List<Map<String, dynamic>>>((ref) {
