@@ -182,11 +182,12 @@ mixin ShowsApi on TraktApiBase {
       );
 
       // Headers required by Trakt API
-      final requestHeaders = Map<String, String>.from(headers)..addAll({
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': headers['trakt-api-key'] ?? '',
-      });
+      final requestHeaders = Map<String, String>.from(headers)
+        ..addAll({
+          'Content-Type': 'application/json',
+          'trakt-api-version': '2',
+          'trakt-api-key': headers['trakt-api-key'] ?? '',
+        });
 
       final response = await http.get(uri, headers: requestHeaders);
 
@@ -221,11 +222,12 @@ mixin ShowsApi on TraktApiBase {
       });
 
       // Headers requeridos por la API de Trakt
-      final requestHeaders = Map<String, String>.from(headers)..addAll({
-        'Content-Type': 'application/json',
-        'trakt-api-version': '2',
-        'trakt-api-key': headers['trakt-api-key'] ?? '',
-      });
+      final requestHeaders = Map<String, String>.from(headers)
+        ..addAll({
+          'Content-Type': 'application/json',
+          'trakt-api-version': '2',
+          'trakt-api-key': headers['trakt-api-key'] ?? '',
+        });
 
       final response = await http.get(uri, headers: requestHeaders);
 
@@ -358,10 +360,10 @@ mixin ShowsApi on TraktApiBase {
         // Extract pagination info from headers
         final totalPages =
             int.tryParse(response.headers['x-pagination-page-count'] ?? '1') ??
-            1;
+                1;
         final totalItems =
             int.tryParse(response.headers['x-pagination-item-count'] ?? '0') ??
-            0;
+                0;
         final currentPage =
             int.tryParse(response.headers['x-pagination-page'] ?? '1') ?? 1;
 

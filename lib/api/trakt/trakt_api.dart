@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'shows_api.dart';
 import 'shows_lists_api.dart';
+import 'movies_lists_api.dart';
 import 'history_api.dart';
 import 'user_api.dart';
 import 'search_api.dart';
@@ -28,24 +29,25 @@ abstract class TraktApiBase {
   Future<List<dynamic>> getJsonList(String endpoint);
   String get baseUrl;
   Map<String, String> get headers;
-  
+
   /// Dispose of any resources used by the API client.
   /// Subclasses should override this method to clean up their resources.
   void dispose() {}
 }
 
 class TraktApi extends TraktApiBase
-    with ShowsApi, ShowsListsApi, HistoryApi, UserApi, SearchApi, CalendarApi {
-  
-  @override
-  void dispose() {
-    super.dispose();
-    // Any TraktApi specific cleanup can go here
-  }
+    with
+        ShowsApi,
+        ShowsListsApi,
+        MoviesListsApi,
+        HistoryApi,
+        UserApi,
+        SearchApi,
+        CalendarApi {
   TraktApi({String? clientId, String? clientSecret, String? redirectUri})
-    : _clientId = clientId,
-      _clientSecret = clientSecret,
-      _redirectUri = redirectUri;
+      : _clientId = clientId,
+        _clientSecret = clientSecret,
+        _redirectUri = redirectUri;
 
   // --- BASE CONFIGURATION ---
   @override
@@ -78,8 +80,7 @@ class TraktApi extends TraktApiBase
       await prefs.setString('refresh_token', data['refresh_token']);
     }
     if (data['expires_in'] != null) {
-      final expiresAt =
-          DateTime.now().millisecondsSinceEpoch ~/ 1000 +
+      final expiresAt = DateTime.now().millisecondsSinceEpoch ~/ 1000 +
           (data['expires_in'] as int);
       await prefs.setInt('expires_at', expiresAt);
     }

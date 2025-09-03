@@ -48,6 +48,7 @@ dependencies:
   # Network & Storage
   http: ^1.5.0
   cached_network_image: ^3.4.1
+  freezed_annotation: ^2.4.1
   shared_preferences: ^2.5.3
 
   # Utils
@@ -67,10 +68,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # Code Generation
+  # Linting
+  flutter_lints: ^3.0.1
   build_runner: ^2.4.8
+  freezed: ^2.4.8
+  json_serializable: ^6.8.0
   riverpod_generator: ^2.4.9
-  freezed: ^2.3.2 # Downgraded to be compatible with riverpod_generator ^2.4.9
 
   # Testing
   mockito: ^5.4.4 # Downgraded to be compatible with other dependencies
