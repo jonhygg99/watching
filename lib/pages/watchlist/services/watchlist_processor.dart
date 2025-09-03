@@ -10,7 +10,7 @@ class WatchlistProcessor {
   final _translationCache = <String, Map<String, dynamic>>{};
 
   WatchlistProcessor(this._ref, [WatchlistEpisodeService? episodeService])
-    : _episodeService = episodeService ?? WatchlistEpisodeService(_ref);
+      : _episodeService = episodeService ?? WatchlistEpisodeService(_ref);
 
   /// Process a single watchlist item with timeout and error handling
   Future<Map<String, dynamic>?> processItem(
@@ -55,7 +55,8 @@ class WatchlistProcessor {
           timeout: timeout,
           fallback: null,
         ),
-      ], eagerError: true).catchError((e) {
+      ], eagerError: true)
+          .catchError((e) {
         debugPrint('Error in parallel processing: $e');
         return [null, null];
       });
@@ -221,10 +222,9 @@ class WatchlistProcessor {
       if (translationsList.isEmpty) return null;
 
       // Filter out translations with null titles (same as show details)
-      final validTranslations =
-          translationsList
-              .where((t) => t != null && t is Map && t['title'] != null)
-              .toList();
+      final validTranslations = translationsList
+          .where((t) => t != null && t is Map && t['title'] != null)
+          .toList();
 
       if (validTranslations.isEmpty) return null;
 
@@ -233,10 +233,9 @@ class WatchlistProcessor {
       // Try exact match for user's country (same as show details)
       try {
         return validTranslations.firstWhere(
-              (t) => t['language']?.toString().toLowerCase() == countryPrefix,
-              orElse: () => validTranslations.first as Map<String, dynamic>,
-            )
-            as Map<String, dynamic>;
+          (t) => t['language']?.toString().toLowerCase() == countryPrefix,
+          orElse: () => validTranslations.first as Map<String, dynamic>,
+        ) as Map<String, dynamic>;
       } catch (e) {
         return null;
       }

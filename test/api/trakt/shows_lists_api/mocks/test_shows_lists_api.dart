@@ -1,29 +1,29 @@
 import 'package:mockito/mockito.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
-import 'package:watching/api/trakt/shows_lists_api.dart';
+import 'package:watching/api/trakt/list/shows_lists_api.dart';
 
 // Create a mock TraktApiBase
 class MockTraktApiBase extends Mock implements TraktApiBase {
   @override
   String get baseUrl => 'https://api.trakt.tv';
-  
+
   @override
   Map<String, String> get headers => {
         'Content-Type': 'application/json',
         'trakt-api-version': '2',
         'trakt-api-key': 'test-client-id',
       };
-      
+
   @override
   Future<void> ensureValidToken() async {}
-  
+
   @override
-  Future<Map<String, dynamic>> getJsonMap(String endpoint) => 
+  Future<Map<String, dynamic>> getJsonMap(String endpoint) =>
       super.noSuchMethod(
         Invocation.method(#getJsonMap, [endpoint]),
         returnValue: Future<Map<String, dynamic>>.value({}),
       );
-      
+
   @override
   Future<List<dynamic>> getJsonList(String endpoint) {
     // Handle the endpoint with pagination parameters
@@ -66,12 +66,14 @@ class TestShowsListsApi extends Mock implements TraktApiBase, ShowsListsApi {
   // ShowsListsApi implementation - these will be mocked in tests
   @override
   Future<List<dynamic>> getTrendingShows({int page = 1, int limit = 10}) async {
-    return _apiBase.getJsonList('/shows/trending?extended=images&page=$page&limit=$limit');
+    return _apiBase
+        .getJsonList('/shows/trending?extended=images&page=$page&limit=$limit');
   }
 
   @override
   Future<List<dynamic>> getPopularShows({int page = 1, int limit = 10}) async {
-    return _apiBase.getJsonList('/shows/popular?extended=images&page=$page&limit=$limit');
+    return _apiBase
+        .getJsonList('/shows/popular?extended=images&page=$page&limit=$limit');
   }
 
   @override
@@ -80,7 +82,8 @@ class TestShowsListsApi extends Mock implements TraktApiBase, ShowsListsApi {
     int page = 1,
     int limit = 10,
   }) async {
-    return _apiBase.getJsonList('/shows/favorited/$period?extended=images&page=$page&limit=$limit');
+    return _apiBase.getJsonList(
+        '/shows/favorited/$period?extended=images&page=$page&limit=$limit');
   }
 
   @override
@@ -89,7 +92,8 @@ class TestShowsListsApi extends Mock implements TraktApiBase, ShowsListsApi {
     int page = 1,
     int limit = 10,
   }) async {
-    return _apiBase.getJsonList('/shows/collected/$period?extended=images&page=$page&limit=$limit');
+    return _apiBase.getJsonList(
+        '/shows/collected/$period?extended=images&page=$page&limit=$limit');
   }
 
   @override
@@ -98,7 +102,8 @@ class TestShowsListsApi extends Mock implements TraktApiBase, ShowsListsApi {
     int page = 1,
     int limit = 10,
   }) async {
-    return _apiBase.getJsonList('/shows/played/$period?extended=images&page=$page&limit=$limit');
+    return _apiBase.getJsonList(
+        '/shows/played/$period?extended=images&page=$page&limit=$limit');
   }
 
   @override
@@ -107,7 +112,8 @@ class TestShowsListsApi extends Mock implements TraktApiBase, ShowsListsApi {
     int page = 1,
     int limit = 10,
   }) async {
-    return _apiBase.getJsonList('/shows/watched/$period?extended=images&page=$page&limit=$limit');
+    return _apiBase.getJsonList(
+        '/shows/watched/$period?extended=images&page=$page&limit=$limit');
   }
 
   @override
@@ -115,6 +121,7 @@ class TestShowsListsApi extends Mock implements TraktApiBase, ShowsListsApi {
     int page = 1,
     int limit = 10,
   }) async {
-    return _apiBase.getJsonList('/shows/anticipated?extended=images&page=$page&limit=$limit');
+    return _apiBase.getJsonList(
+        '/shows/anticipated?extended=images&page=$page&limit=$limit');
   }
 }

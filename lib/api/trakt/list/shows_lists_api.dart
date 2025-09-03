@@ -1,5 +1,5 @@
+import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/shared/models/show_models.dart';
-import 'trakt_api.dart';
 
 /// Mixin for show list endpoints (trending, popular, favorited, etc.).
 mixin ShowsListsApi on TraktApiBase {
@@ -18,9 +18,11 @@ mixin ShowsListsApi on TraktApiBase {
     final response = await getJsonList(
       '/shows/trending?extended=full,images&page=$page&limit=$limit',
     );
-    return response.map<TraktShow>(
-      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
-    ).toList();
+    return response
+        .map<TraktShow>(
+          (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   /// Gets popular shows.
@@ -38,9 +40,11 @@ mixin ShowsListsApi on TraktApiBase {
     final response = await getJsonList(
       '/shows/popular?extended=full,images&page=$page&limit=$limit',
     );
-    return response.map<TraktShow>(
-      (item) => TraktShow.fromJson(item as Map<String, dynamic>),
-    ).toList();
+    return response
+        .map<TraktShow>(
+          (item) => TraktShow.fromJson(item as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   /// Gets most favorited shows.
@@ -61,9 +65,11 @@ mixin ShowsListsApi on TraktApiBase {
     final response = await getJsonList(
       '/shows/favorited/$period?extended=full,images&page=$page&limit=$limit',
     );
-    return response.map<TraktShow>(
-      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
-    ).toList();
+    return response
+        .map<TraktShow>(
+          (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   /// Gets most collected shows.
@@ -84,9 +90,11 @@ mixin ShowsListsApi on TraktApiBase {
     final response = await getJsonList(
       '/shows/collected/$period?extended=full,images&page=$page&limit=$limit',
     );
-    return response.map<TraktShow>(
-      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
-    ).toList();
+    return response
+        .map<TraktShow>(
+          (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   /// Gets most played shows.
@@ -107,9 +115,11 @@ mixin ShowsListsApi on TraktApiBase {
     final response = await getJsonList(
       '/shows/played/$period?extended=full,images&page=$page&limit=$limit',
     );
-    return response.map<TraktShow>(
-      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
-    ).toList();
+    return response
+        .map<TraktShow>(
+          (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   /// Gets most watched shows.
@@ -130,9 +140,11 @@ mixin ShowsListsApi on TraktApiBase {
     final response = await getJsonList(
       '/shows/watched/$period?extended=full,images&page=$page&limit=$limit',
     );
-    return response.map<TraktShow>(
-      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
-    ).toList();
+    return response
+        .map<TraktShow>(
+          (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+        )
+        .toList();
   }
 
   /// Gets most anticipated shows.
@@ -150,8 +162,10 @@ mixin ShowsListsApi on TraktApiBase {
     final response = await getJsonList(
       '/shows/anticipated?extended=full,images&page=$page&limit=$limit',
     );
-    return response.map<TraktShow>(
-      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
-    ).toList();
+    return response
+        .map<TraktShow>(
+          (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+        )
+        .toList();
   }
 }

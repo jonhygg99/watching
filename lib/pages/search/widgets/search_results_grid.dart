@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:watching/l10n/app_localizations.dart';
-import 'package:watching/api/trakt/show_translation.dart';
+import 'package:watching/api/trakt/show/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
 import 'search_result_item.dart';
@@ -32,10 +32,9 @@ class SearchResultsGrid extends ConsumerWidget {
     final searchType = types.join(',');
 
     return FutureBuilder<Map<String, dynamic>>(
-      future:
-          query.isNotEmpty
-              ? api.searchMoviesAndShows(query: query, type: searchType)
-              : Future.value({'items': []}),
+      future: query.isNotEmpty
+          ? api.searchMoviesAndShows(query: query, type: searchType)
+          : Future.value({'items': []}),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -45,12 +44,11 @@ class SearchResultsGrid extends ConsumerWidget {
         }
 
         final results = snapshot.data?['items'] ?? [];
-        final filtered =
-            (results as List<dynamic>)
-                .where(
-                  (item) => item['type'] == 'show' || item['type'] == 'movie',
-                )
-                .toList();
+        final filtered = (results as List<dynamic>)
+            .where(
+              (item) => item['type'] == 'show' || item['type'] == 'movie',
+            )
+            .toList();
 
         if (filtered.isEmpty) {
           return Center(
@@ -112,8 +110,7 @@ class SearchResultsGrid extends ConsumerWidget {
                     ),
                     onTap: () {
                       final show = item['originalData'];
-                      final showId =
-                          show['ids']?['trakt']?.toString() ??
+                      final showId = show['ids']?['trakt']?.toString() ??
                           show['ids']?['slug'] ??
                           '';
                       if (showId.isEmpty) return;

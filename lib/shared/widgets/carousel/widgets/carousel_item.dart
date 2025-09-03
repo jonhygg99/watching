@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watching/api/trakt/show_translation.dart';
+import 'package:watching/api/trakt/show/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/utils/get_image.dart';
@@ -53,17 +53,16 @@ class CarouselItem extends ConsumerWidget {
               Flexible(
                 child: AspectRatio(
                   aspectRatio: 2 / 3,
-                  child:
-                      imageUrl != null
-                          ? CarouselImageItem(
-                            imageUrl: imageUrl,
-                            onTap: () => _navigateToDetail(context),
-                            borderRadius: kShowBorderRadius,
-                          )
-                          : CarouselPlaceholderItem(
-                            itemWidth: itemWidth,
-                            onTap: () => _navigateToDetail(context),
-                          ),
+                  child: imageUrl != null
+                      ? CarouselImageItem(
+                          imageUrl: imageUrl,
+                          onTap: () => _navigateToDetail(context),
+                          borderRadius: kShowBorderRadius,
+                        )
+                      : CarouselPlaceholderItem(
+                          itemWidth: itemWidth,
+                          onTap: () => _navigateToDetail(context),
+                        ),
                 ),
               ),
               const SizedBox(height: kSpaceBtwTitleWidget),

@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/pages/watchlist/enums/time_period.dart';
 import 'package:watching/shared/models/movie_models.dart';
-import 'trakt_api.dart';
-
-/// Time periods for movie lists
-enum TimePeriod {
-  daily,
-  weekly,
-  monthly,
-  yearly,
-  all,
-}
 
 /// Mixin for movie list endpoints (trending, popular, etc.).
 mixin MoviesListsApi on TraktApiBase {
@@ -28,7 +20,8 @@ mixin MoviesListsApi on TraktApiBase {
 
       return response
           .whereType<Map<String, dynamic>>()
-          .map((item) => TraktMovie.fromJson(item['movie'] as Map<String, dynamic>))
+          .map((item) =>
+              TraktMovie.fromJson(item['movie'] as Map<String, dynamic>))
           .toList();
     } catch (e) {
       debugPrint('Error in getTrendingMovies: $e');
@@ -76,7 +69,8 @@ mixin MoviesListsApi on TraktApiBase {
 
       return response
           .whereType<Map<String, dynamic>>()
-          .map((item) => TraktMovie.fromJson(item['movie'] as Map<String, dynamic>))
+          .map((item) =>
+              TraktMovie.fromJson(item['movie'] as Map<String, dynamic>))
           .toList();
     } catch (e) {
       debugPrint('Error in getFavoritedMovies: $e');
@@ -101,7 +95,8 @@ mixin MoviesListsApi on TraktApiBase {
 
       return response
           .whereType<Map<String, dynamic>>()
-          .map((item) => TraktMovie.fromJson(item['movie'] as Map<String, dynamic>))
+          .map((item) =>
+              TraktMovie.fromJson(item['movie'] as Map<String, dynamic>))
           .toList();
     } catch (e) {
       debugPrint('Error in getPlayedMovies: $e');
@@ -126,7 +121,8 @@ mixin MoviesListsApi on TraktApiBase {
 
       return response
           .whereType<Map<String, dynamic>>()
-          .map((item) => TraktMovie.fromJson(item['movie'] as Map<String, dynamic>))
+          .map((item) =>
+              TraktMovie.fromJson(item['movie'] as Map<String, dynamic>))
           .toList();
     } catch (e) {
       debugPrint('Error in getWatchedMovies: $e');

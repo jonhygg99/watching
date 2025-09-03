@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:watching/api/trakt/show_translation.dart';
+import 'package:watching/api/trakt/show/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
 import 'package:watching/shared/constants/colors.dart';
@@ -36,10 +36,9 @@ class ShowGridItem extends ConsumerWidget {
         final isDark = theme.brightness == Brightness.dark;
         final baseColor =
             (isDark ? kSkeletonBaseColorDark : kSkeletonBaseColorLight)!;
-        final highlightColor =
-            (isDark
-                ? kSkeletonHighlightColorDark
-                : kSkeletonHighlightColorLight)!;
+        final highlightColor = (isDark
+            ? kSkeletonHighlightColorDark
+            : kSkeletonHighlightColorLight)!;
 
         return GestureDetector(
           onTap: () {
@@ -57,36 +56,33 @@ class ShowGridItem extends ConsumerWidget {
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(kItemRadius),
-                  child:
-                      posterUrl != null
-                          ? CachedNetworkImage(
-                            imageUrl: posterUrl,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            placeholder:
-                                (context, url) => Container(
-                                  color: baseColor,
-                                  child: Shimmer.fromColors(
-                                    baseColor: baseColor,
-                                    highlightColor: highlightColor,
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                      color: baseColor,
-                                    ),
-                                  ),
-                                ),
-                            errorWidget:
-                                (context, url, error) => Container(
-                                  color: baseColor,
-                                  child: const Icon(Icons.error),
-                                ),
-                          )
-                          : Container(
+                  child: posterUrl != null
+                      ? CachedNetworkImage(
+                          imageUrl: posterUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          placeholder: (context, url) => Container(
                             color: baseColor,
-                            child: const Center(child: Icon(Icons.tv)),
+                            child: Shimmer.fromColors(
+                              baseColor: baseColor,
+                              highlightColor: highlightColor,
+                              child: Container(
+                                width: double.infinity,
+                                height: double.infinity,
+                                color: baseColor,
+                              ),
+                            ),
                           ),
+                          errorWidget: (context, url, error) => Container(
+                            color: baseColor,
+                            child: const Icon(Icons.error),
+                          ),
+                        )
+                      : Container(
+                          color: baseColor,
+                          child: const Center(child: Icon(Icons.tv)),
+                        ),
                 ),
               ),
               const SizedBox(height: kSpaceBtwTitleWidget),

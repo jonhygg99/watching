@@ -5,9 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'shows_api.dart';
-import 'shows_lists_api.dart';
-import 'movies_lists_api.dart';
+import 'show/shows_api.dart';
+import 'show/episodes_api.dart';
+import 'show/seasons_api.dart';
+import 'list/shows_lists_api.dart';
+import 'list/movies_lists_api.dart';
 import 'history_api.dart';
 import 'user_api.dart';
 import 'search_api.dart';
@@ -38,10 +40,12 @@ abstract class TraktApiBase {
 class TraktApi extends TraktApiBase
     with
         ShowsApi,
+        EpisodesApi,
         ShowsListsApi,
         MoviesListsApi,
         HistoryApi,
         UserApi,
+        SeasonsApi,
         SearchApi,
         CalendarApi {
   TraktApi({String? clientId, String? clientSecret, String? redirectUri})

@@ -10,10 +10,10 @@ class TestTraktApi extends TraktApiBase with SearchApi {
 
   @override
   Map<String, String> get headers => {
-    'Content-Type': 'application/json',
-    'trakt-api-version': '2',
-    'trakt-api-key': 'test-client-id',
-  };
+        'Content-Type': 'application/json',
+        'trakt-api-version': '2',
+        'trakt-api-key': 'test-client-id',
+      };
 
   @override
   Future<void> ensureValidToken() async {}

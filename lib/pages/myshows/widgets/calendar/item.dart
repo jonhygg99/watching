@@ -6,7 +6,7 @@ import 'package:watching/shared/pages/show_details/details_page.dart';
 import 'package:watching/pages/myshows/widgets/calendar/show_info.dart';
 import 'package:watching/pages/myshows/widgets/calendar/show_episodes.dart';
 import 'package:watching/pages/myshows/widgets/show_poster.dart';
-import 'package:watching/api/trakt/show_translation.dart';
+import 'package:watching/api/trakt/show/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 
 class CalendarItem extends StatelessWidget {
@@ -27,10 +27,9 @@ class CalendarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get the next airing episode
     final nextEpisode = episodes.isNotEmpty ? episodes[0] : null;
-    final airDate =
-        nextEpisode != null
-            ? DateTime.tryParse(nextEpisode['first_aired'])
-            : null;
+    final airDate = nextEpisode != null
+        ? DateTime.tryParse(nextEpisode['first_aired'])
+        : null;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final difference = airDate?.difference(today);
@@ -43,9 +42,8 @@ class CalendarItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder:
-                (context) =>
-                    ShowDetailPage(showId: show['ids']['trakt'].toString()),
+            builder: (context) =>
+                ShowDetailPage(showId: show['ids']['trakt'].toString()),
           ),
         );
       },
@@ -117,16 +115,15 @@ class CalendarItem extends StatelessWidget {
                     ),
                   );
                 },
-                child:
-                    isExpanded
-                        ? Column(
-                          key: ValueKey(
-                            'expanded_episodes_${show['ids']['trakt']}',
-                          ),
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: _buildExpandedEpisodes(context, days),
-                        )
-                        : const SizedBox.shrink(),
+                child: isExpanded
+                    ? Column(
+                        key: ValueKey(
+                          'expanded_episodes_${show['ids']['trakt']}',
+                        ),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: _buildExpandedEpisodes(context, days),
+                      )
+                    : const SizedBox.shrink(),
               ),
           ],
         ),

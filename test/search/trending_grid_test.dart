@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
-import 'package:watching/api/trakt/show_translation.dart';
+import 'package:watching/api/trakt/show/show_translation.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/pages/search/widgets/trending_grid.dart';
 import 'package:watching/pages/search/widgets/search_result_item.dart';
@@ -29,14 +29,13 @@ class MockShowTranslationService extends Mock
     required dynamic traktApi,
   }) {
     return super.noSuchMethod(
-          Invocation.method(#getTranslatedTitle, [], {
-            #show: show,
-            #traktApi: traktApi,
-          }),
-          returnValue: Future.value('Translated Title'),
-          returnValueForMissingStub: Future.value('Translated Title'),
-        )
-        as Future<String>;
+      Invocation.method(#getTranslatedTitle, [], {
+        #show: show,
+        #traktApi: traktApi,
+      }),
+      returnValue: Future.value('Translated Title'),
+      returnValueForMissingStub: Future.value('Translated Title'),
+    ) as Future<String>;
   }
 }
 
@@ -105,9 +104,8 @@ void main() {
         traktApi: anyNamed('traktApi'),
       ),
     ).thenAnswer((invocation) async {
-      final showArg =
-          invocation.namedArguments[const Symbol('show')]
-              as Map<String, dynamic>;
+      final showArg = invocation.namedArguments[const Symbol('show')]
+          as Map<String, dynamic>;
       translationTracker.trackCall(showArg);
       return 'Translated ${showArg['title']}';
     });
