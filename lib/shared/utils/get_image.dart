@@ -1,14 +1,27 @@
 String? _getImageUrl(dynamic imageList) {
-  if (imageList is List && imageList.isNotEmpty && imageList.first is String) {
-    final url = imageList.first as String;
-    if (url.startsWith('http')) return url;
-    return 'https://$url';
+  if (imageList == null) return null;
+  
+  // Handle case where imageList is already a URL string (movie format)
+  if (imageList is String) {
+    return imageList.startsWith('http') ? imageList : 'https://$imageList';
   }
+  
+  // Handle case where imageList is a List (show format)
+  if (imageList is List) {
+    if (imageList.isNotEmpty) {
+      // Get first URL from the list
+      final firstItem = imageList.first;
+      if (firstItem is String) {
+        return firstItem.startsWith('http') ? firstItem : 'https://$firstItem';
+      }
+    }
+  }
+  
   return null;
 }
 
 String? getFirstAvailableImage(
-  Map<String, dynamic>? images, {
+  dynamic images, {
   String? preferredType,
 }) {
   if (images == null) return null;
@@ -24,8 +37,10 @@ String? getFirstAvailableImage(
     // Skip if we already checked this as the preferred type
     if (type == preferredType) continue;
 
-    final url = _getImageUrl(images[type]);
-    if (url != null) return url;
+    if (images[type] != null) {
+      final url = _getImageUrl(images[type]);
+      if (url != null) return url;
+    }
   }
 
   return null;

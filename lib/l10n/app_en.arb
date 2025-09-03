@@ -615,6 +615,26 @@
   "@@readLess": {
     "description": "Text for the 'Read less' button in expandable text"
   },
+  "trendingMovies": "Trending Movies",
+  "@@trendingMovies": {
+    "description": "Title for trending movies carousel"
+  },
+  "popularMovies": "Popular Movies",
+  "@@popularMovies": {
+    "description": "Title for popular movies carousel"
+  },
+  "weeklyFavoritedMovies": "Weekly Favorited Movies",
+  "@@weeklyFavoritedMovies": {
+    "description": "Title for weekly favorited movies carousel"
+  },
+  "weeklyWatchedMovies": "Weekly Watched Movies",
+  "@@weeklyWatchedMovies": {
+    "description": "Title for weekly watched movies carousel"
+  },
+  "weeklyPlayedMovies": "Weekly Played Movies",
+  "@@weeklyPlayedMovies": {
+    "description": "Title for weekly played movies carousel"
+  },
   "monthNamesShort": "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec",
   "@@monthNamesShort": {
     "description": "Comma-separated list of short month names (3 letters) for date formatting"

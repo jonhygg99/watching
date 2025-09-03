@@ -5,7 +5,7 @@ class TraktShow {
   final String title;
   final int year;
   final TraktId ids;
-  final Map<String, dynamic>? images;
+  final Map<String, List<String>>? images;
   final String? overview;
   final String? status;
   final double? rating;
@@ -59,7 +59,12 @@ class TraktShow {
       title: json['title'] as String? ?? '',
       year: json['year'] as int? ?? 0,
       ids: TraktId.fromJson(json['ids'] as Map<String, dynamic>),
-      images: json['images'] as Map<String, dynamic>?,
+      images: json['images'] != null ? Map<String, List<String>>.from(
+        (json['images'] as Map).map((key, value) => MapEntry(
+          key.toString(),
+          (value as List<dynamic>).map((e) => e.toString()).toList(),
+        )),
+      ) : null,
       overview: json['overview'] as String?,
       status: json['status'] as String?,
       rating: json['rating']?.toDouble(),

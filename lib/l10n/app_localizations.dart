@@ -908,6 +908,36 @@ abstract class AppLocalizations {
   /// **'Read less'**
   String get readLess;
 
+  /// No description provided for @trendingMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Trending Movies'**
+  String get trendingMovies;
+
+  /// No description provided for @popularMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Movies'**
+  String get popularMovies;
+
+  /// No description provided for @weeklyFavoritedMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Favorited Movies'**
+  String get weeklyFavoritedMovies;
+
+  /// No description provided for @weeklyWatchedMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Watched Movies'**
+  String get weeklyWatchedMovies;
+
+  /// No description provided for @weeklyPlayedMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Played Movies'**
+  String get weeklyPlayedMovies;
+
   /// No description provided for @monthNamesShort.
   ///
   /// In en, this message translates to:

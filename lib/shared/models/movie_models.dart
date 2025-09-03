@@ -6,7 +6,7 @@ class TraktMovie {
   final String title;
   final int? year;
   final TraktId ids;
-  final Map<String, String>? images;
+  final Map<String, dynamic>? images;
 
   const TraktMovie({
     required this.title,
@@ -22,10 +22,10 @@ class TraktMovie {
         year: json['year'] as int?,
         ids: TraktId.fromJson(json['ids'] as Map<String, dynamic>),
         images: json['images'] != null
-            ? Map<String, String>.from(
+            ? Map<String, dynamic>.from(
                 (json['images'] as Map).map((key, value) => MapEntry(
                       key.toString(),
-                      value is String ? value : value.toString(),
+                      value is List ? value : [value.toString()],
                     )))
             : null,
       );

@@ -427,6 +427,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readLess => 'Read less';
 
   @override
+  String get trendingMovies => 'Trending Movies';
+
+  @override
+  String get popularMovies => 'Popular Movies';
+
+  @override
+  String get weeklyFavoritedMovies => 'Weekly Favorited Movies';
+
+  @override
+  String get weeklyWatchedMovies => 'Weekly Watched Movies';
+
+  @override
+  String get weeklyPlayedMovies => 'Weekly Played Movies';
+
+  @override
   String get monthNamesShort =>
       'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec';
 

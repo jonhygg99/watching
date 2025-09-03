@@ -615,6 +615,26 @@
   "@@readLess": {
     "description": "Texto para el botón 'Leer menos' en texto expandible"
   },
+  "trendingMovies": "Películas en tendencia",
+  "@@trendingMovies": {
+    "description": "Título del carrusel de películas en tendencia"
+  },
+  "popularMovies": "Películas populares",
+  "@@popularMovies": {
+    "description": "Título del carrusel de películas populares"
+  },
+  "weeklyFavoritedMovies": "Películas favoritas de la semana",
+  "@@weeklyFavoritedMovies": {
+    "description": "Título del carrusel de películas favoritas de la semana"
+  },
+  "weeklyWatchedMovies": "Películas vistas esta semana",
+  "@@weeklyWatchedMovies": {
+    "description": "Título del carrusel de películas vistas esta semana"
+  },
+  "weeklyPlayedMovies": "Películas reproducidas esta semana",
+  "@@weeklyPlayedMovies": {
+    "description": "Título del carrusel de películas reproducidas esta semana"
+  },
   "monthNamesShort": "Ene,Feb,Mar,Abr,May,Jun,Jul,Ago,Sep,Oct,Nov,Dic",
   "@@monthNamesShort": {
     "description": "Lista separada por comas de los nombres cortos de los meses (3 letras) para formato de fecha"

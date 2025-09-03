@@ -23,6 +23,7 @@ class AppCarousel<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      key: ValueKey<String>('carousel_$title'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CarouselHeader(title: title, onViewMore: onViewMore),
@@ -31,6 +32,7 @@ class AppCarousel<T> extends StatelessWidget {
           child: items.isEmpty
               ? Center(child: Text(emptyText))
               : ListView.builder(
+                  key: PageStorageKey<String>('carousel_$title'),
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.only(left: kSpacePhoneHorizontal),
                   itemCount: items.length,
