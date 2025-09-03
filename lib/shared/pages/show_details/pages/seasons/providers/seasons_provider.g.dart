@@ -39,13 +39,21 @@ class SeasonsFamily extends Family<AsyncValue<List<Map<String, dynamic>>>> {
   const SeasonsFamily();
 
   /// See also [seasons].
-  SeasonsProvider call({required String showId}) {
-    return SeasonsProvider(showId: showId);
+  SeasonsProvider call({
+    required String showId,
+  }) {
+    return SeasonsProvider(
+      showId: showId,
+    );
   }
 
   @override
-  SeasonsProvider getProviderOverride(covariant SeasonsProvider provider) {
-    return call(showId: provider.showId);
+  SeasonsProvider getProviderOverride(
+    covariant SeasonsProvider provider,
+  ) {
+    return call(
+      showId: provider.showId,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -67,19 +75,23 @@ class SeasonsFamily extends Family<AsyncValue<List<Map<String, dynamic>>>> {
 class SeasonsProvider
     extends AutoDisposeFutureProvider<List<Map<String, dynamic>>> {
   /// See also [seasons].
-  SeasonsProvider({required String showId})
-    : this._internal(
-        (ref) => seasons(ref as SeasonsRef, showId: showId),
-        from: seasonsProvider,
-        name: r'seasonsProvider',
-        debugGetCreateSourceHash:
-            const bool.fromEnvironment('dart.vm.product')
-                ? null
-                : _$seasonsHash,
-        dependencies: SeasonsFamily._dependencies,
-        allTransitiveDependencies: SeasonsFamily._allTransitiveDependencies,
-        showId: showId,
-      );
+  SeasonsProvider({
+    required String showId,
+  }) : this._internal(
+          (ref) => seasons(
+            ref as SeasonsRef,
+            showId: showId,
+          ),
+          from: seasonsProvider,
+          name: r'seasonsProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$seasonsHash,
+          dependencies: SeasonsFamily._dependencies,
+          allTransitiveDependencies: SeasonsFamily._allTransitiveDependencies,
+          showId: showId,
+        );
 
   SeasonsProvider._internal(
     super._createNotifier, {
@@ -145,6 +157,5 @@ class _SeasonsProviderElement
   @override
   String get showId => (origin as SeasonsProvider).showId;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

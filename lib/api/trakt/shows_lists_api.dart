@@ -1,3 +1,4 @@
+import 'package:watching/shared/models/show_models.dart';
 import 'trakt_api.dart';
 
 /// Mixin for show list endpoints (trending, popular, favorited, etc.).
@@ -6,26 +7,40 @@ mixin ShowsListsApi on TraktApiBase {
   ///
   /// [page] - Page number to return (default: 1)
   /// [limit] - Number of items per page (default: 10, max: 100)
-  Future<List<dynamic>> getTrendingShows({
+  /// Gets trending shows.
+  ///
+  /// [page] - Page number to return (default: 1)
+  /// [limit] - Number of items per page (default: 10, max: 100)
+  Future<List<TraktShow>> getTrendingShows({
     int page = 1,
     int limit = 10,
   }) async {
-    return await getJsonList(
-      '/shows/trending?extended=images&page=$page&limit=$limit',
+    final response = await getJsonList(
+      '/shows/trending?extended=full,images&page=$page&limit=$limit',
     );
+    return response.map<TraktShow>(
+      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+    ).toList();
   }
 
   /// Gets popular shows.
   ///
   /// [page] - Page number to return (default: 1)
   /// [limit] - Number of items per page (default: 10, max: 100)
-  Future<List<dynamic>> getPopularShows({
+  /// Gets popular shows.
+  ///
+  /// [page] - Page number to return (default: 1)
+  /// [limit] - Number of items per page (default: 10, max: 100)
+  Future<List<TraktShow>> getPopularShows({
     int page = 1,
     int limit = 10,
   }) async {
-    return await getJsonList(
-      '/shows/popular?extended=images&page=$page&limit=$limit',
+    final response = await getJsonList(
+      '/shows/popular?extended=full,images&page=$page&limit=$limit',
     );
+    return response.map<TraktShow>(
+      (item) => TraktShow.fromJson(item as Map<String, dynamic>),
+    ).toList();
   }
 
   /// Gets most favorited shows.
@@ -33,14 +48,22 @@ mixin ShowsListsApi on TraktApiBase {
   /// [period] - Time period to filter by (daily, weekly, monthly, yearly, all)
   /// [page] - Page number to return (default: 1)
   /// [limit] - Number of items per page (default: 10, max: 100)
-  Future<List<dynamic>> getMostFavoritedShows({
+  /// Gets most favorited shows.
+  ///
+  /// [period] - Time period to filter by (daily, weekly, monthly, yearly, all)
+  /// [page] - Page number to return (default: 1)
+  /// [limit] - Number of items per page (default: 10, max: 100)
+  Future<List<TraktShow>> getMostFavoritedShows({
     String period = 'monthly',
     int page = 1,
     int limit = 10,
   }) async {
-    return await getJsonList(
-      '/shows/favorited/$period?extended=images&page=$page&limit=$limit',
+    final response = await getJsonList(
+      '/shows/favorited/$period?extended=full,images&page=$page&limit=$limit',
     );
+    return response.map<TraktShow>(
+      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+    ).toList();
   }
 
   /// Gets most collected shows.
@@ -48,14 +71,22 @@ mixin ShowsListsApi on TraktApiBase {
   /// [period] - Time period to filter by (daily, weekly, monthly, yearly, all)
   /// [page] - Page number to return (default: 1)
   /// [limit] - Number of items per page (default: 10, max: 100)
-  Future<List<dynamic>> getMostCollectedShows({
+  /// Gets most collected shows.
+  ///
+  /// [period] - Time period to filter by (daily, weekly, monthly, yearly, all)
+  /// [page] - Page number to return (default: 1)
+  /// [limit] - Number of items per page (default: 10, max: 100)
+  Future<List<TraktShow>> getMostCollectedShows({
     String period = 'monthly',
     int page = 1,
     int limit = 10,
   }) async {
-    return await getJsonList(
-      '/shows/collected/$period?extended=images&page=$page&limit=$limit',
+    final response = await getJsonList(
+      '/shows/collected/$period?extended=full,images&page=$page&limit=$limit',
     );
+    return response.map<TraktShow>(
+      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+    ).toList();
   }
 
   /// Gets most played shows.
@@ -63,14 +94,22 @@ mixin ShowsListsApi on TraktApiBase {
   /// [period] - Time period to filter by (daily, weekly, monthly, yearly, all)
   /// [page] - Page number to return (default: 1)
   /// [limit] - Number of items per page (default: 10, max: 100)
-  Future<List<dynamic>> getMostPlayedShows({
+  /// Gets most played shows.
+  ///
+  /// [period] - Time period to filter by (daily, weekly, monthly, yearly, all)
+  /// [page] - Page number to return (default: 1)
+  /// [limit] - Number of items per page (default: 10, max: 100)
+  Future<List<TraktShow>> getMostPlayedShows({
     String period = 'monthly',
     int page = 1,
     int limit = 10,
   }) async {
-    return await getJsonList(
-      '/shows/played/$period?extended=images&page=$page&limit=$limit',
+    final response = await getJsonList(
+      '/shows/played/$period?extended=full,images&page=$page&limit=$limit',
     );
+    return response.map<TraktShow>(
+      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+    ).toList();
   }
 
   /// Gets most watched shows.
@@ -78,26 +117,41 @@ mixin ShowsListsApi on TraktApiBase {
   /// [period] - Time period to filter by (daily, weekly, monthly, yearly, all)
   /// [page] - Page number to return (default: 1)
   /// [limit] - Number of items per page (default: 10, max: 100)
-  Future<List<dynamic>> getMostWatchedShows({
+  /// Gets most watched shows.
+  ///
+  /// [period] - Time period to filter by (daily, weekly, monthly, yearly, all)
+  /// [page] - Page number to return (default: 1)
+  /// [limit] - Number of items per page (default: 10, max: 100)
+  Future<List<TraktShow>> getMostWatchedShows({
     String period = 'monthly',
     int page = 1,
     int limit = 10,
   }) async {
-    return await getJsonList(
-      '/shows/watched/$period?extended=images&page=$page&limit=$limit',
+    final response = await getJsonList(
+      '/shows/watched/$period?extended=full,images&page=$page&limit=$limit',
     );
+    return response.map<TraktShow>(
+      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+    ).toList();
   }
 
   /// Gets most anticipated shows.
   ///
   /// [page] - Page number to return (default: 1)
   /// [limit] - Number of items per page (default: 10, max: 100)
-  Future<List<dynamic>> getMostAnticipatedShows({
+  /// Gets most anticipated shows.
+  ///
+  /// [page] - Page number to return (default: 1)
+  /// [limit] - Number of items per page (default: 10, max: 100)
+  Future<List<TraktShow>> getMostAnticipatedShows({
     int page = 1,
     int limit = 10,
   }) async {
-    return await getJsonList(
-      '/shows/anticipated?extended=images&page=$page&limit=$limit',
+    final response = await getJsonList(
+      '/shows/anticipated?extended=full,images&page=$page&limit=$limit',
     );
+    return response.map<TraktShow>(
+      (item) => TraktShow.fromNestedJson(item as Map<String, dynamic>),
+    ).toList();
   }
 }

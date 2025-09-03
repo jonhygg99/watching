@@ -144,7 +144,7 @@ class TraktApi extends TraktApiBase
         return [];
       } else if (response.statusCode == 404) {
         if (kDebugMode) {
-          debugPrint('Resource not found: $endpoint');
+          debugPrint('Resource not found in JsonList: $endpoint');
         }
         return [];
       } else {
@@ -194,7 +194,7 @@ class TraktApi extends TraktApiBase
         return {};
       } else if (response.statusCode == 404) {
         if (kDebugMode) {
-          debugPrint('Resource not found: $endpoint');
+          debugPrint('Resource not found in JsonMap: $endpoint');
         }
         return {};
       } else {

@@ -99,24 +99,23 @@ class SeasonDetailProvider
     required int seasonNumber,
     String? languageCode,
   }) : this._internal(
-         () =>
-             SeasonDetail()
-               ..showId = showId
-               ..seasonNumber = seasonNumber
-               ..languageCode = languageCode,
-         from: seasonDetailProvider,
-         name: r'seasonDetailProvider',
-         debugGetCreateSourceHash:
-             const bool.fromEnvironment('dart.vm.product')
-                 ? null
-                 : _$seasonDetailHash,
-         dependencies: SeasonDetailFamily._dependencies,
-         allTransitiveDependencies:
-             SeasonDetailFamily._allTransitiveDependencies,
-         showId: showId,
-         seasonNumber: seasonNumber,
-         languageCode: languageCode,
-       );
+          () => SeasonDetail()
+            ..showId = showId
+            ..seasonNumber = seasonNumber
+            ..languageCode = languageCode,
+          from: seasonDetailProvider,
+          name: r'seasonDetailProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$seasonDetailHash,
+          dependencies: SeasonDetailFamily._dependencies,
+          allTransitiveDependencies:
+              SeasonDetailFamily._allTransitiveDependencies,
+          showId: showId,
+          seasonNumber: seasonNumber,
+          languageCode: languageCode,
+        );
 
   SeasonDetailProvider._internal(
     super._createNotifier, {
@@ -135,7 +134,9 @@ class SeasonDetailProvider
   final String? languageCode;
 
   @override
-  FutureOr<SeasonDetails> runNotifierBuild(covariant SeasonDetail notifier) {
+  FutureOr<SeasonDetails> runNotifierBuild(
+    covariant SeasonDetail notifier,
+  ) {
     return notifier.build(
       showId: showId,
       seasonNumber: seasonNumber,
@@ -148,11 +149,10 @@ class SeasonDetailProvider
     return ProviderOverride(
       origin: this,
       override: SeasonDetailProvider._internal(
-        () =>
-            create()
-              ..showId = showId
-              ..seasonNumber = seasonNumber
-              ..languageCode = languageCode,
+        () => create()
+          ..showId = showId
+          ..seasonNumber = seasonNumber
+          ..languageCode = languageCode,
         from: from,
         name: null,
         dependencies: null,
@@ -167,7 +167,7 @@ class SeasonDetailProvider
 
   @override
   AutoDisposeAsyncNotifierProviderElement<SeasonDetail, SeasonDetails>
-  createElement() {
+      createElement() {
     return _SeasonDetailProviderElement(this);
   }
 
@@ -215,6 +215,5 @@ class _SeasonDetailProviderElement
   @override
   String? get languageCode => (origin as SeasonDetailProvider).languageCode;
 }
-
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

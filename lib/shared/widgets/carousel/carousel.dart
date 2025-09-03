@@ -14,6 +14,7 @@ class Carousel extends ConsumerWidget {
   final VoidCallback? onViewMore;
 
   const Carousel({
+    super.key,
     required this.title,
     required this.future,
     required this.extractShow,

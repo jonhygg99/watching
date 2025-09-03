@@ -32,15 +32,13 @@ String _$countryCodeHash() => r'5e037e6406dd2c5e562d42464aaad7a6c2ce9577';
 @ProviderFor(CountryCode)
 final countryCodeProvider =
     AutoDisposeNotifierProvider<CountryCode, String>.internal(
-      CountryCode.new,
-      name: r'countryCodeProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product')
-              ? null
-              : _$countryCodeHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  CountryCode.new,
+  name: r'countryCodeProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$countryCodeHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$CountryCode = AutoDisposeNotifier<String>;
 String _$usernameHash() => r'9b7fc1974d8185ee3779b54e36ef98a5a9f03849';
@@ -51,13 +49,13 @@ String _$usernameHash() => r'9b7fc1974d8185ee3779b54e36ef98a5a9f03849';
 @ProviderFor(Username)
 final usernameProvider =
     AutoDisposeNotifierProvider<Username, String?>.internal(
-      Username.new,
-      name: r'usernameProvider',
-      debugGetCreateSourceHash:
-          const bool.fromEnvironment('dart.vm.product') ? null : _$usernameHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  Username.new,
+  name: r'usernameProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$usernameHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$Username = AutoDisposeNotifier<String?>;
 String _$navIndexHash() => r'ce3728813a4c87041ffb09c0b5f6eeaea57a0bf3';
