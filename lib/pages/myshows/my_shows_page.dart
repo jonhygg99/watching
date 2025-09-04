@@ -99,12 +99,12 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
       }
 
       // Convert the map to a list and sort by first_aired
-      final List<dynamic> processedData =
-          groupedShows.values.toList()..sort(
-            (a, b) => (a['episodes'][0]['first_aired'] as String).compareTo(
-              b['episodes'][0]['first_aired'] as String,
-            ),
-          );
+      final List<dynamic> processedData = groupedShows.values.toList()
+        ..sort(
+          (a, b) => (a['episodes'][0]['first_aired'] as String).compareTo(
+            b['episodes'][0]['first_aired'] as String,
+          ),
+        );
 
       setState(() {
         _calendarData = processedData;
@@ -149,7 +149,9 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
             title: AppLocalizations.of(context)!.waitingForNextSeason,
           ),
           const SizedBox(height: 24),
-          ShowsList(type: ShowsListType.ended, title: AppLocalizations.of(context)!.endedShows),
+          ShowsList(
+              type: ShowsListType.ended,
+              title: AppLocalizations.of(context)!.endedShows),
           const SizedBox(height: 16),
         ],
       ),

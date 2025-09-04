@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/constants/measures.dart';
 
 class MyShowsSkeleton extends StatelessWidget {
   const MyShowsSkeleton({super.key});
@@ -41,25 +42,25 @@ class MyShowsSkeleton extends StatelessWidget {
 
   Widget _buildSectionSkeleton() {
     return Container(
-      width: 200,
-      height: 24,
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(4),
-      ),
-    );
+        width: 120,
+        height: 20,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(4),
+        ));
   }
 
   Widget _buildShowItemSkeleton(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
     final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Poster Skeleton
+          // Poster Skeleton (matching calendar item size)
           Shimmer.fromColors(
             baseColor: baseColor,
             highlightColor: highlightColor,
@@ -78,21 +79,7 @@ class MyShowsSkeleton extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title Skeleton
-                Shimmer.fromColors(
-                  baseColor: baseColor,
-                  highlightColor: highlightColor,
-                  child: Container(
-                    width: double.infinity,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: baseColor,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Subtitle Skeleton
+                // Date indicator skeleton
                 Shimmer.fromColors(
                   baseColor: baseColor,
                   highlightColor: highlightColor,
@@ -105,12 +92,27 @@ class MyShowsSkeleton extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
+                // Title Skeleton
                 Shimmer.fromColors(
                   baseColor: baseColor,
                   highlightColor: highlightColor,
                   child: Container(
                     width: 120,
+                    height: 25,
+                    decoration: BoxDecoration(
+                      color: baseColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                // Season/episode info skeleton
+                Shimmer.fromColors(
+                  baseColor: baseColor,
+                  highlightColor: highlightColor,
+                  child: Container(
+                    width: 60,
                     height: 16,
                     decoration: BoxDecoration(
                       color: baseColor,
@@ -118,21 +120,47 @@ class MyShowsSkeleton extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Metadata Skeleton
+                const SizedBox(height: 6),
+                // Air date skeleton
+                Shimmer.fromColors(
+                  baseColor: baseColor,
+                  highlightColor: highlightColor,
+                  child: Container(
+                    width: 100,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: baseColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Show more button skeleton
+                Shimmer.fromColors(
+                  baseColor: baseColor,
+                  highlightColor: highlightColor,
+                  child: Container(
+                    width: double.infinity,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: baseColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-          // Days Bubble Skeleton
+          // Days Left Bubble (matching ShowDaysLeft component)
           Shimmer.fromColors(
             baseColor: baseColor,
             highlightColor: highlightColor,
             child: Container(
-              width: 70,
-              height: 70,
+              width: 60,
+              height: 60,
               margin: const EdgeInsets.only(left: 8, right: 16),
-              decoration: BoxDecoration(
-                color: baseColor,
+              decoration: const BoxDecoration(
+                color: Colors.grey,
                 shape: BoxShape.circle,
               ),
             ),
@@ -149,16 +177,34 @@ class MyShowsSkeleton extends StatelessWidget {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         childAspectRatio: 0.6,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
       ),
       itemCount: 6, // Show 6 skeleton items (2 rows of 3)
       itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(8),
-          ),
+        return Column(
+          children: [
+            Expanded(
+              child: Container(
+                width: 100,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Title skeleton
+            Container(
+              width: 80,
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
         );
       },
     );
