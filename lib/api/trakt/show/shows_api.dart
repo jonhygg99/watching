@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/shared/models/show_summary_model.dart';
+import 'package:watching/shared/models/rating.dart';
 
 export 'episodes_api.dart';
 export 'seasons_api.dart';
@@ -64,8 +65,9 @@ mixin ShowsApi on TraktApiBase {
   }
 
   /// Gets ratings for a show by ID.
-  Future<Map<String, dynamic>> getShowRatings({required String id}) async {
-    return await getJsonMap('/shows/$id/ratings');
+  Future<Rating> getShowRatings({required String id}) async {
+    final json = await getJsonMap('/shows/$id/ratings');
+    return Rating.fromJson(json);
   }
 
   /// Gets watched progress for a show.
