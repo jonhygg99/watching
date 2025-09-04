@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/l10n/app_localizations.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'star_rating.dart';
 
 class EpisodeActions extends ConsumerWidget {
   final Map<String, dynamic> episode;
-  final Map<String, dynamic> showData;
   final int seasonNumber;
   final int episodeNumber;
   final double? currentRating;
@@ -17,7 +17,6 @@ class EpisodeActions extends ConsumerWidget {
   const EpisodeActions({
     super.key,
     required this.episode,
-    required this.showData,
     required this.seasonNumber,
     required this.episodeNumber,
     required this.currentRating,
@@ -52,17 +51,16 @@ class EpisodeActions extends ConsumerWidget {
         if (!isWatching) ...[
           SizedBox(
             width: isWatched ? null : 0, // Take up space only when watched
-            child:
-                isWatched
-                    ? Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: StarRating(
-                        initialRating: currentRating ?? 0.0,
-                        size: 20,
-                        onRatingChanged: onRatingChanged,
-                      ),
-                    )
-                    : const SizedBox(width: 0), // Invisible placeholder
+            child: isWatched
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: StarRating(
+                      initialRating: currentRating ?? 0.0,
+                      size: 20,
+                      onRatingChanged: onRatingChanged,
+                    ),
+                  )
+                : const SizedBox(width: 0), // Invisible placeholder
           ),
           const Spacer(),
         ],
@@ -70,43 +68,43 @@ class EpisodeActions extends ConsumerWidget {
         // Watched toggle button
         isWatching
             ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
             : TextButton(
-              onPressed: () => onWatchedStatusChanged(!isWatched),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 8,
+                onPressed: () => onWatchedStatusChanged(!isWatched),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 8,
+                  ),
+                  backgroundColor:
+                      isWatched ? Colors.green.withValues(alpha: 0.1) : null,
+                  foregroundColor: isWatched ? Colors.green[700] : null,
                 ),
-                backgroundColor:
-                    isWatched ? Colors.green.withValues(alpha: 0.1) : null,
-                foregroundColor: isWatched ? Colors.green[700] : null,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isWatched ? Icons.visibility : Icons.visibility_off,
-                    size: 18,
-                    color: isWatched ? Colors.green[700] : null,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    isWatched
-                        ? AppLocalizations.of(context)!.watched
-                        : AppLocalizations.of(context)!.unwatched,
-                    style: TextStyle(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isWatched ? Icons.visibility : Icons.visibility_off,
+                      size: 18,
                       color: isWatched ? Colors.green[700] : null,
-                      fontWeight:
-                          isWatched ? FontWeight.bold : FontWeight.normal,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Text(
+                      isWatched
+                          ? AppLocalizations.of(context)!.watched
+                          : AppLocalizations.of(context)!.unwatched,
+                      style: TextStyle(
+                        color: isWatched ? Colors.green[700] : null,
+                        fontWeight:
+                            isWatched ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
       ],
     );
   }

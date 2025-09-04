@@ -7,6 +7,7 @@ import 'package:watching/pages/watchlist/widgets/animated_show_card.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/pages/watchlist/widgets/show_card.dart';
 import 'package:watching/pages/watchlist/widgets/watch_progress_info.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
 
 /// Widget for a single show/movie item in the watchlist.
@@ -78,10 +79,9 @@ class WatchlistShowItem extends HookConsumerWidget {
   // Reusable container decoration
   BoxDecoration _buildSwipeDecoration(Color color, bool isProcessing) {
     return BoxDecoration(
-      color:
-          isProcessing
-              ? Colors.grey[600]?.withValues(alpha: 0.8)
-              : color.withValues(alpha: 0.8),
+      color: isProcessing
+          ? Colors.grey[600]?.withValues(alpha: 0.8)
+          : color.withValues(alpha: 0.8),
       borderRadius: kShowBorderRadius,
     );
   }
@@ -89,10 +89,9 @@ class WatchlistShowItem extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Safely get the show map with proper type handling
-    final show =
-        item['show'] is Map
-            ? Map<String, dynamic>.from(item['show'] as Map)
-            : null;
+    final show = item['show'] is Map
+        ? Map<String, dynamic>.from(item['show'] as Map)
+        : null;
     final title = show?['title']?.toString() ?? 'No title';
 
     // Safely get the ids map with proper type handling
@@ -115,16 +114,16 @@ class WatchlistShowItem extends HookConsumerWidget {
 
     // Safely get progress with proper type handling
     final progressMap = item['progress'];
-    final progress =
-        progressMap is Map
-            ? Map<String, dynamic>.from(progressMap)
-            : <String, dynamic>{};
+    final progress = progressMap is Map
+        ? Map<String, dynamic>.from(progressMap)
+        : <String, dynamic>{};
 
     final watched = progress['completed'] as int? ?? 0;
     final total = progress['aired'] as int? ?? 1;
     if (traktId == null || watched == total) {
       return const SizedBox.shrink();
     }
+    final showSummary = ShowSummary.fromJson(show!);
 
     if (animatingOut.contains(traktId)) {
       return AnimatedShowCard(
@@ -137,16 +136,15 @@ class WatchlistShowItem extends HookConsumerWidget {
           title: title,
           apiService: ref.read(traktApiProvider),
           progress: progress,
-          showData: show ?? {},
+          showData: showSummary,
         ),
-        builder:
-            (context, child) => ShowCard(
-              traktId: traktId,
-              posterUrl: posterUrl,
-              infoWidget: child,
-              apiService: ref.read(traktApiProvider),
-              parentContext: context,
-            ),
+        builder: (context, child) => ShowCard(
+          traktId: traktId,
+          posterUrl: posterUrl,
+          infoWidget: child,
+          apiService: ref.read(traktApiProvider),
+          parentContext: context,
+        ),
         onFullyWatched: () => onFullyWatched?.call(traktId),
       );
     }
@@ -185,32 +183,31 @@ class WatchlistShowItem extends HookConsumerWidget {
               decoration: _buildSwipeDecoration(Colors.red[700]!, isProcessing),
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child:
-                  isProcessing
-                      ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildLoadingIndicator(),
-                          const SizedBox(width: 16),
-                          Text(
-                            AppLocalizations.of(context)!.markingAsWatched,
-                            style: _actionTextStyle,
-                          ),
-                        ],
-                      )
-                      : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.undo, color: Colors.white, size: 28),
-                          const SizedBox(width: 12),
-                          Text(
-                            AppLocalizations.of(context)!.unwatched,
-                            style: _actionTextStyle,
-                          ),
-                        ],
-                      ),
+              child: isProcessing
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildLoadingIndicator(),
+                        const SizedBox(width: 16),
+                        Text(
+                          AppLocalizations.of(context)!.markingAsWatched,
+                          style: _actionTextStyle,
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.undo, color: Colors.white, size: 28),
+                        const SizedBox(width: 12),
+                        Text(
+                          AppLocalizations.of(context)!.unwatched,
+                          style: _actionTextStyle,
+                        ),
+                      ],
+                    ),
             ),
             secondaryBackground: Container(
               margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
@@ -220,36 +217,35 @@ class WatchlistShowItem extends HookConsumerWidget {
               ),
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child:
-                  isProcessing
-                      ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.markingAsWatched,
-                            style: _actionTextStyle,
-                          ),
-                          const SizedBox(width: 16),
-                          _buildLoadingIndicator(),
-                        ],
-                      )
-                      : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.watched,
-                            style: _actionTextStyle,
-                          ),
-                          const SizedBox(width: 12),
-                          const Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ],
-                      ),
+              child: isProcessing
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.markingAsWatched,
+                          style: _actionTextStyle,
+                        ),
+                        const SizedBox(width: 16),
+                        _buildLoadingIndicator(),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.watched,
+                          style: _actionTextStyle,
+                        ),
+                        const SizedBox(width: 12),
+                        const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ],
+                    ),
             ),
             child: GestureDetector(
               onTap: () {
@@ -275,7 +271,7 @@ class WatchlistShowItem extends HookConsumerWidget {
                   title: title,
                   apiService: ref.read(traktApiProvider),
                   progress: progress,
-                  showData: show ?? {},
+                  showData: showSummary,
                 ),
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/utils/get_image.dart';
 import 'package:watching/shared/widgets/episode_info_modal/episode_info_modal.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
@@ -18,7 +19,7 @@ class SeasonEpisodeList extends StatefulWidget {
   final Map<int, EpisodeState>? episodeStates;
   final int seasonNumber;
   final String showId;
-  final Map<String, dynamic> showData;
+  final ShowSummary showData;
   final String? languageCode;
   final Future<void> Function(int epNumber, bool watched) onToggleEpisode;
   final void Function(int epNumber, Color color, {int delayMs}) setMarkingColor;
@@ -90,38 +91,34 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
 
   Widget _buildWatchButton(int epNumber, EpisodeState state) {
     return IconButton(
-      onPressed:
-          state.isProcessing
-              ? null
-              : () async {
-                await widget.onToggleEpisode(epNumber, !state.isWatched);
-              },
-      icon:
-          state.isProcessing
-              ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                ),
-              )
-              : Icon(
-                state.isWatched ? Icons.check_circle : Icons.circle_outlined,
-                size: 28,
-                color:
-                    state.isProcessing
-                        ? Colors.blue
-                        : state.isWatched
-                        ? Colors.green
-                        : Colors.grey[400],
+      onPressed: state.isProcessing
+          ? null
+          : () async {
+              await widget.onToggleEpisode(epNumber, !state.isWatched);
+            },
+      icon: state.isProcessing
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
               ),
-      tooltip:
-          state.isProcessing
-              ? ''
-              : (state.isWatched
-                  ? AppLocalizations.of(context)!.removeFromHistory
-                  : AppLocalizations.of(context)!.markAsWatched),
+            )
+          : Icon(
+              state.isWatched ? Icons.check_circle : Icons.circle_outlined,
+              size: 28,
+              color: state.isProcessing
+                  ? Colors.blue
+                  : state.isWatched
+                      ? Colors.green
+                      : Colors.grey[400],
+            ),
+      tooltip: state.isProcessing
+          ? ''
+          : (state.isWatched
+              ? AppLocalizations.of(context)!.removeFromHistory
+              : AppLocalizations.of(context)!.markAsWatched),
     );
   }
 
@@ -156,19 +153,18 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder:
-                    (context) => EpisodeInfoModal(
-                      episodeFuture: Future.value(epInfo ?? ep),
-                      showData: widget.showData,
-                      seasonNumber: widget.seasonNumber,
-                      episodeNumber: epNumber,
-                      onWatchedStatusChanged: (isWatched) async {
-                        // Toggle the episode watched status
-                        await widget.onToggleEpisode(epNumber, isWatched);
-                        // Refresh the UI
-                        if (mounted) setState(() {});
-                      },
-                    ),
+                builder: (context) => EpisodeInfoModal(
+                  episodeFuture: Future.value(epInfo ?? ep),
+                  showData: widget.showData,
+                  seasonNumber: widget.seasonNumber,
+                  episodeNumber: epNumber,
+                  onWatchedStatusChanged: (isWatched) async {
+                    // Toggle the episode watched status
+                    await widget.onToggleEpisode(epNumber, isWatched);
+                    // Refresh the UI
+                    if (mounted) setState(() {});
+                  },
+                ),
               );
 
               // Refresh the episode list after the modal is closed
@@ -183,13 +179,12 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                     width: 150,
                     height: 100,
                     fit: BoxFit.cover,
-                    errorWidget:
-                        (context, url, error) => Container(
-                          width: 150,
-                          height: 100,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.error_outline),
-                        ),
+                    errorWidget: (context, url, error) => Container(
+                      width: 150,
+                      height: 100,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.error_outline),
+                    ),
                   )
                 else
                   Container(
@@ -216,7 +211,9 @@ class _SeasonEpisodeListState extends State<SeasonEpisodeList> {
                         const SizedBox(height: 4),
                         Text(
                           epTitle,
-                          style: Theme.of(context).textTheme.bodyMedium
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
                               ?.copyWith(fontWeight: FontWeight.w500),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'package:watching/pages/watchlist/widgets/episode_info_button.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
@@ -17,7 +18,7 @@ class WatchProgressInfo extends StatelessWidget {
   final String title;
   final TraktApi apiService;
   final Map<String, dynamic>? progress;
-  final Map<String, dynamic> showData;
+  final ShowSummary showData;
 
   const WatchProgressInfo({
     super.key,
@@ -52,7 +53,7 @@ class WatchProgressInfo extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             AppLocalizations.of(context)!.noProgressAvailable,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
         ],
       );
@@ -77,7 +78,7 @@ class _ProgressDetails extends StatelessWidget {
   final String traktId;
   final Map<String, dynamic> progress;
   final TraktApi apiService;
-  final Map<String, dynamic> showData;
+  final ShowSummary showData;
   final TextStyle? titleStyle;
   final TextStyle? episodeStyle;
 
@@ -96,13 +97,11 @@ class _ProgressDetails extends StatelessWidget {
     final episodesWatched = progress['completed'] ?? 0;
     final totalEpisodes = progress['aired'] ?? 1;
     final nextEpisode = progress['next_episode'];
-    final percent =
-        totalEpisodes > 0
-            ? (episodesWatched / totalEpisodes).clamp(0.0, 1.0)
-            : 0.0;
+    final percent = totalEpisodes > 0
+        ? (episodesWatched / totalEpisodes).clamp(0.0, 1.0)
+        : 0.0;
 
-    final effectiveTitleStyle =
-        titleStyle ??
+    final effectiveTitleStyle = titleStyle ??
         Theme.of(
           context,
         ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold);

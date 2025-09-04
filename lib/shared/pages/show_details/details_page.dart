@@ -7,6 +7,7 @@ import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/colors.dart';
 import 'package:watching/shared/constants/measures.dart';
 import 'package:watching/shared/constants/sort_options.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/pages/show_details/cast.dart';
 import 'package:watching/shared/pages/show_details/widgets/back_button.dart';
 import 'package:watching/shared/pages/show_details/widgets/current_episode/current_episode.dart';
@@ -90,7 +91,7 @@ class ShowDetailPage extends HookConsumerWidget {
                     child: Text(AppLocalizations.of(context)!.noResults),
                   );
                 }
-                final show = results[0] as Map<String, dynamic>?;
+                final show = results[0] as ShowSummary;
                 final translations = results[1] as List<dynamic>?;
                 final people = results[2] as Map<String, dynamic>?;
                 final videos = results[3] as List<dynamic>?;
@@ -98,12 +99,6 @@ class ShowDetailPage extends HookConsumerWidget {
                     results[4] as Map<String, dynamic>?;
                 final relatedShows =
                     relatedShowsResponse?['shows'] as List<dynamic>?;
-
-                if (show == null) {
-                  return Center(
-                    child: Text(AppLocalizations.of(context)!.noResults),
-                  );
-                }
 
                 // Filter out null values and find the best translation
                 Map<String, dynamic>? translation;
@@ -124,12 +119,11 @@ class ShowDetailPage extends HookConsumerWidget {
                 }
 
                 // Get title, overview, and tagline from translation if available, otherwise use original
-                final originalTitle =
-                    translation?['title'] ?? show['title'] ?? '';
+                final originalTitle = translation?['title'] ?? show.title ?? '';
                 final originalOverview =
-                    translation?['overview'] ?? show['overview'] ?? '';
+                    translation?['overview'] ?? show.overview ?? '';
                 final originalTagline =
-                    translation?['tagline'] ?? show['tagline'] ?? '';
+                    translation?['tagline'] ?? show.tagline ?? '';
 
                 return CustomScrollView(
                   controller: scrollController,
@@ -151,8 +145,8 @@ class ShowDetailPage extends HookConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CurrentEpisode(
-                              traktId: show['ids']['trakt'].toString(),
-                              title: show['title']?.toString(),
+                              traktId: show.ids.trakt.toString(),
+                              title: show.title,
                               languageCode:
                                   countryCode.substring(0, 2).toLowerCase(),
                               showData: show,

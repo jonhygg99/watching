@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/pages/watchlist/widgets/error_dialog.dart';
 import 'package:watching/pages/watchlist/widgets/empty_watchlist.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/pages/watchlist/providers/watchlist_providers.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/shared/constants/measures.dart';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/widgets/progress_bar.dart';
 import 'package:watching/shared/pages/show_details/pages/seasons/season_detail_page.dart';
 import 'season_mark_button.dart';
@@ -10,7 +11,7 @@ import 'season_mark_button.dart';
 /// Usa hooks y Riverpod para el manejo de estado y side-effects.
 class SeasonsProgressWidget extends HookConsumerWidget {
   final String showId;
-  final Map<String, dynamic> showData;
+  final ShowSummary showData;
   final String? languageCode;
   final Function()? onProgressChanged;
   final Function()? onEpisodeWatched;
@@ -116,19 +117,18 @@ class SeasonsProgressWidget extends HookConsumerWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder:
-                      (context) => SeasonDetailPage(
-                        showId: showId,
-                        showData: showData,
-                        seasonNumber: number,
-                        languageCode: languageCode,
-                        onEpisodeWatched: () {
-                          // Call all callbacks if they exist
-                          onEpisodeWatched?.call();
-                          onProgressChanged?.call();
-                          onWatchlistUpdate?.call();
-                        },
-                      ),
+                  builder: (context) => SeasonDetailPage(
+                    showId: showId,
+                    showData: showData,
+                    seasonNumber: number,
+                    languageCode: languageCode,
+                    onEpisodeWatched: () {
+                      // Call all callbacks if they exist
+                      onEpisodeWatched?.call();
+                      onProgressChanged?.call();
+                      onWatchlistUpdate?.call();
+                    },
+                  ),
                 ),
               );
             },
@@ -143,10 +143,9 @@ class SeasonsProgressWidget extends HookConsumerWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ProgressBar(
-                      percent:
-                          (aired == 0 || completed < 0 || aired < 0)
-                              ? 0.0
-                              : (completed / aired).clamp(0.0, 1.0),
+                      percent: (aired == 0 || completed < 0 || aired < 0)
+                          ? 0.0
+                          : (completed / aired).clamp(0.0, 1.0),
                       watched: completed,
                       total: aired,
                     ),

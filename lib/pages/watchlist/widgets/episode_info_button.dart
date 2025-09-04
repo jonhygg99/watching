@@ -5,6 +5,7 @@ import 'package:watching/shared/widgets/episode_info_modal/episode_info_modal.da
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/widgets/primary_button.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 
 /// A button that shows episode information in a modal
 class EpisodeInfoButton extends HookConsumerWidget {
@@ -13,7 +14,7 @@ class EpisodeInfoButton extends HookConsumerWidget {
   final int episode;
   final TraktApi apiService;
   final String? countryCode;
-  final Map<String, dynamic> showData;
+  final ShowSummary showData;
 
   const EpisodeInfoButton({
     super.key,
@@ -36,33 +37,32 @@ class EpisodeInfoButton extends HookConsumerWidget {
         Icons.info_outline,
         color: Theme.of(context).colorScheme.primary,
       ),
-      onPressed:
-          traktId == null
-              ? null
-              : () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(24),
-                    ),
+      onPressed: traktId == null
+          ? null
+          : () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(24),
                   ),
-                  builder: (ctx) {
-                    return EpisodeInfoModal(
-                      episodeFuture: apiService.getEpisodeInfo(
-                        id: traktId!,
-                        season: season,
-                        episode: episode,
-                        language: effectiveCountryCode.toLowerCase(),
-                      ),
-                      showData: showData,
-                      seasonNumber: season,
-                      episodeNumber: episode,
-                    );
-                  },
-                );
-              },
+                ),
+                builder: (ctx) {
+                  return EpisodeInfoModal(
+                    episodeFuture: apiService.getEpisodeInfo(
+                      id: traktId!,
+                      season: season,
+                      episode: episode,
+                      language: effectiveCountryCode.toLowerCase(),
+                    ),
+                    showData: showData,
+                    seasonNumber: season,
+                    episodeNumber: episode,
+                  );
+                },
+              );
+            },
     );
   }
 }

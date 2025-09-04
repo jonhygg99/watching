@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/utils/get_image.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
@@ -23,7 +24,7 @@ class EpisodeInfoModal extends HookConsumerWidget {
   });
 
   final Future<Map<String, dynamic>> episodeFuture;
-  final Map<String, dynamic> showData;
+  final ShowSummary showData;
   final int seasonNumber;
   final int episodeNumber;
   final void Function(bool)? onWatchedStatusChanged;
@@ -33,8 +34,7 @@ class EpisodeInfoModal extends HookConsumerWidget {
     ValueNotifier<bool?> isWatchedNotifier,
   ) async {
     try {
-      final showId = showData['ids']['trakt']?.toString();
-      if (showId == null) return;
+      final showId = showData.ids.trakt.toString();
 
       final progress = await traktApi.getShowWatchedProgress(id: showId);
       final seasons = progress['seasons'] as List<dynamic>?;
@@ -121,7 +121,7 @@ class EpisodeInfoModal extends HookConsumerWidget {
     required void Function(bool)? onWatchedStatusChanged,
   }) async {
     final notifier = ref.read(watchlistProvider.notifier);
-    final showId = showData['ids']['trakt']?.toString() ?? '';
+    final showId = showData.ids.trakt.toString();
 
     try {
       await notifier.toggleEpisodeWatchedStatus(
@@ -183,10 +183,9 @@ class EpisodeInfoModal extends HookConsumerWidget {
             }
 
             final img = getScreenshotUrl(episodeWithWatched);
-            final imageUrl =
-                img != null
-                    ? (!img.startsWith('http') ? 'https://$img' : img)
-                    : null;
+            final imageUrl = img != null
+                ? (!img.startsWith('http') ? 'https://$img' : img)
+                : null;
 
             content = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,31 +196,29 @@ class EpisodeInfoModal extends HookConsumerWidget {
                   builder: (context, ref, _) {
                     return EpisodeActions(
                       episode: episodeWithWatched,
-                      showData: showData,
                       seasonNumber: seasonNumber,
                       episodeNumber: episodeNumber,
                       currentRating: episodeRating.value,
-                      onRatingChanged:
-                          (rating) => _handleRatingUpdate(
-                            rating,
-                            isRating: isRating,
-                            currentRating: episodeRating,
-                            ratingService: ratingService,
-                          ),
-                      onWatchedStatusChanged:
-                          (isWatchedValue) => _handleWatchedStatusChanged(
-                            context,
-                            ref,
-                            episodeWithWatched,
-                            isWatchedValue,
-                            isWatchedNotifier: isWatched,
-                            onWatchedStatusChanged: onWatchedStatusChanged,
-                          ),
+                      onRatingChanged: (rating) => _handleRatingUpdate(
+                        rating,
+                        isRating: isRating,
+                        currentRating: episodeRating,
+                        ratingService: ratingService,
+                      ),
+                      onWatchedStatusChanged: (isWatchedValue) =>
+                          _handleWatchedStatusChanged(
+                        context,
+                        ref,
+                        episodeWithWatched,
+                        isWatchedValue,
+                        isWatchedNotifier: isWatched,
+                        onWatchedStatusChanged: onWatchedStatusChanged,
+                      ),
                       onCommentsPressed: () {
                         final sortNotifier = ValueNotifier<String>('likes');
                         CommentsModal.show(
                           context,
-                          showId: showData['ids']['trakt'].toString(),
+                          showId: showData.ids.trakt.toString(),
                           sort: sortNotifier,
                           sortKeys: commentSortOptions.keys.toList(),
                           ref: ref,

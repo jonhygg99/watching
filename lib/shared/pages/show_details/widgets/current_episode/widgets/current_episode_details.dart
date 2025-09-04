@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 import 'package:watching/shared/pages/show_details/widgets/current_episode/widgets/action_buttons.dart';
 import 'package:watching/shared/pages/show_details/widgets/current_episode/widgets/episode_info_row.dart';
@@ -14,7 +15,7 @@ class CurrentEpisodeDetails extends StatelessWidget {
   final VoidCallback onRefreshProgress;
   final Map<String, dynamic>? progressData;
   final Map<String, dynamic>? nextEpisode;
-  final Map<String, dynamic>? showData;
+  final ShowSummary showData;
   final String traktId;
   final String? languageCode;
   final VoidCallback? onWatchedStatusChanged;

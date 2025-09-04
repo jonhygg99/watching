@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/shared/constants/show_status.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/utils/get_image.dart';
 import 'package:watching/shared/pages/show_details/widgets/header/widgets/rating.dart';
 import 'package:watching/shared/pages/show_details/widgets/header/widgets/gradient_overlay.dart';
@@ -11,7 +12,7 @@ import 'package:watching/shared/pages/show_details/widgets/header/widgets/title.
 import 'package:watching/shared/pages/show_details/widgets/header/widgets/fanart_image.dart';
 
 class Header extends HookWidget {
-  final Map<String, dynamic> show;
+  final ShowSummary show;
   final String title;
   final ScrollController? scrollController;
 
@@ -24,9 +25,9 @@ class Header extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rating = show['rating']?.toDouble() ?? 0.0;
+    final rating = show.rating?.toDouble() ?? 0.0;
     final fanartUrl = getFirstAvailableImage(
-      show['images'],
+      show.images,
       preferredType: 'fanart',
     );
 
@@ -93,18 +94,16 @@ class Header extends HookWidget {
       children: [
         InfoItemsRow(
           items: [
-            if (show['year'] != null) show['year'].toString(),
-            if (show['runtime'] != null)
-              l10n.runtimeMinutes(
-                int.tryParse(show['runtime'].toString()) ?? 0,
-              ),
-            if (show['status'] != null)
-              ShowStatus.getTranslatedStatus(show['status'].toString(), l10n),
+            show.year.toString(),
+            l10n.runtimeMinutes(
+              int.tryParse(show.runtime.toString()) ?? 0,
+            ),
+            ShowStatus.getTranslatedStatus(show.status.toString(), l10n),
           ],
         ),
         TitleWidget(title: title),
         const SizedBox(height: 8),
-        GenresChips(genres: show['genres'] as List? ?? []),
+        GenresChips(genres: show.genres ?? []),
       ],
     );
   }
@@ -121,11 +120,11 @@ class Header extends HookWidget {
       child: Stack(
         children: [
           const GradientOverlay(),
-          if (show['rating'] != null)
+          if (show.rating != null)
             Positioned(
               top: topPadding,
               right: 16,
-              child: Rating(rating: show['rating']?.toDouble() ?? 0.0),
+              child: Rating(rating: show.rating?.toDouble() ?? 0.0),
             ),
           Positioned(
             left: 16,

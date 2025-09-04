@@ -1,4 +1,5 @@
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 
 class EpisodeRatingService {
   final TraktApi _traktApi;
@@ -6,7 +7,7 @@ class EpisodeRatingService {
   EpisodeRatingService(this._traktApi);
 
   Future<void> addRating({
-    required Map<String, dynamic> showData,
+    required ShowSummary showData,
     required int seasonNumber,
     required int episodeNumber,
     required double rating,
@@ -31,8 +32,8 @@ class EpisodeRatingService {
         'tmdb': showIds['tmdb'],
         'tvdb': showIds['tvdb'],
       },
-      'title': showData['title'] ?? 'Unknown',
-      'year': showData['year'],
+      'title': showData.title ?? 'Unknown',
+      'year': showData.year,
       'seasons': [
         {
           'number': seasonNumber,
@@ -47,7 +48,7 @@ class EpisodeRatingService {
   }
 
   Future<void> removeRating({
-    required Map<String, dynamic> showData,
+    required ShowSummary showData,
     required int seasonNumber,
     required int episodeNumber,
   }) async {
@@ -57,8 +58,8 @@ class EpisodeRatingService {
     while (attempt < maxRetries) {
       try {
         // Get the show data
-        final showIds = showData['ids'] as Map<String, dynamic>? ?? {};
-        final showTraktId = showIds['trakt'] ?? 0;
+        final showIds = showData.ids;
+        final showTraktId = showIds.trakt;
 
         if (showTraktId == 0) return;
 
@@ -66,13 +67,13 @@ class EpisodeRatingService {
         final showPayload = {
           'ids': {
             'trakt': showTraktId,
-            'slug': showIds['slug'],
-            'imdb': showIds['imdb'],
-            'tmdb': showIds['tmdb'],
-            'tvdb': showIds['tvdb'],
+            'slug': showIds.slug,
+            'imdb': showIds.imdb,
+            'tmdb': showIds.tmdb,
+            'tvdb': showIds.tvdb,
           },
-          'title': showData['title'] ?? 'Unknown',
-          'year': showData['year'],
+          'title': showData.title,
+          'year': showData.year,
           'seasons': [
             {
               'number': seasonNumber,

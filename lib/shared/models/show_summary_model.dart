@@ -131,4 +131,6 @@ class ShowSummary extends TraktShow {
 
   @override
   String toString() => 'ShowSummary($title, $year, $ids, tagline: $tagline)';
+
+  void operator [](String other) {}
 }

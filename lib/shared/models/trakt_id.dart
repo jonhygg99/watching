@@ -85,5 +85,6 @@ class TraktId {
       tvdb.hashCode;
 
   @override
-  String toString() => 'TraktId($trakt, $slug, $imdb, $tmdb${tvdb != null ? ', $tvdb' : ''})';
+  String toString() =>
+      'TraktId($trakt, $slug, $imdb, $tmdb${tvdb != null ? ', $tvdb' : ''})';
 }

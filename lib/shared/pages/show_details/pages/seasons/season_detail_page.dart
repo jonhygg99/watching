@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/widgets/tiny_progress_bar.dart';
 
 import 'providers/season_detail_provider.dart';
@@ -16,7 +17,7 @@ import 'widgets/season_navigation.dart';
 class SeasonDetailPage extends HookConsumerWidget {
   final int seasonNumber;
   final String showId;
-  final Map<String, dynamic> showData;
+  final ShowSummary showData;
   final String? languageCode;
   final VoidCallback? onEpisodeWatched;
 
@@ -54,9 +55,10 @@ class _SeasonDetailPageState extends HookConsumerWidget {
   final int seasonNumber;
   final String? languageCode;
   final VoidCallback? onEpisodeWatched;
-  final Map<String, dynamic> showData;
+  final ShowSummary showData;
 
-  void _navigateToSeason(PageController pageController, int newSeasonNumber, int currentSeasonNumber) {
+  void _navigateToSeason(PageController pageController, int newSeasonNumber,
+      int currentSeasonNumber) {
     if (newSeasonNumber == currentSeasonNumber) return;
     pageController.animateToPage(
       newSeasonNumber - 1,
@@ -77,7 +79,8 @@ class _SeasonDetailPageState extends HookConsumerWidget {
       return () {
         // Add a small delay to ensure any pending animations complete
         Future.delayed(const Duration(milliseconds: 100), () {
-          if (controller.hasClients && !controller.position.hasContentDimensions) {
+          if (controller.hasClients &&
+              !controller.position.hasContentDimensions) {
             controller.dispose();
           }
         });
@@ -99,13 +102,16 @@ class _SeasonDetailPageState extends HookConsumerWidget {
 
             return seasonDetail.when(
               data: (_) => Text(
-                AppLocalizations.of(context)!.seasonTitle(currentSeasonNumber.value),
+                AppLocalizations.of(context)!
+                    .seasonTitle(currentSeasonNumber.value),
               ),
               loading: () => Text(
-                AppLocalizations.of(context)!.seasonTitle(currentSeasonNumber.value),
+                AppLocalizations.of(context)!
+                    .seasonTitle(currentSeasonNumber.value),
               ),
               error: (_, __) => Text(
-                AppLocalizations.of(context)!.seasonTitle(currentSeasonNumber.value),
+                AppLocalizations.of(context)!
+                    .seasonTitle(currentSeasonNumber.value),
               ),
             );
           },
@@ -129,24 +135,27 @@ class _SeasonDetailPageState extends HookConsumerWidget {
                     currentSeasonNumber.value,
                   ),
                   loading: false,
-                  episodeNumbers: details.episodes
-                      .map((e) => e['number'] as int)
-                      .toList(),
+                  episodeNumbers:
+                      details.episodes.map((e) => e['number'] as int).toList(),
                   onBulkAction: (allCurrentlyWatched) async {
                     // If all episodes are already watched, unwatch them all
                     // Otherwise, mark all as watched
                     final shouldMarkAsWatched = !allCurrentlyWatched;
-                    
-                    await ref.read(
-                      seasonDetailProvider(
-                        showId: showId,
-                        seasonNumber: currentSeasonNumber.value,
-                        languageCode: languageCode,
-                      ).notifier,
-                    ).toggleSeasonWatched(shouldMarkAsWatched);
-                    
+
+                    await ref
+                        .read(
+                          seasonDetailProvider(
+                            showId: showId,
+                            seasonNumber: currentSeasonNumber.value,
+                            languageCode: languageCode,
+                          ).notifier,
+                        )
+                        .toggleSeasonWatched(shouldMarkAsWatched);
+
                     onEpisodeWatched?.call();
-                    ref.read(watchlistProvider.notifier).updateShowProgress(showId);
+                    ref
+                        .read(watchlistProvider.notifier)
+                        .updateShowProgress(showId);
                   },
                 ),
                 loading: () => const SizedBox.shrink(),
@@ -163,7 +172,8 @@ class _SeasonDetailPageState extends HookConsumerWidget {
               SeasonNavigation(
                 hasPreviousSeason: currentSeasonNumber.value > 1,
                 hasNextSeason: currentSeasonNumber.value <
-                    (seasons.last['number'] as int? ?? currentSeasonNumber.value),
+                    (seasons.last['number'] as int? ??
+                        currentSeasonNumber.value),
                 isLoadingSeasons: false,
                 seasonNumber: currentSeasonNumber.value,
                 seasonsList: seasons,
@@ -183,7 +193,8 @@ class _SeasonDetailPageState extends HookConsumerWidget {
                 },
                 onNextSeason: () {
                   if (currentSeasonNumber.value <
-                      (seasons.last['number'] as int? ?? currentSeasonNumber.value)) {
+                      (seasons.last['number'] as int? ??
+                          currentSeasonNumber.value)) {
                     _navigateToSeason(
                       pageController,
                       currentSeasonNumber.value + 1,
@@ -233,7 +244,7 @@ class _SeasonContent extends HookConsumerWidget {
   final int seasonNumber;
   final String? languageCode;
   final VoidCallback? onEpisodeWatched;
-  final Map<String, dynamic> showData;
+  final ShowSummary showData;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -312,6 +323,7 @@ class _SeasonContent extends HookConsumerWidget {
         });
       }
     }
+
     final seasonDetail = ref.watch(
       seasonDetailProvider(
         showId: showId,
@@ -331,13 +343,15 @@ class _SeasonContent extends HookConsumerWidget {
             child: TinyProgressBar(
               percent: getSeasonProgress(details.progress, seasonNumber),
               watched: (details.progress['seasons'] as List?)?.firstWhere(
-                (s) => s['number'] == seasonNumber,
-                orElse: () => {'completed': 0},
-              )['completed'] ?? 0,
+                    (s) => s['number'] == seasonNumber,
+                    orElse: () => {'completed': 0},
+                  )['completed'] ??
+                  0,
               total: (details.progress['seasons'] as List?)?.firstWhere(
-                (s) => s['number'] == seasonNumber,
-                orElse: () => {'aired': 1},
-              )['aired'] ?? 1,
+                    (s) => s['number'] == seasonNumber,
+                    orElse: () => {'aired': 1},
+                  )['aired'] ??
+                  1,
             ),
           ),
           Expanded(

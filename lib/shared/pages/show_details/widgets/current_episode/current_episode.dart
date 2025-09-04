@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/pages/show_details/widgets/current_episode/widgets/current_episode_details.dart';
 import 'package:watching/shared/pages/show_details/widgets/skeleton/widgets/skeleton_episode.dart';
 import 'package:watching/shared/utils/episode_utils.dart';
@@ -17,7 +18,7 @@ class CurrentEpisode extends HookWidget {
   final String traktId;
   final String? title;
   final String? languageCode;
-  final Map<String, dynamic>? showData;
+  final ShowSummary showData;
   final VoidCallback? onWatchedStatusChanged;
   final VoidCallback? onEpisodeWatched;
 
@@ -26,7 +27,7 @@ class CurrentEpisode extends HookWidget {
     required this.traktId,
     this.title,
     this.languageCode,
-    this.showData,
+    required this.showData,
     this.onWatchedStatusChanged,
     this.onEpisodeWatched,
   });
@@ -105,7 +106,8 @@ class CurrentEpisode extends HookWidget {
               !translatedEpisodeName.value.containsKey(
                 AppLocalizations.of(
                   context,
-                )!.seasonEpisodeFormat(episodeNumber, seasonNumber),
+                )!
+                    .seasonEpisodeFormat(episodeNumber, seasonNumber),
               )) {
             final translatedName = await _getTranslatedEpisodeName(
               trakt,
@@ -168,8 +170,7 @@ class CurrentEpisode extends HookWidget {
       final episodeKey = 'S${seasonNumber}E$episodeNumber';
 
       // Use translated name if available, fallback to original
-      final episodeName =
-          translatedEpisodeName.value[episodeKey] ??
+      final episodeName = translatedEpisodeName.value[episodeKey] ??
           currentNextEpisode['title'] as String? ??
           AppLocalizations.of(context)!.episodeNumber(episodeNumber);
 

@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 import 'package:watching/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 import 'package:watching/shared/pages/show_details/pages/seasons/season_detail_page.dart';
 import 'package:watching/shared/pages/show_details/widgets/current_episode/widgets/episode_helpers.dart';
 import 'package:watching/shared/widgets/episode_info_modal/episode_info_modal.dart';
 
 class ActionButtons extends StatelessWidget {
   final Map<String, dynamic>? nextEpisode;
-  final Map<String, dynamic>? showData;
+  final ShowSummary showData;
   final String traktId;
   final String? languageCode;
   final VoidCallback? onWatchedStatusChanged;
@@ -40,17 +41,15 @@ class ActionButtons extends StatelessWidget {
       children: [
         Expanded(
           child: Padding(
-            padding:
-                nextEpisode == null
-                    ? EdgeInsets.zero
-                    : const EdgeInsets.only(right: 4.0),
+            padding: nextEpisode == null
+                ? EdgeInsets.zero
+                : const EdgeInsets.only(right: 4.0),
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? [kGradientLightColor, kGradientDarkColor]
-                          : [kGradientLightColorLight, kGradientDarkColorLight],
+                  colors: Theme.of(context).brightness == Brightness.dark
+                      ? [kGradientLightColor, kGradientDarkColor]
+                      : [kGradientLightColorLight, kGradientDarkColorLight],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -59,21 +58,19 @@ class ActionButtons extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: () {
                   if (showData != null) {
-                    final currentSeason =
-                        nextEpisode != null
-                            ? nextEpisode!['season'] as int? ?? 1
-                            : findLastSeason(progressData);
+                    final currentSeason = nextEpisode != null
+                        ? nextEpisode!['season'] as int? ?? 1
+                        : findLastSeason(progressData);
 
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder:
-                            (context) => SeasonDetailPage(
-                              seasonNumber: currentSeason,
-                              showId: traktId,
-                              showData: showData!,
-                              languageCode: languageCode,
-                              onEpisodeWatched: onEpisodeWatched,
-                            ),
+                        builder: (context) => SeasonDetailPage(
+                          seasonNumber: currentSeason,
+                          showId: traktId,
+                          showData: showData!,
+                          languageCode: languageCode,
+                          onEpisodeWatched: onEpisodeWatched,
+                        ),
                       ),
                     );
                   }
@@ -92,7 +89,8 @@ class ActionButtons extends StatelessWidget {
                 ),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 56),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   backgroundColor: Colors.transparent,
                   foregroundColor: Colors.white,
                   shadowColor: Colors.transparent,
@@ -111,13 +109,12 @@ class ActionButtons extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors:
-                        Theme.of(context).brightness == Brightness.dark
-                            ? [kGradientLightColor, kGradientDarkColor]
-                            : [
-                              kGradientLightColorLight,
-                              kGradientDarkColorLight,
-                            ],
+                    colors: Theme.of(context).brightness == Brightness.dark
+                        ? [kGradientLightColor, kGradientDarkColor]
+                        : [
+                            kGradientLightColorLight,
+                            kGradientDarkColorLight,
+                          ],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
@@ -125,31 +122,28 @@ class ActionButtons extends StatelessWidget {
                 ),
                 child: FilledButton.icon(
                   onPressed: () {
-                    if (seasonNumber != null &&
-                        episodeNumber != null &&
-                        showData != null) {
+                    if (seasonNumber != null && episodeNumber != null) {
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         useSafeArea: true,
-                        builder:
-                            (context) => EpisodeInfoModal(
-                              episodeFuture: trakt.getEpisodeInfo(
-                                id: traktId,
-                                season: seasonNumber!,
-                                episode: episodeNumber!,
-                                language: languageCode,
-                              ),
-                              showData: showData!,
-                              seasonNumber: seasonNumber!,
-                              episodeNumber: episodeNumber!,
-                              onWatchedStatusChanged: (_) {
-                                onRefreshProgress();
-                                if (context.mounted) {
-                                  onWatchedStatusChanged?.call();
-                                }
-                              },
-                            ),
+                        builder: (context) => EpisodeInfoModal(
+                          episodeFuture: trakt.getEpisodeInfo(
+                            id: traktId,
+                            season: seasonNumber!,
+                            episode: episodeNumber!,
+                            language: languageCode,
+                          ),
+                          showData: showData!,
+                          seasonNumber: seasonNumber!,
+                          episodeNumber: episodeNumber!,
+                          onWatchedStatusChanged: (_) {
+                            onRefreshProgress();
+                            if (context.mounted) {
+                              onWatchedStatusChanged?.call();
+                            }
+                          },
+                        ),
                       );
                     }
                   },
@@ -167,7 +161,8 @@ class ActionButtons extends StatelessWidget {
                   ),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(double.infinity, 56),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                     backgroundColor: Colors.transparent,
                     foregroundColor: Colors.white,
                     shadowColor: Colors.transparent,
