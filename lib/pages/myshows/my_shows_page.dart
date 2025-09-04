@@ -141,7 +141,7 @@ class _MyShowsPageState extends ConsumerState<MyShowsPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_calendarData?.isNotEmpty ?? false) ...[
-            Padding(padding: const EdgeInsets.only(top: kPhoneSpaceVertical)),
+            const Padding(padding: EdgeInsets.only(top: kPhoneSpaceVertical)),
             Calendar(items: _calendarData ?? []),
           ],
           ShowsList(

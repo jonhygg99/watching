@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:watching/api/trakt/trakt_api.dart';
+import 'package:watching/shared/models/show_summary_model.dart';
 
 export 'episodes_api.dart';
 export 'seasons_api.dart';
@@ -13,12 +14,13 @@ mixin ShowsApi on TraktApiBase {
   ///
   /// [id]: The Trakt ID, Trakt slug, or IMDB ID of the show
   /// [extended]: If true, includes full extended info (images, full, etc.)
-  Future<Map<String, dynamic>> getShowById({
+  Future<ShowSummary> getShowSummary({
     required String id,
     bool extended = true,
   }) async {
     final endpoint = '/shows/$id${extended ? '?extended=full,images' : ''}';
-    return await getJsonMap(endpoint);
+    final json = await getJsonMap(endpoint);
+    return ShowSummary.fromJson(json);
   }
 
   /// Gets comments for a show by ID with pagination support.

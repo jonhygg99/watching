@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:watching/shared/constants/colors.dart';
-import 'package:watching/shared/constants/measures.dart';
 
 class MyShowsSkeleton extends StatelessWidget {
   const MyShowsSkeleton({super.key});

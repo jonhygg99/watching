@@ -25,7 +25,7 @@ class ShowDetailPage extends HookConsumerWidget {
     super.key,
     required this.showId,
     Map<String, dynamic>?
-    showData, // TODO: not using it and very powerful to not call apis again
+        showData, // TODO: not using it and very powerful to not call apis again
   });
 
   @override
@@ -62,7 +62,7 @@ class ShowDetailPage extends HookConsumerWidget {
           children: [
             FutureBuilder<List<dynamic>>(
               future: Future.wait([
-                apiService.getShowById(id: showId),
+                apiService.getShowSummary(id: showId),
                 apiService.getShowTranslations(
                   id: showId,
                   language: countryCode.substring(0, 2).toLowerCase(),

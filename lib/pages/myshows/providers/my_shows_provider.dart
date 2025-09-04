@@ -54,37 +54,30 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
     _loadShows();
 
     // Subscribe to watchlist changes
-    _watchlistSubscription = _ref
-        .read(watchlistProvider.notifier)
-        .stream
-        .distinct((prev, next) {
-          if (prev.items.length != next.items.length) {
-            return false;
-          }
+    _watchlistSubscription =
+        _ref.read(watchlistProvider.notifier).stream.distinct((prev, next) {
+      if (prev.items.length != next.items.length) {
+        return false;
+      }
 
-          // Compare show IDs to detect actual changes
-          final prevIds =
-              prev.items
-                  .map(
-                    (i) =>
-                        (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])
-                            ?.toString(),
-                  )
-                  .toSet();
-          final nextIds =
-              next.items
-                  .map(
-                    (i) =>
-                        (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])
-                            ?.toString(),
-                  )
-                  .toSet();
+      // Compare show IDs to detect actual changes
+      final prevIds = prev.items
+          .map(
+            (i) =>
+                (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])?.toString(),
+          )
+          .toSet();
+      final nextIds = next.items
+          .map(
+            (i) =>
+                (i['show']?['ids']?['trakt'] ?? i['ids']?['trakt'])?.toString(),
+          )
+          .toSet();
 
-          return setEquals(prevIds, nextIds);
-        })
-        .listen((_) {
-          _loadShows();
-        });
+      return setEquals(prevIds, nextIds);
+    }).listen((_) {
+      _loadShows();
+    });
   }
 
   @override
@@ -163,13 +156,12 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
       bool hasNewItems = false;
 
       // Only process new items that we haven't seen before
-      final itemsToProcess =
-          deduplicatedItems.where((item) {
-            final show = item['show'] ?? item;
-            final ids = show['ids'] ?? {};
-            final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
-            return traktId != null && !_itemsMap.containsKey(traktId);
-          }).toList();
+      final itemsToProcess = deduplicatedItems.where((item) {
+        final show = item['show'] ?? item;
+        final ids = show['ids'] ?? {};
+        final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
+        return traktId != null && !_itemsMap.containsKey(traktId);
+      }).toList();
 
       // If we already have all items, just update the list order
       if (itemsToProcess.isEmpty) {
@@ -287,12 +279,10 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
     TraktApi trakt,
   ) async {
     try {
-      // Get the show ID
-      final show = item['show'] ?? item;
-      final ids = show['ids'] ?? {};
-      final traktId = (ids['slug'] ?? ids['trakt'])?.toString();
+      final showData = item['show'] ?? item;
+      final traktId = showData['ids']?['trakt']?.toString();
 
-      if (traktId == null || traktId.isEmpty) return null;
+      if (traktId == null) return null;
 
       // Try to get the existing item first to avoid unnecessary API calls
       if (!state.isRefreshing) {
@@ -302,36 +292,42 @@ class MyShowsNotifier extends StateNotifier<MyShowsState> {
         }
       }
 
-      // Get show details with status
-      final showDetails = await trakt.getShowById(id: traktId).catchError((e) {
-        log('Error fetching show details for $traktId: $e');
-        return {'status': 'unknown'};
-      });
-
-      // Create a new map to avoid modifying the original
-      final newItem = Map<String, dynamic>.from(item);
-      newItem['status'] = showDetails['status'] ?? 'unknown';
-
-      if (newItem['show'] != null) {
-        newItem['show'] = Map<String, dynamic>.from(newItem['show']);
-        newItem['show']['status'] = showDetails['status'] ?? 'unknown';
+      // Only fetch status if we don't have it already
+      final currentStatus = showData['status'];
+      if (currentStatus != null && currentStatus != 'unknown') {
+        return item;
       }
 
-      return newItem;
+      // Get show details with status
+      try {
+        final showSummary = await trakt.getShowSummary(id: traktId);
+
+        // Create a new map to avoid modifying the original
+        final newItem = Map<String, dynamic>.from(item);
+        newItem['status'] = showSummary.status ?? 'unknown';
+
+        if (newItem['show'] != null) {
+          newItem['show'] = Map<String, dynamic>.from(newItem['show']);
+          newItem['show']['status'] = showSummary.status ?? 'unknown';
+        }
+
+        return newItem;
+      } catch (e) {
+        log('Error fetching show details for $traktId: $e');
+        // Return the original item without status if we can't fetch it
+        return item;
+      }
     } catch (e) {
       log('Error processing show: $e');
-      // Return the original item with a default status
-      final newItem = Map<String, dynamic>.from(item);
-      newItem['status'] = 'unknown';
-      return newItem;
+      return item;
     }
   }
 }
 
 final myShowsWithStatusProvider =
     StateNotifierProvider<MyShowsNotifier, MyShowsState>((ref) {
-      return MyShowsNotifier(ref);
-    });
+  return MyShowsNotifier(ref);
+});
 
 // A separate provider to expose the items as a simple list for easier consumption
 final myShowsListProvider = Provider<List<Map<String, dynamic>>>((ref) {
