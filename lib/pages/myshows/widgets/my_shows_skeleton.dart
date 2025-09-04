@@ -22,8 +22,6 @@ class MyShowsSkeleton extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Upcoming Episodes Skeleton
-            _buildSectionSkeleton(),
-            const SizedBox(height: 16),
             ...List.generate(3, (index) => _buildShowItemSkeleton(context)),
 
             // Waiting Shows Skeleton

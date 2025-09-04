@@ -56,11 +56,10 @@ class Skeleton extends StatelessWidget {
               children: [
                 // Show title (titleMedium with bold)
                 Container(
-                  height:
-                      textTheme.titleMedium?.fontSize != null
-                          ? textTheme.titleMedium!.fontSize! *
-                              1.4 // Account for line height
-                          : 24,
+                  height: textTheme.titleMedium?.fontSize != null
+                      ? textTheme.titleMedium!.fontSize! *
+                          1.4 // Account for line height
+                      : 24,
                   width: 200,
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
@@ -72,11 +71,10 @@ class Skeleton extends StatelessWidget {
                   children: [
                     // Episode info (T1E1 - Episode Title) - bodyMedium style
                     Container(
-                      height:
-                          textTheme.bodyMedium?.fontSize != null
-                              ? textTheme.bodyMedium!.fontSize! *
-                                  1.4 // Account for line height
-                              : 20,
+                      height: textTheme.bodyMedium?.fontSize != null
+                          ? textTheme.bodyMedium!.fontSize! *
+                              1.4 // Account for line height
+                          : 20,
                       width: 150,
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
@@ -90,11 +88,10 @@ class Skeleton extends StatelessWidget {
                     // Episodes Watched / Total Episodes
                     Container(
                       width: 40, // Approximate width for "X/Y" text
-                      height:
-                          textTheme.bodySmall?.fontSize != null
-                              ? textTheme.bodySmall!.fontSize! *
-                                  1.4 // Account for line height
-                              : 16,
+                      height: textTheme.bodySmall?.fontSize != null
+                          ? textTheme.bodySmall!.fontSize! *
+                              1.4 // Account for line height
+                          : 16,
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
                         borderRadius: BorderRadius.circular(8),
@@ -127,15 +124,11 @@ class Skeleton extends StatelessWidget {
                 // Info button (matches EpisodeInfoButton)
                 Container(
                   height: 36, // Standard button height
-                  width: 120, // Approximate width for button with text
-                  margin: const EdgeInsets.only(
-                    top: 6,
-                  ), // Matches the SizedBox(height: 6) in _ProgressDetails
+                  width: double.infinity, // Full width
+                  margin: const EdgeInsets.only(top: 6), // Matches the SizedBox(height: 6) in _ProgressDetails
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(
-                      18,
-                    ), // Standard button border radius
+                    borderRadius: BorderRadius.circular(8), // Matches PrimaryButton default
                   ),
                 ),
               ],

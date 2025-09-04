@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:watching/api/trakt/list/movies_lists_api.dart';
 import 'package:watching/pages/watchlist/enums/time_period.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/enum/list_type.dart';

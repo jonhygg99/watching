@@ -28,11 +28,6 @@ class WatchlistProcessor {
         return null;
       }
 
-      // Initialize with minimal data structure
-      if (show['title'] == null) {
-        show['title'] = 'Loading...';
-      }
-
       // Get the user's country code
       final countryCode = _ref.read(countryCodeProvider);
 

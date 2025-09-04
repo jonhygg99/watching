@@ -7,7 +7,6 @@ import 'package:watching/shared/enum/list_type.dart';
 import 'package:watching/shared/widgets/carousel/widgets/movie_carousel.dart';
 import 'package:watching/shared/widgets/carousel/widgets/show_carousel.dart';
 import 'package:watching/shared/constants/measures.dart';
-import 'package:watching/api/trakt/list/movies_lists_api.dart';
 
 /// DiscoverPage displays curated carousels of TV shows using data from Trakt API.
 class DiscoverPage extends ConsumerWidget {
