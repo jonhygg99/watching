@@ -5,6 +5,7 @@ import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/pages/watchlist/providers/watchlist_providers.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/constants/watchlist_constants.dart';
 import 'package:watching/pages/watchlist/widgets/skeleton.dart';
 import 'package:watching/pages/watchlist/widgets/watchlist_show_item.dart';
 
@@ -105,7 +106,10 @@ class WatchlistPage extends HookConsumerWidget {
 
                         // Remove from list after animation and refresh show progress
                         Future.delayed(
-                          const Duration(milliseconds: 300),
+                          Duration(
+                            milliseconds:
+                                WatchlistAnimations.chunkProcessingDelayMs,
+                          ),
                           () async {
                             await ref
                                 .read(watchlistProvider.notifier)

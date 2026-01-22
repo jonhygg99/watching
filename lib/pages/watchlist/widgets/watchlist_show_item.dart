@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:watching/l10n/app_localizations.dart';
 import 'package:watching/providers/app_providers.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/constants/watchlist_constants.dart';
 import 'package:watching/pages/watchlist/widgets/animated_show_card.dart';
 import 'package:watching/pages/watchlist/state/watchlist_notifier.dart';
 import 'package:watching/pages/watchlist/widgets/show_card.dart';
@@ -57,12 +58,12 @@ class WatchlistShowItem extends HookConsumerWidget {
 
   // Reusable loading widget for swipe actions
   Widget _buildLoadingIndicator() {
-    return const SizedBox(
-      width: 24,
-      height: 24,
+    return SizedBox(
+      width: WatchlistDimensions.iconWidth,
+      height: WatchlistDimensions.iconHeight,
       child: CircularProgressIndicator(
-        strokeWidth: 2.5,
-        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        strokeWidth: WatchlistDimensions.progressStrokeWidth,
+        valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
       ),
     );
   }
@@ -181,10 +182,15 @@ class WatchlistShowItem extends HookConsumerWidget {
               }
             },
             background: Container(
-              margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+              margin: EdgeInsets.symmetric(
+                vertical: WatchlistDimensions.itemVerticalMargin,
+                horizontal: WatchlistDimensions.itemHorizontalMargin,
+              ),
               decoration: _buildSwipeDecoration(Colors.red[700]!, isProcessing),
               alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(
+                horizontal: WatchlistDimensions.itemHorizontalPadding,
+              ),
               child:
                   isProcessing
                       ? Row(
@@ -213,13 +219,18 @@ class WatchlistShowItem extends HookConsumerWidget {
                       ),
             ),
             secondaryBackground: Container(
-              margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+              margin: EdgeInsets.symmetric(
+                vertical: WatchlistDimensions.itemVerticalMargin,
+                horizontal: WatchlistDimensions.itemHorizontalMargin,
+              ),
               decoration: _buildSwipeDecoration(
                 Colors.green[700]!,
                 isProcessing,
               ),
               alignment: Alignment.centerRight,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(
+                horizontal: WatchlistDimensions.itemHorizontalPadding,
+              ),
               child:
                   isProcessing
                       ? Row(

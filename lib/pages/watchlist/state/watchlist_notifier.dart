@@ -7,6 +7,7 @@ import 'package:watching/pages/watchlist/providers/watchlist_type_provider.dart'
 import 'package:watching/pages/watchlist/services/watchlist_episode_service.dart';
 import 'package:watching/pages/watchlist/services/watchlist_processor.dart';
 import 'package:watching/providers/app_providers.dart';
+import 'package:watching/shared/constants/watchlist_constants.dart';
 import 'package:collection/collection.dart';
 
 // Export types for easy importing
@@ -123,7 +124,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       final items = await trakt.getWatched(type: typeStr);
 
       // Process items in chunks for progressive loading
-      final chunkSize = 5; // Process 5 items at a time
+      final chunkSize = WatchlistProcessing.chunkSize;
       final chunks = items.slices(chunkSize);
 
       List<Map<String, dynamic>> allProcessedItems = [];
@@ -267,7 +268,11 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       await _loadWatchlist(forceRefresh: true);
     } catch (e) {
       final error =
-          e is Exception ? e : Exception('Failed to refresh watchlist: $e');
+          e is Exception
+              ? e
+              : Exception(
+                '${WatchlistErrorMessages.failedToRefreshWatchlist}: $e',
+              );
       debugPrint('Error in refresh: $error');
       state = state.copyWith(
         error: error.toString(),
@@ -336,7 +341,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       if (nextEpisode == null) {
         throw Exception(
-          'No next episode found to mark as watched for show: $traktId',
+          '${WatchlistErrorMessages.noNextEpisodeFound} for show: $traktId',
         );
       }
 
@@ -365,7 +370,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       if (seasonNumber == null || episodeNumber == null) {
         throw Exception(
-          'Missing required episode data (season: $seasonNumber, episode: $episodeNumber)',
+          '${WatchlistErrorMessages.missingEpisodeData} (season: $seasonNumber, episode: $episodeNumber)',
         );
       }
 
@@ -394,7 +399,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         );
 
         // Add a small delay to ensure the server has processed the update
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(
+          Duration(seconds: WatchlistAnimations.apiProcessingDelayS),
+        );
 
         // Update the progress
         await updateShowProgress(showIdToUse);
@@ -407,7 +414,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     } catch (e) {
       // Update state to reflect the error
       state = state.copyWith(
-        error: 'Failed to mark episode as watched: ${e.toString()}',
+        error:
+            '${WatchlistErrorMessages.failedToMarkEpisodeWatched}: ${e.toString()}',
         isLoading: false,
       );
       rethrow;
@@ -526,7 +534,7 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
 
       if (lastWatchedEpisode == null) {
         throw Exception(
-          'No watched episodes found to unwatch for show: $traktId',
+          '${WatchlistErrorMessages.noWatchedEpisodesFound} for show: $traktId',
         );
       }
 
@@ -562,7 +570,9 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
         );
 
         // Add a small delay to ensure the server has processed the update
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(
+          Duration(seconds: WatchlistAnimations.apiProcessingDelayS),
+        );
 
         // Refresh the progress
         await updateShowProgress(traktId);
@@ -575,7 +585,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
     } catch (e) {
       // Update state to reflect the error
       state = state.copyWith(
-        error: 'Failed to mark episode as unwatched: ${e.toString()}',
+        error:
+            '${WatchlistErrorMessages.failedToMarkEpisodeUnwatched}: ${e.toString()}',
         isLoading: false,
       );
       rethrow;
@@ -718,7 +729,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       await updateShowProgress(showIdToUse);
     } catch (e) {
       state = state.copyWith(
-        error: 'Error al actualizar el estado del episodio: ${e.toString()}',
+        error:
+            '${WatchlistErrorMessages.failedToUpdateEpisodeStatus}: ${e.toString()}',
       );
       rethrow;
     } finally {
@@ -815,7 +827,8 @@ class WatchlistNotifier extends StateNotifier<WatchlistState> {
       } catch (refreshError) {
         // Update state to reflect the error
         state = state.copyWith(
-          error: 'Failed to update show progress: ${e.toString()}',
+          error:
+              '${WatchlistErrorMessages.failedToUpdateShowProgress}: ${e.toString()}',
           isLoading: false,
         );
       }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:watching/shared/constants/colors.dart';
+import 'package:watching/shared/constants/watchlist_constants.dart';
 
 /// A skeleton loading widget for watchlist items with shimmer effect
 class Skeleton extends StatelessWidget {
@@ -18,7 +19,10 @@ class Skeleton extends StatelessWidget {
       baseColor: baseColor,
       highlightColor: highlightColor,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+        padding: EdgeInsets.symmetric(
+          vertical: WatchlistDimensions.itemVerticalMargin,
+          horizontal: WatchlistDimensions.itemHorizontalMargin,
+        ),
         itemCount: 5,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -31,7 +35,10 @@ class Skeleton extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
+      margin: EdgeInsets.symmetric(
+        vertical: WatchlistDimensions.itemVerticalMargin,
+        horizontal: 0,
+      ),
       elevation: 0,
       color: Colors.transparent,
       shadowColor: Colors.transparent,

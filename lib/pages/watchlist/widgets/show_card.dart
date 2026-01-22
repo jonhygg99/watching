@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:watching/shared/constants/measures.dart';
+import 'package:watching/shared/constants/watchlist_constants.dart';
 import 'package:watching/shared/pages/show_details/details_page.dart';
 import 'package:watching/api/trakt/trakt_api.dart';
 
@@ -34,7 +35,10 @@ class ShowCard extends StatelessWidget {
               }
               : null,
       child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+        margin: EdgeInsets.symmetric(
+          vertical: WatchlistDimensions.itemVerticalMargin,
+          horizontal: WatchlistDimensions.itemHorizontalMargin,
+        ),
         elevation: 0,
         color: Colors.transparent,
         shadowColor: Colors.transparent,
